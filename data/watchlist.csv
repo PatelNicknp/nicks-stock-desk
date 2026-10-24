@@ -1,6 +1,6 @@
 ticker,company,price,day_pct,score,verdict,entry_low,entry_high,distance_to_entry_pct,timing,note_input,data_status,note,disclaimer
 AVGO,Broadcom,321.68,-0.48,8,HOLD,336.92,348.71,-7.75,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-LLY,Lilly (Eli),1273.46,-2.54,10,BUY,1186.6,1204.94,5.69,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+LLY,Lilly (Eli),1273.46,-2.54,12,BUY,1186.6,1204.94,5.69,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 COST,Costco,1003.32,-1.46,9,BUY,941.74,958.15,4.71,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CAT,Caterpillar Inc.,687.0,-2.42,-3,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 PLTR,Palantir Technologies,196.75,0.29,10,BUY,186.55,195.51,0.63,Uptrend,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
