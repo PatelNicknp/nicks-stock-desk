@@ -187,7 +187,7 @@
 
   function priceShell(sub) {
     return '<div class="panel pad" data-px-panel><div class="rowhead wrap"><div><div class="ptitle">Price</div><div class="psub">' +
-      D.esc(sub || "Daily bars") + '</div></div><div class="pxtools" data-px-tools></div></div><div class="chart-box pxchart"><div class="px-price"><canvas data-px-price></canvas></div><div class="px-vol" data-px-volwrap hidden><canvas data-px-vol></canvas></div></div><p class="cap" data-px-cap></p></div>';
+      D.esc(sub || "Daily bars") + '</div></div><div class="pxtools" data-px-tools></div></div><div class="pxmas" data-px-mas></div><div class="chart-box pxchart"><div class="px-host" data-px-host><div class="px-legend" data-px-legend></div></div></div><p class="cap" data-px-cap></p></div>';
   }
   function setupLines(row) {
     const lines = [];

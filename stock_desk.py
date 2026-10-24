@@ -1777,9 +1777,10 @@ def build_watch(watch, scores):
 # Scorecard chart window. About half a year of sessions. The job's full history
 # stays in cache/ohlcv.csv.gz and is not copied into the sheet.
 CHART_BARS = 126
-# Daily bars for the candlestick chart. One year of sessions, so the 1Y
-# picker has a full window. Averages are computed on the whole cache first.
-CANDLE_BARS = 260
+# Daily bars published for the price chart. None keeps every session in the
+# price cache (about five years). The 1Y view needs roughly 200 extra sessions
+# so a 200-day average is warm at the left edge. The browser computes averages.
+CANDLE_BARS = None
 _TICKER_FILE = re.compile(r"^[A-Z0-9][A-Z0-9.\-]{0,12}$")
 
 
@@ -1830,13 +1831,14 @@ def price_file(close, scores):
 
 
 def candle_file(long_df, tickers, bars=CANDLE_BARS):
-    """Last `bars` sessions per ticker for the site candlestick files.
+    """OHLC sessions per ticker for the site price chart.
 
-    High, low, close, and volume come from the price cache. Open stays blank
-    when that cache has no open column. Averages use the full close history,
-    then the window is sliced, so the left edge is not a partial average.
+    High, low, close, volume, and open come from the price cache. Open stays
+    blank when that cache has no open column. `bars` is None to keep the whole
+    cache, or a session count to keep only the tail. Moving averages are not
+    stored here; the chart computes them in the browser.
     """
-    cols = ["date", "ticker", "open", "high", "low", "close", "volume", "sma20", "sma50"]
+    cols = ["date", "ticker", "open", "high", "low", "close", "volume"]
     if long_df is None or len(long_df) == 0 or not tickers or "close" not in getattr(long_df, "columns", []):
         return pd.DataFrame(columns=cols)
     want = []
@@ -1861,14 +1863,13 @@ def candle_file(long_df, tickers, bars=CANDLE_BARS):
     parts = []
     for _, g in x.groupby("ticker", sort=False):
         g = g.copy()
-        close = g["close"]
-        g["sma20"] = close.rolling(20, min_periods=20).mean()
-        g["sma50"] = close.rolling(50, min_periods=50).mean()
-        parts.append(g.tail(int(bars)))
+        if bars:
+            g = g.tail(int(bars))
+        parts.append(g)
     if not parts:
         return pd.DataFrame(columns=cols)
     out = pd.concat(parts, ignore_index=True)
-    for col in ("open", "high", "low", "close", "sma20", "sma50"):
+    for col in ("open", "high", "low", "close"):
         out[col] = out[col].round(2)
     out["volume"] = out["volume"].round(0).astype("Int64")
     out["date"] = pd.to_datetime(out["date"]).dt.strftime("%Y-%m-%d")
@@ -2108,9 +2109,11 @@ def main(argv=None):
     watch_out = build_watch(watch, scores) if features.get("watchlist_portfolio", True) else pd.DataFrame()
     prices = price_file(close, scores) if features.get("scorecard", True) else pd.DataFrame()
     if len(scores) and long is not None and len(long):
-        n_candles = write_candle_files(candle_file(long, list(scores["ticker"])), os.path.join(data, "ohlc"))
+        candle_frame = candle_file(long, list(scores["ticker"]))
+        n_candles = write_candle_files(candle_frame, os.path.join(data, "ohlc"))
         if n_candles:
-            note = "%d tickers, last %d sessions from the price cache. No new download." % (n_candles, CANDLE_BARS)
+            span = int(candle_frame.groupby("ticker").size().max()) if len(candle_frame) else 0
+            note = "%d tickers, up to %d cached sessions. No new download." % (n_candles, span)
             if "open" not in long.columns or not pd.to_numeric(long["open"], errors="coerce").notna().any():
                 note += " Open is blank until the next full price download."
             log("Price candles", "OK", asof, note)
