@@ -52,68 +52,70 @@ Overview
 
 1. Today
 2. Top stocks
-3. Stock scorecard
-4. Watchlist and portfolio
-5. Alerts
-6. Backtest
+3. Buy setups
+4. Stock scorecard
+5. Watchlist and portfolio
+6. Alerts
+7. Backtest
 
 Scanners
 
-7. Growth
-8. Quality
-9. Dividend
-10. Wheel (stocks only)
-11. VCP
-12. CANSLIM
-13. Box breakout
-14. Flag breakout
-15. Leaders
+8. Growth
+9. Quality
+10. Dividend
+11. Wheel (stocks only)
+12. VCP
+13. CANSLIM
+14. Box breakout
+15. Flag breakout
+16. Leaders
+17. 52-week
 
 Earnings
 
-16. Calendar
-17. Strength heatmap
-18. Report cards
+18. Calendar
+19. Strength heatmap
+20. Report cards
 
 Sentiment
 
-19. Put/call ratio
-20. Put and call walls
-21. Analyst ratings
-22. 13F tracker
-23. AAII
-24. Insider trading
-25. Headline sentiment
-26. XLY/XLP
+21. Put/call ratio
+22. Put and call walls
+23. Analyst ratings
+24. 13F tracker
+25. AAII
+26. Insider trading
+27. Headline sentiment
+28. XLY/XLP
 
 Financials
 
-27. Summary
-28. Earnings tracker
-29. Company financials
-30. Dividend fundamentals
+29. Summary
+30. Earnings tracker
+31. Company financials
+32. Dividend fundamentals
 
 Macro
 
-31. Sector rotation
-32. Macro screener
-33. Sector macro scores
-34. Historical P/E
+33. Sector rotation
+34. Macro screener
+35. Sector macro scores
+36. Historical P/E
 
 Technicals
 
-35. 52-week breakouts
-36. Trends
-37. Pullbacks
-38. Gainers and losers
-39. Breadth
-40. Sector performance
-41. Heatmaps
+37. 52-week breakouts
+38. Trends
+39. Pullbacks
+40. Gainers and losers
+41. Breadth
+42. Sector performance
+43. Heatmaps
 
 System
 
-42. Data updates
-43. Help
+44. Data updates
+45. Help
 
 ## Page template
 
@@ -163,7 +165,25 @@ Color `score` with the point scale. Color `verdict` with the chip colors. Color 
 
 Do not show the component columns here. They are on the scorecard.
 
-## 3. Stock scorecard
+## 3. Buy setups
+
+Source: `buy_setups`. Switches: `feature.buy_setups` (on) and `buy_setups.market_filter` (on).
+
+Research list, not a recommendation. This desk never places trades and it does not send alerts.
+
+A row qualifies when VCP, Box, Flag, or CANSLIM is READY or BROKEN OUT today, the verdict is BUY, the close is above the 50-day and the 200-day averages, and the risk from the entry to the stop is 8% or less. HOLD and AVOID are excluded. With the market filter on, SPY must also be in an uptrend: close above its 50-day and 200-day averages, and the 50-day above the 200-day. QQQ is computed the same way for the card and does not decide the list. If SPY is not in an uptrend, the table is empty and the banner says "Market not in an uptrend today, so no buy setups are listed". Show anyway reveals those names greyed.
+
+KPI cards: setups today, broken out today, multi-scanner setups, SPY and QQQ uptrend, average reward-to-risk.
+
+Filters: index (contains), sector, setup source, status, ticker.
+
+Table: ticker (link to the scorecard), company, sector, index membership, price, price as of, setup sources, sources count, best status, entry, stop, target 1, target 2, risk percent, reward to risk, distance to entry, score, verdict, 52-week range position, percent from the 52-week high, reason, market ok.
+
+Sort: BROKEN OUT today first, then more agreeing scanners, then the smallest absolute distance to the entry, then score descending.
+
+Clicking a row draws the price chart with labelled lines for entry, stop, target 1, and target 2. The caption says many breakouts fail, which is why the stop is always shown.
+
+## 4. Stock scorecard
 
 This is the single-stock page. Data sources: `scores` (filter to the ticker control), `score_details` (same ticker), `prices` (same ticker), `news` (same ticker), `earnings_history` (same ticker).
 
@@ -189,7 +209,7 @@ Earnings spark: last reports from `earnings_history`, surprise and `move_1d_pct`
 
 Footer facts: `fundamentals_basis`, `fundamentals_filed`, `fin_avg_years`, `forward_pe_avg_basis`, `missing_fields`.
 
-## 4. Watchlist and portfolio
+## 5. Watchlist and portfolio
 
 Two stacked panels.
 
@@ -199,7 +219,7 @@ Holdings table, source `portfolio`: ticker, shares, avg cost, price, value, gain
 
 Watchlist, source `watchlist`: ticker, price, score, verdict, entry zone, distance_to_entry_pct, timing, note_input. Sort by score descending.
 
-## 5. Alerts
+## 6. Alerts
 
 Source: `alerts`, plus `score_changes` underneath.
 
@@ -209,7 +229,7 @@ Score changes: ticker, score, score_prev, score_change, verdict, day_pct. Sort b
 
 Caption: "These are changes since the previous run. Nothing is emailed and nothing is sent to a broker."
 
-## 6. Backtest
+## 7. Backtest
 
 Sources: `backtest_summary`, `backtest_equity`, `backtest_buckets`, `backtest_yearly`, `backtest_notes`.
 
@@ -225,19 +245,19 @@ Year table from `backtest_yearly`.
 
 Notes table from `backtest_notes`, always visible, not behind a click. It is the list of limits (costs, no look-ahead for filings, what was left out, no delisted names).
 
-## 7. Growth scanner
+## 8. Growth scanner
 
 Source: `scanner_growth`. Default filter `passes = yes`. Columns: ticker, company, sector, price, score, verdict, rev_growth, eps_growth, rs_spy_3m, why. Sort by rev_growth descending. A control can show the names that did not pass.
 
-## 8. Quality scanner
+## 9. Quality scanner
 
 Source: `scanner_quality`. Default `passes = yes`. Columns: ticker, company, sector, roe, de, pts_roe, pts_de, score, verdict, why. Color the point columns.
 
-## 9. Dividend scanner
+## 10. Dividend scanner
 
 Source: `scanner_dividend`. Default `passes = yes`. Columns: ticker, company, div_yield, div_yield_avg, pts_div_yield, score, verdict, why.
 
-## 10. Wheel (stocks only)
+## 11. Wheel (stocks only)
 
 Source: `scanner_wheel`. Default `passes = yes`.
 
@@ -245,7 +265,7 @@ Columns: ticker, company, sector, price, score, verdict, timing, rsi14, above_sm
 
 There is no strike, no expiry, no premium, and no contract symbol. Do not add one. The `why` text says this is not an option contract. Title the page "Wheel candidates (stocks only)".
 
-## 11. VCP
+## 12. VCP
 
 Source: `scanner_vcp`. These rows follow Nick's TradingView indicator in `reference/nicks_minervini_with_exit_strategy.pine`. They are computed from the prices already on file. This page does not download anything.
 
@@ -259,7 +279,7 @@ Sort by status (broken out, then ready, then watching), then strength descending
 
 Title the page "VCP". Under the table, show `note`. It says the stop and target use the buy point until a buy prints, and that a tie is not a pivot.
 
-## 12. CANSLIM
+## 13. CANSLIM
 
 Source: `scanner_canslim`. Same letters as the NSE scan in `reference/canslim_vcp_nse_SCAN.md`, scored against SPY. QQQ is used for market direction only when that price is already in the file.
 
@@ -271,7 +291,7 @@ Sort by strength descending.
 
 Leave `stop` and `target` off the table. They are blank on purpose. A cell that says `not verified` stays as text. Do not replace it with zero. Color `i_trend` up green and down red. `m_qqq` will read `not verified` until QQQ is already in the price file.
 
-## 13. Box breakout
+## 14. Box breakout
 
 Source: `scanner_box`.
 
@@ -281,7 +301,7 @@ Columns: ticker, index_membership, status, pivot, stop, target, strength, range_
 
 Sort by strength descending. `pivot` is the range high, `stop` is the range low, and `target` is the range high plus the height of the range.
 
-## 14. Flag breakout
+## 15. Flag breakout
 
 Source: `scanner_flag`.
 
@@ -291,7 +311,7 @@ Columns: ticker, index_membership, status, pivot, stop, target, strength, pole_p
 
 Sort by strength descending. `pivot` is the flag high, `stop` is the flag low, and `target` is the flag high plus the height of the pole.
 
-## 15. Leaders
+## 16. Leaders
 
 Source: `scanner_leaders`. This is the VCP page and the CANSLIM page on one row per ticker.
 
@@ -301,7 +321,21 @@ Columns: ticker, index_membership, status, on_vcp, on_canslim, pivot, stop, targ
 
 Sort by strength descending. When a name is on both scans, the buy point, stop, and target are the VCP ones. A CANSLIM-only row leaves stop and target blank.
 
-## 16. Earnings calendar
+## 17. 52-week
+
+Source: `scanner_52w`, with the chart from `highs_lows_history`. Switch: `scanner_52w`.
+
+This is not the 52-week breakouts page. Breakouts are names within 1% of the 52-week closing high. This page uses the intraday high and low over 252 sessions.
+
+Scorecards: new 52-week highs today, new 52-week lows today, names within 5% of the high, new highs on volume of at least 1.5 times the 50-day average, and net (highs minus lows).
+
+Chart: bars for new highs (green) and new lows (red), and a line for the net. Ranges 3M, 6M, and 1Y.
+
+Table sections: new highs today, new lows today, near the high, breakout to a new high on volume, and all stocks. Columns: ticker, company, sector, price, 52-week high, 52-week low, percent from high, percent above low, range position (0 at the low, 100 at the high), volume ratio, score, verdict.
+
+`new_high_today` and `new_low_today` compare the close with the prior 252 sessions. The high and low columns are the intraday range. A blank cell is missing history, not zero.
+
+## 18. Earnings calendar
 
 Source: `earnings_calendar`.
 
@@ -313,7 +347,7 @@ Color `last_1d_move_pct` and `last_surprise_pct` with the return scale. Blank mo
 
 Caption: "The one-day move is the next session after a report that hit at or after 4pm Eastern, otherwise the session of the report. The average is the last eight reports."
 
-## 17. Earnings strength heatmap
+## 19. Earnings strength heatmap
 
 Source: `earnings_heatmap`.
 
@@ -321,7 +355,7 @@ Pivot: rows are tickers, columns are `quarter`, values are `heat`. Color `heat` 
 
 A double beat would require both lines. This free feed does not have the revenue estimate.
 
-## 18. Earnings report cards
+## 20. Earnings report cards
 
 Source: `earnings_cards`.
 
@@ -329,7 +363,7 @@ Cards or a table: ticker, grade, summary, sources. Grade colors: A `#166534`, B 
 
 Caption: "Grades are a fixed rule on the last few earnings beats and revenue growth versus the company's own history. They are not a write-up from a person, and they are not a trade."
 
-## 19. Put/call ratio
+## 21. Put/call ratio
 
 Source: `put_call`. Filter `name = EQUITY PUT/CALL RATIO`.
 
@@ -339,7 +373,7 @@ Latest zone (`zone`) as a chip: Fear red, Greed green, Neutral muted.
 
 Caption: "Market mood only. Not an option position."
 
-## 20. Put and call walls
+## 22. Put and call walls
 
 Source: `option_walls`.
 
@@ -353,7 +387,7 @@ Caption under the title, not optional: "Open interest by strike. Sentiment only.
 
 If the page is the MISSING row, show the note and no chart.
 
-## 21. Analyst ratings
+## 23. Analyst ratings
 
 Source: `analyst_ratings`.
 
@@ -361,7 +395,7 @@ Columns: ticker, company, analyst_mean, analyst_count, pts_analyst, target_analy
 
 `upside_pct` may be blank. Do not calculate it inside Looker if the column is blank. Leave it.
 
-## 22. 13F tracker
+## 24. 13F tracker
 
 Source: `institutional_13f`.
 
@@ -371,7 +405,7 @@ Second table, filter `row_type = top_holder`, driven by the same ticker control:
 
 Caption: "Summary of the latest public holdings file, plus the largest holders. Not every fund. Built this way so the page stays fast."
 
-## 23. AAII
+## 25. AAII
 
 Source: `aaii_sentiment`.
 
@@ -379,7 +413,7 @@ This page is a MISSING state on purpose. Show `note` in the body text, large eno
 
 Link text to the put/call page: "The free mood gauge is the put/call ratio."
 
-## 24. Insider trading
+## 26. Insider trading
 
 Source: `insider_trading`.
 
@@ -387,7 +421,7 @@ Columns: ticker, buys_3m, sells_3m, pts_insider. Sort buys descending. Color the
 
 Caption: "Open-market buy and sell counts over three months, from Nasdaq's public insider summary."
 
-## 25. Headline sentiment
+## 27. Headline sentiment
 
 Source: `headline_sentiment`.
 
@@ -395,7 +429,7 @@ List: ticker, headline, publisher, published, tone, tone_note. Color `tone` with
 
 Caption: "Tone is a word rule on the headline (beat, upgrade, probe, layoff, and similar). It is not added into the desk score."
 
-## 26. XLY/XLP
+## 28. XLY/XLP
 
 Source: `xly_xlp`.
 
@@ -403,7 +437,7 @@ Line chart: `ratio` and `ratio_sma50`. Latest `zone` as a chip (Risk on / Risk o
 
 Caption: "Consumer discretionary divided by consumer staples. Above the 50-day average of the ratio is labeled risk on."
 
-## 27. Financials summary
+## 29. Financials summary
 
 Source: `financials_summary`.
 
@@ -413,13 +447,13 @@ Color both point columns with the point scale. Blank is `n/a`.
 
 Caption: "Direction says whether a lower or a higher number earns the point. The industry median needs four peers."
 
-## 28. Earnings tracker
+## 30. Earnings tracker
 
 Source: `earnings_tracker`.
 
 Columns: ticker, earnings_date, eps_estimate, eps_actual, surprise_pct. Sort by earnings_date descending. Color surprise. A blank actual is a future date. Do not mark it as a miss.
 
-## 29. Company financials
+## 31. Company financials
 
 Source: `company_financials`.
 
@@ -429,13 +463,13 @@ If gross profit was not in the filing, the margin cells are blank. Leave them bl
 
 Caption: "Annual figures from SEC filings. Margins are blank when the filing did not include that line."
 
-## 30. Dividend fundamentals
+## 32. Dividend fundamentals
 
 Source: `dividend_scanner`. This is the full list, not only the names that pass the screen.
 
 Columns: ticker, company, sector, price, div_yield, div_yield_avg, dps, pts_div_yield, verdict. Sort by div_yield descending. A yield of 0 can be real (the company does not pay). A blank yield means we could not tell. The freshness page separates those.
 
-## 31. Sector rotation
+## 33. Sector rotation
 
 Source: `sector_rotation`, `sector_rotation_tails`, `sector_rotation_history`, and `scores` for the stocks inside a sector.
 
@@ -451,7 +485,7 @@ What changed: `change_daily` and `change_weekly`. A real move reads "Energy move
 
 Caption: research only, no notification, and the z-score is not the commercial indicator.
 
-## 32. Macro screener
+## 34. Macro screener
 
 Source: `macro_screener`.
 
@@ -461,7 +495,7 @@ Caption: "Signal is +1 when the surprise is in the direction that usually helps 
 
 If the only row is MISSING, show the note. Do not invent a CPI number.
 
-## 33. Sector macro scores
+## 35. Sector macro scores
 
 Source: `sector_macro`. Also show `sectors` if you want the price change next to the macro score. Keep them as two tables. Do not blend.
 
@@ -469,7 +503,7 @@ Columns: ticker, name, macro_growth, macro_inflation, macro_jobs, macro_score, p
 
 These weights are fixed in the job (for example, hotter inflation helps energy and hurts technology). The help page says they are a sketch.
 
-## 34. Historical P/E
+## 36. Historical P/E
 
 Source: `historical_pe`.
 
@@ -479,7 +513,7 @@ A text box bound to `official_status`: it should read MISSING. Next to it, the n
 
 Do not add a line for `official_sp500_pe`. It is blank.
 
-## 35. 52-week breakouts
+## 37. 52-week breakouts
 
 Source: `breakouts`.
 
@@ -487,7 +521,7 @@ Columns: ticker, company, sector, price, dist_52w_high_pct, volume_ratio, score,
 
 If the table's only row is the MISSING note, that means nobody is within 1% of a 52-week high today. That is a result, not a broken feed. The note says which.
 
-## 36. Trends
+## 38. Trends
 
 Source: `trends`.
 
@@ -499,7 +533,7 @@ Filter chips for Uptrend, Downtrend, Mixed. Default Uptrend.
 
 Uptrend means the price is above all four averages. Downtrend means it is below all four.
 
-## 37. Pullbacks
+## 39. Pullbacks
 
 Source: `pullbacks`. Default filter `passes = yes`.
 
@@ -507,13 +541,13 @@ Columns: ticker, company, price, rsi14, entry_low, entry_high, score, verdict, w
 
 Caption: "An uptrend (above the 50-day and the 200-day) with price back in the pullback or entry area, and RSI under 70."
 
-## 38. Gainers and losers
+## 40. Gainers and losers
 
 Source: `gainers_losers`.
 
 Two tables, or one table with a side filter. Gainers: `side = gainer`, sort day_pct descending. Losers: `side = loser`, sort day_pct ascending. Columns: ticker, company, sector, price, day_pct, score, verdict. Color day_pct.
 
-## 39. Breadth
+## 41. Breadth
 
 Source: `breadth_history`.
 
@@ -521,13 +555,13 @@ Line chart, four series: pct_above_sma20, pct_above_sma50, pct_above_sma100, pct
 
 Scorecards for the latest point of each line.
 
-## 40. Sector performance
+## 42. Sector performance
 
 Source: `sector_performance`.
 
 Table: sector, day_pct, week_pct, month_pct, month3_pct, ytd_pct, pct_above_sma50, score_avg, n. Color the return columns. This is equal-weight across the desk's stocks in that sector, not the ETF. The ETF view is the Top sectors numbers inside `sectors`.
 
-## 41. Heatmaps
+## 43. Heatmaps
 
 Source: `heatmaps`.
 
@@ -537,7 +571,7 @@ A sector drop-down filters the rows. Default all.
 
 Optional second view: a pivot of average `ret_1d` by sector. If you build it, label it "average of the stocks above", so it is not confused with the ETF.
 
-## 42. Data updates
+## 44. Data updates
 
 Source: `updates_log`.
 
@@ -547,7 +581,7 @@ Status colors: OK `#166534`, CACHED `#92400E`, MISSING `#7F1D1D`, text `#E6EBF5`
 
 No other decoration. This page is how you see whether a number is fresh.
 
-## 43. Help
+## 45. Help
 
 Source: `help`.
 

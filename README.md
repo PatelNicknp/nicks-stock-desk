@@ -112,6 +112,18 @@ These two are desk rules. They are not in the Pine script.
 
 A leader is a VCP that is READY or BROKEN OUT today, or a strict CANSLIM qualify, or both. One row per ticker. When both hit, the pivot, stop, and target come from the VCP rules, and strength is the average of the VCP strength and the RS percentile. A letter that was not verified on the CANSLIM page stays not verified here.
 
+### 52-week highs and lows
+
+Switch: `scanner_52w`, on by default. The page is `52-week.html`. It reads the cached daily high, low, close, and volume, plus the score, verdict, sector, and index tags already on the desk. It does not call Yahoo.
+
+The 52-week high and low are the highest high and the lowest low of the last 252 sessions, including that session. A new high today means the close is at or above the highest high of the prior 252 sessions. A new low today means the close is at or below the lowest low of those sessions. An intraday poke through the old high does not count unless the close holds it. Near the high means the close is within 5% of the 52-week high. That is the zone Minervini prefers. A high on volume is a new high with volume at least 1.5 times the 50-day average (`W52_VOL_MULT` in `setups.py`). `highs_lows_history.csv` counts those names each session and is backfilled from the same cache, so the chart has more than a year of history before the next download.
+
+### Buy setups
+
+Switch: `buy_setups`, on by default. A second switch, `buy_setups.market_filter`, is also on by default. The page is `buy-setups.html`. It reads the VCP, box, flag, and CANSLIM files, the scores, the 52-week file, and the cached closes. It does not call Yahoo. Research list, not a recommendation. This desk never places trades and it does not send alerts.
+
+A name qualifies when one of those scanners is READY or BROKEN OUT today, the verdict is BUY, the close is above the 50-day and the 200-day averages, and the risk from the entry to the stop is 8% or less. Entry is the buy point of the strongest scanner that agrees. VCP uses the Minervini pivot. The stop is the tighter of 7% under that entry or the setup's own stop. Target 1 is 20% above the entry, or 20% above the breakout close. Target 2 is the entry plus three times the dollar risk. With the market filter on, the list is empty unless SPY's close is above its 50-day and 200-day averages and the 50-day is above the 200-day. QQQ is shown the same way and does not decide the list. The page can still show the hidden names greyed.
+
 ### Sector rotation
 
 The sector rotation page uses the 11 SPDR sector ETFs and SPY already in the price cache. It does not add a Yahoo request. Dollar, oil, and gold are not in that cache and they are not in the two FRED files (the 10-year yield and the 10-year minus 2-year spread), so the page lists those three as missing.
