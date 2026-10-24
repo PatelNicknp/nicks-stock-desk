@@ -427,7 +427,7 @@
         miniStat("PEG target", rangeTarget(row.target_peg, row.price)) + miniStat("Blended target", blendHtml(row)) +
         miniStat("Inputs in blend", blendCount(row)) +
         "</div></div></div>" +
-        '<div class="split">' + priceShell("Plan levels stay on the chart") +
+        '<div class="split chartpair">' + priceShell("Plan levels stay on the chart") +
         '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
         '<div class="split r21"><div class="panel" id="break"></div><div><div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Versus sector</div></div><div class="scroll"><table><tbody>' + vs +
         '</tbody></table></div></div><div class="panel pad"><div class="ptitle">Data basis</div><div style="font-size:11px;margin-top:8px">' + basis + "</div></div></div></div>" +

@@ -1330,8 +1330,9 @@
     document.getElementById("app").innerHTML =
       '<div class="scrim" id="scrim"></div>' +
       '<div class="app"><nav class="nav" id="nav"><a class="brand" href="index.html"><span class="logo">N</span>Nick\'s Stock Desk</a>' +
-      groups + "</nav><div class=\"main\"><div class=\"hdr\"><div><button type=\"button\" class=\"menu-btn\" id=\"menu\">☰</button>" +
-      "<h1>" + esc(page.title) + "</h1><div class=\"rl\">" + esc(RESEARCH) + "</div></div>" +
+      groups + "</nav><div class=\"main\"><div class=\"hdr\">" +
+      '<button type="button" class="menu-btn" id="menu" aria-label="Open menu" aria-controls="nav" aria-expanded="false">☰</button>' +
+      "<div class=\"titles\"><h1>" + esc(page.title) + "</h1><div class=\"rl\">" + esc(RESEARCH) + "</div></div>" +
       '<div class="upd">Updated <b id="updated">…</b></div></div><div id="page"></div></div></div>';
     document.getElementById("nav").addEventListener("click", (e) => {
       const btn = e.target.closest(".grp");
@@ -1361,8 +1362,16 @@
     });
     const menu = document.getElementById("menu");
     const scrim = document.getElementById("scrim");
-    menu.addEventListener("click", () => document.body.classList.toggle("nav-open"));
-    scrim.addEventListener("click", () => document.body.classList.remove("nav-open"));
+    const setNav = (open) => {
+      document.body.classList.toggle("nav-open", open);
+      menu.setAttribute("aria-expanded", open ? "true" : "false");
+      menu.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    };
+    menu.addEventListener("click", () => setNav(!document.body.classList.contains("nav-open")));
+    scrim.addEventListener("click", () => setNav(false));
+    document.getElementById("nav").addEventListener("click", (e) => {
+      if (e.target.closest("a.item")) setNav(false);
+    });
   }
 
   function findPage(id) {
