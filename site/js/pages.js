@@ -1609,6 +1609,251 @@
     draw();
   }
 
+  function renderWeek52(ctx) {
+    const raw = ctx.files["scanner_52w.csv"];
+    const all = D.realRows(raw);
+    const hist = D.realRows(ctx.files["highs_lows_history.csv"]).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+    const yes = (r, key) => String(r[key] || "").toLowerCase() === "yes";
+    const nHigh = countWhere(all, (r) => yes(r, "new_high_today"));
+    const nLow = countWhere(all, (r) => yes(r, "new_low_today"));
+    const nNear = countWhere(all, (r) => yes(r, "near_high"));
+    const nVol = countWhere(all, (r) => yes(r, "high_on_volume"));
+    const net = nHigh - nLow;
+    const netText = net < 0 ? "−" + Math.abs(net) : String(net);
+    const netColor = net > 0 ? "#22C55E" : net < 0 ? "#EF4444" : "#8B96AD";
+    ctx.page.innerHTML =
+      '<p class="cap">A 52-week high is the highest intraday price of the last 252 trading days, and a 52-week low is the lowest. New highs and new lows on this page use the close, so a name can touch a new high during the day and still not count if it does not close there. Near the high means the close is within 5% of that high. That band is the zone Minervini prefers. A high on big volume also needs volume at least 1.5 times the 50-day average. Research only. This page does not place trades or send alerts.</p>' +
+      '<div class="cards" id="cards"></div>' +
+      '<div class="panel pad"><div class="rowhead wrap"><div style="min-width:0;flex:1"><div class="ptitle">Highs and lows</div><div class="psub">Green bars are new highs. Red bars are new lows. The line is highs minus lows.</div></div>' +
+      '<div class="seg" id="hlrange"><button type="button" data-d="92">3M</button><button type="button" data-d="183" class="on">6M</button><button type="button" data-d="365">1Y</button></div></div>' +
+      '<div class="chart-box tall"><canvas id="hl"></canvas></div></div>' +
+      '<div class="ctrls" id="ctrls"></div><div class="panel" id="tbl"></div>';
+    document.getElementById("cards").innerHTML =
+      card("New 52w highs today", '<span style="color:#22C55E">' + nHigh + "</span>") +
+      card("New 52w lows today", '<span style="color:#EF4444">' + nLow + "</span>") +
+      card("Near high (within 5%)", '<span style="color:#F59E0B">' + nNear + "</span>") +
+      card("New highs on big volume", '<span style="color:#22C55E">' + nVol + "</span>", "At least 1.5× the 50-day average") +
+      card("Net highs minus lows", '<span style="color:' + netColor + '">' + netText + "</span>");
+    const tabs = [
+      ["highs", "New highs"],
+      ["lows", "New lows"],
+      ["near", "Near high"],
+      ["vol", "On volume"],
+      ["all", "All"],
+    ];
+    const titles = {
+      highs: "New highs today",
+      lows: "New lows today",
+      near: "Near the high",
+      vol: "Breakout to a new high on volume",
+      all: "All stocks",
+    };
+    const box = document.getElementById("ctrls");
+    standardFilters(box, all, { index: true, sector: true, verdict: true, ticker: true, order: ["index", "sector", "verdict", "ticker"], list: "w52" });
+    box.insertAdjacentHTML("afterbegin", '<div class="w52tabs" id="w52tabs">' + tabs.map((t, i) =>
+      '<button type="button" data-tab="' + t[0] + '"' + (i === 0 ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") + "</div>");
+    D.placeFeed(box, raw);
+    let tab = "highs";
+    let days = 183;
+    const state = { sort: "range_position_pct", dir: "desc", sort2: "score", dir2: "desc", page: 0 };
+    const columns = [TK, CO, SE, PR,
+      T("high_52w", "52w high", "num", { dec: 2 }), T("low_52w", "52w low", "num", { dec: 2 }),
+      T("pct_from_high", "% from high", "pct", { dec: 1, color: true }),
+      T("pct_above_low", "% above low", "pct", { dec: 1, color: true }),
+      T("range_position_pct", "Range", "rangepos"),
+      T("volume_ratio", "Vol ×", "volx", { dec: 2 }), SC, VE];
+    const inTab = (r) => {
+      if (tab === "highs") return yes(r, "new_high_today");
+      if (tab === "lows") return yes(r, "new_low_today");
+      if (tab === "near") return yes(r, "near_high");
+      if (tab === "vol") return yes(r, "high_on_volume");
+      return true;
+    };
+    const applySort = () => {
+      if (tab === "lows") {
+        state.sort = "pct_from_high"; state.dir = "asc"; state.sort2 = "score"; state.dir2 = "desc";
+      } else {
+        state.sort = "range_position_pct"; state.dir = "desc"; state.sort2 = "score"; state.dir2 = "desc";
+      }
+      state.page = 0;
+    };
+    const paint = () => {
+      const rows = D.lastNDays(hist, "date", days).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+      D.destroyCharts();
+      if (!rows.length) return;
+      D.comboChart(document.getElementById("hl"), rows.map((r) => r.date), [
+        { label: "New highs", data: D.seriesNum(rows, "new_highs"), color: "#22C55E" },
+        { label: "New lows", data: D.seriesNum(rows, "new_lows"), color: "#EF4444" },
+      ], { label: "Net", data: D.seriesNum(rows, "net"), color: "#7C9CFF" });
+    };
+    const draw = () => {
+      D.drawTable(document.getElementById("tbl"), {
+        title: titles[tab],
+        rows: all.filter((r) => inTab(r) && readCommon(box, r)),
+        columns: columns,
+        state: state,
+        pageSize: 25,
+        empty: "No names in this group.",
+      });
+    };
+    box.querySelectorAll("#w52tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tab = btn.getAttribute("data-tab");
+        box.querySelectorAll("#w52tabs button").forEach((b) => b.classList.toggle("on", b === btn));
+        applySort();
+        draw();
+      });
+    });
+    document.getElementById("hlrange").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("button");
+      if (!btn) return;
+      days = Number(btn.getAttribute("data-d"));
+      document.querySelectorAll("#hlrange button").forEach((b) => b.classList.toggle("on", b === btn));
+      paint();
+    });
+    hook(box, state, draw);
+    paint();
+    draw();
+  }
+
+  function buyLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    const add = (key, color, label) => {
+      const n = D.num(row[key]);
+      if (n != null) lines.push({ value: n, color: color, label: label });
+    };
+    add("entry", "#F59E0B", "Entry");
+    add("stop", "#EF4444", "Stop");
+    add("target1", "#22C55E", "Target1");
+    add("target2", "#7C9CFF", "Target2");
+    return lines;
+  }
+  function renderBuySetups(ctx) {
+    const raw = ctx.files["buy_setups.csv"];
+    const fileRows = D.realRows(raw);
+    const missing = (raw || []).some((r) => r.data_status === "MISSING");
+    const named = fileRows.filter((r) => String(r.ticker || "").trim()).map((r) => {
+      r.status = r.best_status;
+      return r;
+    });
+    const market = fileRows[0] || {};
+    const yes = (v) => String(v || "").toLowerCase() === "yes";
+    const spyUp = yes(market.spy_uptrend || market.market_ok);
+    const qqqUp = yes(market.qqq_uptrend);
+    const filterOn = D.featureOn("buy_setups.market_filter");
+    const marketDown = !missing && filterOn && !spyUp;
+    const yn = (on) => on ? '<span style="color:#22C55E">yes</span>' : '<span style="color:#EF4444">no</span>';
+    ctx.page.innerHTML =
+      '<p class="cap">Research list, not a recommendation. This desk never places trades.</p>' +
+      '<div id="buybanner"></div>' +
+      '<div class="cards" id="cards"></div>' +
+      '<div class="ctrls" id="ctrls"></div>' +
+      '<div id="chart"></div>' +
+      '<div class="panel" id="tbl"></div>' +
+      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
+    const box = document.getElementById("ctrls");
+    box.innerHTML =
+      D.multiHtml("index", "Index", D.indexTokens(named)) +
+      D.multiHtml("sector", "Sector", D.uniq(named, "sector")) +
+      D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "CANSLIM"]) +
+      D.multiHtml("status", "Status", D.uniq(named, "status")) +
+      D.searchHtml("ticker", "Ticker", "tick-list-buy", D.uniq(named, "ticker"));
+    D.placeFeed(box, raw);
+    let showAnyway = false;
+    let pick = null;
+    const state = { sort: "_ord", dir: "asc", page: 0 };
+    const columns = [
+      T("_ord", "", "num", { hidden: true }),
+      TK, CO, SE, T("index_membership", "Index", "text"), PR, T("price_as_of", "As of", "date"),
+      T("setup_sources", "Setup", "text"), T("sources_count", "Count", "num", { dec: 0 }),
+      T("best_status", "Status", "setup"),
+      T("entry", "Entry", "num", { dec: 2 }), T("stop", "Stop", "num", { dec: 2 }),
+      T("target1", "Target 1", "num", { dec: 2 }), T("target2", "Target 2", "num", { dec: 2 }),
+      T("risk_pct", "Risk %", "pct", { dec: 1 }), T("reward_risk", "Reward/risk", "multiple", { dec: 2 }),
+      T("dist_to_entry_pct", "Dist. to entry", "pct", { dec: 1, color: true }),
+      SC, VE, T("range_position_52w", "52w range", "rangepos"),
+      T("pct_from_high_52w", "% from 52w high", "pct", { dec: 1, color: true }),
+      T("reason", "Why", "text", { wrap: true, width: "280px" }), T("market_ok", "Market ok", "pass"),
+    ];
+    const sourceOk = (row) => {
+      const picked = D.selectedMulti(box, "source");
+      if (!picked) return true;
+      const parts = String(row.setup_sources || "").split("+").map((s) => s.trim());
+      return picked.some((p) => parts.indexOf(p) >= 0);
+    };
+    const specOrder = (rows) => {
+      const ranked = rows.slice().sort((a, b) => {
+        const status = (r) => r.best_status === "BROKEN OUT today" ? 0 : 1;
+        if (status(a) !== status(b)) return status(a) - status(b);
+        const count = (r) => D.num(r.sources_count) || 0;
+        if (count(a) !== count(b)) return count(b) - count(a);
+        const dist = (r) => {
+          const n = D.num(r.dist_to_entry_pct);
+          return n == null ? Infinity : Math.abs(n);
+        };
+        if (dist(a) !== dist(b)) return dist(a) - dist(b);
+        const score = (r) => {
+          const n = D.num(r.score);
+          return n == null ? -Infinity : n;
+        };
+        if (score(a) !== score(b)) return score(b) - score(a);
+        return String(a.ticker || "").localeCompare(String(b.ticker || ""));
+      });
+      ranked.forEach((r, i) => { r._ord = i; });
+      return ranked;
+    };
+    const draw = () => {
+      const grey = marketDown && showAnyway;
+      const pool = (marketDown && !showAnyway) ? [] : named.filter((r) => readCommon(box, r) && sourceOk(r));
+      const rows = specOrder(pool);
+      const kpis = (marketDown && !showAnyway) ? [] : named;
+      const broken = countWhere(kpis, (r) => r.best_status === "BROKEN OUT today");
+      const multi = countWhere(kpis, (r) => (D.num(r.sources_count) || 0) >= 2);
+      const rr = avg(kpis, "reward_risk");
+      document.getElementById("cards").innerHTML =
+        card("Setups today", String(kpis.length)) +
+        card("Broken out today", String(broken)) +
+        card("Multi-scanner setups", String(multi), "At least two scanners agree") +
+        card("Market status", missing ? D.na() : "SPY " + yn(spyUp), missing ? "" : "QQQ " + yn(qqqUp)) +
+        card("Average reward-to-risk", rr == null ? D.na() : D.esc(D.fmt(rr, 2)), "Target 1 versus the stop");
+      const banner = document.getElementById("buybanner");
+      if (marketDown) {
+        banner.hidden = false;
+        banner.innerHTML = '<span>Market not in an uptrend today, so no buy setups are listed</span>' +
+          '<button type="button" id="showanyway">' + (showAnyway ? "Hide greyed names" : "Show anyway") + "</button>";
+        banner.querySelector("#showanyway").addEventListener("click", () => { showAnyway = !showAnyway; draw(); });
+      } else {
+        banner.hidden = true;
+        banner.innerHTML = "";
+      }
+      if (pick && !rows.some((r) => r.ticker === pick)) pick = null;
+      const selected = rows.find((r) => r.ticker === pick) || rows[0] || null;
+      pick = selected ? selected.ticker : null;
+      const chart = document.getElementById("chart");
+      chart.classList.toggle("dimmed", grey);
+      document.getElementById("tbl").classList.toggle("dimmed", grey);
+      D.destroyCharts();
+      if (!selected) {
+        chart.innerHTML = "";
+      } else {
+        chart.innerHTML = priceShell("Entry, stop, and both targets. The stop stays on the chart because many breakouts fail.");
+        D.drawPriceChart(chart.querySelector("[data-px-panel]"), { ticker: selected.ticker, lines: buyLines(selected) });
+      }
+      D.drawTable(document.getElementById("tbl"), {
+        rows: rows,
+        columns: columns,
+        state: state,
+        pageSize: 25,
+        pick: pick,
+        empty: marketDown && !showAnyway ? "No buy setups are listed." : (named.length ? "No names match these filters." : "No stock passed the buy-setup rules today."),
+        onPick: (row) => { pick = row.ticker; draw(); },
+      });
+    };
+    hook(box, state, draw);
+    draw();
+  }
+
   function renderBreakouts(ctx) {
     const raw = ctx.files["breakouts.csv"];
     const all = D.realRows(raw);
@@ -1850,7 +2095,9 @@
       "scanner box": "Box breakout",
       "scanner flag": "Flag breakout",
       "scanner leaders": "Leaders",
+      "scanner 52w": "52-week",
       "top stocks": "Top stocks",
+      "buy setups": "Buy setups",
       "top sectors": "Today's sectors",
       "watchlist portfolio": "Watchlist and portfolio",
       "score breakdown": "Score breakdown",
@@ -1920,6 +2167,7 @@
   window.DESK_PAGES = {
     today: { files: ["market_today.csv", "breadth_history.csv", "sectors.csv", "alerts.csv"], render: renderToday },
     top: { files: ["scores.csv"], render: renderTop },
+    buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
     scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
     watchlist: { files: ["portfolio.csv", "portfolio_summary.csv", "watchlist.csv"], render: renderWatch },
     alerts: { files: ["alerts.csv", "score_changes.csv"], render: renderAlerts },
@@ -1933,6 +2181,7 @@
     box: box,
     flag: flag,
     leaders: leaders,
+    week52: { files: ["scanner_52w.csv", "highs_lows_history.csv"], render: renderWeek52 },
     calendar: { files: ["earnings_calendar.csv"], render: renderCalendar },
     heatmap: { files: ["earnings_heatmap.csv"], render: renderHeat },
     cards: { files: ["earnings_cards.csv"], render: renderCards },

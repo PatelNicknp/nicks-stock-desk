@@ -20,6 +20,8 @@ feature.scanner_canslim,True
 feature.scanner_box,True
 feature.scanner_flag,True
 feature.scanner_leaders,True
+feature.scanner_52w,True
+feature.buy_setups,True
 feature.earnings_calendar,True
 feature.earnings_heatmap,True
 feature.earnings_cards,True
@@ -46,6 +48,7 @@ feature.sector_performance,True
 feature.heatmaps,True
 feature.updates_log,True
 feature.help,True
+buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
 index.growth,True

@@ -22,6 +22,8 @@
     "scanner_box": true,
     "scanner_flag": true,
     "scanner_leaders": true,
+    "scanner_52w": true,
+    "buy_setups": true,
     "earnings_calendar": true,
     "earnings_heatmap": true,
     "earnings_cards": true,
@@ -48,6 +50,9 @@
     "heatmaps": true,
     "updates_log": true,
     "help": true
+  },
+  "buy_setups": {
+    "market_filter": true
   },
   "indexes": {
     "sp500": true,

@@ -11,6 +11,7 @@
     ["Overview", [
       ["Today", "index.html", "today"],
       ["Top stocks", "top-stocks.html", "top"],
+      ["Buy setups", "buy-setups.html", "buysetups"],
       ["Stock scorecard", "scorecard.html", "scorecard"],
       ["Watchlist and portfolio", "watchlist.html", "watchlist"],
       ["Alerts", "alerts.html", "alerts"],
@@ -26,6 +27,7 @@
       ["Box breakout", "box.html", "box"],
       ["Flag breakout", "flag.html", "flag"],
       ["Leaders", "leaders.html", "leaders"],
+      ["52-week", "52-week.html", "week52"],
     ]],
     ["Earnings", [
       ["Calendar", "earnings-calendar.html", "calendar"],
@@ -433,6 +435,14 @@
         const color = n >= 0 ? "#1F9D55" : "#D14343";
         return '<span class="track"><span class="fill" style="width:' + w + 'px;background:' + color + '"></span></span>';
       }
+      case "rangepos": {
+        const n = num(v);
+        if (n == null) return na();
+        const clamped = Math.max(0, Math.min(100, n));
+        const w = Math.max(0, Math.round(clamped / 100 * 88));
+        const color = clamped >= 95 ? UP : clamped <= 15 ? DN : AC;
+        return '<span class="track" title="' + esc(fmt(n, 0)) + '"><span class="fill" style="width:' + w + 'px;background:' + color + '"></span></span> ' + esc(fmt(n, 0));
+      }
       case "shortdate": {
         const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ""));
         if (!m) return isBlank(v) ? na() : esc(v);
@@ -553,7 +563,7 @@
   function compare(a, b, col, dir) {
     const va = a[col.key];
     const vb = b[col.key];
-    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar", "daybar", "scorejump", "count", "signedcompact", "of8", "owncap"].indexOf(col.kind) >= 0;
+    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar", "daybar", "rangepos", "scorejump", "count", "signedcompact", "of8", "owncap"].indexOf(col.kind) >= 0;
     let c = 0;
     if (numeric) {
       const pull = (value) => {
@@ -927,6 +937,44 @@
         scales: horizontal
           ? { x: Object.assign(valueAxis, xExtra), y: catAxis }
           : { x: Object.assign(catAxis, extra.x || {}), y: valueAxis },
+      },
+    });
+  }
+  function comboChart(canvas, labels, bars, line) {
+    const datasets = (bars || []).map((b) => ({
+      type: "bar",
+      label: b.label,
+      data: b.data,
+      backgroundColor: b.color,
+      borderWidth: 0,
+      order: 2,
+      maxBarThickness: 8,
+    }));
+    if (line) {
+      datasets.push({
+        type: "line",
+        label: line.label,
+        data: line.data,
+        borderColor: line.color,
+        backgroundColor: line.color,
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0,
+        order: 1,
+      });
+    }
+    makeChart(canvas, {
+      type: "bar",
+      data: { labels: labels, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend: lineLegend(), tooltip: { intersect: false } },
+        scales: {
+          x: Object.assign(axis(), { ticks: dateTicks(labels) }),
+          y: axis(),
+        },
       },
     });
   }
@@ -1727,6 +1775,7 @@
 
   const FEATURE = {
     top: "feature.top_stocks",
+    buysetups: "feature.buy_setups",
     scorecard: "feature.scorecard",
     watchlist: "feature.watchlist_portfolio",
     alerts: "feature.alerts",
@@ -1740,6 +1789,7 @@
     box: "feature.scanner_box",
     flag: "feature.scanner_flag",
     leaders: "feature.scanner_leaders",
+    week52: "feature.scanner_52w",
     calendar: "feature.earnings_calendar",
     heatmap: "feature.earnings_heatmap",
     cards: "feature.earnings_cards",
@@ -1827,7 +1877,7 @@
     featureOn: featureOn, monthLabel: monthLabel, ptsColor: ptsColor,
     wireFilters: wireFilters, matchMulti: matchMulti, matchContains: matchContains,
     matchText: matchText, matchMin: matchMin,
-    destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, makeChart: makeChart,
+    destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
     boot: boot,
   };

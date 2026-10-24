@@ -56,6 +56,22 @@ FLAG_NEAR = 0.02
 VOL_MULT = PINE["vol_mult"]
 VOL_LEN = PINE["vol_len"]
 
+# 52-week page. The high and low use each session's high and low columns.
+# A new high or new low is the close versus the prior 252 sessions, so an
+# intraday poke through the old high does not count unless the close holds it.
+W52_BARS = 252
+W52_NEAR_PCT = 5.0
+W52_VOL_MULT = 1.5  # new 52-week high on volume at least this many times the 50-day average
+W52_VOL_LEN = VOL_LEN
+
+# Buy setups. The 7% and 20% match the Pine script stop and sell-part.
+BUY_STOP_PCT = PINE["stop_pct"]
+BUY_PART_PCT = PINE["part_pct"]
+BUY_MAX_RISK_PCT = 8.0
+BUY_TARGET2_R = 3.0
+BUY_SETUP_ORDER = ("VCP", "Box", "Flag", "CANSLIM")
+BUY_LIVE_STATUS = ("READY", "BROKEN OUT today")
+
 VCP_NOTE = (
     "Stop and target before a buy apply the indicator's 7% and 20% to the pivot. "
     "On the buy bar they use that bar's close. A swing confirms 3 bars later. "
@@ -1215,19 +1231,538 @@ def combine_leaders(vcp, canslim):
     return pd.DataFrame(rows)
 
 
-def build_setups(close, high, low, vol, universe, quarters, annual, holders, features):
-    """Return the five scanner frames. Each is empty when that switch is off."""
+def w52_note():
+    """Plain-English rule, with the window and the volume multiple filled from the constants."""
+    return (
+        "52-week high and low are the highest high and lowest low of the last %d sessions, including today. "
+        "A new high today means the close is at or above the highest high of the prior %d sessions. "
+        "A new low today means the close is at or below the lowest low of the prior %d sessions. "
+        "Near the high means the close is within %g%% of the 52-week high. "
+        "High on volume means that new high and volume at least %g times the 50-day average. "
+        "Research only. This does not place a trade."
+    ) % (W52_BARS, W52_BARS, W52_BARS, W52_NEAR_PCT, W52_VOL_MULT)
+
+
+def _w52_text(v):
+    if v is None:
+        return ""
+    try:
+        if pd.isna(v):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    text = str(v).strip()
+    if text.lower() in ("nan", "none"):
+        return ""
+    return text
+
+
+def _w52_sessions(frame):
+    """Flags for one ticker. The arrays are that name's own sessions, with gaps removed."""
+    h = frame["high"].to_numpy(dtype=float)
+    l = frame["low"].to_numpy(dtype=float)
+    c = frame["close"].to_numpy(dtype=float)
+    v = frame["volume"].to_numpy(dtype=float)
+    hs = pd.Series(h)
+    ls = pd.Series(l)
+    high_52 = hs.rolling(W52_BARS, min_periods=W52_BARS).max().to_numpy()
+    low_52 = ls.rolling(W52_BARS, min_periods=W52_BARS).min().to_numpy()
+    prior_high = hs.rolling(W52_BARS, min_periods=W52_BARS).max().shift(1).to_numpy()
+    prior_low = ls.rolling(W52_BARS, min_periods=W52_BARS).min().shift(1).to_numpy()
+    vol_avg = pd.Series(v).rolling(W52_VOL_LEN, min_periods=W52_VOL_LEN).mean().to_numpy()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = v / vol_avg
+        pct_from = (c / high_52 - 1.0) * 100.0
+        pct_above = (c / low_52 - 1.0) * 100.0
+        span = high_52 - low_52
+        pos = (c - low_52) / span * 100.0
+    flat = np.isfinite(high_52) & np.isfinite(c) & ~(span > 0) & (np.abs(c - high_52) <= 1e-9)
+    pos = np.where(np.isfinite(span) & (span > 0), pos, np.where(flat, 100.0, np.nan))
+    pos = np.where(np.isfinite(pos), np.clip(pos, 0.0, 100.0), np.nan)
+    ready = np.isfinite(prior_high) & np.isfinite(prior_low) & np.isfinite(c)
+    new_high = ready & (c >= prior_high)
+    new_low = ready & (c <= prior_low)
+    # Within 5% of the 52-week high. The tiny slack keeps an exact 5% close on the near side of float rounding.
+    near = np.isfinite(pct_from) & (pct_from >= -W52_NEAR_PCT - 1e-6)
+    big = np.isfinite(ratio) & np.isfinite(vol_avg) & (vol_avg > 0) & (ratio >= W52_VOL_MULT)
+    return pd.DataFrame({
+        "price": c,
+        "high_52w": high_52,
+        "low_52w": low_52,
+        "pct_from_high": pct_from,
+        "pct_above_low": pct_above,
+        "range_position_pct": pos,
+        "volume_ratio": np.where(np.isfinite(ratio) & np.isfinite(vol_avg) & (vol_avg > 0), ratio, np.nan),
+        "ready": ready,
+        "new_high": new_high,
+        "new_low": new_low,
+        "near": near,
+        "high_on_volume": new_high & big,
+    }, index=frame.index)
+
+
+def _days_since_high(highs, i):
+    """Sessions since the most recent bar that printed the 252-session high. Today is 0."""
+    if i < W52_BARS - 1:
+        return None
+    window = np.asarray(highs[i - (W52_BARS - 1):i + 1], dtype=float)
+    if window.shape[0] != W52_BARS or not np.isfinite(window).all():
+        return None
+    hits = np.flatnonzero(window == float(window.max()))
+    if len(hits) == 0:
+        return None
+    return int(window.shape[0] - 1 - hits[-1])
+
+
+def _w52_lookup(table, ticker, col):
+    if table is None or ticker not in table.index or col not in table.columns:
+        return None
+    return table.at[ticker, col]
+
+
+def scan_52w(close, high, low, vol, universe, scores=None):
+    """One row per ticker, plus a daily highs/lows count backfilled from the same bars.
+
+    No network. Names without a bar are skipped. A flag is yes only on the latest
+    panel session, and only when 252 prior sessions exist. The history file keeps
+    every such session, which is more than a year when the cache holds about five.
+    """
+    if close is None or len(getattr(close, "index", [])) == 0 or universe is None or len(universe) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+    if "ticker" not in getattr(universe, "columns", []):
+        return pd.DataFrame(), pd.DataFrame()
+    names = []
+    seen = set()
+    for raw in universe["ticker"].tolist():
+        ticker = str(raw).strip()
+        if not ticker or ticker in seen or ticker not in close.columns:
+            continue
+        seen.add(ticker)
+        names.append(ticker)
+    if not names:
+        return pd.DataFrame(), pd.DataFrame()
+    panel = _panel_date(close)
+    panel_ts = None if panel is None else pd.Timestamp(panel)
+    if getattr(panel_ts, "tzinfo", None) is not None:
+        panel_ts = panel_ts.tz_localize(None)
+    if panel_ts is not None:
+        panel_ts = panel_ts.normalize()
+    score_idx = None
+    if scores is not None and len(scores) and "ticker" in scores.columns:
+        score_idx = scores.drop_duplicates("ticker", keep="last").set_index("ticker")
+    hsrc = high if high is not None else close
+    lsrc = low if low is not None else close
+    note = w52_note()
+    rows = []
+    pieces = []
+    for ticker in names:
+        if ticker not in hsrc.columns or ticker not in lsrc.columns:
+            continue
+        if vol is not None and ticker in vol.columns:
+            vol_s = vol[ticker]
+        else:
+            vol_s = np.nan
+        frame = pd.DataFrame({
+            "high": hsrc[ticker],
+            "low": lsrc[ticker],
+            "close": close[ticker],
+            "volume": vol_s,
+        })
+        frame = frame.dropna(subset=["close", "high", "low"])
+        frame = frame[~frame.index.duplicated(keep="last")].sort_index()
+        if panel_ts is not None and len(frame):
+            frame = frame.loc[:panel_ts]
+        if len(frame) == 0:
+            continue
+        stats = _w52_sessions(frame)
+        ready = stats["ready"].to_numpy(dtype=bool)
+        ranged_bars = np.isfinite(stats["high_52w"].to_numpy(dtype=float))
+        keep = ready | ranged_bars
+        if keep.any():
+            piece = pd.DataFrame({
+                "new_highs": np.where(ready, stats["new_high"].to_numpy(dtype=int), 0),
+                "new_lows": np.where(ready, stats["new_low"].to_numpy(dtype=int), 0),
+                "near_high_count": np.where(ranged_bars, stats["near"].to_numpy(dtype=int), 0),
+            }, index=stats.index)
+            piece = piece.loc[keep]
+            piece.index.name = "date"
+            pieces.append(piece)
+        last = stats.iloc[-1]
+        last_dt = pd.Timestamp(stats.index[-1])
+        if getattr(last_dt, "tzinfo", None) is not None:
+            last_dt = last_dt.tz_localize(None)
+        on_panel = panel_ts is not None and last_dt.normalize() == panel_ts
+        active = bool(on_panel and last["ready"])
+        near_now = bool(on_panel and np.isfinite(last["high_52w"]) and last["near"])
+        meta = _meta_row(universe, ticker)
+        for col, key in (("company", "company"), ("sector", "sector"), ("index_membership", "index_membership")):
+            if not meta.get(key):
+                meta[key] = _w52_text(_w52_lookup(score_idx, ticker, col))
+        score = _num(_w52_lookup(score_idx, ticker, "score"))
+        verdict = _w52_text(_w52_lookup(score_idx, ticker, "verdict"))
+        ranged = np.isfinite(last["high_52w"]) and np.isfinite(last["low_52w"])
+        status = "OK" if active else "PARTIAL"
+        rows.append({
+            "ticker": ticker,
+            "company": meta.get("company") or "",
+            "sector": meta.get("sector") or "",
+            "index_membership": meta.get("index_membership") or "",
+            "price": _round(last["price"]),
+            "price_as_of": last_dt.strftime("%Y-%m-%d"),
+            "high_52w": _round(last["high_52w"]) if ranged else None,
+            "low_52w": _round(last["low_52w"]) if ranged else None,
+            "pct_from_high": _round(last["pct_from_high"]) if ranged else None,
+            "pct_above_low": _round(last["pct_above_low"]) if ranged else None,
+            "range_position_pct": _round(last["range_position_pct"]) if ranged else None,
+            "new_high_today": "yes" if active and bool(last["new_high"]) else "no",
+            "new_low_today": "yes" if active and bool(last["new_low"]) else "no",
+            "near_high": "yes" if near_now else "no",
+            "high_on_volume": "yes" if active and bool(last["high_on_volume"]) else "no",
+            "volume_ratio": _round(last["volume_ratio"]) if _num(last["volume_ratio"]) is not None else None,
+            "days_since_high": _days_since_high(frame["high"].to_numpy(dtype=float), len(frame) - 1) if ranged else None,
+            "score": score,
+            "verdict": verdict,
+            "data_status": status,
+            "note": note,
+        })
+    hist = _w52_history(pieces)
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return out, hist
+    out["_rp"] = pd.to_numeric(out["range_position_pct"], errors="coerce")
+    out["_sc"] = pd.to_numeric(out["score"], errors="coerce")
+    out = out.sort_values(["_rp", "_sc", "ticker"], ascending=[False, False, True], na_position="last")
+    return out.drop(columns=["_rp", "_sc"]), hist
+
+
+def _w52_history(pieces):
+    if not pieces:
+        return pd.DataFrame()
+    cat = pd.concat(pieces)
+    cat.index.name = "date"
+    g = cat.groupby(level=0).sum()
+    g = g.sort_index()
+    g["net"] = g["new_highs"].astype(int) - g["new_lows"].astype(int)
+    g["new_highs"] = g["new_highs"].astype(int)
+    g["new_lows"] = g["new_lows"].astype(int)
+    g["near_high_count"] = g["near_high_count"].astype(int)
+    idx = pd.to_datetime(g.index)
+    if getattr(idx, "tz", None) is not None:
+        idx = idx.tz_localize(None)
+    g = g.copy()
+    g.insert(0, "date", idx.strftime("%Y-%m-%d"))
+    g["data_status"] = "OK"
+    g["note"] = (
+        "Each session counts names with a full %d prior sessions. "
+        "New highs and new lows use the close. Near high is within %g%% of the 252-session high. "
+        "Net is new highs minus new lows. Built from the cached bars."
+    ) % (W52_BARS, W52_NEAR_PCT)
+    g = g.reset_index(drop=True)
+    return g[["date", "new_highs", "new_lows", "near_high_count", "net", "data_status", "note"]]
+
+
+def _ma_state(series):
+    """Last close, 50-day average, and 200-day average. None when the window is short."""
+    if series is None:
+        return None
+    s = pd.Series(series, dtype=float).dropna()
+    if len(s) < 200:
+        return None
+    sma50 = float(s.rolling(50, min_periods=50).mean().iloc[-1])
+    sma200 = float(s.rolling(200, min_periods=200).mean().iloc[-1])
+    last = float(s.iloc[-1])
+    if not (np.isfinite(sma50) and np.isfinite(sma200) and np.isfinite(last)):
+        return None
+    return last, sma50, sma200
+
+
+def above_both_sma(series):
+    """Close above the 50-day and the 200-day. A stock does not also need a golden cross."""
+    state = _ma_state(series)
+    if state is None:
+        return False
+    last, sma50, sma200 = state
+    return bool(last > sma50 and last > sma200)
+
+
+def uptrend(series):
+    """Market uptrend: close above both averages, and the 50-day above the 200-day.
+
+    Used for SPY, which decides the list, and for QQQ, which is display only.
+    A series shorter than 200 sessions is not an uptrend.
+    """
+    state = _ma_state(series)
+    if state is None:
+        return False
+    last, sma50, sma200 = state
+    return bool(last > sma50 and last > sma200 and sma50 > sma200)
+
+
+def buy_stop(entry, setup_stop):
+    """Tighter of the 7% stop and the setup stop, when that stop is below the entry."""
+    entry = _num(entry)
+    if entry is None or entry <= 0:
+        return None
+    cap = entry * (1.0 - BUY_STOP_PCT / 100.0)
+    own = _num(setup_stop)
+    if own is not None and own < entry and own > cap:
+        return own
+    return cap
+
+
+def buy_levels(entry, setup_stop, price, broken_out):
+    """Stop, both targets, risk percent, and reward versus that risk.
+
+    Target 1 is 20% above the entry. After a breakout it is 20% above the close.
+    Target 2 is the entry plus three times the dollar risk.
+    """
+    entry = _num(entry)
+    stop = buy_stop(entry, setup_stop)
+    price = _num(price)
+    if entry is None or stop is None or stop >= entry:
+        return None
+    risk = entry - stop
+    risk_pct = risk / entry * 100.0
+    if not (0 < risk_pct <= BUY_MAX_RISK_PCT):
+        return None
+    base = price if broken_out and price is not None else entry
+    target1 = base * (1.0 + BUY_PART_PCT / 100.0)
+    target2 = entry + BUY_TARGET2_R * risk
+    reward = (target1 - entry) / risk
+    return {
+        "stop": stop,
+        "target1": target1,
+        "target2": target2,
+        "risk_pct": risk_pct,
+        "reward_risk": reward,
+    }
+
+
+def _yn_flag(flag):
+    return "yes" if flag else "no"
+
+
+def _setup_records(df, source):
+    if df is None or len(getattr(df, "index", [])) == 0 or "ticker" not in getattr(df, "columns", []):
+        return []
+    rows = []
+    for rec in df.to_dict("records"):
+        status = str(rec.get("status") or "").strip()
+        ticker = str(rec.get("ticker") or "").strip()
+        if not ticker or status not in BUY_LIVE_STATUS:
+            continue
+        rows.append({
+            "ticker": ticker,
+            "source": source,
+            "status": status,
+            "pivot": _num(rec.get("pivot")),
+            "stop": _num(rec.get("stop")),
+            "strength": _num(rec.get("strength")),
+            "company": _w52_text(rec.get("company")),
+            "sector": _w52_text(rec.get("sector")),
+            "index_membership": _w52_text(rec.get("index_membership")),
+            "price": _num(rec.get("price")),
+            "price_as_of": _w52_text(rec.get("price_as_of")),
+        })
+    return rows
+
+
+def _buy_reason(sources, best, entry, broken_out):
+    joined = " + ".join(sources)
+    state = "broke out today" if broken_out else "is ready"
+    if len(sources) > 1:
+        state = "agree, and the strongest " + state
+    base = "today's close" if broken_out else "the entry"
+    return (
+        "%s %s. Entry is the %s buy point at %s. Target 1 is 20%% above %s. "
+        "The stop is shown because many breakouts fail."
+    ) % (joined, state, best["source"], _round(entry), base)
+
+
+def buy_rows_visible(df, market_filter):
+    """Rows the page lists. The market switch hides them when SPY is not in an uptrend."""
+    if df is None or len(df) == 0 or "ticker" not in df.columns:
+        return df.iloc[0:0] if df is not None else pd.DataFrame()
+    rows = df[df["ticker"].astype(str).str.strip() != ""].copy()
+    if len(rows) == 0 or not market_filter:
+        return rows
+    ok = str(rows.iloc[0].get("market_ok") or "").strip().lower() == "yes"
+    if ok:
+        return rows
+    return rows.iloc[0:0]
+
+
+def build_buy_setups(vcp, box, flag, canslim, scores, close=None, week=None, sma_ok=None, market=None):
+    """Names that pass the stock rules. market_ok is SPY's uptrend, for the page filter.
+
+    No network. Scanners, scores, the 52-week file, and the cached closes are the inputs.
+    The market switch does not delete rows, so the page can show them greyed.
+    """
+    grouped = {}
+    for source, frame in (("VCP", vcp), ("Box", box), ("Flag", flag), ("CANSLIM", canslim)):
+        for rec in _setup_records(frame, source):
+            grouped.setdefault(rec["ticker"], []).append(rec)
+    score_idx = None
+    if scores is not None and len(scores) and "ticker" in getattr(scores, "columns", []):
+        score_idx = scores.drop_duplicates("ticker", keep="last").set_index("ticker")
+    week_idx = None
+    if week is not None and len(week) and "ticker" in getattr(week, "columns", []):
+        week_idx = week.drop_duplicates("ticker", keep="last").set_index("ticker")
+    if market is None:
+        spy_ok = uptrend(close["SPY"]) if close is not None and "SPY" in getattr(close, "columns", []) else False
+        qqq_ok = uptrend(close["QQQ"]) if close is not None and "QQQ" in getattr(close, "columns", []) else False
+    else:
+        spy_ok = bool(market.get("spy"))
+        qqq_ok = bool(market.get("qqq"))
+    market_ok = _yn_flag(spy_ok)
+    qqq_flag = _yn_flag(qqq_ok)
+    order = {name: i for i, name in enumerate(BUY_SETUP_ORDER)}
+    rows = []
+    for ticker, setups_for in grouped.items():
+        verdict = _w52_text(_w52_lookup(score_idx, ticker, "verdict"))
+        if verdict != "BUY":
+            continue
+        if sma_ok is not None:
+            if not sma_ok.get(ticker):
+                continue
+            price = None
+            price_as_of = ""
+        else:
+            price, price_as_of = _close_last(close, ticker)
+            series = close[ticker] if close is not None and ticker in getattr(close, "columns", []) else None
+            if price is None or not above_both_sma(series):
+                continue
+        usable = [rec for rec in setups_for if rec["pivot"] is not None and rec["pivot"] > 0]
+        if not usable:
+            continue
+        usable.sort(key=lambda rec: (-(rec["strength"] if rec["strength"] is not None else -1), order[rec["source"]]))
+        best = usable[0]
+        if price is None:
+            price = best["price"]
+        if not price_as_of:
+            price_as_of = best["price_as_of"]
+        broken = best["status"] == "BROKEN OUT today"
+        levels = buy_levels(best["pivot"], best["stop"], price, broken)
+        if levels is None:
+            continue
+        sources = [
+            name for name in BUY_SETUP_ORDER
+            if any(rec["source"] == name and rec["pivot"] is not None and rec["pivot"] > 0 for rec in setups_for)
+        ]
+        meta_company = _w52_text(_w52_lookup(score_idx, ticker, "company")) or best["company"]
+        meta_sector = _w52_text(_w52_lookup(score_idx, ticker, "sector")) or best["sector"]
+        meta_index = _w52_text(_w52_lookup(score_idx, ticker, "index_membership")) or best["index_membership"]
+        score = _num(_w52_lookup(score_idx, ticker, "score"))
+        range_pos = _num(_w52_lookup(week_idx, ticker, "range_position_pct"))
+        from_high = _num(_w52_lookup(week_idx, ticker, "pct_from_high"))
+        dist = None if price is None else (price / best["pivot"] - 1.0) * 100.0
+        dist_val = _round(dist)
+        if dist_val == 0:
+            dist_val = 0.0
+        rows.append({
+            "ticker": ticker,
+            "company": meta_company,
+            "sector": meta_sector,
+            "index_membership": meta_index,
+            "price": _round(price),
+            "price_as_of": price_as_of,
+            "setup_sources": " + ".join(sources),
+            "sources_count": len(sources),
+            "best_status": best["status"],
+            "entry": _round(best["pivot"]),
+            "stop": _round(levels["stop"]),
+            "target1": _round(levels["target1"]),
+            "target2": _round(levels["target2"]),
+            "risk_pct": _round(levels["risk_pct"]),
+            "reward_risk": _round(levels["reward_risk"]),
+            "dist_to_entry_pct": dist_val,
+            "score": score,
+            "verdict": verdict,
+            "range_position_52w": _round(range_pos) if range_pos is not None else None,
+            "pct_from_high_52w": _round(from_high) if from_high is not None else None,
+            "reason": _buy_reason(sources, best, best["pivot"], broken),
+            "market_ok": market_ok,
+            "spy_uptrend": market_ok,
+            "qqq_uptrend": qqq_flag,
+            "data_status": "OK",
+            "note": "Research list, not a recommendation. This desk never places trades.",
+        })
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return _buy_market_row(market_ok, qqq_flag)
+    out["_status"] = out["best_status"].map(lambda s: 0 if s == "BROKEN OUT today" else 1)
+    out["_dist"] = pd.to_numeric(out["dist_to_entry_pct"], errors="coerce").abs()
+    out["_score"] = pd.to_numeric(out["score"], errors="coerce")
+    out = out.sort_values(
+        ["_status", "sources_count", "_dist", "_score", "ticker"],
+        ascending=[True, False, True, False, True],
+        na_position="last",
+    )
+    return out.drop(columns=["_status", "_dist", "_score"]).reset_index(drop=True)
+
+
+def _close_last(close, ticker):
+    if close is None or ticker not in getattr(close, "columns", []):
+        return None, ""
+    s = close[ticker].dropna()
+    if len(s) == 0:
+        return None, ""
+    dt = pd.Timestamp(s.index[-1])
+    if getattr(dt, "tzinfo", None) is not None:
+        dt = dt.tz_localize(None)
+    return float(s.iloc[-1]), dt.strftime("%Y-%m-%d")
+
+
+def _buy_market_row(market_ok, qqq_flag):
+    """One row so the page can show SPY and QQQ when no stock passed."""
+    return pd.DataFrame([{
+        "ticker": "",
+        "company": "",
+        "sector": "",
+        "index_membership": "",
+        "price": None,
+        "price_as_of": "",
+        "setup_sources": "",
+        "sources_count": None,
+        "best_status": "",
+        "entry": None,
+        "stop": None,
+        "target1": None,
+        "target2": None,
+        "risk_pct": None,
+        "reward_risk": None,
+        "dist_to_entry_pct": None,
+        "score": None,
+        "verdict": "",
+        "range_position_52w": None,
+        "pct_from_high_52w": None,
+        "reason": "",
+        "market_ok": market_ok,
+        "spy_uptrend": market_ok,
+        "qqq_uptrend": qqq_flag,
+        "data_status": "OK",
+        "note": "No names passed the buy-setup rules. Research list, not a recommendation. This desk never places trades.",
+    }])
+
+
+def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None):
+    """Return the scanner frames. Each is empty when that switch is off."""
     features = features or {}
     want_v = features.get("scanner_vcp", True)
     want_c = features.get("scanner_canslim", True)
     want_b = features.get("scanner_box", True)
     want_f = features.get("scanner_flag", True)
     want_l = features.get("scanner_leaders", True)
+    want_w = features.get("scanner_52w", True)
     vcp = scan_vcp(close, high, low, vol, universe) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()
     leaders = combine_leaders(vcp, canslim) if want_l else pd.DataFrame()
+    if want_w:
+        week, week_hist = scan_52w(close, high, low, vol, universe, scores)
+    else:
+        week, week_hist = pd.DataFrame(), pd.DataFrame()
     if not want_v:
         vcp = pd.DataFrame()
     if not want_c:
@@ -1238,4 +1773,6 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
         "scanner_box": box,
         "scanner_flag": flag,
         "scanner_leaders": leaders,
+        "scanner_52w": week,
+        "highs_lows_history": week_hist,
     }
