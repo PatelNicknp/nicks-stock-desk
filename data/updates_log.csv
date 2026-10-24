@@ -1,18 +1,20 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,already fetched today,2026-10-24 05:12 PT
-Universe (Wikipedia Nasdaq-100),OK,101,already fetched today,2026-10-24 05:12 PT
-Prices (Yahoo Finance),OK,2026-10-23,"672928 rows, batched",2026-10-24 05:13 PT
-SEC company tickers,OK,2026-10-24,reused cache,2026-10-24 05:13 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-10-24,520 names,2026-10-24 05:13 PT
-Analyst and profile (Yahoo Finance),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-24 05:13 PT
-Earnings dates (Yahoo Finance),OK,2026-10-24,reused cache,2026-10-24 05:13 PT
-Institutional 13F and insider (Nasdaq),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-24 05:13 PT
-News headlines (Yahoo Finance),OK,2026-10-24,reused cache,2026-10-24 05:14 PT
-Option walls (Yahoo option chain),OK,2026-10-24,reused cache (option chains refresh at most once a day),2026-10-24 05:14 PT
-Put/call (CBOE),OK,2026-10-24,reused cache,2026-10-24 05:14 PT
-FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-10-24 05:15 PT
-Economic calendar (Nasdaq),OK,2026-10-24,reused cache,2026-10-24 05:15 PT
-Backtest,OK,2026-10-23,monthly point-in-time test,2026-10-24 05:16 PT
-Price candles,OK,2026-10-23,"523 tickers, last 260 sessions from the price cache. No new download.",2026-10-24 05:16 PT
-Pattern scanners,OK,2026-10-23,"VCP 279, CANSLIM 240, box 134, flag 9, leaders 184. No new downloads.",2026-10-24 05:17 PT
-Column check,PARTIAL,,"A column is blank on every row: portfolio, scanner_canslim, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-10-24 05:17 PT
+Universe (Wikipedia S&P 500),OK,503,already fetched today,2026-10-24 15:49 PT
+Universe (Wikipedia Nasdaq-100),OK,101,already fetched today,2026-10-24 15:49 PT
+Prices (Yahoo Finance),OK,2026-10-23,"672928 rows, batched",2026-10-24 15:49 PT
+SEC company tickers,OK,2026-10-24,reused cache,2026-10-24 15:49 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-10-24,520 names,2026-10-24 15:49 PT
+Analyst and profile (Yahoo Finance),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-24 15:49 PT
+Earnings dates (Yahoo Finance),OK,2026-10-24,reused cache,2026-10-24 15:49 PT
+Institutional 13F and insider (Nasdaq),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-24 15:49 PT
+News headlines (Yahoo Finance),OK,2026-10-24,reused cache,2026-10-24 15:50 PT
+Option walls (Yahoo option chain),OK,2026-10-24,reused cache (option chains refresh at most once a day),2026-10-24 15:50 PT
+Put/call (CBOE),OK,2026-10-24,reused cache,2026-10-24 15:50 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-10-24 15:51 PT
+Economic calendar (Nasdaq),OK,2026-10-24,reused cache,2026-10-24 15:51 PT
+Backtest,OK,2026-10-23,monthly point-in-time test,2026-10-24 15:52 PT
+Price candles,OK,2026-10-23,"523 tickers, up to 1255 cached sessions. No new download.",2026-10-24 15:52 PT
+Pattern scanners,OK,2026-10-23,"VCP 279, CANSLIM 240, box 134, flag 9, leaders 184, 52-week 524 names over 1004 sessions. No new downloads.",2026-10-24 15:53 PT
+Buy setups,OK,2026-10-23,Buy setups 16. Research list only. Built from the scanners already on the desk. No new downloads.,2026-10-24 15:53 PT
+Sector rotation,OK,2026-10-23,"11 sectors, 2 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-10-24 15:53 PT
+Column check,PARTIAL,,"A column is blank on every row: portfolio, scanner_canslim, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-10-24 15:53 PT
