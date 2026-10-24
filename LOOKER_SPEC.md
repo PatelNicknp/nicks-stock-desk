@@ -122,7 +122,7 @@ Unless a page says otherwise:
 - A date chip bound to `market_today.updated_pt` (add that data source once and reuse the chip).
 - A ticker drop-down (search enabled) when the table has a `ticker` column. Default: all.
 - The table under the charts. Sort is specified per page.
-- Hide `data_status`, `note`, and `disclaimer` from the main table. Put `note` in a one-line text box that shows only when `data_status` is `MISSING`, so a broken feed explains itself instead of looking like zeros.
+- Hide `data_status`, `note`, and `disclaimer` from the main table. Put `note` in a one-line text box that shows when `data_status` is `MISSING` or `PARTIAL`. `PARTIAL` means a column is blank on every row. A blank is missing data, not a zero.
 
 ---
 
@@ -150,7 +150,7 @@ A bar of `sectors.day_pct` for the 11 big sector ETFs (filter `ticker` in XLK, X
 
 Source: `scores`.
 
-Filter bar: verdict (multi-select, default BUY and HOLD), sector, confidence, and index membership.
+Filter bar: verdict (multi-select, default BUY and HOLD), sector, confidence, and index membership. `sector` is one of the 11 GICS sectors. Industry stays in its own column and is not renamed.
 
 `index_membership` is text such as `SP500`, `NDX100`, `Growth`, or `SP500 / NDX100` when a stock is in more than one list. Filter with **Contains**, not equals, so `SP500` still matches `SP500 / NDX100`. The same three tags are on the `universe` tab as `in_sp500`, `in_ndx100`, and `in_growth` (yes or no) if you would rather filter on a single flag. A holding that is not in any of the three lists is tagged `Focus`.
 
@@ -176,7 +176,7 @@ Valuation row: `target_analyst` plus `target_analyst_kind`, `target_pfcf`, `targ
 
 Score row: five boxes, `pts_tech`, `pts_fin`, `pts_sent`, `pts_earnings`, `pts_sector`, using the point colors, and the total `score`.
 
-Breakdown table from `score_details`: group_name, item, points_label, now_value, avg_value, vs_industry. Color `points`. Blank points show `n/a`. That file is only those columns plus `ticker`. The long disclaimer is not repeated on every row. The research line on the page covers it.
+Breakdown table from `score_details`: group_name, item, points_label, now_value, avg_value, vs_industry. Color `points`. Blank points show `n/a`. `points_label` is the words `plus 1`, `minus 1`, `zero`, or `n/a` (the numeric `points` column is the number). That file is only those columns plus `ticker`. The long disclaimer is not repeated on every row. The research line on the page covers it.
 
 A second small table from `scores`, one row, the industry point columns (`pts_*_ind`). Caption: "Versus other stocks in this sector on the desk, not a paid industry set. Not added into the score again."
 
@@ -216,9 +216,9 @@ Top of the page: the `headline` where `is_headline` is `yes`. Large type. If it 
 
 Three scorecards from that same headline row: top-20 yearly pace (`top20_cagr_pct`), S&P 500 pace (`spy_cagr_pct`), max drawdown (`top20_max_drawdown_pct`).
 
-Line chart from `backtest_equity`: top20, spy, bottom20. Start at 10,000 in the data.
+Line chart from `backtest_equity`: top20, spy, bottom20. The first row is 10,000 for each curve.
 
-Table from `backtest_buckets`. Filter control for horizon (1w, 4w, 12w), default 12w. Color `excess_pct` with the return scale. This is where a high-score bucket can be red. Leave it red.
+Table from `backtest_buckets`. Filter control for horizon (1w, 4w, 12w), default 12w. Sort buckets by `bucket_order` (1 through 6). The bucket text is `Scores 0 or below`, `Scores 1 to 3`, `Scores 4 to 5`, `Scores 6 to 7`, `Scores 8 to 9`, `Scores 10 or more`. Color `excess_pct` with the return scale. This is where a high-score bucket can be red. Leave it red.
 
 Year table from `backtest_yearly`.
 
@@ -254,7 +254,7 @@ Columns: ticker, index_membership, status, pivot, stop, target, trail, strength,
 
 Sort by status (broken out, then ready, then watching), then strength descending.
 
-`trend_score` is the 8-point template. `r1` through `r8` are PASS or FAIL for the eight rules. Color PASS green and FAIL red. `pivot` is the buy point (the high of the latest contraction). `stop` is 7% under the buy price. `target` is 20% above it (the "sell part" level). `trail` is the 20-day average the indicator uses after a buy.
+`trend_score` is the 8-point template, written `8 of 8` so a sheet does not turn it into a date. `r1` through `r8` are PASS or FAIL for the eight rules. Color PASS green and FAIL red. `pivot` is the buy point (the high of the latest contraction). `stop` is 7% under the buy price. `target` is 20% above it (the "sell part" level). `trail` is the 20-day average the indicator uses after a buy.
 
 Title the page "VCP". Under the table, show `note`. It says the stop and target use the buy point until a buy prints, and that a tie is not a pivot.
 
@@ -342,7 +342,7 @@ Caption: "Market mood only. Not an option position."
 
 Source: `option_walls`.
 
-Ticker drop-down, then expiry drop-down. Default to the nearest expiry.
+Ticker drop-down, then expiry drop-down. Default the expiry filter to `nearest_expiry = true` (the first expiry on or after today for that ticker).
 
 Bar chart: strike on the x-axis, open_interest on the y-axis, one series for calls and one for puts (green and red).
 
@@ -356,7 +356,7 @@ If the page is the MISSING row, show the note and no chart.
 
 Source: `analyst_ratings`.
 
-Columns: ticker, company, analyst_mean, analyst_count, pts_analyst, target_analyst, target_analyst_kind, price, upside_pct. Sort by pts_analyst descending. Color `pts_analyst` with the point scale. Blank rating is `n/a`.
+Columns: ticker, company, analyst_mean, analyst_count, pts_analyst, target_analyst, target_analyst_kind, price, upside_pct. Sort by pts_analyst descending. Color `pts_analyst` with the point scale. Blank rating is `n/a`. `upside_pct` is the mean target divided by price, minus 1, in percent. It is blank when the mean target or the price is missing.
 
 `upside_pct` may be blank. Do not calculate it inside Looker if the column is blank. Leave it.
 

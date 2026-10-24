@@ -152,6 +152,78 @@ def _debt_map(gaap, frame_re, forms, flow):
     return out
 
 
+def _instant_by_end(gaap, names, forms):
+    """Balance-sheet facts keyed by period end.
+
+    Companyfacts often stores equity and debt with no CY#### frame, or with an
+    instant frame such as CY2024Q3I. Matching the income-statement row is by
+    the period end date. A flow (a start date more than a few days before the
+    end) is not a balance-sheet stock and is ignored. The latest filing wins.
+    """
+    rows, used = _units(gaap, names)
+    best = {}
+    for row in rows:
+        if not _ok_form(row.get("form"), forms):
+            continue
+        dur = _duration(row)
+        frame = row.get("frame") or ""
+        if not (dur is None or dur <= 5 or str(frame).endswith("I")):
+            continue
+        end = str(row.get("end") or "")[:10]
+        if len(end) < 10:
+            continue
+        prev = best.get(end)
+        if prev is None or str(row.get("filed") or "") >= str(prev.get("filed") or ""):
+            best[end] = row
+    out = {}
+    for end, row in best.items():
+        out[end] = {"val": row.get("val"), "end": row.get("end"), "filed": row.get("filed"), "concept": used}
+    return out
+
+
+def _debt_by_end(gaap, forms):
+    """Same debt rule as _debt_map, keyed by period end instead of a CY frame."""
+    nc = _instant_by_end(gaap, DEBT_NC, forms)
+    cur = _instant_by_end(gaap, DEBT_CUR, forms)
+    lt = _instant_by_end(gaap, DEBT_LT, forms)
+    ends = set(nc) | set(cur) | set(lt)
+    out = {}
+    for end in ends:
+        if end in nc and end in cur:
+            val = float(nc[end]["val"]) + float(cur[end]["val"])
+            src = nc[end]
+        elif end in lt:
+            val = lt[end]["val"]
+            src = lt[end]
+        elif end in nc:
+            val = nc[end]["val"]
+            src = nc[end]
+        else:
+            continue
+        out[end] = {"val": val, "end": src["end"], "filed": src["filed"], "concept": "debt"}
+    return out
+
+
+def _attach_by_end(df, by_end, column):
+    """Fill a blank balance-sheet column from facts that share the row's period end.
+
+    A value already taken from a CY frame is kept. Missing stays missing.
+    """
+    if df is None or len(df) == 0 or not by_end or "end" not in df.columns:
+        return df
+    df = df.copy()
+    if column not in df.columns:
+        df[column] = np.nan
+    ends = df["end"].astype(str).str[:10]
+    for i, end in ends.items():
+        item = by_end.get(end)
+        if not item:
+            continue
+        if pd.isna(df.at[i, column]):
+            df.at[i, column] = item["val"]
+    return df
+
+
 def parse_companyfacts(payload):
     """Return (annual_df, quarter_df) for one company. Empty frames if nothing usable."""
     facts = (payload or {}).get("facts") or {}
@@ -182,6 +254,10 @@ def parse_companyfacts(payload):
     amaps["equity"] = equity
     amaps["debt"] = _debt_map(gaap, ANNUAL_FRAME, ("10-K", "20-F", "40-F"), False)
     annual = _merge_frames(amaps, [], [])
+    # Real filings usually omit the CY#### frame on the balance sheet. Attach by period end.
+    annual_forms = ("10-K", "20-F", "40-F")
+    annual = _attach_by_end(annual, _instant_by_end(gaap, EQUITY_CONCEPTS, annual_forms), "equity")
+    annual = _attach_by_end(annual, _debt_by_end(gaap, annual_forms), "debt")
 
     qmaps = {}
     q_flow = {
@@ -200,6 +276,9 @@ def parse_companyfacts(payload):
     if not qmaps["shares"]:
         qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT], QUARTER_FRAME, 0, 0, False, ("10-Q", "10-K", "20-F", "40-F"), 1)
     quarters = _merge_frames(qmaps, [], [])
+    quarter_forms = ("10-Q", "10-K", "20-F", "40-F")
+    quarters = _attach_by_end(quarters, _instant_by_end(gaap, EQUITY_CONCEPTS, quarter_forms), "equity")
+    quarters = _attach_by_end(quarters, _debt_by_end(gaap, quarter_forms), "debt")
     return annual, quarters
 
 

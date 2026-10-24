@@ -5,6 +5,7 @@ Missing numbers stay blank. A feed that cannot be built is one MISSING row with 
 """
 import numpy as np
 import pandas as pd
+import fundamentals as fund
 from scoring import FIN_SPECS, grade_earnings, headline_tone, beat_flag
 
 DISCLAIMER = "Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
@@ -53,6 +54,50 @@ def blank_row(columns, status, note):
     return row
 
 
+def _cell_blank(v):
+    if v is None:
+        return True
+    try:
+        if pd.isna(v):
+            return True
+    except (ValueError, TypeError):
+        pass
+    if isinstance(v, str) and v.strip().lower() in ("", "nan", "none", "<na>"):
+        return True
+    return False
+
+
+def flag_blank_columns(df):
+    """OK is wrong when a measured column is blank on every row.
+
+    A one-row MISSING placeholder stays MISSING. An alerts info row is a
+    message, not a broken feed. note and disclaimer may be empty.
+    """
+    if df is None or len(df) == 0 or "data_status" not in df.columns:
+        return df
+    status = df["data_status"].astype(str)
+    if len(df) == 1 and status.iloc[0] == "MISSING":
+        return df
+    if "kind" in df.columns and len(df) == 1 and str(df.iloc[0].get("kind") or "") == "info":
+        return df
+    measured = [c for c in df.columns if c not in ("note", "disclaimer", "data_status")]
+    blanks = [c for c in measured if df[c].map(_cell_blank).all()]
+    if not blanks:
+        return df
+    out = df.copy()
+    all_blank = len(blanks) == len(measured)
+    new_status = "MISSING" if all_blank else "PARTIAL"
+    def _next(s):
+        if s in ("MISSING", "CACHED"):
+            return s
+        return new_status
+    out["data_status"] = status.map(_next)
+    extra = "Blank on every row: " + ", ".join(blanks) + ". A blank is missing data, not zero."
+    notes = out["note"].map(lambda v: "" if _cell_blank(v) else str(v).strip())
+    out["note"] = np.where(notes.eq(""), extra, notes + " " + extra)
+    return out
+
+
 def ensure(df, columns, status_if_empty, note):
     if df is None or len(df) == 0:
         return pd.DataFrame([blank_row(columns, status_if_empty, note)])
@@ -64,7 +109,9 @@ def ensure(df, columns, status_if_empty, note):
         out["disclaimer"] = DISCLAIMER
     if "data_status" in columns and (out["data_status"].eq("").all() or out["data_status"].isna().all()):
         out["data_status"] = "OK"
-    return out[columns]
+    out = out[columns]
+    out = flag_blank_columns(out)
+    return out
 
 
 def _off(columns):
@@ -145,7 +192,7 @@ COLS["earnings_heatmap"] = ["ticker", "quarter", "eps_flag", "rev_flag", "label"
 COLS["earnings_cards"] = ["ticker", "company", "grade", "summary", "sources", "data_status", "note", "disclaimer"]
 COLS["earnings_history"] = ["ticker", "earnings_date", "eps_estimate", "eps_actual", "surprise_pct", "move_1d_pct", "data_status", "note", "disclaimer"]
 COLS["put_call"] = ["date", "name", "value", "ma5", "fear_line", "greed_line", "zone", "data_status", "note", "disclaimer"]
-COLS["option_walls"] = ["ticker", "expiry", "side", "strike", "open_interest", "volume", "is_wall", "data_status", "note", "disclaimer"]
+COLS["option_walls"] = ["ticker", "expiry", "side", "strike", "open_interest", "volume", "is_wall", "nearest_expiry", "data_status", "note", "disclaimer"]
 COLS["analyst_ratings"] = ["ticker", "company", "analyst_mean", "analyst_count", "pts_analyst", "target_analyst", "target_analyst_kind", "price", "upside_pct", "data_status", "note", "disclaimer"]
 COLS["institutional_13f"] = ["ticker", "row_type", "owner", "increased_shares", "decreased_shares", "holders", "ownership_pct", "shares", "share_change", "as_of", "pts_institutional", "data_status", "note", "disclaimer"]
 COLS["aaii_sentiment"] = ["as_of", "bullish_pct", "neutral_pct", "bearish_pct", "data_status", "note", "disclaimer"]
@@ -171,7 +218,7 @@ COLS["help"] = ["topic", "plain_english"]
 COLS["settings"] = ["setting", "value"]
 COLS["universe"] = ["ticker", "company", "sector", "index_membership", "in_sp500", "in_ndx100", "in_growth", "data_status", "note", "disclaimer"]
 COLS["backtest_summary"] = ["window", "start", "end", "months", "top20_cagr_pct", "spy_cagr_pct", "bottom20_cagr_pct", "top20_total_pct", "spy_total_pct", "bottom20_total_pct", "top20_max_drawdown_pct", "spy_max_drawdown_pct", "hit_rate_12w_pct", "top_bucket_excess_12w_pct", "headline", "is_headline", "data_status", "note", "disclaimer"]
-COLS["backtest_buckets"] = ["horizon", "bucket", "n", "avg_return_pct", "avg_spy_pct", "excess_pct", "hit_rate_pct", "data_status", "note", "disclaimer"]
+COLS["backtest_buckets"] = ["horizon", "bucket", "bucket_order", "n", "avg_return_pct", "avg_spy_pct", "excess_pct", "hit_rate_pct", "data_status", "note", "disclaimer"]
 COLS["backtest_equity"] = ["date", "top20", "spy", "bottom20", "data_status", "note", "disclaimer"]
 COLS["backtest_yearly"] = ["year", "top20_pct", "spy_pct", "difference_pct", "hit_rate_12w_pct", "signals", "data_status", "note", "disclaimer"]
 COLS["backtest_notes"] = ["item", "detail", "data_status", "note", "disclaimer"]
@@ -246,7 +293,7 @@ def score_details(scores):
                 missing_pt = missing_pt or bool(pd.isna(p))
             except (ValueError, TypeError):
                 pass
-            label = "n/a" if missing_pt else ("%+d" % int(p))
+            label = "n/a" if missing_pt else points_label(p)
             ind = ""
             if pts.startswith("pts_") and "ind_" + pts[4:] in scores.columns:
                 ind = r.get("pts_" + pts[4:] + "_ind") if False else r.get("pts_" + pts.replace("pts_", "") + "_ind", "")
@@ -257,6 +304,16 @@ def score_details(scores):
                 "vs_industry": "" if ind is None else ind,
             })
     return pd.DataFrame(rows)
+
+
+def points_label(p):
+    """Words, so a sheet does not turn '+1' into a number. The points column stays numeric."""
+    n = int(p)
+    if n > 0:
+        return "plus %d" % n
+    if n < 0:
+        return "minus %d" % abs(n)
+    return "zero"
 
 
 def _passes_frame(df, cols):
@@ -311,12 +368,14 @@ def _reaction_table(earnings, close):
                 a, b = close.iloc[i - 1][t], close.iloc[i][t]
                 if pd.notna(a) and pd.notna(b) and a > 0:
                     move = (b / a - 1) * 100
+        result = beat_flag(_num(r.get("eps_actual")), _num(r.get("eps_estimate")))
         rows.append({
             "ticker": r["ticker"],
             "earnings_date": str(pd.Timestamp(r["earnings_dt"]).date()) if pd.notna(r["earnings_dt"]) else "",
             "eps_estimate": r.get("eps_estimate"),
             "eps_actual": r.get("eps_actual"),
             "surprise_pct": r.get("surprise_pct"),
+            "result": result,
             "move_1d_pct": None if not np.isfinite(move) else round(float(move), 2),
             "has_actual": pd.notna(r.get("eps_actual")),
             "earnings_dt": r["earnings_dt"],
@@ -403,10 +462,26 @@ def financials_long(scores):
     return pd.DataFrame(rows)
 
 
+def _multiple(price, denominator):
+    """Price (or market cap) over a fundamental. Blank when either side is missing or not positive."""
+    if price is None or denominator is None or not np.isfinite(price) or price <= 0 or denominator <= 0:
+        return None
+    value = round(float(price) / float(denominator), 4)
+    # A ratio that rounds to zero is a unit mismatch (shares in millions, revenue in dollars). Leave it blank.
+    if value <= 0:
+        return None
+    return value
+
+
 def company_rows(annual, close):
     rows = []
     if annual is None or len(annual) == 0:
         return pd.DataFrame(rows)
+    closes = {}
+    if close is not None and hasattr(close, "columns"):
+        for t in pd.unique(annual["ticker"]):
+            if t in close.columns:
+                closes[t] = pd.to_numeric(close[t], errors="coerce").dropna()
     for _, r in annual.iterrows():
         rev, gp, oi, ni = _num(r.get("revenue")), _num(r.get("gross_profit")), _num(r.get("op_income")), _num(r.get("net_income"))
         fcf = None
@@ -415,18 +490,60 @@ def company_rows(annual, close):
         gm = gp / rev if rev and gp is not None and rev > 0 else None
         om = oi / rev if rev and oi is not None and rev > 0 else None
         nm = ni / rev if rev and ni is not None and rev > 0 else None
+        eps = _num(r.get("eps"))
+        shares = _num(r.get("shares"))
+        filed = r.get("filed")
+        known = None
+        if not _cell_blank(filed):
+            try:
+                known = pd.Timestamp(filed) + pd.Timedelta(days=1)
+            except Exception:
+                known = None
+        px = fund._price_on_or_after(closes.get(r["ticker"]), known)
+        if px is not None and not np.isfinite(px):
+            px = None
+        mcap = px * shares if px is not None and shares is not None else None
         rows.append({
             "ticker": r["ticker"],
-            "fy_end": _date_cell(r.get("fy_end") if pd.notna(r.get("fy_end")) else r.get("end")),
-            "filed": _date_cell(r.get("filed")),
+            "fy_end": _date_cell(r.get("fy_end") if not _cell_blank(r.get("fy_end")) else r.get("end")),
+            "filed": _date_cell(filed),
             "revenue": rev, "gross_profit": gp, "op_income": oi, "net_income": ni,
-            "eps": _num(r.get("eps")),
+            "eps": eps,
             "gross_margin": None if gm is None else round(gm * 100, 2),
             "operating_margin": None if om is None else round(om * 100, 2),
             "net_margin": None if nm is None else round(nm * 100, 2),
-            "fcf": fcf, "pe": "", "ps": "", "pfcf": "",
+            "fcf": fcf,
+            "pe": _multiple(px, eps),
+            "ps": _multiple(mcap, rev),
+            "pfcf": _multiple(mcap, fcf),
         })
     return pd.DataFrame(rows)
+
+
+def mark_nearest_expiry(df, today=None):
+    """Flag the expiry on or after today for each ticker. No chain download.
+
+    If every expiry is already past, the latest one is the nearest. The flag
+    is the text true or false so it is not stored as 1 or 0.
+    """
+    if df is None or len(df) == 0 or "expiry" not in df.columns:
+        return df
+    out = df.copy()
+    day = pd.Timestamp(today).normalize() if today is not None else pd.Timestamp.now().normalize()
+    exp = pd.to_datetime(out["expiry"], errors="coerce")
+    out["nearest_expiry"] = "false"
+    for _, idx in out.groupby(out["ticker"].astype(str)).groups.items():
+        dates = exp.loc[idx]
+        future = dates[dates >= day]
+        if len(future):
+            pick = future.min()
+        else:
+            past = dates.dropna()
+            if not len(past):
+                continue
+            pick = past.max()
+        out.loc[dates[dates == pick].index, "nearest_expiry"] = "true"
+    return out
 
 
 def macro_tables(econ, sector_etfs):
@@ -779,12 +896,12 @@ def help_rows():
         ("Macro", "The macro page compares the latest published number with the forecast for a short list of US reports, then applies a simple, written-down map to each sector ETF. It is a sketch, not a forecast."),
         ("Rate limits", "Prices are downloaded in batches. Fundamentals, analyst ratings, 13F, insider counts, and option chains are fetched at most once a day and reused until the next session. If a source fails, the previous file is kept and the updates log says CACHED."),
         ("The lists", "The desk scores the S&P 500, the Nasdaq-100, and a short growth list. A stock in more than one list appears once. index_membership shows SP500, NDX100, and Growth together, so you can filter the page. Each list has an on/off switch in config.json. Your holdings and watchlist are always included."),
-        ("VCP scanner", "This page follows Nick's TradingView indicator: the 8-point trend template, the contraction count, the buy point, and the exit (7% stop, move to breakeven after 2.5 times the risk, sell part at 20%, trail a close under the 20-day average, climax warning at 25% in 10 days). READY means the template is 8/8 and price is still under the buy point. BROKEN OUT today means today's close crossed that point on big volume. Before a buy prints, the stop and target are the same percents measured from the buy point. The indicator itself waits for the breakout close."),
+        ("VCP scanner", "This page follows Nick's TradingView indicator: the 8-point trend template, the contraction count, the buy point, and the exit (7% stop, move to breakeven after 2.5 times the risk, sell part at 20%, trail a close under the 20-day average, climax warning at 25% in 10 days). READY means the template is 8 of 8 and price is still under the buy point. BROKEN OUT today means today's close crossed that point on big volume. Before a buy prints, the stop and target are the same percents measured from the buy point. The indicator itself waits for the breakout close. trend_score is written as '8 of 8' so a sheet does not read it as a date."),
         ("CANSLIM scanner", "C and A are the year-ago EPS change from the cached filings. N is how close the price is to its 52-week closing high. S is the 20-day average volume. L is the relative-strength percentile versus SPY inside this universe. I is the cached institutional increase versus decrease. M is SPY, and QQQ when that price is already on file, versus the 21, 50, and 200 day averages. A blank that says not verified was not in the cache. It is not a guess. This page does not set a stop or a target."),
         ("Box and flag", "A box is a tight sideways range that closes out the top on above-average volume. A flag is a sharp rise, a short shallow pause, then a close above the pause on volume. Stop and target are the pattern levels described on the page. These two are desk rules. They are not the TradingView indicator."),
         ("Leaders", "Leaders puts a VCP that is ready or broken out today together with a strict CANSLIM qualify. A name on both uses the VCP buy point, stop, and target. A name on only one still shows, and any missing letter stays not verified."),
         ("Your list", "Edit input/holdings.csv and input/my_watchlist.csv to change the portfolio and the watchlist. Example rows are marked example=yes. Replace them with your own shares and cost. The desk still will not place a trade."),
-        ("Updates log", "OK means the source answered this run. CACHED means this run failed and an older copy was used. MISSING means there is no copy at all."),
+        ("Updates log", "OK means the source answered and its columns have values. PARTIAL means a column is blank on every row. CACHED means this run failed and an older copy was used. MISSING means there is no copy at all. A blank cell is missing data. It is not a zero."),
         ("The Google Sheet", "The sheet is filled by the Desk menu, not by IMPORTDATA. Desk > Refresh data now copies each file into the tab with the same name. Desk > Install hourly auto-refresh reloads about once an hour. The Setup tab shows the time of the last refresh. A blank cell means the number was missing. It is not a zero."),
     ]
 

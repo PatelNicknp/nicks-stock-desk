@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import stock_desk
 import tables
+import scoring
 
 
 def _facts_rows(ticker, revenue, eps, equity, debt, ocf, capex, dps, shares):
@@ -123,7 +124,7 @@ def test_offline_job():
         hpe = pd.read_csv(os.path.join(data, "historical_pe.csv"))
         assert (hpe["official_status"] == "MISSING").any() or (hpe["data_status"] == "MISSING").any()
         log = pd.read_csv(os.path.join(data, "updates_log.csv"))
-        assert set(log["status"]) <= {"OK", "CACHED", "MISSING"}
+        assert set(log["status"]) <= {"OK", "CACHED", "MISSING", "PARTIAL"}
         # no network status that looks like a live fetch of SEC during offline
         sec = log[log["source"].str.contains("SEC EDGAR")]
         assert sec["note"].str.contains("cache|offline|does not call|reused", case=False).all()
@@ -138,10 +139,39 @@ def test_offline_job():
         prices = pd.read_csv(os.path.join(data, "prices.csv"))
         assert "disclaimer" not in prices.columns
         assert prices.groupby("ticker").size().max() <= stock_desk.CHART_BARS
-        details = pd.read_csv(os.path.join(data, "score_details.csv"))
+        details = pd.read_csv(os.path.join(data, "score_details.csv"), keep_default_na=False)
         assert "disclaimer" not in details.columns
         assert "plain_english" not in details.columns
         assert set(["ticker", "group_name", "item", "points", "points_label", "now_value", "avg_value", "vs_industry"]) <= set(details.columns)
+        labels = details["points_label"].astype(str)
+        assert not labels.str.fullmatch(r"[+-]?\d+").any()
+        assert set(labels) <= {"plus 1", "plus 2", "minus 1", "minus 2", "zero", "n/a"}
+        aaa = scores[scores.ticker == "AAA"].iloc[0]
+        assert pd.notna(aaa["roe"]) and float(aaa["roe"]) != 0
+        assert pd.notna(aaa["de"])
+        ratings = pd.read_csv(os.path.join(data, "analyst_ratings.csv"))
+        aaa_r = ratings[ratings.ticker == "AAA"].iloc[0]
+        assert abs(float(aaa_r["upside_pct"]) - (50 / float(aaa_r["price"]) - 1) * 100) < 0.02
+        assert ratings.loc[ratings.ticker == "CCC", "upside_pct"].isna().all()
+        company = pd.read_csv(os.path.join(data, "company_financials.csv"))
+        aaa_fin = company[company.ticker == "AAA"]
+        assert aaa_fin["pe"].notna().any()
+        assert aaa_fin["ps"].notna().any()
+        assert aaa_fin["pfcf"].notna().any()
+        assert not (aaa_fin[["pe", "ps", "pfcf"]].fillna(-1) == 0).any().any()
+        tracker = pd.read_csv(os.path.join(data, "earnings_tracker.csv"))
+        beat = tracker[(tracker.ticker == "AAA") & (tracker.eps_actual.astype(str) == "0.6")]
+        assert (beat["result"] == "beat").all()
+        missing_actual = tracker[(tracker.ticker == "AAA") & tracker.eps_actual.isna()]
+        if len(missing_actual):
+            assert missing_actual["result"].isna().all()
+        assert set(scores["sector"].dropna()) <= set(stock_desk.GICS_SECTORS)
+        port = pd.read_csv(os.path.join(data, "portfolio.csv"))
+        assert port["score_week_ago"].isna().all()
+        assert port["score_week_change"].isna().all()
+        first = prices.sort_values("date").groupby("ticker").head(1)
+        assert first["sma20"].notna().all()
+        assert first["sma50"].notna().all()
     finally:
         os.environ.pop("DESK_ROOT", None)
         shutil.rmtree(root, ignore_errors=True)
@@ -239,6 +269,109 @@ def test_rank_tiebreak_is_missing_count_then_ticker():
     assert out.loc[out.ticker == "CC", "rank"].isna().all()
 
 
+def test_week_ago_score_needs_seven_days():
+    hist = pd.DataFrame({
+        "date": ["2026-10-01", "2026-10-23"],
+        "ticker": ["AAA", "AAA"],
+        "score": [7, 9],
+    })
+    assert stock_desk._week_score(hist, "AAA") == 7
+    recent = hist[hist["date"] >= "2026-10-20"]
+    assert stock_desk._week_score(recent, "AAA") is None
+    assert stock_desk._week_score(pd.DataFrame(), "AAA") is None
+
+
+def test_gics_sector_collapses_yahoo_names():
+    assert stock_desk.gics_sector("Technology") == "Information Technology"
+    assert stock_desk.gics_sector("Consumer Cyclical") == "Consumer Discretionary"
+    assert stock_desk.gics_sector("Consumer Defensive") == "Consumer Staples"
+    assert stock_desk.gics_sector("Financial Services") == "Financials"
+    assert stock_desk.gics_sector("Healthcare") == "Health Care"
+    assert stock_desk.gics_sector("Basic Materials") == "Materials"
+    assert stock_desk.gics_sector("Health Care") == "Health Care"
+    assert stock_desk.gics_sector("") == ""
+    assert stock_desk.gics_sector(None) == ""
+    assert len(stock_desk.GICS_SECTORS) == 11
+
+
+def test_sma_is_warm_before_the_chart_window_and_skips_holes():
+    dates = pd.bdate_range("2024-01-02", periods=200)
+    values = np.arange(200, dtype=float) + 1
+    close = pd.DataFrame({"AAA": values}, index=dates)
+    close.iloc[-10, 0] = np.nan
+    scores = pd.DataFrame([{
+        "ticker": "AAA", "entry_low": 1, "entry_high": 2, "stop": 1, "trade_target": 3,
+    }])
+    out = stock_desk.price_file(close, scores)
+    assert out["sma20"].notna().all()
+    assert out["sma50"].notna().all()
+    assert not (out[["sma20", "sma50"]].fillna(-1) == 0).any().any()
+    short_dates = pd.bdate_range("2024-01-02", periods=30)
+    short = pd.DataFrame({"AAA": np.arange(30, dtype=float) + 10}, index=short_dates)
+    early = stock_desk.price_file(short, scores)
+    assert early["sma50"].isna().all()
+    assert early["sma20"].iloc[:19].isna().all()
+    assert early["sma20"].iloc[19:].notna().all()
+
+
+def test_blank_column_is_partial_not_ok():
+    df = pd.DataFrame({
+        "ticker": ["AAA", "BBB"],
+        "roe": [np.nan, np.nan],
+        "de": [1.0, 0.2],
+        "data_status": ["", ""],
+        "note": ["", ""],
+        "disclaimer": ["x", "x"],
+    })
+    out = tables.ensure(df, ["ticker", "roe", "de", "data_status", "note", "disclaimer"], "MISSING", "no")
+    assert (out["data_status"] == "PARTIAL").all()
+    assert "roe" in out["note"].iloc[0]
+    assert out["de"].notna().all()
+    info = pd.DataFrame([{"ticker": "", "kind": "info", "text": "none yet", "score": "", "data_status": "OK", "note": "", "disclaimer": "x"}])
+    kept = tables.flag_blank_columns(info)
+    assert kept["data_status"].iloc[0] == "OK"
+
+
+def test_nearest_expiry_flag():
+    walls = pd.DataFrame([
+        {"ticker": "AAA", "expiry": "2026-10-20", "side": "call"},
+        {"ticker": "AAA", "expiry": "2026-10-30", "side": "call"},
+        {"ticker": "AAA", "expiry": "2026-10-30", "side": "put"},
+        {"ticker": "AAA", "expiry": "2026-11-20", "side": "put"},
+        {"ticker": "BBB", "expiry": "2026-09-01", "side": "call"},
+    ])
+    out = tables.mark_nearest_expiry(walls, today="2026-10-24")
+    aaa = out[out.ticker == "AAA"]
+    assert set(aaa.loc[aaa.expiry == "2026-10-30", "nearest_expiry"]) == {"true"}
+    assert (aaa.loc[aaa.expiry != "2026-10-30", "nearest_expiry"] == "false").all()
+    assert out.loc[out.ticker == "BBB", "nearest_expiry"].iloc[0] == "true"
+
+
+def test_equity_curve_starts_at_10000_and_buckets_stay_text():
+    idx = pd.bdate_range("2024-01-02", periods=40)
+    px = pd.DataFrame({
+        "AAA": np.linspace(10, 12, len(idx)),
+        "BBB": np.linspace(10, 8, len(idx)),
+        "SPY": np.linspace(100, 110, len(idx)),
+    }, index=idx)
+    d0, d1 = idx[10], idx[30]
+    books = [(d0, ["AAA"], ["BBB"]), (d1, ["AAA"], ["BBB"])]
+    sig = pd.DataFrame({"date": [d0], "score": [10], "12w": [0.1], "12w_spy": [0.05]})
+    buckets = [{"horizon": "12w", "bucket": "Scores 10 or more", "bucket_order": 6, "excess_pct": 1.5}]
+    equity, _, _ = scoring._books(px, "SPY", books, 0.001, sig, buckets)
+    assert equity[0]["date"] == str(pd.Timestamp(d0).date())
+    assert equity[0]["top20"] == 10000
+    assert equity[0]["spy"] == 10000
+    assert equity[0]["bottom20"] == 10000
+    assert equity[1]["top20"] != 10000
+    window = scoring._window_summary(
+        "full", [d1], [0], [(d1, 0.01)], [(d1, 0.01)], [(d1, 0.01)], sig, buckets)
+    assert window["top_bucket_excess_12w_pct"] == 1.5
+    assert "1-3" not in scoring.BUCKET_LABELS
+    assert scoring.BUCKET_ORDER["Scores 1 to 3"] == 2
+    assert scoring.BUCKET_ORDER["Scores 10 or more"] == 6
+
+
 if __name__ == "__main__":
     test_offline_job()
     test_feature_off_writes_header_only()
@@ -246,4 +379,10 @@ if __name__ == "__main__":
     test_breadth_without_enough_days_stays_blank()
     test_market_row_buy_count_and_qqq()
     test_rank_tiebreak_is_missing_count_then_ticker()
+    test_week_ago_score_needs_seven_days()
+    test_gics_sector_collapses_yahoo_names()
+    test_sma_is_warm_before_the_chart_window_and_skips_holes()
+    test_blank_column_is_partial_not_ok()
+    test_nearest_expiry_flag()
+    test_equity_curve_starts_at_10000_and_buckets_stay_text()
     print("job ok")
