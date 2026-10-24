@@ -100,7 +100,8 @@ COLS["scores"] = [
 # Breakdown columns the scorecard table uses. Status and the disclaimer are not repeated on every row.
 COLS["score_details"] = ["ticker", "group_name", "item", "points", "points_label", "now_value", "avg_value", "vs_industry"]
 COLS["market_today"] = [
-    "spy_price", "spy_day_pct", "breadth_sma20", "breadth_sma50", "breadth_sma100", "breadth_sma200",
+    "spy_price", "spy_day_pct", "qqq_day_pct", "buy_count",
+    "breadth_sma20", "breadth_sma50", "breadth_sma100", "breadth_sma200",
     "breadth_sma50_week_ago", "advancers", "decliners", "universe_n", "highs_52w", "lows_52w",
     "put_call", "put_call_ma5", "put_call_zone", "put_call_name", "vix",
     "fred_dgs10", "fred_t10y2y", "xly_xlp", "updated_pt", "price_as_of",
@@ -653,27 +654,47 @@ def _ytd(s):
 
 
 def breadth_history(close):
-    rows = []
+    """Share of stocks above each moving average, on sessions where stocks traded.
+
+    A holiday that only has a VIX print used to leave one blank row in the price
+    panel. The next 20, 50, 100, and 200 sessions then had no average, and those
+    missing readings were stored as 0. Missing stays blank. A stock with no price
+    or no average that day is left out of the count. It is not treated as below.
+    """
     if close is None or close.empty:
         return pd.DataFrame()
-    # drop benchmark columns if present
-    px = close[[c for c in close.columns if c not in ("SPY", "^VIX") and not str(c).startswith("X") and c not in MACRO_WEIGHT]]
-    # The filter above drops sector ETFs that start with X and also any ticker starting with X (XOM). Don't do that.
-    px = close.drop(columns=[c for c in list(MACRO_WEIGHT) + ["SPY", "^VIX"] if c in close.columns], errors="ignore")
+    drop = [c for c in list(MACRO_WEIGHT) + ["SPY", "^VIX", "QQQ"] if c in close.columns]
+    px = close.drop(columns=drop, errors="ignore")
+    if px.shape[1] == 0:
+        return pd.DataFrame()
+    traded = px.notna().sum(axis=1)
+    if int(traded.max()) == 0:
+        return pd.DataFrame()
+    # Half the usual names, and at least 20. That drops a holiday row and keeps a normal session.
+    floor = max(20, int(traded.max() * 0.5))
+    px = px.loc[traded >= floor]
+    if px.empty:
+        return pd.DataFrame()
+    shares = {}
     for n, name in ((20, "pct_above_sma20"), (50, "pct_above_sma50"), (100, "pct_above_sma100"), (200, "pct_above_sma200")):
-        sma = px.rolling(n).mean()
-        above = px.gt(sma)
-        share = above.mean(axis=1) * 100
-        if name == "pct_above_sma20":
-            base = share.dropna().tail(140)
-            for d, v in base.items():
-                rows.append({"date": str(pd.Timestamp(d).date()), name: round(float(v), 1)})
-        else:
-            series = share.dropna()
-            for row in rows:
-                d = pd.Timestamp(row["date"])
-                if d in series.index and pd.notna(series.loc[d]):
-                    row[name] = round(float(series.loc[d]), 1)
+        sma = px.rolling(n, min_periods=n).mean()
+        valid = px.notna() & sma.notna()
+        count = valid.sum(axis=1)
+        above = (px > sma) & valid
+        share = above.sum(axis=1) / count.where(count >= 20)
+        shares[name] = share * 100
+    ready = shares["pct_above_sma20"].dropna()
+    if ready.empty:
+        return pd.DataFrame()
+    idx = px.index[px.index >= ready.index[0]][-140:]
+    rows = []
+    for d in idx:
+        row = {"date": str(pd.Timestamp(d).date())}
+        for name, series in shares.items():
+            v = series.loc[d]
+            if pd.notna(v):
+                row[name] = round(float(v), 1)
+        rows.append(row)
     return pd.DataFrame(rows)
 
 
@@ -685,6 +706,11 @@ def market_row(close, breadth, pcr_df, fred, xratio, updated, asof, n, scores):
             row["spy_price"] = round(float(s.iloc[-1]), 2)
             if len(s) > 1 and s.iloc[-2]:
                 row["spy_day_pct"] = round(float(s.iloc[-1] / s.iloc[-2] - 1) * 100, 2)
+    # QQQ is filled only when that ETF is already in the price file. No separate download.
+    if close is not None and "QQQ" in close.columns:
+        q = close["QQQ"].dropna()
+        if len(q) > 1 and q.iloc[-2]:
+            row["qqq_day_pct"] = round(float(q.iloc[-1] / q.iloc[-2] - 1) * 100, 2)
     if close is not None and "^VIX" in close.columns:
         v = close["^VIX"].dropna()
         if len(v):
@@ -696,6 +722,8 @@ def market_row(close, breadth, pcr_df, fred, xratio, updated, asof, n, scores):
         if len(breadth) > 5:
             row["breadth_sma50_week_ago"] = breadth.iloc[-6].get("pct_above_sma50")
     if scores is not None and len(scores):
+        if "verdict" in scores.columns:
+            row["buy_count"] = int((scores["verdict"].astype(str) == "BUY").sum())
         day = pd.to_numeric(scores["day_pct"], errors="coerce")
         row["advancers"] = int((day > 0).sum())
         row["decliners"] = int((day < 0).sum())

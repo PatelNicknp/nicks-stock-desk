@@ -1588,7 +1588,8 @@ def main(argv=None):
         universe = combine_indexes([], hold_tickers, watch_tickers, switches)
         log("Universe feature", "OK", "", "feature off: scoring the holdings and watchlist only")
     etfs = [e["ticker"] for e in cfg.get("sector_etfs", [])]
-    extras = etfs + ["SPY", "^VIX"]
+    # QQQ is one more name in the same Yahoo batch as SPY. It does not add a request.
+    extras = etfs + ["SPY", "QQQ", "^VIX"]
     tickers = list(dict.fromkeys(list(universe["ticker"]) + extras))
     long = load_prices(tickers, cfg, cache, mode)
     close, high, low, vol = wide_from_long(long, "close"), wide_from_long(long, "high"), wide_from_long(long, "low"), wide_from_long(long, "volume")
