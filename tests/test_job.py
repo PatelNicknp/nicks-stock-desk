@@ -367,6 +367,7 @@ def test_equity_curve_starts_at_10000_and_buckets_stay_text():
     window = scoring._window_summary(
         "full", [d1], [0], [(d1, 0.01)], [(d1, 0.01)], [(d1, 0.01)], sig, buckets)
     assert window["top_bucket_excess_12w_pct"] == 1.5
+    assert window["window"] == "full"
     assert "1-3" not in scoring.BUCKET_LABELS
     assert scoring.BUCKET_ORDER["Scores 1 to 3"] == 2
     assert scoring.BUCKET_ORDER["Scores 10 or more"] == 6
