@@ -307,6 +307,36 @@
   function px2(v) {
     return D.num(v) == null ? D.na() : D.esc(D.fmt(v, 2));
   }
+  function inTargetBand(value, price) {
+    const v = D.num(value);
+    const p = D.num(price);
+    if (v == null) return false;
+    if (p == null || p <= 0) return true;
+    const ratio = v / p;
+    return ratio >= 0.5 && ratio <= 2;
+  }
+  function rangeTarget(value, price) {
+    if (D.num(value) == null) return D.na();
+    if (!inTargetBand(value, price)) return D.na() + '<div class="l">out of range</div>';
+    return D.esc(D.fmt(value, 2));
+  }
+  function blendParts(row) {
+    const parts = [];
+    if (D.num(row.target_analyst) != null) parts.push(D.num(row.target_analyst));
+    if (inTargetBand(row.target_pfcf, row.price) && D.num(row.target_pfcf) != null) parts.push(D.num(row.target_pfcf));
+    if (inTargetBand(row.target_peg, row.price) && D.num(row.target_peg) != null) parts.push(D.num(row.target_peg));
+    return parts;
+  }
+  function blendHtml(row) {
+    const parts = blendParts(row);
+    if (!parts.length) return D.na();
+    const avg = parts.reduce((sum, n) => sum + n, 0) / parts.length;
+    return '<span style="color:#7C9CFF">' + D.esc(D.fmt(avg, 2)) + "</span>";
+  }
+  function blendCount(row) {
+    const n = blendParts(row).length;
+    return n ? D.esc(String(n)) : D.na();
+  }
   function ptsCard(label, v) {
     const n = D.num(v);
     const shown = n == null ? D.na() : D.esc(D.signedPts(n));
@@ -377,9 +407,9 @@
         miniStat("Reward / risk", px2(row.reward_risk)) +
         '</div><p class="cap">AVOID leaves entry and the trade target blank on purpose.</p></div>' +
         '<div class="panel pad"><div class="ptitle">Valuation</div><div class="mini">' +
-        miniStat("Analyst target", px2(row.target_analyst)) + miniStat("Cash-flow target", px2(row.target_pfcf)) +
-        miniStat("PEG target", px2(row.target_peg)) + miniStat("Blended target", D.num(row.target_blended) == null ? D.na() : '<span style="color:#7C9CFF">' + D.esc(D.fmt(row.target_blended, 2)) + "</span>") +
-        miniStat("Inputs in blend", D.isBlank(row.target_blend_n) ? D.na() : D.esc(row.target_blend_n)) +
+        miniStat("Analyst target", px2(row.target_analyst)) + miniStat("Cash-flow target", rangeTarget(row.target_pfcf, row.price)) +
+        miniStat("PEG target", rangeTarget(row.target_peg, row.price)) + miniStat("Blended target", blendHtml(row)) +
+        miniStat("Inputs in blend", blendCount(row)) +
         "</div></div></div>" +
         '<div class="split"><div class="panel pad"><div class="ptitle">Price, last 6 months, with plan levels</div><div class="chart-box"><canvas id="px"></canvas></div><p class="cap">Gaps in the averages are bridged.</p></div>' +
         '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
@@ -929,7 +959,8 @@
     const filledQ = quartersAll.filter((qtr) => all.some((r) => yq(r.quarter) === qtr && !D.isBlank(r.eps_flag)));
     const last6 = (filledQ.length ? filledQ : quartersAll).slice(-6);
     const q0 = /^(\d{4}) Q(\d)/.exec(last6[0] || "");
-    const fromDefault = q0 ? q0[1] + "-" + String((Number(q0[2]) - 1) * 3 + 1).padStart(2, "0") + "-01" : "";
+    let fromDefault = q0 ? q0[1] + "-" + String((Number(q0[2]) - 1) * 3 + 1).padStart(2, "0") + "-01" : "";
+    if (!fromDefault || fromDefault < "2025-10-01") fromDefault = "2025-10-01";
     const end = maxDate(all, "quarter");
     const box = document.getElementById("ctrls");
     box.innerHTML = D.dateHtml("from", "From", fromDefault) + D.dateHtml("to", "To", end) +
@@ -1148,7 +1179,7 @@
     const capped = summary.some((r) => String(r.note || "").toLowerCase().indexOf("capped") >= 0 || (D.num(r.ownership_pct) || 0) > 100);
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">Summary of the latest public holdings file, plus the largest holders. Not every fund. Built this way so the page stays fast.' +
-      (capped ? " When reported holdings exceed shares outstanding, the cell reads 100%+." : "") + "</p>" +
+      (capped ? " Dash = not shown. The free source counts some holders twice, so the total can top 100%." : "") + "</p>" +
       '<div class="split r21"><div class="panel" id="sum"></div><div class="panel" id="top"></div></div>';
     const box = document.getElementById("ctrls");
     box.innerHTML = D.searchHtml("ticker", "Ticker", "f-tk", D.uniq(summary, "ticker")) +
@@ -1407,7 +1438,7 @@
         ] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: "#8B96AD", boxWidth: 12 } }, barLabels: { level: true, money: true, lines: true, dec: 1 } },
+          plugins: { legend: { labels: { color: "#8B96AD", boxWidth: 12 } }, barLabels: { level: true, money: true, dec: 1 } },
           scales: {
             x: { ticks: { color: "#8B96AD", maxRotation: 0, autoSkip: false }, grid: { display: false } },
             y: { ticks: { color: "#8B96AD", callback: moneyTick }, grid: { color: "#1E293B" } },
@@ -1418,7 +1449,7 @@
         { label: "Gross margin", data: D.seriesNum(rows, "gross_margin"), color: "#E6EBF5", spanGaps: false },
         { label: "Operating margin", data: D.seriesNum(rows, "operating_margin"), color: "#7C9CFF", spanGaps: false },
         { label: "Net margin", data: D.seriesNum(rows, "net_margin"), color: "#8B96AD", spanGaps: false },
-      ], { x: { ticks: { autoSkip: false, maxRotation: 0, color: "#8B96AD" } }, plugins: { barLabels: { level: true, lines: true, suffix: "%", dec: 1 } } });
+      ], { x: { ticks: { autoSkip: false, maxRotation: 0, color: "#8B96AD" } }, plugins: { barLabels: { level: true, suffix: "%", dec: 1 } } });
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
         columns: [T("fy_end", "Fiscal year", "fy"), T("revenue", "Revenue", "compact"), T("gross_profit", "Gross profit", "compact"),

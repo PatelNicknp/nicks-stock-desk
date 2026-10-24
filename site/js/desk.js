@@ -534,7 +534,7 @@
         const n = num(v);
         if (n == null) return na();
         if (n >= 100 || String(row.note || "").toLowerCase().indexOf("capped") >= 0) {
-          return '<span style="color:#8B96AD" title="Reported holdings exceed shares outstanding; capped">100%+</span>';
+          return '<span style="color:#8B96AD" title="Dash = not shown. The free source counts some holders twice, so the total can top 100%.">–</span>';
         }
         return esc(fmt(n, d) + "%");
       }
@@ -560,6 +560,11 @@
         if (col.kind === "of8") {
           const m = String(value || "").match(/(\d+)/);
           return m ? Number(m[1]) : null;
+        }
+        if (col.kind === "owncap") {
+          const n = num(value);
+          if (n != null && n >= 100) return null;
+          return n;
         }
         return num(value);
       };
@@ -885,9 +890,15 @@
     const category = labels.length <= 20 ? { ticks: { autoSkip: false, color: MU, maxRotation: 0 } } : {};
     const nums = (data || []).map(Number).filter((n) => Number.isFinite(n));
     const lo = nums.length ? Math.min.apply(null, nums.concat([0])) : 0;
+    const hi = nums.length ? Math.max.apply(null, nums.concat([0])) : 0;
     const valueExtra = Object.assign({}, extra.y || {});
     const xExtra = Object.assign({}, extra.x || {});
-    if (horizontal && lo < 0 && xExtra.suggestedMin == null) xExtra.suggestedMin = lo * 1.35;
+    if (horizontal && extra.labels) {
+      const span = Math.max(hi - lo, 1e-9);
+      const pad = span * 0.15;
+      if (xExtra.suggestedMin == null) xExtra.suggestedMin = lo - pad;
+      if (xExtra.suggestedMax == null) xExtra.suggestedMax = hi + pad;
+    } else if (horizontal && lo < 0 && xExtra.suggestedMin == null) xExtra.suggestedMin = lo * 1.35;
     if (!horizontal && lo < 0 && valueExtra.suggestedMin == null) valueExtra.suggestedMin = lo * 1.35;
     const valueAxis = Object.assign(axis(), valueExtra);
     const catAxis = Object.assign(axis(), category, extra.cat || {});
@@ -972,7 +983,7 @@
     const dec = opt.dec == null ? 1 : opt.dec;
     const abs = Math.abs(v);
     const body = abs >= 1000 ? String(compact(abs) || "").replace(/^-/, "") : abs.toFixed(dec);
-    if (opt.money) return (v < 0 ? "-$" : "$") + body;
+    if (opt.money) return (v < 0 ? "−$" : "$") + String(body).replace(/\.0(?=[KMBT]|$)/, "");
     return body + (opt.suffix || "");
   }
   const barLabels = {
@@ -1004,14 +1015,18 @@
             text = (v > 0 ? "+" : v < 0 ? "−" : "") + String(body).replace(/^-/, "") + (opt.suffix || "");
             ctx.fillStyle = v > 0 ? UP : v < 0 ? DN : MU;
           }
-          if (horizontal) {
-            // Keep the number off the category name. Negative bars are drawn to the left.
+          if (horizontal && area) {
+            // Light grey, just outside the bar tip, so a red bar does not hide red text.
+            ctx.fillStyle = "#C3CBDB";
+            const textW = ctx.measureText(text).width;
             if (v < 0) {
-              ctx.textAlign = "left";
-              ctx.fillText(text, el.x + 4, el.y);
-            } else if (area) {
               ctx.textAlign = "right";
-              ctx.fillText(text, area.right - 4, el.y);
+              const x = Math.max(area.left + textW, el.x - 4);
+              ctx.fillText(text, x, el.y);
+            } else {
+              ctx.textAlign = "left";
+              const x = Math.min(area.right - textW, el.x + 4);
+              ctx.fillText(text, x, el.y);
             }
           } else {
             ctx.textAlign = "center";
@@ -1047,16 +1062,20 @@
     return rows.map((r) => num(r[key]));
   }
 
+  function navOn(items) {
+    return items.filter((it) => !FEATURE[it[2]] || featureOn(FEATURE[it[2]]));
+  }
   function renderShell(page) {
     const groups = NAV.map(([name, items]) => {
-      const open = items.some((it) => it[2] === page.id);
-      const links = open ? items.map((it) => {
-        const off = FEATURE[it[2]] && !featureOn(FEATURE[it[2]]);
-        return '<a class="item' + (it[2] === page.id ? " sel" : "") + (off ? " off" : "") + '" href="' + it[1] + '">' + esc(it[0]) + "</a>";
+      const shown = navOn(items);
+      if (!shown.length) return "";
+      const open = shown.some((it) => it[2] === page.id);
+      const links = open ? shown.map((it) => {
+        return '<a class="item' + (it[2] === page.id ? " sel" : "") + '" href="' + it[1] + '">' + esc(it[0]) + "</a>";
       }).join("") : "";
       return '<div class="group" data-open="' + (open ? "1" : "0") + '">' +
         '<button type="button" class="grp" aria-expanded="' + (open ? "true" : "false") + '"><span class="chev">' +
-        (open ? "▾" : "▸") + "</span>" + esc(name) + '<span class="cnt">' + items.length + "</span></button>" +
+        (open ? "▾" : "▸") + "</span>" + esc(name) + '<span class="cnt">' + shown.length + "</span></button>" +
         '<div class="items"' + (open ? "" : ' hidden') + ">" + links + "</div></div>";
     }).join("");
     document.getElementById("app").innerHTML =
@@ -1078,9 +1097,8 @@
         const name = btn.textContent.replace(/[▾▸]/g, "").replace(/\d+$/, "").trim();
         const spec = NAV.find((g) => g[0] === name);
         if (spec && !items.childElementCount) {
-          items.innerHTML = spec[1].map((it) => {
-            const off = FEATURE[it[2]] && !featureOn(FEATURE[it[2]]);
-            return '<a class="item' + (it[2] === page.id ? " sel" : "") + (off ? " off" : "") + '" href="' + it[1] + '">' + esc(it[0]) + "</a>";
+          items.innerHTML = navOn(spec[1]).map((it) => {
+            return '<a class="item' + (it[2] === page.id ? " sel" : "") + '" href="' + it[1] + '">' + esc(it[0]) + "</a>";
           }).join("");
         }
         items.removeAttribute("hidden");

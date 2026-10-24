@@ -52,6 +52,16 @@ def test_score_is_sum_of_parts_and_targets():
     # 15% growth -> fair P/E 15, EPS 2 -> 30
     assert abs(row["target_peg"] - 30) < 1e-9
     assert row["target_blend_n"] == 3
+    # 221 is about 4.8x a 45.69 price, so it stays on the row and leaves the blend.
+    wide = dict(fin)
+    wide["pfcf_avg"] = 221.03 / 3.0
+    wide["fcf_per_share"] = 3.0
+    wide_mkt = dict(mkt)
+    wide_mkt["price"] = 45.69
+    wide_row = scoring.score_components(wide, wide_mkt, extra, CFG)
+    assert abs(wide_row["target_pfcf"] - 221.03) < 0.02
+    assert wide_row["target_blend_n"] == 2
+    assert abs(wide_row["target_blended"] - (55 + 30) / 2.0) < 1e-6
     assert "BUY" in row["reason"]
     assert row["entry_low"] is not None and row["stop"] < row["entry_low"]
 
