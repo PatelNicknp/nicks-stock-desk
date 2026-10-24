@@ -128,6 +128,75 @@ def test_alerts_and_wheel_columns_live_in_tables():
     assert ("BBB", "insider_buy") in kinds
 
 
+def test_sector_fallback_fills_roe_points_and_the_score():
+    df = pd.DataFrame({
+        "ticker": ["ADSK"],
+        "roe": [0.48],
+        "roe_avg": [np.nan],
+        "pts_roe": [np.nan],
+        "pts_roe_ind": [1],
+        "de": [0.4],
+        "de_avg": [0.5],
+        "pts_de": [1],
+        "pts_de_ind": [0],
+        "pts_tech": [2],
+        "pts_sent": [1],
+        "pts_earnings": [1],
+        "pts_sector": [1],
+        "pts_forward_pe": [1],
+        "pts_ttm_pe": [np.nan],
+        "pts_ps": [np.nan],
+        "pts_pfcf": [np.nan],
+        "pts_rev_growth": [1],
+        "pts_eps_growth": [1],
+        "pts_div_yield": [0],
+        "timing": ["Uptrend"],
+        "price": [100],
+        "stop": [80],
+        "verdict": ["BUY"],
+        "reason": [""],
+        "n_fin": [4],
+    })
+    out = scoring.apply_sector_point_fallback(df, CFG)
+    assert int(out.loc[0, "pts_roe"]) == 1
+    # fin points that exist: forward 1, de 1, rev 1, eps 1, roe 1, div 0 = 5
+    assert int(out.loc[0, "pts_fin"]) == 5
+    assert int(out.loc[0, "score"]) == 10
+    assert "its sector" in out.loc[0, "reason"]
+
+
+def test_duplicate_backtest_window_is_dropped():
+    rows = [
+        {"window": "5y", "start": "2022-09-30", "end": "2026-10-23", "months": 50},
+        {"window": "full", "start": "2022-09-30", "end": "2026-10-23", "months": 50},
+    ]
+    kept = scoring._unique_windows(rows)
+    assert [r["window"] for r in kept] == ["5y"]
+
+
+def test_pullbacks_skip_avoid_and_blank_entries():
+    import tables
+    df = pd.DataFrame([
+        {"ticker": "OK", "above_sma200": 1, "above_sma50": 1, "timing": "Pullback", "rsi14": 40,
+         "verdict": "BUY", "entry_low": 10, "entry_high": 11, "dist_52w_high_pct": -5, "day_pct": 1,
+         "above_sma20": 1, "above_sma100": 1, "score": 8},
+        {"ticker": "NO", "above_sma200": 1, "above_sma50": 1, "timing": "Pullback", "rsi14": 40,
+         "verdict": "AVOID", "entry_low": np.nan, "entry_high": np.nan, "dist_52w_high_pct": -5, "day_pct": 1,
+         "above_sma20": 1, "above_sma100": 1, "score": 2},
+    ])
+    _, _, pb, _, _ = tables.technical_pages(df)
+    got = dict(zip(pb["ticker"], pb["passes"]))
+    assert got["OK"] == "yes"
+    assert got["NO"] == "no"
+
+
+def test_ownership_cap():
+    import stock_desk
+    assert stock_desk.cap_ownership(140.5) == (100.0, True)
+    assert stock_desk.cap_ownership(80) == (80.0, False)
+    assert stock_desk.cap_ownership(None) == (None, False)
+
+
 def test_no_broker_order_api_in_source():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     banned = ("api.alpaca", "place_order", "/v2/orders", "ib_insync")
@@ -145,5 +214,9 @@ if __name__ == "__main__":
     test_industry_excludes_self_and_needs_peers()
     test_grade_and_headline_and_tone()
     test_alerts_and_wheel_columns_live_in_tables()
+    test_sector_fallback_fills_roe_points_and_the_score()
+    test_duplicate_backtest_window_is_dropped()
+    test_pullbacks_skip_avoid_and_blank_entries()
+    test_ownership_cap()
     test_no_broker_order_api_in_source()
     print("scoring ok")

@@ -784,6 +784,19 @@ def load_yahoo(tickers, cfg, cache, mode):
     return info, earn
 
 
+def cap_ownership(value):
+    """Nasdaq's share of shares outstanding can exceed 100 when share classes overlap.
+
+    Cap the published figure at 100 and say so. The raw feed is not a sum we control.
+    """
+    n = _parse_int(value)
+    if n is None:
+        return None, False
+    if n > 100:
+        return 100.0, True
+    return n, False
+
+
 def _parse_int(v):
     if v is None:
         return None
@@ -842,7 +855,7 @@ def load_holders(tickers, cfg, cache, mode):
                 elif "Total" in name:
                     holders = _parse_int(r.get("holders"))
             own_s = ((hd.get("ownershipSummary") or {}).get("SharesOutstandingPCT") or {}).get("value")
-            own = _parse_int(own_s)
+            own, _capped = cap_ownership(own_s)
             table = ((hd.get("holdingsTransactions") or {}).get("table") or {})
             for r in (table.get("rows") or [])[:5]:
                 if not as_of:
@@ -1378,6 +1391,14 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
     df = pd.DataFrame(rows)
     if len(df):
         df = scoring.add_industry(df, scfg["flat_band_pct"])
+        df = scoring.apply_sector_point_fallback(df, scfg)
+        misses, counts = [], []
+        for _, rec in df.iterrows():
+            fields = tables.missing_fields(rec)
+            misses.append(";".join(fields))
+            counts.append(len(fields))
+        df["missing_fields"] = misses
+        df["missing_count"] = counts
         df = assign_ranks(df)
     return df, prepared
 
@@ -1845,12 +1866,17 @@ def main(argv=None):
     inst_rows = []
     if len(holders):
         for _, r in holders.iterrows():
+            own, capped = cap_ownership(r.get("ownership_pct"))
+            note = ""
+            if capped:
+                note = "Capped at 100%. Nasdaq reported a higher share of shares outstanding, which can count a share class twice."
             inst_rows.append({
                 "ticker": r["ticker"], "row_type": "summary", "owner": "",
                 "increased_shares": r.get("inst_up"), "decreased_shares": r.get("inst_down"),
-                "holders": r.get("holders"), "ownership_pct": r.get("ownership_pct"),
+                "holders": r.get("holders"), "ownership_pct": own,
                 "shares": "", "share_change": "", "as_of": r.get("as_of"),
                 "pts_institutional": scores.set_index("ticker")["pts_institutional"].get(r["ticker"]) if len(scores) else "",
+                "note": note,
             })
     if len(holder_rows):
         for _, r in holder_rows.iterrows():
