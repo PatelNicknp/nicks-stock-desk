@@ -143,6 +143,75 @@ def test_net_income_falls_back_when_a_later_tag_has_the_year():
     assert older["net_income"] == 14
 
 
+def test_unframed_fy_fact_fills_net_income_and_does_not_replace_a_framed_value():
+    """A 10-K with fp FY and no CY frame is a real year. A framed value for that end stays."""
+    payload = _facts()
+    gaap = payload["facts"]["us-gaap"]
+    ni = []
+    for end, filed, val, start in (
+        ("2022-12-31", "2023-02-01", 10, "2022-01-01"),
+        ("2023-12-31", "2024-02-01", 14, "2023-01-01"),
+        ("2024-12-31", "2025-02-01", 18, "2024-01-01"),
+        ("2025-01-31", "2025-03-15", 497000000, "2024-02-01"),
+    ):
+        ni.append(_row(val, "", start, end, filed, "10-K"))
+    # A quarterly flow must not be treated as the year.
+    ni.append(_row(1, "", "2024-01-01", "2024-03-31", "2024-05-01", "10-Q"))
+    gaap["NetIncomeLoss"] = {"units": {"USD": ni}}
+    annual, _ = fund.parse_companyfacts(payload)
+    row = annual[annual.frame == "CY2024"].iloc[0]
+    assert row["revenue"] == 150  # the unframed decoy of 1 does not replace it
+    assert row["net_income"] == 18
+    extra = annual[annual["end"].astype(str).str.startswith("2025-01-31")]
+    assert len(extra) == 1
+    assert extra.iloc[0]["net_income"] == 497000000
+    assert str(extra.iloc[0]["frame"]).startswith("FY")
+
+
+def test_split_puts_eps_on_the_adjusted_share_count():
+    annual = pd.DataFrame([
+        {"ticker": "ORLY", "end": "2022-12-31", "filed": "2025-02-28", "eps": 33.44, "dps": 0.0, "shares": 64962000},
+        {"ticker": "ORLY", "end": "2023-12-31", "filed": "2026-02-27", "eps": 2.56, "dps": 0.0, "shares": 914976000},
+        {"ticker": "BKNG", "end": "2025-12-31", "filed": "2026-02-18", "eps": 165.57, "dps": 9.60, "shares": 32639000},
+    ])
+    quarters = pd.DataFrame([
+        {"ticker": "ORLY", "end": "2024-03-31", "filed": "2025-05-09", "eps": 9.20, "dps": 0.0, "shares": 59454000},
+        {"ticker": "ORLY", "end": "2024-06-30", "filed": "2025-08-08", "eps": 0.70, "dps": 0.0, "shares": 885655000},
+        {"ticker": "BKNG", "end": "2025-09-30", "filed": "2025-10-28", "eps": 84.41, "dps": 0.0, "shares": 32558000},
+        {"ticker": "BKNG", "end": "2026-03-31", "filed": "2026-04-28", "eps": 1.36, "dps": 0.42, "shares": 794000000},
+        {"ticker": "BKNG", "end": "2026-06-30", "filed": "2026-08-04", "eps": 2.53, "dps": 0.0, "shares": 770000000},
+    ])
+    annual, quarters = fund.adjust_pershare_for_splits(annual, quarters)
+    orly = annual[annual.ticker == "ORLY"].set_index("end")
+    assert abs(orly.loc["2022-12-31", "eps"] - 33.44 / 15) < 0.01
+    assert abs(orly.loc["2023-12-31", "eps"] - 2.56) < 0.01
+    assert orly.loc["2022-12-31", "shares"] > 900_000_000
+    bk = annual[annual.ticker == "BKNG"].iloc[0]
+    assert abs(bk["eps"] - 165.57 / 25) < 0.02
+    assert abs(bk["dps"] - 9.60 / 25) < 0.01
+    assert bk["shares"] > 700_000_000
+    pre_q = quarters[(quarters.ticker == "BKNG") & (quarters.end == "2025-09-30")].iloc[0]
+    assert abs(pre_q["eps"] - 84.41 / 25) < 0.02
+    post_q = quarters[(quarters.ticker == "BKNG") & (quarters.end == "2026-06-30")].iloc[0]
+    assert abs(post_q["eps"] - 2.53) < 0.01
+    assert fund.guard_multiple(0.92) is None
+    assert fund.guard_yield(0.0616) == 0.0616
+    assert fund.guard_yield(0.20) is None
+    mcd = pd.DataFrame([
+        {"ticker": "MCD", "end": "2020-12-31", "filed": "2021-02-01", "eps": 6.31, "dps": 5.0, "shares": 750100000},
+        {"ticker": "MCD", "end": "2025-12-31", "filed": "2026-02-01", "eps": 11.95, "dps": 7.08, "shares": 716.4},
+    ])
+    nvr = pd.DataFrame([
+        {"ticker": "NVR", "end": "2025-12-31", "filed": "2026-02-01", "eps": 400.0, "dps": 0.0, "shares": 2816295},
+    ])
+    fixed, _ = fund.adjust_pershare_for_splits(pd.concat([mcd, nvr], ignore_index=True), pd.DataFrame())
+    mcd_last = fixed[(fixed.ticker == "MCD") & (fixed.end == "2025-12-31")].iloc[0]
+    assert abs(mcd_last["shares"] - 716.4 * 1_000_000) < 1
+    assert abs(mcd_last["eps"] - 11.95) < 0.01
+    nvr_row = fixed[fixed.ticker == "NVR"].iloc[0]
+    assert abs(nvr_row["shares"] - 2816295) < 1
+
+
 def test_dividend_zero_is_real_when_concept_absent_from_one_year():
     # covered by fillna only when some years report a dividend. All-missing is also 0 (no dividend tag).
     annual, _ = fund.parse_companyfacts(_facts())
@@ -158,5 +227,7 @@ if __name__ == "__main__":
     test_known_on_blocks_same_day_and_missing_fcf()
     test_equity_without_cy_frame_matches_on_period_end()
     test_net_income_falls_back_when_a_later_tag_has_the_year()
+    test_unframed_fy_fact_fills_net_income_and_does_not_replace_a_framed_value()
+    test_split_puts_eps_on_the_adjusted_share_count()
     test_dividend_zero_is_real_when_concept_absent_from_one_year()
     print("fundamentals ok")

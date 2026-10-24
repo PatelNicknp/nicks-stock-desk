@@ -582,6 +582,23 @@ def _balance_sheet_blank(annual):
     return True
 
 
+def _flow_gap(annual):
+    """True when recent years have revenue but the income-statement frame was dropped.
+
+    Facts with no CY#### tag used to be skipped. That left net income blank on
+    filings that do report it. One full run refetches so the new parser can keep them.
+    """
+    if annual is None or len(annual) == 0 or "net_income" not in getattr(annual, "columns", []):
+        return False
+    end = pd.to_datetime(annual["end"], errors="coerce") if "end" in annual.columns else pd.Series(pd.NaT, index=annual.index)
+    recent = annual[end >= pd.Timestamp("2022-01-01")]
+    if len(recent) < 100 or "revenue" not in recent.columns:
+        return False
+    rev = pd.to_numeric(recent["revenue"], errors="coerce")
+    ni = pd.to_numeric(recent["net_income"], errors="coerce")
+    return int((rev.notna() & ni.isna()).sum()) >= 80
+
+
 def load_sec(tickers, cik, cfg, cache, mode):
     annual_p = os.path.join(cache, "annual.csv")
     quarter_p = os.path.join(cache, "quarters.csv")
@@ -589,13 +606,17 @@ def load_sec(tickers, cik, cfg, cache, mode):
     decision = _need_fetch("sec_facts", annual_p, mode)
     gaps = None
     sheet_blank = _balance_sheet_blank(annual)
+    flow_gap = _flow_gap(annual)
     if decision == "reuse":
         gaps = _missing_tickers(annual, tickers) if mode == "full" else []
         gaps = [t for t in gaps if t in cik]
-        # One full run may refetch when the saved balance sheet is unusable.
+        # One full run may refetch when the saved statements are unusable.
         # Hourly and offline never call the SEC. This is the same daily pass, not an extra source.
         if mode == "full" and sheet_blank:
             print("SEC equity and debt are blank in the cache; refetching company facts")
+            gaps = None
+        elif mode == "full" and flow_gap:
+            print("SEC annual net income is missing where revenue is present; refetching company facts")
             gaps = None
         elif not gaps:
             status = "PARTIAL" if sheet_blank else "OK"
@@ -614,7 +635,7 @@ def load_sec(tickers, cik, cfg, cache, mode):
     # A new day refreshes everyone. A crash the same day continues where it stopped.
     # A balance-sheet refetch ignores today's progress: those rows were parsed without equity.
     done = progress_load(cache, "sec")
-    if mode == "full" and sheet_blank and not gaps:
+    if mode == "full" and (sheet_blank or flow_gap) and not gaps:
         done = set()
     new_a, new_q, fails = [], [], 0
     pool = gaps if gaps else [t for t in tickers if t in cik]
@@ -784,6 +805,140 @@ def load_yahoo(tickers, cfg, cache, mode):
     return info, earn
 
 
+def _parse_asof(value):
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return pd.NaT
+    return pd.Timestamp(ts)
+
+
+def _latest_holder_rows(rows):
+    """One row per filer, and only the newest quarter for that ticker.
+
+    The holdings table mixes quarter-end dates. Summing them, or listing both,
+    counts the same shares twice.
+    """
+    if not rows:
+        return []
+    frame = pd.DataFrame(rows)
+    if "ticker" not in frame.columns:
+        return rows
+    frame["_asof"] = frame["as_of"].map(_parse_asof) if "as_of" in frame.columns else pd.NaT
+    kept = []
+    for _ticker, sub in frame.groupby(frame["ticker"].astype(str), sort=False):
+        latest = sub["_asof"].max()
+        if pd.isna(latest):
+            chunk = sub
+        else:
+            chunk = sub[sub["_asof"] == latest]
+        chunk = chunk.copy()
+        chunk["_owner"] = chunk["owner"].astype(str).str.strip().str.lower() if "owner" in chunk.columns else ""
+        chunk = chunk.sort_values("_asof").drop_duplicates("_owner", keep="last")
+        kept.append(chunk.drop(columns=["_asof", "_owner"], errors="ignore"))
+    if not kept:
+        return []
+    return pd.concat(kept, ignore_index=True).to_dict("records")
+
+
+def latest_shares_by_ticker(annual, quarters):
+    """Newest SEC share count for each ticker. Blank stays blank."""
+    parts = []
+    for frame in (quarters, annual):
+        if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []) or "shares" not in frame.columns:
+            continue
+        sub = frame[["ticker", "end", "shares"]].copy()
+        sub["end"] = pd.to_datetime(sub["end"], errors="coerce")
+        sub["shares"] = pd.to_numeric(sub["shares"], errors="coerce")
+        sub = sub.dropna(subset=["end", "shares"])
+        sub = sub[sub["shares"] > 0]
+        parts.append(sub)
+    if not parts:
+        return {}
+    all_rows = pd.concat(parts, ignore_index=True).sort_values("end")
+    last = all_rows.drop_duplicates("ticker", keep="last")
+    return dict(zip(last["ticker"].astype(str), last["shares"].astype(float)))
+
+
+def ownership_percent(inst_shares, sec_shares, nasdaq_so_m, fallback_pct):
+    """Holdings divided by the share count that matches the filing.
+
+    Nasdaq divides total reported holdings by its own shares-outstanding figure.
+    That denominator is often one class or a stale count, so the percent prints
+    above 100. SEC shares can be one class too. The denominator is the larger of
+    the two counts. Above 100 after that still means the holdings were counted
+    twice; the caller flags it instead of pretending the raw percent was right.
+    Returns (percent or None, exceeds_shares).
+    """
+    inst = _parse_int(inst_shares)
+    sec = _parse_int(sec_shares)
+    nq = _parse_int(nasdaq_so_m)
+    if nq is not None and 0 < nq < 1_000_000:
+        nq = nq * 1_000_000.0
+    # A share count under 1,000,000 that matches Nasdaq after * 1,000,000 was
+    # reported in millions (MCD). NVR's real 2.8 million shares is already above that.
+    if sec is not None and 0 < sec < 1_000_000:
+        scaled = sec * 1_000_000.0
+        if nq and abs(scaled - nq) / nq <= 0.35:
+            sec = scaled
+        elif not nq:
+            sec = scaled
+    # Either source can be one share class. The smaller count pushes the percent
+    # through 100. Use the larger count; still above 100 means the holdings overlap.
+    denoms = [v for v in (sec, nq) if v and v > 0]
+    denom = max(denoms) if denoms else None
+    if inst is not None and denom and denom > 0:
+        pct = inst / denom * 100.0
+        return round(pct, 2), pct > 100.0
+    own, capped = cap_ownership(fallback_pct)
+    if own is None:
+        return None, False
+    return own, bool(capped)
+
+
+def apply_ownership(holders, annual, quarters):
+    """Replace Nasdaq's ownership percent with holdings / SEC shares."""
+    if holders is None or len(holders) == 0:
+        return holders
+    out = holders.copy()
+    shares = latest_shares_by_ticker(annual, quarters)
+    pcts = []
+    overs = []
+    for _, r in out.iterrows():
+        pct, over = ownership_percent(
+            r.get("inst_shares"), shares.get(str(r.get("ticker"))), r.get("nasdaq_so_m"), r.get("ownership_pct"))
+        pcts.append(pct)
+        overs.append(over)
+    out["ownership_pct"] = pcts
+    out["_ownership_over"] = overs
+    return out
+
+
+def filer_name(name):
+    """Keep a filer's own casing. Nasdaq title-cases short names (Fmr Llc, Blackrock)."""
+    if name is None or (isinstance(name, float) and pd.isna(name)):
+        return ""
+    text = str(name).strip()
+    if not text:
+        return ""
+    known = {
+        "fmr llc": "FMR LLC",
+        "blackrock, inc.": "BlackRock, Inc.",
+        "blackrock inc.": "BlackRock, Inc.",
+        "blackrock, inc": "BlackRock, Inc.",
+    }
+    if text.lower() in known:
+        return known[text.lower()]
+    out = []
+    for word in text.split():
+        bare = word.strip(",")
+        if bare.lower() in ("llc", "lp", "llp"):
+            suffix = "," if word.endswith(",") else ""
+            out.append(bare.upper() + suffix)
+        else:
+            out.append(word)
+    return " ".join(out)
+
+
 def cap_ownership(value):
     """Nasdaq's share of shares outstanding can exceed 100 when share classes overlap.
 
@@ -815,18 +970,28 @@ def load_holders(tickers, cfg, cache, mode):
     summary, detail = read_csv(path), read_csv(detail_p)
     decision = _need_fetch("holders", path, mode)
     gaps = None
+    # The saved percent is Nasdaq's raw ratio. Recomputing it needs the holdings
+    # total and Nasdaq's share count, which older caches did not keep.
+    missing_parts = len(summary) > 0 and "inst_shares" not in summary.columns
     if decision == "reuse":
         gaps = _missing_tickers(summary, tickers) if mode == "full" else []
-        if not gaps:
+        if mode == "full" and missing_parts:
+            print("13F cache has no holdings total; refetching so ownership is not just capped")
+            gaps = None
+            decision = "fetch"
+        elif not gaps:
             log("Institutional 13F and insider (Nasdaq)", "OK", STAMPS.get("holders", ""), "reused cache (slow sources refresh at most once a day)")
             return summary, detail
-        print("Nasdaq filling %d names added since the daily fetch" % len(gaps))
+        else:
+            print("Nasdaq filling %d names added since the daily fetch" % len(gaps))
     if decision == "missing":
         log("Institutional 13F and insider (Nasdaq)", "MISSING", "", "no cache and this run does not call Nasdaq")
         return summary, detail
     lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
     headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     done = progress_load(cache, "holders")
+    if mode == "full" and missing_parts:
+        done = set()
     sums, rows, fails = [], [], 0
     old = summary.set_index("ticker") if len(summary) and "ticker" in summary.columns else None
     if len(summary) and done:
@@ -855,15 +1020,23 @@ def load_holders(tickers, cfg, cache, mode):
                 elif "Total" in name:
                     holders = _parse_int(r.get("holders"))
             own_s = ((hd.get("ownershipSummary") or {}).get("SharesOutstandingPCT") or {}).get("value")
+            so_s = ((hd.get("ownershipSummary") or {}).get("ShareoutstandingTotal") or {}).get("value")
             own, _capped = cap_ownership(own_s)
+            inst_shares = None
+            for r in ((hd.get("activePositions") or {}).get("rows") or []):
+                if "Total Institutional" in (r.get("positions") or ""):
+                    inst_shares = _parse_int(r.get("shares"))
             table = ((hd.get("holdingsTransactions") or {}).get("table") or {})
-            for r in (table.get("rows") or [])[:5]:
+            parsed_rows = []
+            for r in (table.get("rows") or []):
                 if not as_of:
                     as_of = r.get("date") or ""
-                rows.append({
-                    "ticker": t, "owner": r.get("ownerName"), "shares": _parse_int(r.get("sharesHeld")),
+                parsed_rows.append({
+                    "ticker": t, "owner": filer_name(r.get("ownerName")), "shares": _parse_int(r.get("sharesHeld")),
                     "share_change": _parse_int(r.get("sharesChange")), "as_of": r.get("date") or "",
                 })
+            parsed_rows = _latest_holder_rows(parsed_rows)
+            rows.extend(parsed_rows)
             buys = sells = None
             for r in ((idata.get("numberOfTrades") or {}).get("rows") or []):
                 name = r.get("insiderTrade") or ""
@@ -873,7 +1046,8 @@ def load_holders(tickers, cfg, cache, mode):
                     sells = _parse_int(r.get("months3"))
             sums.append({
                 "ticker": t, "inst_up": increased, "inst_down": decreased, "holders": holders,
-                "ownership_pct": own,                 "as_of": as_of, "insider_buys": buys, "insider_sells": sells,
+                "ownership_pct": own, "inst_shares": inst_shares, "nasdaq_so_m": _parse_int(so_s),
+                "as_of": as_of, "insider_buys": buys, "insider_sells": sells,
             })
             done.add(t)
         except Exception:
@@ -1744,6 +1918,14 @@ def main(argv=None):
             log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no CIK map")
         info, earnings = load_yahoo(list(universe["ticker"]), cfg, cache, mode)
         holders, holder_rows = load_holders(list(universe["ticker"]), cfg, cache, mode)
+    if len(annual) or len(quarters):
+        annual, quarters = fund.adjust_pershare_for_splits(annual, quarters)
+    if len(holders):
+        holders = apply_ownership(holders, annual, quarters)
+    if len(holder_rows):
+        holder_rows = pd.DataFrame(_latest_holder_rows(holder_rows.to_dict("records")))
+        if len(holder_rows) and "owner" in holder_rows.columns:
+            holder_rows["owner"] = holder_rows["owner"].map(filer_name)
     # fill sector gaps from Yahoo
     if len(info) and len(universe):
         imap = info.set_index("ticker")
@@ -1860,16 +2042,21 @@ def main(argv=None):
     company = tables.company_rows(annual, close) if features.get("company_financials", True) else pd.DataFrame()
     hpe = tables.historical_pe(close, prepared) if features.get("historical_pe", True) else pd.DataFrame()
     if len(hpe):
-        hpe["note"] = "desk_median_trailing_pe is the median of this desk's stocks. official_sp500_pe is MISSING: no free official series."
+        hpe["note"] = "Median trailing P/E of the stocks on this desk. There is no free official S&P 500 P/E series, so that line is not drawn."
     fresh = tables.freshness_table(scores) if features.get("freshness_flags", True) else pd.DataFrame()
     # institutional long rows
     inst_rows = []
     if len(holders):
         for _, r in holders.iterrows():
-            own, capped = cap_ownership(r.get("ownership_pct"))
+            own = r.get("ownership_pct")
+            try:
+                own_n = float(own)
+            except (TypeError, ValueError):
+                own_n = None
+            over = bool(r.get("_ownership_over")) or (own_n is not None and own_n > 100)
             note = ""
-            if capped:
-                note = "Capped at 100%. Nasdaq reported a higher share of shares outstanding, which can count a share class twice."
+            if over:
+                note = "Reported holdings exceed shares outstanding; capped"
             inst_rows.append({
                 "ticker": r["ticker"], "row_type": "summary", "owner": "",
                 "increased_shares": r.get("inst_up"), "decreased_shares": r.get("inst_down"),

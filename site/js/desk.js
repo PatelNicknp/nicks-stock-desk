@@ -492,6 +492,15 @@
         else if (s.indexOf("inline") >= 0 || s.indexOf("in line") >= 0) color = MU;
         return '<span style="color:' + color + '">' + esc(v) + "</span>";
       }
+      case "surprise": {
+        const n = num(v);
+        if (n == null) return na();
+        const sig = num(row.signal);
+        const color = sig == null ? MU : sig > 0 ? UP : sig < 0 ? DN : MU;
+        const body = compact(Math.abs(n));
+        const sign = n > 0 ? "+" : n < 0 ? "−" : "";
+        return '<span style="color:' + color + '">' + esc(sign + body) + "</span>";
+      }
       case "signedcompact": {
         const n = num(v);
         if (n == null) return na();
@@ -508,7 +517,27 @@
       case "checked": return isBlank(v) ? na() : esc(formatUpdated(v).replace(/ PT$/, ""));
       case "item": return isBlank(v) ? na() : '<span style="font-weight:700;color:#E6EBF5">' + esc(v) + "</span>";
       case "muted": return isBlank(v) ? na() : '<span style="color:#8B96AD">' + esc(v) + "</span>";
-      case "date": return isBlank(v) ? na() : esc(v);
+      case "date": {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ""));
+        if (!m) return isBlank(v) ? na() : esc(v);
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return esc(months[Number(m[2]) - 1] + " " + Number(m[3]) + ", " + m[1]);
+      }
+      case "ownpts": {
+        const sector = String(row.note || "").toLowerCase().indexOf("sector") >= 0;
+        if (sector || isBlank(v)) {
+          return na() + (sector ? ' <span class="tag">sector used</span>' : "");
+        }
+        return pointsHtml(v);
+      }
+      case "owncap": {
+        const n = num(v);
+        if (n == null) return na();
+        if (n >= 100 || String(row.note || "").toLowerCase().indexOf("capped") >= 0) {
+          return '<span style="color:#8B96AD" title="Reported holdings exceed shares outstanding; capped">100%+</span>';
+        }
+        return esc(fmt(n, d) + "%");
+      }
       default:
         return isBlank(v) ? na() : esc(v);
     }
@@ -524,11 +553,18 @@
   function compare(a, b, col, dir) {
     const va = a[col.key];
     const vb = b[col.key];
-    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar"].indexOf(col.kind) >= 0;
+    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar", "daybar", "scorejump", "count", "signedcompact", "of8", "owncap"].indexOf(col.kind) >= 0;
     let c = 0;
     if (numeric) {
-      const na_ = num(va);
-      const nb_ = num(vb);
+      const pull = (value) => {
+        if (col.kind === "of8") {
+          const m = String(value || "").match(/(\d+)/);
+          return m ? Number(m[1]) : null;
+        }
+        return num(value);
+      };
+      const na_ = pull(va);
+      const nb_ = pull(vb);
       if (na_ == null && nb_ == null) return 0;
       if (na_ == null) return 1;
       if (nb_ == null) return -1;
@@ -581,15 +617,15 @@
     const empty = rows.length ? "" : '<div class="empty">' + esc(opts.empty || "No rows match these filters.") + "</div>";
     const from = rows.length ? start + 1 : 0;
     const to = Math.min(start + pageSize, rows.length);
+    const showFoot = opts.foot !== false && rows.length > pageSize;
     host.innerHTML =
       (opts.title ? '<div class="pad headrow" style="padding-bottom:0"><div class="ptitle">' + esc(opts.title) + "</div>" +
         (opts.sub ? '<div class="psub">' + esc(opts.sub) + "</div>" : "") + "</div>" : "") +
       '<div class="scroll"><table><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       empty +
-      (opts.foot === false ? "" :
-      '<div class="foot"><span>' + from + "–" + to + " of " + rows.length + '</span><div class="pg">' +
+      (showFoot ? '<div class="foot"><span>' + from + "–" + to + " of " + rows.length + '</span><div class="pg">' +
       '<button type="button" data-pg="prev"' + (state.page <= 0 ? " disabled" : "") + ">‹</button>" +
-      '<button type="button" data-pg="next"' + (state.page >= pages - 1 ? " disabled" : "") + ">›</button></div></div>");
+      '<button type="button" data-pg="next"' + (state.page >= pages - 1 ? " disabled" : "") + ">›</button></div></div>" : "");
     host.querySelectorAll("th").forEach((th) => {
       th.addEventListener("click", () => {
         const k = th.getAttribute("data-k");
@@ -655,14 +691,18 @@
     return '<div class="filter" data-id="' + esc(id) + '"><button type="button" class="dd">' + esc(label) +
       ' <span class="dmut">' + esc(shown) + '</span></button><div class="pop" data-filter="' + esc(id) + '">' + checks + "</div></div>";
   }
-  function shortOpt(s) {
-    return s === "BROKEN OUT today" ? "BROKEN OUT" : s;
+  function prettyOpt(s) {
+    if (s === "BROKEN OUT today") return "broken out";
+    if (s === "READY") return "Ready";
+    const text = String(s || "");
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   }
   function multiLabel(options, set) {
     if (!set || set.size === options.length) return "All";
     if (!set.size) return "None";
-    if (set.size <= 2) return Array.from(set).map(shortOpt).join(", ");
-    return set.size + " picked";
+    if (set.size === 2 && set.has("READY") && set.has("BROKEN OUT today")) return "Ready + broken out";
+    if (set.size <= 2) return Array.from(set).map(prettyOpt).join(", ");
+    return set.size + " selected";
   }
   function selectHtml(id, label, options, value, opt) {
     opt = opt || {};
@@ -791,12 +831,13 @@
       if (Number.isFinite(a) && Number.isFinite(b)) span = (b - a) / (365.25 * 86400000);
     }
     return {
-      maxTicksLimit: 7,
       maxRotation: 0,
-      autoSkip: true,
+      autoSkip: false,
       color: MU,
       callback(v) {
-        return monthLabel(this.getLabelForValue(v), span);
+        const a = monthLabel(this.getLabelForValue(v), span);
+        const b = v > 0 ? monthLabel(this.getLabelForValue(v - 1), span) : null;
+        return a !== b ? a : null;
       },
     };
   }
@@ -829,6 +870,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: extra.layout || {},
         plugins: Object.assign({ legend: extra.legend === false ? { display: false } : lineLegend(), tooltip: { intersect: false } }, extra.plugins || {}),
         scales: {
           x: x,
@@ -841,9 +883,15 @@
     extra = extra || {};
     const horizontal = !!extra.horizontal;
     const category = labels.length <= 20 ? { ticks: { autoSkip: false, color: MU, maxRotation: 0 } } : {};
-    const valueAxis = Object.assign(axis(), extra.y || {});
+    const nums = (data || []).map(Number).filter((n) => Number.isFinite(n));
+    const lo = nums.length ? Math.min.apply(null, nums.concat([0])) : 0;
+    const valueExtra = Object.assign({}, extra.y || {});
+    const xExtra = Object.assign({}, extra.x || {});
+    if (horizontal && lo < 0 && xExtra.suggestedMin == null) xExtra.suggestedMin = lo * 1.35;
+    if (!horizontal && lo < 0 && valueExtra.suggestedMin == null) valueExtra.suggestedMin = lo * 1.35;
+    const valueAxis = Object.assign(axis(), valueExtra);
     const catAxis = Object.assign(axis(), category, extra.cat || {});
-    const plugins = Object.assign(basePlugins(false), extra.labels ? { barLabels: { dec: extra.dec == null ? 1 : extra.dec, suffix: extra.suffix || "" } } : {});
+    const plugins = Object.assign(basePlugins(false), extra.labels ? { barLabels: { dec: extra.dec == null ? 1 : extra.dec, suffix: extra.suffix || "", level: !!extra.level, money: !!extra.money } } : {});
     makeChart(canvas, {
       type: "bar",
       data: {
@@ -861,7 +909,7 @@
         maintainAspectRatio: false,
         plugins: plugins,
         scales: horizontal
-          ? { x: Object.assign(valueAxis, extra.x || {}), y: catAxis }
+          ? { x: Object.assign(valueAxis, xExtra), y: catAxis }
           : { x: Object.assign(catAxis, extra.x || {}), y: valueAxis },
       },
     });
@@ -876,7 +924,20 @@
       const y = chart.scales.y;
       if (!area || !y) return;
       const ctx = chart.ctx;
+      const labels = [];
       lines.forEach((ln) => {
+        if (ln.zone && ln.zone.length === 2 && Number.isFinite(ln.zone[0]) && Number.isFinite(ln.zone[1])) {
+          const y1 = y.getPixelForValue(ln.zone[0]);
+          const y2 = y.getPixelForValue(ln.zone[1]);
+          const top = Math.max(area.top, Math.min(y1, y2));
+          const bot = Math.min(area.bottom, Math.max(y1, y2));
+          ctx.save();
+          ctx.fillStyle = ln.color || "rgba(124,156,255,.10)";
+          ctx.fillRect(area.left, top, area.right - area.left, Math.max(1, bot - top));
+          ctx.restore();
+          labels.push({ yy: (top + bot) / 2, text: ln.label || "", color: ln.labelColor || "#7C9CFF" });
+          return;
+        }
         if (ln.value == null || !Number.isFinite(ln.value)) return;
         const yy = y.getPixelForValue(ln.value);
         if (yy < area.top || yy > area.bottom) return;
@@ -887,42 +948,77 @@
         ctx.moveTo(area.left, yy);
         ctx.lineTo(area.right, yy);
         ctx.stroke();
-        ctx.fillStyle = ln.color;
-        ctx.font = "11px Roboto, Arial, sans-serif";
-        ctx.textAlign = "right";
-        ctx.fillText(ln.label || "", area.right - 6, yy - 4);
         ctx.restore();
+        labels.push({ yy: yy, text: ln.label || "", color: ln.color || MU });
       });
+      labels.sort((a, b) => a.yy - b.yy);
+      let last = -1e9;
+      ctx.save();
+      ctx.font = "11px Roboto, Arial, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      labels.forEach((lb) => {
+        let yy = lb.yy;
+        if (yy - last < 13) yy = last + 13;
+        if (yy > area.bottom) yy = area.bottom;
+        last = yy;
+        ctx.fillStyle = lb.color;
+        ctx.fillText(lb.text, area.right - 6, yy);
+      });
+      ctx.restore();
     },
   };
+  function levelText(v, opt) {
+    const dec = opt.dec == null ? 1 : opt.dec;
+    const abs = Math.abs(v);
+    const body = abs >= 1000 ? String(compact(abs) || "").replace(/^-/, "") : abs.toFixed(dec);
+    if (opt.money) return (v < 0 ? "-$" : "$") + body;
+    return body + (opt.suffix || "");
+  }
   const barLabels = {
     id: "barLabels",
     afterDatasetsDraw(chart) {
       const opt = chart.options.plugins && chart.options.plugins.barLabels;
       if (!opt) return;
-      const meta = chart.getDatasetMeta(0);
-      const ds = chart.data.datasets[0];
-      if (!meta || !meta.data || meta.data.length >= 15 || !ds) return;
+      const indexes = opt.lines ? chart.data.datasets.map((_, i) => i) : [0];
       const ctx = chart.ctx;
       const horizontal = chart.options.indexAxis === "y";
+      const area = chart.chartArea;
       ctx.save();
       ctx.font = "11px Roboto, Arial, sans-serif";
       ctx.textBaseline = "middle";
-      meta.data.forEach((el, i) => {
-        const v = Number(ds.data[i]);
-        if (!Number.isFinite(v)) return;
-        const dec = opt.dec == null ? 1 : opt.dec;
-        const body = Math.abs(v) >= 1000 ? compact(v) : v.toFixed(dec);
-        const text = (v > 0 ? "+" : v < 0 ? "−" : "") + String(body).replace(/^-/, "") + (opt.suffix || "");
-        ctx.fillStyle = v > 0 ? UP : v < 0 ? DN : MU;
-        if (horizontal) {
-          ctx.textAlign = v >= 0 ? "left" : "right";
-          ctx.fillText(text, el.x + (v >= 0 ? 4 : -4), el.y);
-        } else {
-          ctx.textAlign = "center";
-          ctx.textBaseline = "bottom";
-          ctx.fillText(text, el.x, el.y - 2);
-        }
+      indexes.forEach((di) => {
+        const meta = chart.getDatasetMeta(di);
+        const ds = chart.data.datasets[di];
+        if (!meta || !meta.data || meta.data.length >= 15 || !ds) return;
+        meta.data.forEach((el, i) => {
+          const v = Number(ds.data[i]);
+          if (!Number.isFinite(v) || !el) return;
+          const dec = opt.dec == null ? 1 : opt.dec;
+          let text;
+          if (opt.level) {
+            text = levelText(v, opt);
+            ctx.fillStyle = "#C3CBDB";
+          } else {
+            const body = Math.abs(v) >= 1000 ? compact(v) : v.toFixed(dec);
+            text = (v > 0 ? "+" : v < 0 ? "−" : "") + String(body).replace(/^-/, "") + (opt.suffix || "");
+            ctx.fillStyle = v > 0 ? UP : v < 0 ? DN : MU;
+          }
+          if (horizontal) {
+            // Keep the number off the category name. Negative bars are drawn to the left.
+            if (v < 0) {
+              ctx.textAlign = "left";
+              ctx.fillText(text, el.x + 4, el.y);
+            } else if (area) {
+              ctx.textAlign = "right";
+              ctx.fillText(text, area.right - 4, el.y);
+            }
+          } else {
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillText(text, el.x, el.y - 2);
+          }
+        });
       });
       ctx.restore();
     },
