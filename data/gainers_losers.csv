@@ -1,7 +1,7 @@
 side,ticker,company,sector,price,day_pct,score,verdict,data_status,note,disclaimer
 gainer,CCI,Crown Castle,Real Estate,85.97,9.06,-6,AVOID,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 gainer,CRWD,CrowdStrike,Information Technology,257.57,8.25,5,HOLD,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-gainer,NET,"Cloudflare, Inc.",Technology,325.73,7.29,3,AVOID,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+gainer,NET,"Cloudflare, Inc.",Information Technology,325.73,7.29,3,AVOID,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 gainer,PANW,Palo Alto Networks,Information Technology,380.55,7.22,5,HOLD,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 gainer,SLB,Schlumberger,Energy,53.06,7.08,2,AVOID,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 gainer,HAL,Halliburton,Energy,34.92,5.21,5,HOLD,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

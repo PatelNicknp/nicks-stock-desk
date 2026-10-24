@@ -669,20 +669,27 @@ def run_backtest(close, prepared, quarters, sector_etf, etf_close, spy, band, co
     if not records:
         return empty
     sig = pd.DataFrame(records)
-    sig["bucket"] = pd.cut(sig["score"], [-99, 0, 3, 5, 7, 9, 99], labels=["<=0", "1-3", "4-5", "6-7", "8-9", "10+"])
+    # Words, not '1-3' or '10+', so a sheet does not turn the bucket into a date.
+    sig["bucket"] = pd.cut(
+        sig["score"], [-99, 0, 3, 5, 7, 9, 99],
+        labels=list(BUCKET_LABELS),
+    )
     buckets = []
     for horizon in ("1w", "4w", "12w"):
         sub = sig.dropna(subset=[horizon, horizon + "_spy"])
         for bucket, g in sub.groupby("bucket", observed=False):
             excess = g[horizon] - g[horizon + "_spy"]
+            label = str(bucket)
+            empty = len(g) == 0
             buckets.append({
                 "horizon": horizon,
-                "bucket": str(bucket),
+                "bucket": label,
+                "bucket_order": BUCKET_ORDER.get(label),
                 "n": int(len(g)),
-                "avg_return_pct": round(float(g[horizon].mean()) * 100, 2),
-                "avg_spy_pct": round(float(g[horizon + "_spy"].mean()) * 100, 2),
-                "excess_pct": round(float(excess.mean()) * 100, 2),
-                "hit_rate_pct": round(float((excess > 0).mean()) * 100, 1),
+                "avg_return_pct": None if empty else round(float(g[horizon].mean()) * 100, 2),
+                "avg_spy_pct": None if empty else round(float(g[horizon + "_spy"].mean()) * 100, 2),
+                "excess_pct": None if empty else round(float(excess.mean()) * 100, 2),
+                "hit_rate_pct": None if empty else round(float((excess > 0).mean()) * 100, 1),
             })
     equity_rows, yearly_rows, summary_rows = _books(px, spy, books, cost, sig, buckets)
     return {
@@ -704,6 +711,18 @@ def metrics_from_prepared_row(row, price, quarters, asof):
     return metrics_asof(one, asof, price, quarters)
 
 
+# Display names for score buckets. '1-3' is a date in Google Sheets.
+BUCKET_LABELS = (
+    "Scores 0 or below",
+    "Scores 1 to 3",
+    "Scores 4 to 5",
+    "Scores 6 to 7",
+    "Scores 8 to 9",
+    "Scores 10 or more",
+)
+BUCKET_ORDER = {label: i + 1 for i, label in enumerate(BUCKET_LABELS)}
+
+
 def _books(px, spy, books, cost, sig, buckets):
     equity_rows = []
     if not books:
@@ -712,6 +731,7 @@ def _books(px, spy, books, cost, sig, buckets):
     prev_top, prev_bot = set(), set()
     top_rets, bot_rets, spy_rets = [], [], []
     dates = []
+    started = False
     for n, (d, top, bot) in enumerate(books):
         if n + 1 >= len(books):
             break
@@ -721,9 +741,18 @@ def _books(px, spy, books, cost, sig, buckets):
         sr = _basket_return(px, [spy], d, d2)
         if tr is None or br is None or sr is None:
             continue
-        top_cost = _turnover(prev_top, set(top), cost, first=(n == 0))
-        bot_cost = _turnover(prev_bot, set(bot), cost, first=(n == 0))
-        spy_cost = cost if n == 0 else 0.0
+        if not started:
+            # The curve is compounded from 10,000. Write that start, then the first return.
+            equity_rows.append({
+                "date": str(pd.Timestamp(d).date()),
+                "top20": 10000.0,
+                "spy": 10000.0,
+                "bottom20": 10000.0,
+            })
+            started = True
+        top_cost = _turnover(prev_top, set(top), cost, first=(len(dates) == 0))
+        bot_cost = _turnover(prev_bot, set(bot), cost, first=(len(dates) == 0))
+        spy_cost = cost if len(dates) == 0 else 0.0
         top_eq *= (1 + tr - top_cost)
         bot_eq *= (1 + br - bot_cost)
         spy_eq *= (1 + sr - spy_cost)
@@ -818,13 +847,13 @@ def _window_summary(label, dates, mask_dates, top_rets, spy_rets, bot_rets, sig,
         if len(base):
             hit = float((base["12w"] > base["12w_spy"]).mean()) * 100
     excess = np.nan
-    for b in buckets:
-        if b["horizon"] == "12w" and b["bucket"] == "10+":
-            excess = b["excess_pct"]
-    if not np.isfinite(excess):
+    for label in ("Scores 10 or more", "Scores 8 to 9"):
         for b in buckets:
-            if b["horizon"] == "12w" and b["bucket"] == "8-9":
+            if b["horizon"] == "12w" and b["bucket"] == label and b.get("excess_pct") is not None:
                 excess = b["excess_pct"]
+                break
+        if np.isfinite(excess):
+            break
     return {
         "window": label,
         "start": str(pd.Timestamp(dates[mask_dates[0]]).date()),

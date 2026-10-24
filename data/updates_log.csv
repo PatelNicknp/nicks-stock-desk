@@ -3,7 +3,7 @@ Universe (Wikipedia S&P 500),OK,503,already fetched today,2026-10-23 21:57 PT
 Universe (Wikipedia Nasdaq-100),OK,101,already fetched today,2026-10-23 21:57 PT
 Prices (Yahoo Finance),OK,2026-10-23,"671673 rows, batched",2026-10-23 21:58 PT
 SEC company tickers,OK,2026-10-24,reused cache,2026-10-23 21:58 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-10-24,518 names,2026-10-23 21:58 PT
+Fundamentals (SEC EDGAR company facts),PARTIAL,2026-10-24,"Equity and debt were blank in the cache, so roe and de are blank on every row. The next full run refetches company facts. This file was not a new SEC call.",2026-10-23 21:58 PT
 Analyst and profile (Yahoo Finance),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-23 21:58 PT
 Earnings dates (Yahoo Finance),OK,2026-10-24,reused cache,2026-10-23 21:58 PT
 Institutional 13F and insider (Nasdaq),OK,2026-10-24,reused cache (slow sources refresh at most once a day),2026-10-23 21:58 PT
@@ -14,3 +14,4 @@ FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read ti
 Economic calendar (Nasdaq),OK,2026-10-24,reused cache,2026-10-23 21:59 PT
 Backtest,OK,2026-10-23,monthly point-in-time test,2026-10-23 22:01 PT
 Pattern scanners,OK,2026-10-23,"VCP 279, CANSLIM 240, box 134, flag 9, leaders 183. No new downloads.",2026-10-23 22:01 PT
+Column check,PARTIAL,,"A column is blank on every row: earnings_heatmap, historical_pe, portfolio, scanner_canslim, scanner_quality, scores. Blank is missing, not zero.",2026-10-23 21:57 PT

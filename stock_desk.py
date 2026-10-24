@@ -294,21 +294,56 @@ INDEX_SOURCES = {
         "stamp": "universe_ndx100",
     },
 }
-# Nasdaq-100's Wikipedia table uses ICB names. Map them onto the same sectors as the S&P list.
+# Eleven GICS sectors. Wikipedia ICB names and Yahoo profile names both land here.
+# Industry is a separate column and is not renamed.
 ICB_TO_GICS = {
     "Technology": "Information Technology",
+    "Information Technology": "Information Technology",
     "Telecommunications": "Communication Services",
+    "Communication Services": "Communication Services",
     "Health Care": "Health Care",
+    "Healthcare": "Health Care",
     "Consumer Discretionary": "Consumer Discretionary",
+    "Consumer Cyclical": "Consumer Discretionary",
     "Consumer Staples": "Consumer Staples",
+    "Consumer Defensive": "Consumer Staples",
     "Industrials": "Industrials",
     "Utilities": "Utilities",
     "Financials": "Financials",
+    "Financial Services": "Financials",
     "Real Estate": "Real Estate",
     "Energy": "Energy",
     "Basic Materials": "Materials",
     "Materials": "Materials",
 }
+GICS_SECTORS = (
+    "Communication Services",
+    "Consumer Discretionary",
+    "Consumer Staples",
+    "Energy",
+    "Financials",
+    "Health Care",
+    "Industrials",
+    "Information Technology",
+    "Materials",
+    "Real Estate",
+    "Utilities",
+)
+
+
+def gics_sector(name):
+    """Map an ICB or Yahoo sector onto one GICS name. Blank stays blank."""
+    if name is None:
+        return ""
+    try:
+        if pd.isna(name):
+            return ""
+    except (ValueError, TypeError):
+        pass
+    text = str(name).strip()
+    if not text or text.lower() in ("nan", "none"):
+        return ""
+    return ICB_TO_GICS.get(text, text)
 
 
 def index_switches(cfg):
@@ -531,26 +566,56 @@ def _missing_tickers(df, tickers):
     return [t for t in tickers if t not in have]
 
 
+def _balance_sheet_blank(annual):
+    """True when the cache has filings but equity and debt are both empty.
+
+    The old parser kept only facts tagged CY####. Balance-sheet facts usually
+    have no such tag, so those two columns were saved as all blank.
+    """
+    if annual is None or len(annual) == 0:
+        return False
+    for col in ("equity", "debt"):
+        if col not in annual.columns:
+            continue
+        if pd.to_numeric(annual[col], errors="coerce").notna().any():
+            return False
+    return True
+
+
 def load_sec(tickers, cik, cfg, cache, mode):
     annual_p = os.path.join(cache, "annual.csv")
     quarter_p = os.path.join(cache, "quarters.csv")
     annual, quarters = read_csv(annual_p), read_csv(quarter_p)
     decision = _need_fetch("sec_facts", annual_p, mode)
     gaps = None
+    sheet_blank = _balance_sheet_blank(annual)
     if decision == "reuse":
         gaps = _missing_tickers(annual, tickers) if mode == "full" else []
         gaps = [t for t in gaps if t in cik]
-        if not gaps:
-            log("Fundamentals (SEC EDGAR company facts)", "OK", STAMPS.get("sec_facts", ""), "reused cache (slow sources refresh at most once a day)")
+        # One full run may refetch when the saved balance sheet is unusable.
+        # Hourly and offline never call the SEC. This is the same daily pass, not an extra source.
+        if mode == "full" and sheet_blank:
+            print("SEC equity and debt are blank in the cache; refetching company facts")
+            gaps = None
+        elif not gaps:
+            status = "PARTIAL" if sheet_blank else "OK"
+            note = "reused cache (slow sources refresh at most once a day)"
+            if sheet_blank:
+                note = "reused cache; equity and debt are blank on every row. This run does not call the SEC."
+            log("Fundamentals (SEC EDGAR company facts)", status, STAMPS.get("sec_facts", ""), note)
             return annual, quarters
-        print("SEC filling %d names added since the daily fetch" % len(gaps))
+        else:
+            print("SEC filling %d names added since the daily fetch" % len(gaps))
     if decision == "missing":
         log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no cache and this run does not call the SEC")
         return annual, quarters
     lim = netutil.RateLimiter(rl(cfg)["sec_requests_per_second"])
     headers = session_headers(cfg, sec=True)
     # A new day refreshes everyone. A crash the same day continues where it stopped.
+    # A balance-sheet refetch ignores today's progress: those rows were parsed without equity.
     done = progress_load(cache, "sec")
+    if mode == "full" and sheet_blank and not gaps:
+        done = set()
     new_a, new_q, fails = [], [], 0
     pool = gaps if gaps else [t for t in tickers if t in cik]
     todo = [t for t in pool if t not in done]
@@ -593,7 +658,11 @@ def load_sec(tickers, cik, cfg, cache, mode):
         note = "%d names" % annual["ticker"].nunique() if len(annual) else "0"
         if fails:
             note += ", %d failed and kept prior rows" % fails
-        log("Fundamentals (SEC EDGAR company facts)", "OK", today_et(), note)
+        status = "OK"
+        if _balance_sheet_blank(annual):
+            status = "PARTIAL"
+            note += "; equity and debt are still blank"
+        log("Fundamentals (SEC EDGAR company facts)", status, today_et(), note)
     return annual, quarters
 
 
@@ -1219,7 +1288,7 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
                 if len(past):
                     last = past.iloc[-1]
                     eps_flag = scoring.beat_flag(scoring._f(last["eps_actual"]), scoring._f(last["eps_estimate"]))
-        sector = u.get("sector") or inf.get("sector") or ""
+        sector = gics_sector(u.get("sector") or inf.get("sector") or "")
         etf = SECTOR_ETF_BY_NAME.get(sector) or group_etf.get(sector)
         extra = {
             "forward_pe": scoring._f(inf.get("forward_pe")),
@@ -1257,6 +1326,7 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
             "index_membership": u.get("index_membership") or membership_label(u.get("in_sp500"), u.get("in_ndx100"), u.get("in_growth")),
             "universe": u.get("index_membership") or membership_label(u.get("in_sp500"), u.get("in_ndx100"), u.get("in_growth")),
             "price": round(mkt["price"], 2),
+            "upside_pct": _upside_pct(extra.get("target_mean"), mkt["price"]),
             "price_as_of": mkt["asof"],
             "rsi14": None if mkt["rsi"] is None else round(mkt["rsi"], 1),
             "volume_ratio": None if mkt["vol_ratio"] is None else round(mkt["vol_ratio"], 2),
@@ -1509,13 +1579,35 @@ def build_watch(watch, scores):
 CHART_BARS = 126
 
 
+def _upside_pct(target_mean, price):
+    """Percent upside from the mean analyst target. Blank when either input is missing."""
+    target = scoring._f(target_mean)
+    px = scoring._f(price)
+    if target is None or px is None or px <= 0:
+        return None
+    return round((target / px - 1) * 100, 2)
+
+
+def _column_blank(df, col):
+    if df is None or len(df) == 0 or col not in getattr(df, "columns", []):
+        return True
+    return not pd.to_numeric(df[col], errors="coerce").notna().any()
+
+
 def price_file(close, scores):
     if close is None or close.empty or scores is None or len(scores) == 0:
         return pd.DataFrame()
     names = [t for t in scores["ticker"] if t in close.columns]
+    # Average each ticker on the sessions it actually traded, using the full
+    # cache, and only then keep the chart window. A holiday hole in the wide
+    # frame used to blank the next 20 or 50 bars.
+    sma20 = pd.DataFrame(index=close.index, columns=names, dtype=float)
+    sma50 = pd.DataFrame(index=close.index, columns=names, dtype=float)
+    for t in names:
+        traded = pd.to_numeric(close[t], errors="coerce").dropna()
+        sma20[t] = traded.rolling(20, min_periods=20).mean()
+        sma50[t] = traded.rolling(50, min_periods=50).mean()
     px = close[names].tail(CHART_BARS)
-    sma20 = close[names].rolling(20).mean().reindex(px.index)
-    sma50 = close[names].rolling(50).mean().reindex(px.index)
     levels = scores.set_index("ticker")
     rows = []
     for t in names:
@@ -1640,10 +1732,13 @@ def main(argv=None):
                 row = imap.loc[t]
                 if isinstance(row, pd.DataFrame):
                     row = row.iloc[-1]
-                if not u.get("sector") and row.get("sector"):
-                    universe.at[i, "sector"] = row.get("sector")
+                sector = gics_sector(u.get("sector")) or gics_sector(row.get("sector"))
+                if sector:
+                    universe.at[i, "sector"] = sector
                 if not u.get("company") and row.get("company"):
                     universe.at[i, "company"] = row.get("company")
+    if len(universe) and "sector" in universe.columns:
+        universe["sector"] = universe["sector"].map(gics_sector)
 
     scores, prepared = build_scores(universe, close, high, low, vol, annual, quarters, info, holders, earnings, cfg) if len(close) else (pd.DataFrame(), {})
     scores = apply_feature_blanks(scores, features)
@@ -1651,6 +1746,11 @@ def main(argv=None):
     an_status = source_status("Analyst and profile (Yahoo Finance)")
     hold_status = source_status("Institutional 13F and insider (Nasdaq)")
     scores = attach_status(scores, price_status, fin_status, an_status, hold_status)
+    if len(scores) and _column_blank(scores, "roe") and _column_blank(scores, "de"):
+        for row in LOG:
+            if "SEC EDGAR" in row["source"] and row["status"] == "OK":
+                row["status"] = "PARTIAL"
+                row["note"] = (row["note"] + " " if row["note"] else "") + "roe and de are blank on every scored row."
     if len(scores):
         scores["in_holdings"] = np.where(scores["ticker"].isin(hold_tickers), "yes", "no")
     scores = assign_ranks(scores)
@@ -1778,9 +1878,9 @@ def main(argv=None):
     if len(insider) and len(scores):
         insider["pts_insider"] = insider["ticker"].map(scores.set_index("ticker")["pts_insider"])
 
-    # walls note
+    # walls note. nearest expiry is computed from the expiry column already on file.
     if len(walls):
-        walls = walls.copy()
+        walls = tables.mark_nearest_expiry(walls)
         walls["note"] = "Open interest only, for the focus list, once a day. Not an option pick."
 
     aaii_note = "AAII does not publish a free machine-readable survey. This page stays MISSING on purpose. The put/call page is the free mood gauge."
@@ -1851,6 +1951,18 @@ def main(argv=None):
     if features.get("alerts", True) and (files["alerts"] is None or len(files["alerts"]) == 0 or (len(files["alerts"]) == 1 and files["alerts"].iloc[0].get("data_status") == "MISSING")):
         note = "No prior run to compare yet. Verdict changes show up on the next run." if not len(prev) else "No verdict changes or score crossings this run."
         files["alerts"] = tables.ensure(pd.DataFrame([{"ticker": "", "kind": "info", "text": note}]), tables.COLS["alerts"], "OK", note)
+
+    partial_pages = []
+    for name, df in files.items():
+        if df is None or "data_status" not in getattr(df, "columns", []):
+            continue
+        if (df["data_status"].astype(str) == "PARTIAL").any():
+            partial_pages.append(name)
+    if partial_pages:
+        log("Column check", "PARTIAL", "", "A column is blank on every row: " + ", ".join(partial_pages) + ". Blank is missing, not zero.")
+    else:
+        log("Column check", "OK", "", "No measured column is blank on every row.")
+    files["updates_log"] = pd.DataFrame(LOG)
 
     for name, df in files.items():
         write_out(df if df is not None else pd.DataFrame(), name, data)

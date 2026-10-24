@@ -384,14 +384,14 @@ def _vcp_reason(state, status, dates):
     if state["pivot"] is not None:
         bits.append("Buy point %s." % _round(state["pivot"]))
     if status == "BROKEN OUT today":
-        bits.append("Today's close crossed above the buy point on volume above 1.5 times the 50-day average, with the trend template at 8/8 and at least two tightening pullbacks.")
+        bits.append("Today's close crossed above the buy point on volume above 1.5 times the 50-day average, with the trend template at 8 of 8 and at least two tightening pullbacks.")
     elif status == "READY":
-        bits.append("The trend template is 8/8 and the pullbacks are tightening. Price has not closed through the buy point yet.")
+        bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price has not closed through the buy point yet.")
     elif state["is_vcp"] and state["pivot"] is not None and state["close"] > state["pivot"] and not state["big_vol"]:
         bits.append("Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
     elif state["cnt"] >= 2 and score < 8:
         failed = [str(i + 1) for i, ok in enumerate(state["rules"]) if not ok]
-        bits.append("Pullbacks are tightening, but the trend template is not 8/8. Still open: rule %s." % ", ".join(failed))
+        bits.append("Pullbacks are tightening, but the trend template is not 8 of 8. Still open: rule %s." % ", ".join(failed))
     elif state["cnt"] == 1:
         bits.append("One pullback so far. The indicator needs a second, tighter one before it will call this a VCP.")
     if state["in_trade"] and state["entry"] is not None:
@@ -510,7 +510,7 @@ def scan_vcp(close, high, low, vol, universe):
             "freshness": _freshness(last, panel, state["bars"], 252),
             "price": _round(state["close"]),
             "price_as_of": str(pd.Timestamp(last).date()),
-            "trend_score": "%d/8" % state["score"],
+            "trend_score": "%d of 8" % state["score"],
             "contractions": state["cnt"],
             "depths": "; ".join(str(d) for d in state["depths"]),
             "volume_ok": "yes" if state["big_vol"] else "no",

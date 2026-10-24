@@ -93,6 +93,40 @@ def test_known_on_blocks_same_day_and_missing_fcf():
     assert m["fcf"] is None
 
 
+def test_equity_without_cy_frame_matches_on_period_end():
+    """SEC balance-sheet facts usually have no CY#### frame. Match them on the end date."""
+    payload = _facts()
+    gaap = payload["facts"]["us-gaap"]
+    # Drop the annual-frame equity and debt. Keep the same period ends on a 10-K with no frame.
+    equity, debt_nc, debt_cur = [], [], []
+    for end, filed, eq, nc, cur in (
+        ("2022-12-31", "2023-02-01", 50, 20, 5),
+        ("2023-12-31", "2024-02-01", 55, 22, 4),
+        ("2024-12-31", "2025-02-01", 60, 18, 2),
+    ):
+        equity.append(_row(eq, "", None, end, filed, "10-K"))
+        debt_nc.append(_row(nc, "", None, end, filed, "10-K"))
+        debt_cur.append(_row(cur, "", None, end, filed, "10-K"))
+    # A full-year flow tagged as equity must not be used. An instant quarter should attach.
+    equity.append(_row(999, "", "2024-01-01", "2024-12-31", "2025-02-01", "10-K"))
+    equity.append(_row(70, "CY2025Q1I", None, "2025-03-31", "2025-05-01", "10-Q"))
+    gaap["StockholdersEquity"] = {"units": {"USD": equity}}
+    gaap["LongTermDebtNoncurrent"] = {"units": {"USD": debt_nc}}
+    gaap["LongTermDebtCurrent"] = {"units": {"USD": debt_cur}}
+    annual, quarters = fund.parse_companyfacts(payload)
+    row = annual[annual.frame == "CY2024"].iloc[0]
+    assert row["equity"] == 60
+    assert row["debt"] == 20  # 18 + 2, and the missing piece is not filled with zero
+    q = quarters[quarters.frame == "CY2025Q1"].iloc[0]
+    assert q["equity"] == 70
+    idx = pd.bdate_range("2022-01-03", "2025-03-01")
+    prep = fund.prepare_annual(annual, pd.Series(20.0, index=idx))
+    metrics = fund.metrics_asof(prep, "2025-02-02", 20.0)
+    assert metrics["roe"] is not None
+    assert abs(metrics["roe"] - (18 / 60)) < 1e-9
+    assert metrics["de"] is not None
+
+
 def test_dividend_zero_is_real_when_concept_absent_from_one_year():
     # covered by fillna only when some years report a dividend. All-missing is also 0 (no dividend tag).
     annual, _ = fund.parse_companyfacts(_facts())
@@ -106,5 +140,6 @@ def test_dividend_zero_is_real_when_concept_absent_from_one_year():
 if __name__ == "__main__":
     test_parser_drops_ytd_and_combines_debt()
     test_known_on_blocks_same_day_and_missing_fcf()
+    test_equity_without_cy_frame_matches_on_period_end()
     test_dividend_zero_is_real_when_concept_absent_from_one_year()
     print("fundamentals ok")

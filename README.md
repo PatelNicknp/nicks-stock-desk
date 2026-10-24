@@ -72,7 +72,7 @@ Source of truth: `reference/nicks_minervini_with_exit_strategy.pine`, using the 
 
 - Trend template, all 8 points: price above the 150 and 200, the 150 above the 200, the 200 higher than 20 sessions ago, the 50 above the 150 and 200, price above the 50, at least 30% above the 52-week low, within 25% of the 52-week high, and ahead of SPY over both 126 and 252 sessions.
 - A contraction is a swing high followed by a swing low. Swings use 4 bars left and 3 bars right, so a turn confirms 3 sessions later. A pullback under 3%, or shorter than 2 bars, is ignored. A lower high and a lower low extend the same contraction. The base starts at the highest swing high unless a later high beats it by more than 5%. The live count is the latest run of tightening pullbacks, at most 4.
-- READY: 8/8 and at least two tightening pullbacks, and the close is still at or under the buy point (the high of the latest contraction).
+- READY: 8 of 8 and at least two tightening pullbacks, and the close is still at or under the buy point (the high of the latest contraction). The score is written as "8 of 8" so a spreadsheet does not treat it as a date.
 - BROKEN OUT today: that same setup, and today's close crossed above the buy point on volume above 1.5 times the 50-day average.
 - Exit, once a buy prints: stop 7% under that bar's close, moved to breakeven after a gain of 2.5 times the initial risk, sell part at 20%, trail is a close under the 20-day average after three days in the trade, and a 25% jump in 10 days is a climax warning rather than the target.
 
