@@ -567,6 +567,10 @@
   }
   function makeChart(canvas, config) {
     if (!canvas || typeof Chart === "undefined") return null;
+    config.options = config.options || {};
+    // Draw the final values immediately. The default entrance animation
+    // starts every point at 0, so a breadth line of 68% first appears near 15%.
+    config.options.animation = false;
     const c = new Chart(canvas, config);
     charts.push(c);
     return c;
