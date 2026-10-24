@@ -56,6 +56,27 @@ for (const file of pages) {
     const research = await page.locator(".rl").innerText();
     if (!/Research only/.test(research)) errors.push("missing research line");
     if (!title) errors.push("missing title");
+    if (file === "index.html" || file === "breadth.html") {
+      const check = await page.evaluate(() => {
+        const chart = Chart.getChart(document.getElementById("br"));
+        const y = chart.scales.y;
+        const rows = chart.data.datasets.map((d, i) => {
+          const value = d.data[d.data.length - 1];
+          const drawn = chart.getDatasetMeta(i).data[d.data.length - 1].y;
+          return { label: d.label, value, drawn, pixel: y.getPixelForValue(value) };
+        });
+        return { yMin: y.min, yMax: y.max, rows, chips: document.querySelector(".chips") ? document.querySelector(".chips").innerText : "" };
+      });
+      if (check.yMin !== 0 || check.yMax !== 100) errors.push("breadth scale is " + check.yMin + " to " + check.yMax);
+      for (const row of check.rows) {
+        if (Math.abs(row.drawn - row.pixel) > 1) errors.push(row.label + " last point is drawn off its value");
+        if (file === "index.html") {
+          const chip = check.chips.match(new RegExp(row.label + "\\s+([0-9.]+)%"));
+          if (!chip) errors.push("missing chip for " + row.label);
+          else if (Math.abs(Number(chip[1]) - row.value) > 0.05) errors.push(row.label + " chip " + chip[1] + " != chart " + row.value);
+        }
+      }
+    }
     const shot = path.join(outDir, file.replace(".html", "") + "-1600.png");
     await page.screenshot({ path: shot });
     if (ipad.has(file)) {

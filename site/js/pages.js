@@ -210,7 +210,7 @@
       (D.num(c[1]) == null ? "–" : D.fmt(c[1], 1) + "%") + "</b></span>").join("");
     ctx.page.innerHTML = D.banner(ctx.files["market_today.csv"]) +
       '<div class="cards">' +
-      card("S&P 500", D.num(mt.spy_price) == null ? D.na() : D.esc(D.fmt(mt.spy_price, 2)), dayHtml) +
+      card("S&P 500 (SPY)", D.num(mt.spy_price) == null ? D.na() : D.esc(D.fmt(mt.spy_price, 2)), dayHtml) +
       card("% above 50-day", b == null ? D.na() : D.esc(D.fmt(b, 1) + "%"), deltaHtml) +
       card("Advancers / decliners",
         '<span style="color:#22C55E">' + D.esc(mt.advancers || "–") + '</span><span style="color:#5B6680"> / </span><span style="color:#EF4444">' + D.esc(mt.decliners || "–") + "</span>",
