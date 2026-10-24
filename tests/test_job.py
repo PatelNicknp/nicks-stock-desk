@@ -130,6 +130,11 @@ def test_offline_job():
         help_df = pd.read_csv(os.path.join(data, "help.csv"))
         assert "upsell" not in " ".join(help_df["plain_english"].astype(str)).lower()
         assert "broker" in " ".join(help_df["plain_english"].astype(str)).lower()
+        scored = scores[pd.to_numeric(scores["score"], errors="coerce").notna()].copy()
+        scored["mc"] = pd.to_numeric(scored["missing_count"], errors="coerce").fillna(10 ** 9)
+        ordered = scored.sort_values(["score", "mc", "ticker"], ascending=[False, True, True])
+        assert list(pd.to_numeric(ordered["rank"]).astype(int)) == list(range(1, len(ordered) + 1))
+        assert scores.loc[pd.to_numeric(scores["score"], errors="coerce").notna(), "rank"].notna().all()
         prices = pd.read_csv(os.path.join(data, "prices.csv"))
         assert "disclaimer" not in prices.columns
         assert prices.groupby("ticker").size().max() <= stock_desk.CHART_BARS
@@ -219,10 +224,26 @@ def test_market_row_buy_count_and_qqq():
     assert "qqq_day_pct" not in blank or pd.isna(blank.get("qqq_day_pct"))
 
 
+def test_rank_tiebreak_is_missing_count_then_ticker():
+    df = pd.DataFrame([
+        {"ticker": "ZZ", "score": 10, "missing_count": 1},
+        {"ticker": "AA", "score": 10, "missing_count": 3},
+        {"ticker": "MM", "score": 10, "missing_count": 1},
+        {"ticker": "BB", "score": 13, "missing_count": 5},
+        {"ticker": "CC", "score": None, "missing_count": 0},
+        {"ticker": "DD", "score": 13, "missing_count": 2},
+    ])
+    out = stock_desk.assign_ranks(df)
+    assert list(out["ticker"]) == ["DD", "BB", "MM", "ZZ", "AA", "CC"]
+    assert list(out.loc[out.ticker != "CC", "rank"].astype(int)) == [1, 2, 3, 4, 5]
+    assert out.loc[out.ticker == "CC", "rank"].isna().all()
+
+
 if __name__ == "__main__":
     test_offline_job()
     test_feature_off_writes_header_only()
     test_breadth_holiday_does_not_become_zero()
     test_breadth_without_enough_days_stays_blank()
     test_market_row_buy_count_and_qqq()
+    test_rank_tiebreak_is_missing_count_then_ticker()
     print("job ok")
