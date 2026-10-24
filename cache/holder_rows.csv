@@ -1584,6 +1584,11 @@ MNST,"Blackrock, Inc.",120058350.0,-5934424.0,6/30/2026
 MNST,Vanguard Capital Management Llc,91365464.0,562282.0,6/30/2026
 MNST,State Street Corp,72165202.0,-3692302.0,6/30/2026
 MNST,Invesco Ltd.,65370958.0,-2320566.0,6/30/2026
+MO,Vanguard Group Inc,160980626.0,1903530.0,12/31/2025
+MO,"Blackrock, Inc.",126073166.0,1325175.0,6/30/2026
+MO,Vanguard Capital Management Llc,109032952.0,196910.0,6/30/2026
+MO,State Street Corp,70192620.0,-1599699.0,6/30/2026
+MO,Charles Schwab Investment Management Inc,59122097.0,4841988.0,6/30/2026
 MOS,Vanguard Group Inc,39123171.0,461524.0,12/31/2025
 MOS,"Blackrock, Inc.",24751481.0,1104511.0,6/30/2026
 MOS,Vanguard Capital Management Llc,20744667.0,109328.0,6/30/2026
@@ -2604,8 +2609,3 @@ ZTS,"Blackrock, Inc.",39430181.0,3845869.0,6/30/2026
 ZTS,Vanguard Capital Management Llc,26027984.0,-44862.0,6/30/2026
 ZTS,Vanguard Portfolio Management Llc,23860445.0,-106955.0,6/30/2026
 ZTS,State Street Corp,19667723.0,343322.0,6/30/2026
-MO,Vanguard Group Inc,160980626.0,1903530.0,12/31/2025
-MO,"Blackrock, Inc.",126073166.0,1325175.0,6/30/2026
-MO,Vanguard Capital Management Llc,109032952.0,196910.0,6/30/2026
-MO,State Street Corp,70192620.0,-1599699.0,6/30/2026
-MO,Charles Schwab Investment Management Inc,59122097.0,4841988.0,6/30/2026
