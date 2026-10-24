@@ -1481,11 +1481,16 @@ def build_watch(watch, scores):
     return pd.DataFrame(rows)
 
 
+# Scorecard chart window. About half a year of sessions. The job's full history
+# stays in cache/ohlcv.csv.gz and is not copied into the sheet.
+CHART_BARS = 126
+
+
 def price_file(close, scores):
     if close is None or close.empty or scores is None or len(scores) == 0:
         return pd.DataFrame()
     names = [t for t in scores["ticker"] if t in close.columns]
-    px = close[names].tail(126)
+    px = close[names].tail(CHART_BARS)
     sma20 = close[names].rolling(20).mean().reindex(px.index)
     sma50 = close[names].rolling(50).mean().reindex(px.index)
     levels = scores.set_index("ticker")

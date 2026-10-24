@@ -1,8 +1,13 @@
-"""Build the Google-Sheet starter workbook. Formulas only. No live data inside the file."""
+"""Build the starter workbook. Headers only. The Desk menu fills the tabs."""
 import os
+import sys
+
 import openpyxl
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+import tables
+
 BASE = "https://raw.githubusercontent.com/PatelNicknp/nicks-stock-desk/main/data/"
 TABS = [
     "scores", "score_details", "market_today", "sectors", "breadth_history",
@@ -19,23 +24,31 @@ TABS = [
     "backtest_summary", "backtest_buckets", "backtest_equity", "backtest_yearly", "backtest_notes",
 ]
 
+
 def main():
     wb = openpyxl.Workbook()
     setup = wb.active
     setup.title = "Setup"
     setup["A1"] = "Nick's Stock Desk"
     setup["A2"] = "Research only. This workbook does not place trades."
-    setup["A3"] = "Each tab loads one CSV with IMPORTDATA. After you upload the file to Google Sheets, use Extensions > Apps Script and paste apps_script/Refresh.gs so the Desk menu can reload them."
+    setup["A3"] = "These tabs only have headers. After you open this file in Google Sheets, paste apps_script/Refresh.gs and use Desk > Refresh data now. The script copies each file into the tab with the same name. Do not use IMPORTDATA."
     setup["A4"] = "Base URL"
     setup["B4"] = BASE
-    setup["A5"] = "If a tab says the resource was not found, the files are not on the main branch yet. Wait until the pull request is merged."
+    setup["A6"] = "Last refresh"
+    setup["B6"] = ""
+    setup["A7"] = "Status"
+    setup["B7"] = "Not loaded yet. Use Desk > Refresh data now."
+    setup.column_dimensions["A"].width = 88
+    setup.column_dimensions["B"].width = 88
     for name in TABS:
         ws = wb.create_sheet(name)
-        ws["A1"] = '=IMPORTDATA("%s%s.csv")' % (BASE, name)
+        for i, col in enumerate(tables.COLS[name], 1):
+            ws.cell(1, i, col)
     out = os.path.join(ROOT, "data", "Nick_Stock_Desk_Starter.xlsx")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     wb.save(out)
     print(out)
+
 
 if __name__ == "__main__":
     main()

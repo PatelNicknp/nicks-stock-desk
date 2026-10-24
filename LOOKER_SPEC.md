@@ -1,6 +1,6 @@
 # Looker Studio spec
 
-Build one report. Dark theme, a left navigation, and one page per section below. Each page reads one Sheet tab. The tab has the same name as the CSV. Do not blend tabs to compute a score. The job already did that.
+Build one report. Dark theme, a left navigation, and one page per section below. Each page reads one Sheet tab. The tab has the same name as the CSV. The sheet is filled by the Desk menu in `apps_script/Refresh.gs` (see `SETUP.md`). Do not add IMPORTDATA formulas. Do not blend tabs to compute a score. The job already did that.
 
 Research line, on every page, as a text box under the title:
 
@@ -174,7 +174,7 @@ Valuation row: `target_analyst` plus `target_analyst_kind`, `target_pfcf`, `targ
 
 Score row: five boxes, `pts_tech`, `pts_fin`, `pts_sent`, `pts_earnings`, `pts_sector`, using the point colors, and the total `score`.
 
-Breakdown table from `score_details`: group_name, item, points_label, now_value, avg_value, vs_industry. Color `points`. Blank points show `n/a`.
+Breakdown table from `score_details`: group_name, item, points_label, now_value, avg_value, vs_industry. Color `points`. Blank points show `n/a`. That file is only those columns plus `ticker`. The long disclaimer is not repeated on every row. The research line on the page covers it.
 
 A second small table from `scores`, one row, the industry point columns (`pts_*_ind`). Caption: "Versus other stocks in this sector on the desk, not a paid industry set. Not added into the score again."
 
@@ -548,6 +548,10 @@ The nineteen names are the 11 SPDR sector ETFs plus semiconductors, biotech, reg
 
 ## Field reminder
 
-`prices.csv` carries the last half year of daily closes for the chart. It is already cut down. Do not ask Looker to compute moving averages.
+`prices.csv` is the scorecard chart only: the last 126 trading days (about half a year), one row per stock per day, columns `date`, `ticker`, `close`, `sma20`, `sma50`, `entry_low`, `entry_high`, `stop`, `trade_target`. Do not ask Looker to compute moving averages. The job keeps the longer daily history in `cache/ohlcv.csv.gz`. That cache is not a sheet tab.
 
-`score_history.csv` is a memory file for the week-ago score. It is not a page. Do not add it as a data source.
+`score_details.csv` is the scorecard breakdown only: `ticker`, `group_name`, `item`, `points`, `points_label`, `now_value`, `avg_value`, `vs_industry`.
+
+`score_history.csv` is a memory file for the week-ago score. It is not a page. Do not add it as a data source. The refresh script does not copy it into the sheet.
+
+After this change, in Looker, open the `prices` and `score_details` data sources and refresh the fields so removed columns drop off. The chart and the breakdown table use the columns that remain.

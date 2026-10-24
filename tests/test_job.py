@@ -130,6 +130,13 @@ def test_offline_job():
         help_df = pd.read_csv(os.path.join(data, "help.csv"))
         assert "upsell" not in " ".join(help_df["plain_english"].astype(str)).lower()
         assert "broker" in " ".join(help_df["plain_english"].astype(str)).lower()
+        prices = pd.read_csv(os.path.join(data, "prices.csv"))
+        assert "disclaimer" not in prices.columns
+        assert prices.groupby("ticker").size().max() <= stock_desk.CHART_BARS
+        details = pd.read_csv(os.path.join(data, "score_details.csv"))
+        assert "disclaimer" not in details.columns
+        assert "plain_english" not in details.columns
+        assert set(["ticker", "group_name", "item", "points", "points_label", "now_value", "avg_value", "vs_industry"]) <= set(details.columns)
     finally:
         os.environ.pop("DESK_ROOT", None)
         shutil.rmtree(root, ignore_errors=True)
