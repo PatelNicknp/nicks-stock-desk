@@ -112,6 +112,14 @@ These two are desk rules. They are not in the Pine script.
 
 A leader is a VCP that is READY or BROKEN OUT today, or a strict CANSLIM qualify, or both. One row per ticker. When both hit, the pivot, stop, and target come from the VCP rules, and strength is the average of the VCP strength and the RS percentile. A letter that was not verified on the CANSLIM page stays not verified here.
 
+### Sector rotation
+
+The sector rotation page uses the 11 SPDR sector ETFs and SPY already in the price cache. It does not add a Yahoo request. Dollar, oil, and gold are not in that cache and they are not in the two FRED files (the 10-year yield and the 10-year minus 2-year spread), so the page lists those three as missing.
+
+RS is the ETF close divided by SPY on daily, weekly, or monthly bars. RS-Ratio is 100 plus the z-score of the smoothed RS versus its rolling mean. RS-Momentum is 100 plus the z-score of the change in RS-Ratio. A flat window has z-score 0, so it sits at 100. 100 counts as the strong side of each axis. This is a desk calculation, not the commercial JdK indicator. The windows are `sector_rotation.windows` in `config.json` (daily 10/40/5/40, weekly 6/26/4/26, monthly 3/12/2/12).
+
+The 0–100 score blends relative strength versus SPY over 21, 63, and 126 sessions, breadth above the 50-day and 200-day averages, names within 5% of a 252-session high, buy setups, the average desk score, the share of BUY verdicts, and a weekly quadrant bonus. Weights are `sector_rotation.weight.*`. A missing factor is dropped and the rest are renormalized. It is not treated as zero. The rate notes are general tendencies, not a forecast. The page does not send a notification.
+
 ## Rate limits
 
 Slow sources are fetched at most once per US session and reused on the hourly runs.

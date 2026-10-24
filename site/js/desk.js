@@ -49,6 +49,7 @@
       ["Dividend fundamentals", "dividend-fundamentals.html", "divfund"],
     ]],
     ["Macro", [
+      ["Sector rotation", "sector-rotation.html", "rotation"],
       ["Macro screener", "macro.html", "macro"],
       ["Sector macro scores", "sector-macro.html", "secmacro"],
       ["Historical P/E", "historical-pe.html", "histpe"],
@@ -371,6 +372,10 @@
       }
       case "verdict": return verdictHtml(v);
       case "trend": return trendHtml(v);
+      case "quad": {
+        const map = { Leading: "#22C55E", Weakening: "#F59E0B", Lagging: "#EF4444", Improving: "#7C9CFF" };
+        return colored(v, map[v] || TX, true);
+      }
       case "setup": return setupHtml(v);
       case "fresh": return freshHtml(v);
       case "pass": return passHtml(v);
@@ -1755,6 +1760,7 @@
     tracker: "feature.earnings_tracker",
     company: "feature.company_financials",
     divfund: "feature.dividend_scanner",
+    rotation: "feature.sector_rotation",
     macro: "feature.macro_screener",
     secmacro: "feature.macro_screener",
     histpe: "feature.historical_pe",

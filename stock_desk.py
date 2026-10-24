@@ -20,6 +20,7 @@ import fundamentals as fund
 import scoring
 import tables
 import setups
+import sector_rotation
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -2168,6 +2169,23 @@ def main(argv=None):
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
         _n(setup_frames["scanner_box"]), _n(setup_frames["scanner_flag"]), _n(setup_frames["scanner_leaders"]),
     ))
+    rot_buys = sector_rotation.maybe_buy_frame(setups, setup_frames, scores, close)
+    rot = sector_rotation.build(
+        close, high, scores, cfg.get("sector_etfs") or [],
+        scanners={
+            "vcp": setup_frames.get("scanner_vcp"),
+            "box": setup_frames.get("scanner_box"),
+            "flag": setup_frames.get("scanner_flag"),
+            "canslim": setup_frames.get("scanner_canslim"),
+        },
+        buy_setups=rot_buys,
+        fred=sector_rotation.read_fred_cache(cache),
+        cfg=cfg.get("sector_rotation"),
+    )
+    if features.get("sector_rotation", True):
+        log("Sector rotation", "OK", asof, rot.get("log") or "No new downloads.")
+    else:
+        log("Sector rotation", "OK", "", "feature off")
 
     insider = holders[["ticker", "insider_buys", "insider_sells"]].rename(columns={"insider_buys": "buys_3m", "insider_sells": "sells_3m"}) if len(holders) else pd.DataFrame()
     if len(insider) and len(scores):
@@ -2220,6 +2238,9 @@ def main(argv=None):
         "dividend_scanner": gated(scores, "dividend_scanner", features.get("dividend_scanner", True), "No dividend rows."),
         "macro_screener": gated(screener, "macro_screener", features.get("macro_screener", True), "No actual-vs-forecast rows. The calendar did not return usable US releases."),
         "sector_macro": gated(sector_macro, "sector_macro", features.get("macro_screener", True), "No sector macro scores because the surprise feed is missing."),
+        "sector_rotation": gated(rot["sector_rotation"], "sector_rotation", features.get("sector_rotation", True), "No sector rotation. SPY or the sector ETFs were missing from the price cache."),
+        "sector_rotation_tails": gated(rot["sector_rotation_tails"], "sector_rotation_tails", features.get("sector_rotation", True), "No relative-rotation tails."),
+        "sector_rotation_history": gated(rot["sector_rotation_history"], "sector_rotation_history", features.get("sector_rotation", True), "No relative-rotation history."),
         "historical_pe": gated(hpe, "historical_pe", features.get("historical_pe", True), "Not enough filings to build a median trailing P/E. Official S&P 500 P/E is MISSING."),
         "breakouts": gated(br, "breakouts", features.get("breakouts", True), "No names near a 52-week high."),
         "trends": gated(tr, "trends", features.get("trends", True), "No trend rows."),

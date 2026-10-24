@@ -22,7 +22,7 @@ var TABS = [
   'put_call', 'option_walls', 'analyst_ratings', 'institutional_13f', 'aaii_sentiment',
   'insider_trading', 'headline_sentiment', 'xly_xlp',
   'financials_summary', 'earnings_tracker', 'company_financials', 'dividend_scanner',
-  'macro_screener', 'sector_macro', 'historical_pe',
+  'macro_screener', 'sector_macro', 'sector_rotation', 'sector_rotation_tails', 'sector_rotation_history', 'historical_pe',
   'breakouts', 'trends', 'pullbacks', 'gainers_losers', 'sector_performance', 'heatmaps',
   'freshness', 'updates_log', 'help', 'settings', 'universe',
   'backtest_summary', 'backtest_buckets', 'backtest_equity', 'backtest_yearly', 'backtest_notes'
@@ -36,7 +36,8 @@ var LARGE = {
   earnings_tracker: true,
   company_financials: true,
   option_walls: true,
-  financials_summary: true
+  financials_summary: true,
+  sector_rotation_history: true
 };
 
 // Stay under Google's 10 million cell cap, with room for the Setup tab.

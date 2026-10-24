@@ -95,24 +95,25 @@ Financials
 
 Macro
 
-31. Macro screener
-32. Sector macro scores
-33. Historical P/E
+31. Sector rotation
+32. Macro screener
+33. Sector macro scores
+34. Historical P/E
 
 Technicals
 
-34. 52-week breakouts
-35. Trends
-36. Pullbacks
-37. Gainers and losers
-38. Breadth
-39. Sector performance
-40. Heatmaps
+35. 52-week breakouts
+36. Trends
+37. Pullbacks
+38. Gainers and losers
+39. Breadth
+40. Sector performance
+41. Heatmaps
 
 System
 
-41. Data updates
-42. Help
+42. Data updates
+43. Help
 
 ## Page template
 
@@ -434,7 +435,23 @@ Source: `dividend_scanner`. This is the full list, not only the names that pass 
 
 Columns: ticker, company, sector, price, div_yield, div_yield_avg, dps, pts_div_yield, verdict. Sort by div_yield descending. A yield of 0 can be real (the company does not pay). A blank yield means we could not tell. The freshness page separates those.
 
-## 31. Macro screener
+## 31. Sector rotation
+
+Source: `sector_rotation`, `sector_rotation_tails`, `sector_rotation_history`, and `scores` for the stocks inside a sector.
+
+Switch: `feature.sector_rotation` (default on).
+
+Scatter chart, one point per SPDR sector ETF versus SPY. RS is the ETF close divided by SPY. RS-Ratio is 100 plus the z-score of smoothed RS versus its rolling mean. RS-Momentum is 100 plus the z-score of the change in RS-Ratio. This is a desk z-score, not the commercial JdK indicator. Daily windows are smooth 10, ratio 40, change span 5, momentum 40. Weekly is 6 / 26 / 4 / 26. Monthly is 3 / 12 / 2 / 12. A toggle switches daily, weekly, and monthly. Each sector draws a tail of the last 4, 8, or 12 points (default 8). Quadrants, with 100 counting as the strong side: Leading green top-right, Weakening yellow bottom-right, Lagging red bottom-left, Improving blue top-left. Tap a point to read the ticker, date, RS-Ratio, RS-Momentum, and quadrant.
+
+Table sorted by `score` descending (rank 1 is the highest). Columns: score, quadrant_d, quadrant_w, quadrant_m, the 1/3/6 month relative-strength factors, breadth, near-high count, buy-setup count, desk average, BUY share, and `reason`. Weights are `sector_rotation.weight.*`. A missing factor is left out of the average. It is not zero. Tapping a row lists that sector's top stocks from `scores`, and the ticker links to the scorecard.
+
+Macro card: trend of the 10-year yield (`dgs10_trend`) and the 10-year minus 2-year spread (`t10y2y_trend`) over about 63 observations, plus a static "historically tends to favor" line. Label it as general tendencies, not a forecast. Dollar, oil, and gold are not in the cache. Show them as missing. Do not invent a reading.
+
+What changed: `change_daily` and `change_weekly`. A real move reads "Energy moved from Improving to Leading". `unchanged` means no move. History is `sector_rotation_history`, backfilled from the cached prices.
+
+Caption: research only, no notification, and the z-score is not the commercial indicator.
+
+## 32. Macro screener
 
 Source: `macro_screener`.
 
@@ -444,7 +461,7 @@ Caption: "Signal is +1 when the surprise is in the direction that usually helps 
 
 If the only row is MISSING, show the note. Do not invent a CPI number.
 
-## 32. Sector macro scores
+## 33. Sector macro scores
 
 Source: `sector_macro`. Also show `sectors` if you want the price change next to the macro score. Keep them as two tables. Do not blend.
 
@@ -452,7 +469,7 @@ Columns: ticker, name, macro_growth, macro_inflation, macro_jobs, macro_score, p
 
 These weights are fixed in the job (for example, hotter inflation helps energy and hurts technology). The help page says they are a sketch.
 
-## 33. Historical P/E
+## 34. Historical P/E
 
 Source: `historical_pe`.
 
@@ -462,7 +479,7 @@ A text box bound to `official_status`: it should read MISSING. Next to it, the n
 
 Do not add a line for `official_sp500_pe`. It is blank.
 
-## 34. 52-week breakouts
+## 35. 52-week breakouts
 
 Source: `breakouts`.
 
@@ -470,7 +487,7 @@ Columns: ticker, company, sector, price, dist_52w_high_pct, volume_ratio, score,
 
 If the table's only row is the MISSING note, that means nobody is within 1% of a 52-week high today. That is a result, not a broken feed. The note says which.
 
-## 35. Trends
+## 36. Trends
 
 Source: `trends`.
 
@@ -482,7 +499,7 @@ Filter chips for Uptrend, Downtrend, Mixed. Default Uptrend.
 
 Uptrend means the price is above all four averages. Downtrend means it is below all four.
 
-## 36. Pullbacks
+## 37. Pullbacks
 
 Source: `pullbacks`. Default filter `passes = yes`.
 
@@ -490,13 +507,13 @@ Columns: ticker, company, price, rsi14, entry_low, entry_high, score, verdict, w
 
 Caption: "An uptrend (above the 50-day and the 200-day) with price back in the pullback or entry area, and RSI under 70."
 
-## 37. Gainers and losers
+## 38. Gainers and losers
 
 Source: `gainers_losers`.
 
 Two tables, or one table with a side filter. Gainers: `side = gainer`, sort day_pct descending. Losers: `side = loser`, sort day_pct ascending. Columns: ticker, company, sector, price, day_pct, score, verdict. Color day_pct.
 
-## 38. Breadth
+## 39. Breadth
 
 Source: `breadth_history`.
 
@@ -504,13 +521,13 @@ Line chart, four series: pct_above_sma20, pct_above_sma50, pct_above_sma100, pct
 
 Scorecards for the latest point of each line.
 
-## 39. Sector performance
+## 40. Sector performance
 
 Source: `sector_performance`.
 
 Table: sector, day_pct, week_pct, month_pct, month3_pct, ytd_pct, pct_above_sma50, score_avg, n. Color the return columns. This is equal-weight across the desk's stocks in that sector, not the ETF. The ETF view is the Top sectors numbers inside `sectors`.
 
-## 40. Heatmaps
+## 41. Heatmaps
 
 Source: `heatmaps`.
 
@@ -520,7 +537,7 @@ A sector drop-down filters the rows. Default all.
 
 Optional second view: a pivot of average `ret_1d` by sector. If you build it, label it "average of the stocks above", so it is not confused with the ETF.
 
-## 41. Data updates
+## 42. Data updates
 
 Source: `updates_log`.
 
@@ -530,7 +547,7 @@ Status colors: OK `#166534`, CACHED `#92400E`, MISSING `#7F1D1D`, text `#E6EBF5`
 
 No other decoration. This page is how you see whether a number is fresh.
 
-## 42. Help
+## 43. Help
 
 Source: `help`.
 

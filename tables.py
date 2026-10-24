@@ -205,6 +205,28 @@ COLS["company_financials"] = ["ticker", "fy_end", "filed", "revenue", "gross_pro
 COLS["dividend_scanner"] = ["ticker", "company", "sector", "price", "div_yield", "div_yield_avg", "dps", "pts_div_yield", "verdict", "data_status", "note", "disclaimer"]
 COLS["macro_screener"] = ["country", "category", "indicator", "date", "actual", "forecast", "surprise", "signal", "data_status", "note", "disclaimer"]
 COLS["sector_macro"] = ["ticker", "name", "macro_growth", "macro_inflation", "macro_jobs", "macro_score", "plain_english", "data_status", "note", "disclaimer"]
+COLS["sector_rotation"] = [
+    "ticker", "name", "sector", "score", "rank",
+    "quadrant_d", "quadrant_w", "quadrant_m",
+    "rs_ratio_w", "rs_momentum_w",
+    "rs_1m", "rs_3m", "rs_6m",
+    "breadth_sma50", "breadth_sma200", "n_stocks",
+    "near_high_count", "near_high_share",
+    "buy_setup_count", "buy_setup_share",
+    "score_avg", "buy_share", "rrg_points",
+    "change_daily", "change_weekly",
+    "dgs10_last", "dgs10_prev", "dgs10_trend",
+    "t10y2y_last", "t10y2y_prev", "t10y2y_trend",
+    "reason", "data_status", "note", "disclaimer",
+]
+COLS["sector_rotation_tails"] = [
+    "timeframe", "ticker", "name", "date", "rs_ratio", "rs_momentum", "quadrant", "tail_index",
+    "data_status", "note", "disclaimer",
+]
+COLS["sector_rotation_history"] = [
+    "date", "timeframe", "ticker", "name", "rs_ratio", "rs_momentum", "quadrant",
+    "data_status", "note", "disclaimer",
+]
 COLS["historical_pe"] = ["date", "desk_median_trailing_pe", "n", "official_sp500_pe", "official_status", "data_status", "note", "disclaimer"]
 COLS["breakouts"] = ["ticker", "company", "sector", "price", "dist_52w_high_pct", "volume_ratio", "score", "verdict", "data_status", "note", "disclaimer"]
 COLS["trends"] = ["ticker", "company", "sector", "price", "trend_label", "sma_alignment", "above_sma20", "above_sma50", "above_sma100", "above_sma200", "score", "data_status", "note", "disclaimer"]
@@ -913,6 +935,7 @@ def help_rows():
         ("CANSLIM scanner", "C and A are the year-ago EPS change from the cached filings. N is how close the price is to its 52-week closing high. S is the 20-day average volume. L is the relative-strength percentile versus SPY inside this universe. I is the cached institutional increase versus decrease. M is SPY, and QQQ when that price is already on file, versus the 21, 50, and 200 day averages. A blank that says not verified was not in the cache. It is not a guess. This page does not set a stop or a target."),
         ("Box and flag", "A box is a tight sideways range that closes out the top on above-average volume. A flag is a sharp rise, a short shallow pause, then a close above the pause on volume. Stop and target are the pattern levels described on the page. These two are desk rules. They are not the TradingView indicator."),
         ("Leaders", "Leaders puts a VCP that is ready or broken out today together with a strict CANSLIM qualify. A name on both uses the VCP buy point, stop, and target. A name on only one still shows, and any missing letter stays not verified."),
+        ("Sector rotation", "The graph compares the 11 SPDR sector ETFs with SPY using prices already in the cache. No new download. RS is the ETF close divided by SPY. RS-Ratio is 100 plus the z-score of that ratio, after a moving average, versus its own rolling mean. RS-Momentum is 100 plus the z-score of the change in RS-Ratio. Sample standard deviation, and a flat window scores 0 so the line sits at 100. 100 is the center and counts as the strong side. Leading is top right, Weakening bottom right, Lagging bottom left, Improving top left. Daily, weekly, and monthly use sector_rotation.windows (daily 10/40/5/40, weekly 6/26/4/26, monthly 3/12/2/12 for smooth, ratio window, change span, and momentum window). The score is 0 to 100. It blends 1, 3, and 6 month relative strength (21, 63, and 126 sessions, ETF return minus SPY, clipped from -15 to +15 points), the share of the sector's stocks above the 50-day and the 200-day, the share within 5% of a 252-session high, the share on a buy setup, the average desk score clipped from -4 to 12, the share of BUY verdicts, and a weekly quadrant bonus (Leading 100, Improving 70, Weakening 40, Lagging 15). A buy setup here is READY or broken out today on VCP, box, flag, or CANSLIM, with verdict BUY and price above both averages. Weights are sector_rotation.weight.* and they are renormalized over the factors that exist. A missing factor is not a zero. The 10-year yield and the 10-year minus 2-year spread are the only macro series on file. Dollar, oil, and gold are not, so the page says they are missing. The tendency notes are general history, not a forecast. This page does not send a notification."),
         ("Your list", "Edit input/holdings.csv and input/my_watchlist.csv to change the portfolio and the watchlist. Example rows are marked example=yes. Replace them with your own shares and cost. The desk still will not place a trade."),
         ("Updates log", "OK means the source answered and its columns have values. PARTIAL means a column is blank on every row. CACHED means this run failed and an older copy was used. MISSING means there is no copy at all. A blank cell is missing data. It is not a zero."),
         ("The Google Sheet", "The sheet is filled by the Desk menu, not by IMPORTDATA. Desk > Refresh data now copies each file into the tab with the same name. Desk > Install hourly auto-refresh reloads about once an hour. The Setup tab shows the time of the last refresh. A blank cell means the number was missing. It is not a zero."),
@@ -925,5 +948,15 @@ def settings_rows(cfg):
         rows.append({"setting": "index." + k, "value": v})
     for k, v in cfg.get("scoring", {}).items():
         rows.append({"setting": "scoring." + k, "value": v})
+    rot = cfg.get("sector_rotation") or {}
+    for tf, spec in (rot.get("windows") or {}).items():
+        if isinstance(spec, dict):
+            for key, value in spec.items():
+                rows.append({"setting": "sector_rotation.windows.%s.%s" % (tf, key), "value": value})
+    for key, value in (rot.get("weights") or {}).items():
+        rows.append({"setting": "sector_rotation.weight." + str(key), "value": value})
+    for key in ("near_high_pct", "w52_bars", "tail_keep", "macro_lookback", "yield_flat_band"):
+        if key in rot:
+            rows.append({"setting": "sector_rotation." + key, "value": rot[key]})
     rows.append({"setting": "label", "value": DISCLAIMER})
     return pd.DataFrame(rows)
