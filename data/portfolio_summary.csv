@@ -1,0 +1,2 @@
+value,day_pnl,day_pnl_pct,total_gain,total_gain_pct,avg_score,needs_attention,n_holdings,example_warning,data_status,note,disclaimer
+64641.7,-295.58,-0.46,25491.7,65.11,3.8,1,5,These holdings include example rows. Edit input/holdings.csv. This desk never places a trade.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

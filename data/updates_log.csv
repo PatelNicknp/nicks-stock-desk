@@ -1,0 +1,16 @@
+source,status,latest,note,checked_pt
+Universe (Wikipedia S&P 500),OK,503,"offline mode, used cache",2026-10-23 18:38 PT
+Universe (Wikipedia Nasdaq-100),OK,101,"offline mode, used cache",2026-10-23 18:38 PT
+Prices (Yahoo Finance),OK,2026-10-23,"offline mode, used cache",2026-10-23 18:38 PT
+SEC company tickers,OK,2026-10-23,reused cache,2026-10-23 18:38 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
+Analyst and profile (Yahoo Finance),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
+Earnings dates (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
+Institutional 13F and insider (Nasdaq),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
+News headlines (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
+Option walls (Yahoo option chain),OK,2026-10-23,reused cache (option chains refresh at most once a day),2026-10-23 18:38 PT
+Put/call (CBOE),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
+FRED,OK,,offline mode,2026-10-23 18:38 PT
+Economic calendar (Nasdaq),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
+Backtest,OK,2026-09-30,monthly point-in-time test,2026-10-23 18:40 PT
+Pattern scanners,OK,2026-10-23,"VCP 281, CANSLIM 246, box 181, flag 13, leaders 182. No new downloads.",2026-10-23 18:40 PT

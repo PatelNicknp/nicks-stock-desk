@@ -1,0 +1,2 @@
+spy_price,spy_day_pct,breadth_sma20,breadth_sma50,breadth_sma100,breadth_sma200,breadth_sma50_week_ago,advancers,decliners,universe_n,highs_52w,lows_52w,put_call,put_call_ma5,put_call_zone,put_call_name,vix,fred_dgs10,fred_t10y2y,xly_xlp,updated_pt,price_as_of,data_status,note,disclaimer
+763.96,-1.18,0.0,0.0,0.0,0.0,0.0,342,180,523,37,1,0.69,0.594,Greed,EQUITY PUT/CALL RATIO,19.45,4.96,0.31,1.278,2026-10-23 18:40 PT,2026-10-23,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

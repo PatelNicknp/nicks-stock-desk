@@ -1,0 +1,6 @@
+ticker,shares,avg_cost,example
+NVDA,40,95.0,yes
+AAPL,80,175.0,yes
+MSFT,30,380.0,yes
+JPM,25,190.0,yes
+UNH,10,520.0,yes

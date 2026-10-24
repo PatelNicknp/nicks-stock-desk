@@ -1,0 +1,102 @@
+ticker,company,sector,in_sp500,in_ndx100,in_growth
+ADBE,Adobe Inc.,Information Technology,no,yes,no
+AMD,Advanced Micro Devices,Information Technology,no,yes,no
+ABNB,Airbnb,Consumer Discretionary,no,yes,no
+ALNY,Alnylam Pharmaceuticals,Health Care,no,yes,no
+GOOGL,Alphabet Inc. (Class A),Information Technology,no,yes,no
+GOOG,Alphabet Inc. (Class C),Information Technology,no,yes,no
+AMZN,Amazon,Consumer Discretionary,no,yes,no
+AEP,American Electric Power,Utilities,no,yes,no
+AMGN,Amgen,Health Care,no,yes,no
+ADI,Analog Devices,Information Technology,no,yes,no
+AAPL,Apple Inc.,Information Technology,no,yes,no
+AMAT,Applied Materials,Information Technology,no,yes,no
+APP,AppLovin,Information Technology,no,yes,no
+ARM,Arm Holdings,Information Technology,no,yes,no
+ASML,ASML Holding,Information Technology,no,yes,no
+ALAB,Astera Labs,Information Technology,no,yes,no
+ADSK,Autodesk,Information Technology,no,yes,no
+ADP,Automatic Data Processing,Industrials,no,yes,no
+AXON,Axon Enterprise,Industrials,no,yes,no
+BKR,Baker Hughes,Energy,no,yes,no
+BKNG,Booking Holdings,Consumer Discretionary,no,yes,no
+AVGO,Broadcom,Information Technology,no,yes,no
+CDNS,Cadence Design Systems,Information Technology,no,yes,no
+CTAS,Cintas,Industrials,no,yes,no
+CSCO,Cisco,Communication Services,no,yes,no
+CCEP,Coca-Cola Europacific Partners,Consumer Staples,no,yes,no
+CMCSA,Comcast,Communication Services,no,yes,no
+CEG,Constellation Energy,Utilities,no,yes,no
+CPRT,Copart,Consumer Discretionary,no,yes,no
+CRWV,CoreWeave,Information Technology,no,yes,no
+COST,Costco,Consumer Discretionary,no,yes,no
+CRWD,CrowdStrike,Information Technology,no,yes,no
+CSX,CSX Corporation,Industrials,no,yes,no
+DDOG,Datadog,Information Technology,no,yes,no
+DXCM,DexCom,Health Care,no,yes,no
+FANG,Diamondback Energy,Energy,no,yes,no
+DASH,DoorDash,Information Technology,no,yes,no
+EXC,Exelon,Utilities,no,yes,no
+FAST,Fastenal,Industrials,no,yes,no
+FER,Ferrovial,Industrials,no,yes,no
+FTNT,Fortinet,Information Technology,no,yes,no
+GEHC,GE HealthCare,Health Care,no,yes,no
+GILD,Gilead Sciences,Health Care,no,yes,no
+HONA,Honeywell Aerospace,Industrials,no,yes,no
+HON,Honeywell Technologies,Industrials,no,yes,no
+IDXX,Idexx Laboratories,Health Care,no,yes,no
+INTC,Intel,Information Technology,no,yes,no
+INTU,Intuit,Information Technology,no,yes,no
+ISRG,Intuitive Surgical,Health Care,no,yes,no
+KDP,Keurig Dr Pepper,Consumer Staples,no,yes,no
+KLAC,KLA Corporation,Information Technology,no,yes,no
+LRCX,Lam Research,Information Technology,no,yes,no
+LIN,Linde plc,Materials,no,yes,no
+LITE,Lumentum,Information Technology,no,yes,no
+MAR,Marriott International,Consumer Discretionary,no,yes,no
+MRVL,Marvell Technology,Information Technology,no,yes,no
+MELI,Mercado Libre,Consumer Discretionary,no,yes,no
+META,Meta Platforms,Information Technology,no,yes,no
+MCHP,Microchip Technology,Information Technology,no,yes,no
+MU,Micron Technology,Information Technology,no,yes,no
+MSFT,Microsoft,Information Technology,no,yes,no
+MSTR,MicroStrategy,Information Technology,no,yes,no
+MRNA,Moderna,Health Care,no,yes,no
+MDLZ,Mondelez International,Consumer Staples,no,yes,no
+MPWR,Monolithic Power Systems,Information Technology,no,yes,no
+MNST,Monster Beverage,Consumer Staples,no,yes,no
+NBIS,Nebius Group,Information Technology,no,yes,no
+NFLX,"Netflix, Inc.",Consumer Discretionary,no,yes,no
+NVDA,Nvidia,Information Technology,no,yes,no
+NXPI,NXP Semiconductors,Information Technology,no,yes,no
+ORLY,O'Reilly Automotive,Consumer Discretionary,no,yes,no
+ODFL,Old Dominion Freight Line,Industrials,no,yes,no
+PCAR,Paccar,Consumer Discretionary,no,yes,no
+PLTR,Palantir Technologies,Information Technology,no,yes,no
+PANW,Palo Alto Networks,Information Technology,no,yes,no
+PAYX,Paychex,Industrials,no,yes,no
+PYPL,PayPal,Industrials,no,yes,no
+PDD,PDD Holdings,Information Technology,no,yes,no
+PEP,PepsiCo,Consumer Staples,no,yes,no
+QCOM,Qualcomm,Information Technology,no,yes,no
+REGN,Regeneron Pharmaceuticals,Health Care,no,yes,no
+RKLB,Rocket Lab,Industrials,no,yes,no
+ROP,Roper Technologies,Information Technology,no,yes,no
+ROST,Ross Stores,Consumer Discretionary,no,yes,no
+SNDK,Sandisk,Information Technology,no,yes,no
+STX,Seagate Technology,Information Technology,no,yes,no
+SHOP,Shopify,Information Technology,no,yes,no
+SPCX,SpaceX,Communication Services,no,yes,no
+SBUX,Starbucks,Consumer Discretionary,no,yes,no
+SNPS,Synopsys,Information Technology,no,yes,no
+TMUS,T-Mobile US,Communication Services,no,yes,no
+TTWO,Take-Two Interactive,Consumer Discretionary,no,yes,no
+TER,Teradyne,Information Technology,no,yes,no
+TSLA,"Tesla, Inc.",Consumer Discretionary,no,yes,no
+TXN,Texas Instruments,Information Technology,no,yes,no
+TRI,Thomson Reuters,Information Technology,no,yes,no
+VRTX,Vertex Pharmaceuticals,Health Care,no,yes,no
+WMT,Walmart,Consumer Discretionary,no,yes,no
+WDC,Western Digital,Information Technology,no,yes,no
+WDAY,"Workday, Inc.",Information Technology,no,yes,no
+XEL,Xcel Energy,Utilities,no,yes,no
