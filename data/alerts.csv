@@ -1,3 +1,2 @@
 ticker,kind,text,score,score_prev,verdict,verdict_prev,price,data_status,note,disclaimer
-TRV,verdict_change,TRV changed from AVOID to HOLD.,4,3,HOLD,AVOID,398.28,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-TRV,score_cross,TRV crossed the hold line (4).,4,3,HOLD,AVOID,398.28,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+,info,No verdict changes or score crossings this run.,,,,,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
