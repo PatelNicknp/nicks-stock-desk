@@ -1,0 +1,504 @@
+ticker,company,sector,in_sp500,in_growth
+MMM,3M,Industrials,yes,no
+AOS,A. O. Smith,Industrials,yes,no
+ABT,Abbott Laboratories,Health Care,yes,no
+ABBV,AbbVie,Health Care,yes,no
+ACN,Accenture,Information Technology,yes,no
+ADBE,Adobe Inc.,Information Technology,yes,no
+AMD,Advanced Micro Devices,Information Technology,yes,no
+AES,AES Corporation,Utilities,yes,no
+AFL,Aflac,Financials,yes,no
+A,Agilent Technologies,Health Care,yes,no
+APD,Air Products,Materials,yes,no
+ABNB,Airbnb,Consumer Discretionary,yes,no
+AKAM,Akamai Technologies,Information Technology,yes,no
+ALB,Albemarle Corporation,Materials,yes,no
+ARE,Alexandria Real Estate Equities,Real Estate,yes,no
+ALGN,Align Technology,Health Care,yes,no
+ALLE,Allegion,Industrials,yes,no
+LNT,Alliant Energy,Utilities,yes,no
+ALL,Allstate,Financials,yes,no
+GOOGL,Alphabet Inc. (Class A),Communication Services,yes,no
+GOOG,Alphabet Inc. (Class C),Communication Services,yes,no
+MO,Altria,Consumer Staples,yes,no
+AMZN,Amazon,Consumer Discretionary,yes,no
+AMCR,Amcor,Materials,yes,no
+AEE,Ameren,Utilities,yes,no
+AEP,American Electric Power,Utilities,yes,no
+AXP,American Express,Financials,yes,no
+AIG,American International Group,Financials,yes,no
+AMT,American Tower,Real Estate,yes,no
+AWK,American Water Works,Utilities,yes,no
+AMP,Ameriprise Financial,Financials,yes,no
+AME,Ametek,Industrials,yes,no
+AMGN,Amgen,Health Care,yes,no
+APH,Amphenol,Information Technology,yes,no
+ADI,Analog Devices,Information Technology,yes,no
+AON,Aon plc,Financials,yes,no
+APA,APA Corporation,Energy,yes,no
+APO,Apollo Global Management,Financials,yes,no
+AAPL,Apple Inc.,Information Technology,yes,no
+AMAT,Applied Materials,Information Technology,yes,no
+APP,AppLovin,Communication Services,yes,no
+APTV,Aptiv,Consumer Discretionary,yes,no
+ACGL,Arch Capital Group,Financials,yes,no
+ADM,Archer Daniels Midland,Consumer Staples,yes,no
+ARES,Ares Management,Financials,yes,no
+ANET,Arista Networks,Information Technology,yes,no
+AJG,Arthur J. Gallagher & Co.,Financials,yes,no
+AIZ,Assurant,Financials,yes,no
+T,AT&T,Communication Services,yes,no
+ATO,Atmos Energy,Utilities,yes,no
+ADSK,Autodesk,Information Technology,yes,no
+ADP,Automatic Data Processing,Industrials,yes,no
+AZO,AutoZone,Consumer Discretionary,yes,no
+AVY,Avery Dennison,Materials,yes,no
+AXON,Axon Enterprise,Industrials,yes,no
+BKR,Baker Hughes,Energy,yes,no
+BALL,Ball Corporation,Materials,yes,no
+BAC,Bank of America,Financials,yes,no
+BAX,Baxter International,Health Care,yes,no
+BDX,Becton Dickinson,Health Care,yes,no
+BRK-B,Berkshire Hathaway,Financials,yes,no
+BBY,Best Buy,Consumer Discretionary,yes,no
+TECH,Bio-Techne,Health Care,yes,no
+BIIB,Biogen,Health Care,yes,no
+BLK,BlackRock,Financials,yes,no
+BX,Blackstone Inc.,Financials,yes,no
+XYZ,"Block, Inc.",Financials,yes,no
+BE,Bloom Energy,Industrials,yes,no
+BNY,BNY Mellon,Financials,yes,no
+BA,Boeing,Industrials,yes,no
+BKNG,Booking Holdings,Consumer Discretionary,yes,no
+BSX,Boston Scientific,Health Care,yes,no
+BMY,Bristol Myers Squibb,Health Care,yes,no
+AVGO,Broadcom,Information Technology,yes,no
+BR,Broadridge Financial Solutions,Industrials,yes,no
+BRO,Brown & Brown,Financials,yes,no
+BF-B,Brown–Forman,Consumer Staples,yes,no
+BG,Bunge Global,Consumer Staples,yes,no
+BXP,"BXP, Inc.",Real Estate,yes,no
+CHRW,C.H. Robinson,Industrials,yes,no
+CDNS,Cadence Design Systems,Information Technology,yes,no
+CPT,Camden Property Trust,Real Estate,yes,no
+COF,Capital One,Financials,yes,no
+CAH,Cardinal Health,Health Care,yes,no
+CCL,Carnival Corporation,Consumer Discretionary,yes,no
+CARR,Carrier Global,Industrials,yes,no
+CVNA,Carvana,Consumer Discretionary,yes,no
+CASY,Casey's,Consumer Staples,yes,no
+CAT,Caterpillar Inc.,Industrials,yes,no
+CBOE,Cboe Global Markets,Financials,yes,no
+CBRE,CBRE Group,Real Estate,yes,no
+CDW,CDW Corporation,Information Technology,yes,no
+COR,Cencora,Health Care,yes,no
+CNC,Centene Corporation,Health Care,yes,no
+CNP,CenterPoint Energy,Utilities,yes,no
+CF,CF Industries,Materials,yes,no
+CRL,Charles River Laboratories,Health Care,yes,no
+SCHW,Charles Schwab Corporation,Financials,yes,no
+CHTR,Charter Communications,Communication Services,yes,no
+CVX,Chevron Corporation,Energy,yes,no
+CMG,Chipotle Mexican Grill,Consumer Discretionary,yes,no
+CB,Chubb Limited,Financials,yes,no
+CHD,Church & Dwight,Consumer Staples,yes,no
+CIEN,Ciena,Information Technology,yes,no
+CI,Cigna,Health Care,yes,no
+CINF,Cincinnati Financial,Financials,yes,no
+CTAS,Cintas,Industrials,yes,no
+CSCO,Cisco,Information Technology,yes,no
+C,Citigroup,Financials,yes,no
+CFG,Citizens Financial Group,Financials,yes,no
+CLX,Clorox,Consumer Staples,yes,no
+CME,CME Group,Financials,yes,no
+CMS,CMS Energy,Utilities,yes,no
+KO,Coca-Cola Company (The),Consumer Staples,yes,no
+CTSH,Cognizant,Information Technology,yes,no
+COHR,Coherent Corp.,Information Technology,yes,no
+COIN,Coinbase,Financials,yes,no
+CL,Colgate-Palmolive,Consumer Staples,yes,no
+CMCSA,Comcast,Communication Services,yes,no
+FIX,Comfort Systems USA,Industrials,yes,no
+COP,ConocoPhillips,Energy,yes,no
+ED,Consolidated Edison,Utilities,yes,no
+STZ,Constellation Brands,Consumer Staples,yes,no
+CEG,Constellation Energy,Utilities,yes,no
+COO,Cooper Companies (The),Health Care,yes,no
+CPRT,Copart,Industrials,yes,no
+GLW,Corning Inc.,Information Technology,yes,no
+CPAY,Corpay,Financials,yes,no
+CSGP,CoStar Group,Real Estate,yes,no
+COST,Costco,Consumer Staples,yes,no
+CRH,CRH plc,Materials,yes,no
+CRWD,CrowdStrike,Information Technology,yes,no
+CCI,Crown Castle,Real Estate,yes,no
+CSX,CSX Corporation,Industrials,yes,no
+CMI,Cummins,Industrials,yes,no
+CVS,CVS Health,Health Care,yes,no
+DHR,Danaher Corporation,Health Care,yes,no
+DRI,Darden Restaurants,Consumer Discretionary,yes,no
+DDOG,Datadog,Information Technology,yes,no
+DVA,DaVita,Health Care,yes,no
+DECK,Deckers Brands,Consumer Discretionary,yes,no
+DE,Deere & Company,Industrials,yes,no
+DELL,Dell Technologies,Information Technology,yes,no
+DAL,Delta Air Lines,Industrials,yes,no
+DVN,Devon Energy,Energy,yes,no
+DXCM,Dexcom,Health Care,yes,no
+FANG,Diamondback Energy,Energy,yes,no
+DLR,Digital Realty,Real Estate,yes,no
+DG,Dollar General,Consumer Staples,yes,no
+DLTR,Dollar Tree,Consumer Staples,yes,no
+D,Dominion Energy,Utilities,yes,no
+DPZ,Domino's,Consumer Discretionary,yes,no
+DASH,DoorDash,Consumer Discretionary,yes,no
+DOV,Dover Corporation,Industrials,yes,no
+DOW,Dow Inc.,Materials,yes,no
+DHI,D. R. Horton,Consumer Discretionary,yes,no
+DTE,DTE Energy,Utilities,yes,no
+DUK,Duke Energy,Utilities,yes,no
+DD,DuPont,Industrials,yes,no
+ETN,Eaton Corporation,Industrials,yes,no
+EBAY,eBay Inc.,Consumer Discretionary,yes,no
+ECHO,EchoStar,Communication Services,yes,no
+ECL,Ecolab,Materials,yes,no
+EIX,Edison International,Utilities,yes,no
+EW,Edwards Lifesciences,Health Care,yes,no
+ELV,Elevance Health,Health Care,yes,no
+EME,Emcor,Industrials,yes,no
+EMR,Emerson Electric,Industrials,yes,no
+ETR,Entergy,Utilities,yes,no
+EOG,EOG Resources,Energy,yes,no
+EQT,EQT Corporation,Energy,yes,no
+EFX,Equifax,Industrials,yes,no
+EQIX,Equinix,Real Estate,yes,no
+ERIE,Erie Indemnity,Financials,yes,no
+ESS,Essex Property Trust,Real Estate,yes,no
+EL,Estée Lauder Companies (The),Consumer Staples,yes,no
+EG,Everest Group,Financials,yes,no
+EVRG,Evergy,Utilities,yes,no
+P,Everpure,Information Technology,yes,no
+ES,Eversource Energy,Utilities,yes,no
+EXC,Exelon,Utilities,yes,no
+EXE,Expand Energy,Energy,yes,no
+EXPE,Expedia Group,Consumer Discretionary,yes,no
+EXPD,Expeditors International,Industrials,yes,no
+EXR,Extra Space Storage,Real Estate,yes,no
+XOM,ExxonMobil,Energy,yes,no
+FFIV,"F5, Inc.",Information Technology,yes,no
+FDS,FactSet,Financials,yes,no
+FICO,Fair Isaac,Information Technology,yes,no
+FAST,Fastenal,Industrials,yes,no
+FRT,Federal Realty Investment Trust,Real Estate,yes,no
+FDX,FedEx,Industrials,yes,no
+FDXF,FedEx Freight,Industrials,yes,no
+FERG,Ferguson Enterprises,Industrials,yes,no
+FIS,Fidelity National Information Services,Financials,yes,no
+FITB,Fifth Third Bancorp,Financials,yes,no
+FSLR,First Solar,Information Technology,yes,no
+FE,FirstEnergy,Utilities,yes,no
+FISV,Fiserv,Financials,yes,no
+FLEX,Flex Ltd.,Information Technology,yes,no
+F,Ford Motor Company,Consumer Discretionary,yes,no
+FTNT,Fortinet,Information Technology,yes,no
+FTV,Fortive,Industrials,yes,no
+FOXA,Fox Corporation (Class A),Communication Services,yes,no
+FOX,Fox Corporation (Class B),Communication Services,yes,no
+BEN,Franklin Resources,Financials,yes,no
+FCX,Freeport-McMoRan,Materials,yes,no
+GRMN,Garmin,Consumer Discretionary,yes,no
+IT,Gartner,Information Technology,yes,no
+GE,GE Aerospace,Industrials,yes,no
+GEHC,GE HealthCare,Health Care,yes,no
+GEV,GE Vernova,Industrials,yes,no
+GEN,Gen Digital,Information Technology,yes,no
+GNRC,Generac,Industrials,yes,no
+GD,General Dynamics,Industrials,yes,no
+GIS,General Mills,Consumer Staples,yes,no
+GM,General Motors,Consumer Discretionary,yes,no
+GPC,Genuine Parts Company,Consumer Discretionary,yes,no
+GILD,Gilead Sciences,Health Care,yes,no
+GPN,Global Payments,Financials,yes,no
+GL,Globe Life,Financials,yes,no
+GDDY,GoDaddy,Information Technology,yes,no
+GS,Goldman Sachs,Financials,yes,no
+HAL,Halliburton,Energy,yes,no
+HIG,Hartford (The),Financials,yes,no
+HAS,Hasbro,Consumer Discretionary,yes,no
+HCA,HCA Healthcare,Health Care,yes,no
+DOC,Healthpeak Properties,Real Estate,yes,no
+HSIC,Henry Schein,Health Care,yes,no
+HSY,Hershey Company (The),Consumer Staples,yes,no
+HPE,Hewlett Packard Enterprise,Information Technology,yes,no
+HLT,Hilton Worldwide,Consumer Discretionary,yes,no
+HD,Home Depot (The),Consumer Discretionary,yes,no
+HONA,Honeywell Aerospace,Industrials,yes,no
+HON,Honeywell Technologies,Industrials,yes,no
+HRL,Hormel Foods,Consumer Staples,yes,no
+HST,Host Hotels & Resorts,Real Estate,yes,no
+HWM,Howmet Aerospace,Industrials,yes,no
+HPQ,HP Inc.,Information Technology,yes,no
+HUBB,Hubbell Incorporated,Industrials,yes,no
+HUM,Humana,Health Care,yes,no
+HBAN,Huntington Bancshares,Financials,yes,no
+HII,Huntington Ingalls Industries,Industrials,yes,no
+IBM,IBM,Information Technology,yes,no
+IEX,IDEX Corporation,Industrials,yes,no
+IDXX,Idexx Laboratories,Health Care,yes,no
+ITW,Illinois Tool Works,Industrials,yes,no
+ILMN,"Illumina, Inc.",Health Care,yes,no
+INCY,Incyte,Health Care,yes,no
+IR,Ingersoll Rand,Industrials,yes,no
+PODD,Insulet Corporation,Health Care,yes,no
+INTC,Intel,Information Technology,yes,no
+IBKR,Interactive Brokers,Financials,yes,no
+ICE,Intercontinental Exchange,Financials,yes,no
+IFF,International Flavors & Fragrances,Materials,yes,no
+IP,International Paper,Materials,yes,no
+INTU,Intuit,Information Technology,yes,no
+ISRG,Intuitive Surgical,Health Care,yes,no
+IVZ,Invesco,Financials,yes,no
+INVH,Invitation Homes,Real Estate,yes,no
+IQV,IQVIA,Health Care,yes,no
+IRM,Iron Mountain,Real Estate,yes,no
+JBHT,J.B. Hunt,Industrials,yes,no
+JBL,Jabil,Information Technology,yes,no
+JKHY,Jack Henry & Associates,Financials,yes,no
+J,Jacobs Solutions,Industrials,yes,no
+JNJ,Johnson & Johnson,Health Care,yes,no
+JCI,Johnson Controls,Industrials,yes,no
+JPM,JPMorgan Chase,Financials,yes,no
+KVUE,Kenvue,Consumer Staples,yes,no
+KDP,Keurig Dr Pepper,Consumer Staples,yes,no
+KEY,KeyCorp,Financials,yes,no
+KEYS,Keysight Technologies,Information Technology,yes,no
+KMB,Kimberly-Clark,Consumer Staples,yes,no
+KIM,Kimco Realty,Real Estate,yes,no
+KMI,Kinder Morgan,Energy,yes,no
+KKR,KKR & Co.,Financials,yes,no
+KLAC,KLA Corporation,Information Technology,yes,no
+KHC,Kraft Heinz,Consumer Staples,yes,no
+KR,Kroger,Consumer Staples,yes,no
+LHX,L3Harris,Industrials,yes,no
+LH,Labcorp,Health Care,yes,no
+LRCX,Lam Research,Information Technology,yes,no
+LVS,Las Vegas Sands,Consumer Discretionary,yes,no
+LDOS,Leidos,Industrials,yes,no
+LEN,Lennar,Consumer Discretionary,yes,no
+LII,Lennox International,Industrials,yes,no
+LLY,Lilly (Eli),Health Care,yes,no
+LIN,Linde plc,Materials,yes,no
+LYV,Live Nation Entertainment,Communication Services,yes,no
+LMT,Lockheed Martin,Industrials,yes,no
+L,Loews Corporation,Financials,yes,no
+LOW,Lowe's,Consumer Discretionary,yes,no
+LULU,Lululemon Athletica,Consumer Discretionary,yes,no
+LITE,Lumentum,Information Technology,yes,no
+LYB,LyondellBasell,Materials,yes,no
+MTB,M&T Bank,Financials,yes,no
+MPC,Marathon Petroleum,Energy,yes,no
+MAR,Marriott International,Consumer Discretionary,yes,no
+MRSH,Marsh McLennan,Financials,yes,no
+MLM,Martin Marietta Materials,Materials,yes,no
+MRVL,Marvell Technology,Information Technology,yes,no
+MAS,Masco,Industrials,yes,no
+MA,Mastercard,Financials,yes,no
+MKC,McCormick & Company,Consumer Staples,yes,no
+MCD,McDonald's,Consumer Discretionary,yes,no
+MCK,McKesson,Health Care,yes,no
+MDT,Medtronic,Health Care,yes,no
+MRK,Merck & Co.,Health Care,yes,no
+META,Meta Platforms,Communication Services,yes,no
+MET,MetLife,Financials,yes,no
+MTD,Mettler Toledo,Health Care,yes,no
+MGM,MGM Resorts,Consumer Discretionary,yes,no
+MCHP,Microchip Technology,Information Technology,yes,no
+MU,Micron Technology,Information Technology,yes,no
+MSFT,Microsoft,Information Technology,yes,no
+MAA,Mid-America Apartment Communities,Real Estate,yes,no
+MRNA,Moderna,Health Care,yes,no
+MDLZ,Mondelez International,Consumer Staples,yes,no
+MPWR,Monolithic Power Systems,Information Technology,yes,no
+MNST,Monster Beverage,Consumer Staples,yes,no
+MCO,Moody's Corporation,Financials,yes,no
+MS,Morgan Stanley,Financials,yes,no
+MOS,Mosaic Company (The),Materials,yes,no
+MSI,Motorola Solutions,Information Technology,yes,no
+MSCI,MSCI,Financials,yes,no
+NDAQ,"Nasdaq, Inc.",Financials,yes,no
+NTAP,NetApp,Information Technology,yes,no
+NFLX,Netflix,Communication Services,yes,no
+NEM,Newmont,Materials,yes,no
+NWSA,News Corp (Class A),Communication Services,yes,no
+NWS,News Corp (Class B),Communication Services,yes,no
+NEE,NextEra Energy,Utilities,yes,no
+NKE,"Nike, Inc.",Consumer Discretionary,yes,no
+NI,NiSource,Utilities,yes,no
+NDSN,Nordson Corporation,Industrials,yes,no
+NSC,Norfolk Southern,Industrials,yes,no
+NTRS,Northern Trust,Financials,yes,no
+NOC,Northrop Grumman,Industrials,yes,no
+NCLH,Norwegian Cruise Line Holdings,Consumer Discretionary,yes,no
+NRG,NRG Energy,Utilities,yes,no
+NUE,Nucor,Materials,yes,no
+NVDA,Nvidia,Information Technology,yes,no
+NVR,"NVR, Inc.",Consumer Discretionary,yes,no
+NXPI,NXP Semiconductors,Information Technology,yes,no
+ORLY,O'Reilly Automotive,Consumer Discretionary,yes,no
+OXY,Occidental Petroleum,Energy,yes,no
+ODFL,Old Dominion,Industrials,yes,no
+OMC,Omnicom Group,Communication Services,yes,no
+ON,ON Semiconductor,Information Technology,yes,no
+OKE,Oneok,Energy,yes,no
+ORCL,Oracle Corporation,Information Technology,yes,no
+OTIS,Otis Worldwide,Industrials,yes,no
+PCAR,Paccar,Industrials,yes,no
+PKG,Packaging Corporation of America,Materials,yes,no
+PLTR,Palantir Technologies,Information Technology,yes,no
+PANW,Palo Alto Networks,Information Technology,yes,no
+PH,Parker Hannifin,Industrials,yes,no
+PAYX,Paychex,Industrials,yes,no
+PYPL,PayPal,Financials,yes,no
+PNR,Pentair,Industrials,yes,no
+PEP,PepsiCo,Consumer Staples,yes,no
+PFE,Pfizer,Health Care,yes,no
+PCG,PG&E Corporation,Utilities,yes,no
+PM,Philip Morris International,Consumer Staples,yes,no
+PSX,Phillips 66,Energy,yes,no
+PNW,Pinnacle West Capital,Utilities,yes,no
+PNC,PNC Financial Services,Financials,yes,no
+PPG,PPG Industries,Materials,yes,no
+PPL,PPL Corporation,Utilities,yes,no
+PFG,Principal Financial Group,Financials,yes,no
+PG,Procter & Gamble,Consumer Staples,yes,no
+PGR,Progressive Corporation,Financials,yes,no
+PLD,Prologis,Real Estate,yes,no
+PRU,Prudential Financial,Financials,yes,no
+PEG,Public Service Enterprise Group,Utilities,yes,no
+PTC,PTC Inc.,Information Technology,yes,no
+PSA,Public Storage,Real Estate,yes,no
+PHM,PulteGroup,Consumer Discretionary,yes,no
+PWR,Quanta Services,Industrials,yes,no
+QCOM,Qualcomm,Information Technology,yes,no
+DGX,Quest Diagnostics,Health Care,yes,no
+Q,Qnity Electronics,Information Technology,yes,no
+RL,Ralph Lauren Corporation,Consumer Discretionary,yes,no
+RJF,Raymond James Financial,Financials,yes,no
+RDDT,Reddit,Communication Services,yes,no
+RTX,RTX Corporation,Industrials,yes,no
+O,Realty Income,Real Estate,yes,no
+REG,Regency Centers,Real Estate,yes,no
+REGN,Regeneron Pharmaceuticals,Health Care,yes,no
+RF,Regions Financial Corporation,Financials,yes,no
+RSG,Republic Services,Industrials,yes,no
+RMD,ResMed,Health Care,yes,no
+RVTY,Revvity,Health Care,yes,no
+HOOD,Robinhood Markets,Financials,yes,no
+ROK,Rockwell Automation,Industrials,yes,no
+ROL,"Rollins, Inc.",Industrials,yes,no
+ROP,Roper Technologies,Information Technology,yes,no
+ROST,Ross Stores,Consumer Discretionary,yes,no
+RCL,Royal Caribbean Group,Consumer Discretionary,yes,no
+SPGI,S&P Global,Financials,yes,no
+CRM,Salesforce,Information Technology,yes,no
+SNDK,Sandisk,Information Technology,yes,no
+SBAC,SBA Communications,Real Estate,yes,no
+SLB,Schlumberger,Energy,yes,no
+STX,Seagate Technology,Information Technology,yes,no
+SRE,Sempra,Utilities,yes,no
+NOW,ServiceNow,Information Technology,yes,no
+SHW,Sherwin-Williams,Materials,yes,no
+SPG,Simon Property Group,Real Estate,yes,no
+SKYD,Skydance Corporation,Communication Services,yes,no
+SWKS,Skyworks Solutions,Information Technology,yes,no
+SJM,J.M. Smucker Company (The),Consumer Staples,yes,no
+SW,Smurfit Westrock,Materials,yes,no
+SNA,Snap-on,Industrials,yes,no
+SOLV,Solventum,Health Care,yes,no
+SO,Southern Company,Utilities,yes,no
+LUV,Southwest Airlines,Industrials,yes,no
+SWK,Stanley Black & Decker,Industrials,yes,no
+SBUX,Starbucks,Consumer Discretionary,yes,no
+STT,State Street Corporation,Financials,yes,no
+STLD,Steel Dynamics,Materials,yes,no
+STE,Steris,Health Care,yes,no
+SYK,Stryker Corporation,Health Care,yes,no
+SMCI,Supermicro,Information Technology,yes,no
+SYF,Synchrony Financial,Financials,yes,no
+SNPS,Synopsys,Information Technology,yes,no
+SYY,Sysco,Consumer Staples,yes,no
+TMUS,T-Mobile US,Communication Services,yes,no
+TROW,T. Rowe Price,Financials,yes,no
+TTWO,Take-Two Interactive,Communication Services,yes,no
+TPR,"Tapestry, Inc.",Consumer Discretionary,yes,no
+TRGP,Targa Resources,Energy,yes,no
+TGT,Target Corporation,Consumer Staples,yes,no
+TEL,TE Connectivity,Information Technology,yes,no
+TDY,Teledyne Technologies,Information Technology,yes,no
+TER,Teradyne,Information Technology,yes,no
+TSLA,"Tesla, Inc.",Consumer Discretionary,yes,no
+TXN,Texas Instruments,Information Technology,yes,no
+TPL,Texas Pacific Land Corporation,Energy,yes,no
+TXT,Textron,Industrials,yes,no
+TMO,Thermo Fisher Scientific,Health Care,yes,no
+TJX,TJX Companies,Consumer Discretionary,yes,no
+TKO,TKO Group Holdings,Communication Services,yes,no
+TSCO,Tractor Supply,Consumer Discretionary,yes,no
+TT,Trane Technologies,Industrials,yes,no
+TDG,TransDigm Group,Industrials,yes,no
+TRV,Travelers Companies (The),Financials,yes,no
+TRMB,Trimble Inc.,Information Technology,yes,no
+TFC,Truist Financial,Financials,yes,no
+TWLO,Twilio,Information Technology,yes,no
+TYL,Tyler Technologies,Information Technology,yes,no
+TSN,Tyson Foods,Consumer Staples,yes,no
+USB,U.S. Bancorp,Financials,yes,no
+UBER,Uber,Industrials,yes,no
+UDR,"UDR, Inc.",Real Estate,yes,no
+ULTA,Ulta Beauty,Consumer Discretionary,yes,no
+UNP,Union Pacific Corporation,Industrials,yes,no
+UAL,United Airlines Holdings,Industrials,yes,no
+UPS,United Parcel Service,Industrials,yes,no
+URI,United Rentals,Industrials,yes,no
+UNH,UnitedHealth Group,Health Care,yes,no
+UHS,Universal Health Services,Health Care,yes,no
+VLO,Valero Energy,Energy,yes,no
+VEEV,Veeva Systems,Health Care,yes,no
+VTR,Ventas,Real Estate,yes,no
+VLTO,Veralto,Industrials,yes,no
+VRSN,Verisign,Information Technology,yes,no
+VRSK,Verisk Analytics,Industrials,yes,no
+VZ,Verizon,Communication Services,yes,no
+VRTX,Vertex Pharmaceuticals,Health Care,yes,no
+VRT,Vertiv,Industrials,yes,no
+VTRS,Viatris,Health Care,yes,no
+VICI,Vici Properties,Real Estate,yes,no
+V,Visa Inc.,Financials,yes,no
+VST,Vistra Corp.,Utilities,yes,no
+VMRK,Vivmark Residential,Real Estate,yes,no
+VMC,Vulcan Materials Company,Materials,yes,no
+VYLR,Vylor,Consumer Staples,yes,no
+WRB,W. R. Berkley Corporation,Financials,yes,no
+GWW,W. W. Grainger,Industrials,yes,no
+WAB,Wabtec,Industrials,yes,no
+WMT,Walmart,Consumer Staples,yes,no
+DIS,Walt Disney Company (The),Communication Services,yes,no
+WM,Waste Management,Industrials,yes,no
+WAT,Waters Corporation,Health Care,yes,no
+WEC,WEC Energy Group,Utilities,yes,no
+WFC,Wells Fargo,Financials,yes,no
+WELL,Welltower,Real Estate,yes,no
+WST,West Pharmaceutical Services,Health Care,yes,no
+WDC,Western Digital,Information Technology,yes,no
+WY,Weyerhaeuser,Real Estate,yes,no
+WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,yes,no
+WMB,Williams Companies,Energy,yes,no
+WTW,Willis Towers Watson,Financials,yes,no
+WDAY,"Workday, Inc.",Information Technology,yes,no
+WYNN,Wynn Resorts,Consumer Discretionary,yes,no
+XEL,Xcel Energy,Utilities,yes,no
+XYL,Xylem Inc.,Industrials,yes,no
+YUM,Yum! Brands,Consumer Discretionary,yes,no
+ZBRA,Zebra Technologies,Information Technology,yes,no
+ZBH,Zimmer Biomet,Health Care,yes,no
+ZTS,Zoetis,Health Care,yes,no

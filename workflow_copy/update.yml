@@ -1,0 +1,56 @@
+name: Update Nick's Stock Desk
+
+on:
+  schedule:
+    # Hourly while the US market is open. Prices refresh. Slow sources stay on today's cache.
+    - cron: "15 14-21 * * 1-5"
+    # Once after the cash close. This is the run that refreshes fundamentals, 13F, insiders, and option chains.
+    - cron: "30 22 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nick-stock-desk
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned dependencies
+        run: pip install -r requirements.txt
+      - name: Run the tests
+        run: |
+          python tests/test_net.py
+          python tests/test_scoring.py
+          python tests/test_fundamentals.py
+          python tests/test_universe.py
+          python tests/test_job.py
+          python tests/test_setups.py
+      - name: Update the desk
+        run: |
+          set -e
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then
+            python stock_desk.py --full
+          else
+            python stock_desk.py --hourly
+          fi
+      - name: Save the new numbers
+        run: |
+          git config user.name "stock-desk-bot"
+          git config user.email "stock-desk-bot@users.noreply.github.com"
+          git add data cache
+          if git diff --cached --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "Update desk data $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi

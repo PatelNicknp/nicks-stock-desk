@@ -1,0 +1,9 @@
+item,detail,data_status,note,disclaimer
+Trading costs included,Yes. 0.1 percent when a stock is bought and 0.1 percent when it is sold.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+Uses only data known at the time,Yes for prices and for SEC filings (usable the day after the filed date).,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+"Analyst, insider, 13F, earnings surprise","Not in this test. Free history of those series is not available, so they are left out rather than filled in.",OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+Includes delisted stocks,No. The universe is today's members. That tilts the test up. Results are not a promise.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+Look-ahead,A filing is ignored until the day after it was filed. Forward returns are measured after the signal date.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+Fundamentals used,"Latest annual report, or trailing four quarters when those quarters were already public.",OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+12-week windows,"They overlap, so the number of signals is not a set of independent 12-week bets.",OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+Past results,Do not guarantee future results. This desk never places a trade.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

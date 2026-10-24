@@ -1,0 +1,334 @@
+//@version=6
+// Nick's Minervini VCP
+// Shows: moving averages, Minervini's 8-point trend template score, VCP contractions,
+// the buy point (pivot) line, and big-volume bars. Built for the Daily chart.
+indicator("Nick's Minervini with Exit Strategy", overlay = true, max_labels_count = 500, max_lines_count = 50, max_bars_back = 500)
+
+// ───────── SETTINGS (shown in the indicator's Settings window) ─────────
+grpMA  = "Moving Averages"
+show50  = input.bool(true, "Show 50-day SMA",  group = grpMA)
+show150 = input.bool(true, "Show 150-day SMA", group = grpMA)
+show200 = input.bool(true, "Show 200-day SMA", group = grpMA)
+
+grpTT  = "Trend Template"
+showTable  = input.bool(true, "Show score table", group = grpTT)
+showDetail = input.bool(true, "Show each rule (pass/fail)", group = grpTT)
+requireAll = input.bool(true, "Require 8/8 for VCP (off = price > 150/200 & 150 > 200)", group = grpTT)
+spySymbol  = input.symbol("SPY", "Compare strength against", group = grpTT)
+
+grpVCP = "VCP (contractions)"
+lookback  = input.int(100, "Base lookback (bars)", minval = 30, maxval = 300, group = grpVCP)
+pivL      = input.int(4, "Swing size: bars to the left", minval = 1, maxval = 20, group = grpVCP)
+pivR      = input.int(3, "Swing size: bars to the right (confirm delay)", minval = 1, maxval = 20, group = grpVCP)
+minBars   = input.int(2, "Min bars from swing high to swing low", minval = 1, maxval = 50, group = grpVCP)
+baseTol   = input.float(5.0, "New base only if high beats base high by (%)", minval = 0.0, step = 0.5, group = grpVCP)
+minDepth  = input.float(3.0, "Ignore pullbacks smaller than (%)", minval = 0.0, step = 0.5, group = grpVCP)
+maxT      = input.int(4, "Max contractions to show", minval = 2, maxval = 6, group = grpVCP)
+showLbls  = input.bool(true, "Label contractions (T1, T2...)", group = grpVCP)
+
+grpBuy = "Buy Point"
+showPivot  = input.bool(true, "Show buy-point line", group = grpBuy)
+needVolume = input.bool(true, "Alert needs big volume on breakout", group = grpBuy)
+
+grpVol = "Volume"
+volMult  = input.float(1.5, "Big volume = this many x 50-day average", minval = 1.0, step = 0.1, group = grpVol)
+showVol  = input.bool(true, "Mark big-volume bars", group = grpVol)
+
+// ───────── MOVING AVERAGES ─────────
+sma50  = ta.sma(close, 50)
+sma150 = ta.sma(close, 150)
+sma200 = ta.sma(close, 200)
+plot(show50  ? sma50  : na, "SMA 50",  color = color.new(color.blue, 0),   linewidth = 1)
+plot(show150 ? sma150 : na, "SMA 150", color = color.new(color.orange, 0), linewidth = 1)
+plot(show200 ? sma200 : na, "SMA 200", color = color.new(color.red, 0),    linewidth = 1)
+
+// ───────── TREND TEMPLATE (8 rules) ─────────
+low52  = ta.lowest(low, 252)    // 52-week low (252 trading days)
+high52 = ta.highest(high, 252)  // 52-week high
+
+// Relative strength approximation: is the stock beating SPY over 6 AND 12 months?
+// (IBD's real RS Rating isn't available in TradingView, so this is a stand-in.)
+spyClose = request.security(spySymbol, timeframe.period, close, lookahead = barmerge.lookahead_off)
+stock6  = close / close[126] - 1
+stock12 = close / close[252] - 1
+spy6    = spyClose / spyClose[126] - 1
+spy12   = spyClose / spyClose[252] - 1
+
+r1 = close > sma150 and close > sma200       // 1. Price above 150 & 200 SMA
+r2 = sma150 > sma200                          // 2. 150 SMA above 200 SMA
+r3 = sma200 > sma200[20]                      // 3. 200 SMA rising (vs ~1 month ago)
+r4 = sma50 > sma150 and sma50 > sma200        // 4. 50 SMA above 150 & 200
+r5 = close > sma50                            // 5. Price above 50 SMA
+r6 = close >= low52 * 1.30                    // 6. At least 30% above 52-week low
+r7 = close >= high52 * 0.75                   // 7. Within 25% of 52-week high
+r8 = not na(spy12) and stock6 > spy6 and stock12 > spy12   // 8. RS vs SPY (approx.)
+
+score = (r1 ? 1 : 0) + (r2 ? 1 : 0) + (r3 ? 1 : 0) + (r4 ? 1 : 0) + (r5 ? 1 : 0) + (r6 ? 1 : 0) + (r7 ? 1 : 0) + (r8 ? 1 : 0)
+
+var table tt = table.new(position.bottom_right, 2, 10, bgcolor = color.new(color.black, 20), border_width = 1)
+
+// Helper: write one rule row into the table
+rowRule(int row, string name, bool ok) =>
+    table.cell(tt, 0, row, name, text_color = color.white, text_size = size.small, text_halign = text.align_left)
+    table.cell(tt, 1, row, ok ? "PASS" : "FAIL", text_color = ok ? color.lime : color.red, text_size = size.small)
+
+if barstate.islast
+    table.clear(tt, 0, 0, 1, 9)
+    if showTable
+        table.cell(tt, 0, 0, "Trend Template", text_color = color.white, text_size = size.small)
+        table.cell(tt, 1, 0, str.tostring(score) + "/8", text_color = color.white, text_size = size.normal, bgcolor = score == 8 ? color.new(color.green, 0) : score >= 6 ? color.new(color.orange, 0) : color.new(color.red, 0))
+        if showDetail
+            rowRule(1, "Price > 150 & 200 SMA", r1)
+            rowRule(2, "150 SMA > 200 SMA", r2)
+            rowRule(3, "200 SMA rising (1 mo)", r3)
+            rowRule(4, "50 SMA > 150 & 200", r4)
+            rowRule(5, "Price > 50 SMA", r5)
+            rowRule(6, "30%+ above 52w low", r6)
+            rowRule(7, "Within 25% of 52w high", r7)
+            rowRule(8, "Beats SPY 6&12 mo*", r8)
+            table.cell(tt, 0, 9, "*RS is an approximation (not IBD RS)", text_color = color.gray, text_size = size.tiny, text_halign = text.align_left)
+            table.merge_cells(tt, 0, 9, 1, 9)
+
+// ───────── VCP DETECTION ─────────
+// Find swing highs/lows. These return na on most bars and only confirm
+// 'pivR' bars after the actual swing.
+ph = ta.pivothigh(high, pivL, pivR)
+pl = ta.pivotlow(low, pivL, pivR)
+
+var float lastHigh    = na   // price of the latest swing high
+var int   lastHighBar = na   // bar of the latest swing high
+var int   lastType    = 0    // 1 = last swing was a high, -1 = a low
+
+// Every recent contraction (newest last). Old ones are trimmed below.
+var array<float> hDepth = array.new<float>()
+var array<float> hHigh  = array.new<float>()
+var array<int>   hBar   = array.new<int>()   // bar of the swing high that started it
+var array<float> hLow   = array.new<float>()
+var array<int>   hLowBar = array.new<int>()  // bar of the swing low that ended it
+var array<label> cLbl   = array.new<label>() // labels currently drawn (live base only)
+
+if not na(ph)
+    // New swing high (keep the higher one if two highs in a row)
+    if lastType != 1 or na(lastHigh) or ph > lastHigh
+        lastHigh    := ph
+        lastHighBar := bar_index - pivR
+    lastType := 1
+
+if not na(pl) and lastType == 1 and not na(lastHigh)
+    // A swing high followed by a swing low = one pullback (contraction)
+    d = (lastHigh - pl) / lastHigh * 100
+    nH = array.size(hHigh)
+    // Lower high + lower low = the SAME pullback still going down (e.g. HPE Aug-Sep).
+    // Extend the previous contraction to this new low instead of counting a new one.
+    if nH > 0 and lastHigh <= array.get(hHigh, nH - 1) and pl < array.get(hLow, nH - 1)
+        prevHigh = array.get(hHigh, nH - 1)
+        array.set(hDepth, nH - 1, (prevHigh - pl) / prevHigh * 100)
+        array.set(hLow, nH - 1, pl)
+        array.set(hLowBar, nH - 1, bar_index - pivR)
+        lastType := -1
+    else if d >= minDepth and (bar_index - pivR) - lastHighBar >= minBars
+        // New contraction. Tiny wiggles (< min depth) or too-short dips are ignored;
+        // the swing high stays, so a deeper low later can still count.
+        array.push(hDepth, d)
+        array.push(hHigh, lastHigh)
+        array.push(hBar, lastHighBar)
+        array.push(hLow, pl)
+        array.push(hLowBar, bar_index - pivR)
+        lastType := -1
+
+// Forget contractions that started before the lookback window
+while array.size(hBar) > 0 and bar_index - array.get(hBar, 0) > lookback
+    array.shift(hDepth)
+    array.shift(hHigh)
+    array.shift(hBar)
+    array.shift(hLow)
+    array.shift(hLowBar)
+
+// The base starts at the contraction with the HIGHEST swing high (within the lookback).
+// Only confirmed contractions count, so a breakout to a new high does NOT reset the base:
+// the old base (labels, VCP tag, buy line) stays until price makes a confirmed swing high
+// above it AND then pulls back by at least the min depth. That new contraction then has the
+// highest high, so it becomes T1 of a new base.
+baseIdx = -1
+if array.size(hHigh) > 0
+    for i = 0 to array.size(hHigh) - 1
+        // A retest of the base high (e.g. 232 -> 232.5) stays in the same base;
+        // only a clearly higher high (by more than baseTol %) starts a new one
+        if baseIdx < 0 or array.get(hHigh, i) > array.get(hHigh, baseIdx) * (1 + baseTol / 100)
+            baseIdx := i
+
+// Collect the contractions that belong to the current base
+cDepth = array.new<float>()
+cHigh  = array.new<float>()
+cBar   = array.new<int>()
+cLow   = array.new<float>()
+cLowBar = array.new<int>()
+if baseIdx >= 0
+    for i = baseIdx to array.size(hHigh) - 1
+        array.push(cDepth, array.get(hDepth, i))
+        array.push(cHigh, array.get(hHigh, i))
+        array.push(cBar, array.get(hBar, i))
+        array.push(cLow, array.get(hLow, i))
+        array.push(cLowBar, array.get(hLowBar, i))
+
+// Keep only the latest run that shrinks toward today:
+// walk back from the newest contraction while each earlier one is LARGER than the next.
+// A contraction deeper than the one before it therefore restarts the run as T1.
+runStart = array.size(cDepth) - 1
+if runStart > 0
+    while runStart > 0 and array.get(cDepth, runStart - 1) > array.get(cDepth, runStart)
+        runStart -= 1
+// Cap to the last 'maxT' contractions
+runStart := math.max(runStart, array.size(cDepth) - maxT)
+// Drop everything before the run, so arrays now hold T1..Tn (oldest to newest)
+while runStart > 0
+    array.shift(cDepth)
+    array.shift(cHigh)
+    array.shift(cBar)
+    array.shift(cLow)
+    array.shift(cLowBar)
+    runStart -= 1
+
+cnt = array.size(cDepth)
+shrinking = cnt >= 2   // the run is shrinking by construction; need 2+ for a VCP
+
+// Uptrend filter: full 8/8 (default) or at least the core rules 1 & 2
+trendOK = requireAll ? score == 8 : (r1 and r2)
+isVCP = shrinking and trendOK
+
+// One "VCP" tag only, for the current base: delete the old one, drawn above the last contraction's high if valid
+var label vcpLbl = na
+if barstate.islast
+    label.delete(vcpLbl)
+    vcpLbl := na
+    if isVCP
+        vcpLbl := label.new(array.get(cBar, cnt - 1), array.get(cHigh, cnt - 1), "VCP", style = label.style_label_down, color = color.new(color.green, 0), textcolor = color.white, size = size.normal)
+
+// Draw T1, T2, T3... only for the live base, on the last bar (old labels are deleted first)
+if barstate.islast
+    for lb in cLbl
+        label.delete(lb)
+    array.clear(cLbl)
+    if showLbls and cnt > 0
+        for i = 0 to cnt - 1
+            txt = "T" + str.tostring(i + 1) + " " + str.tostring(math.round(array.get(cDepth, i))) + "%"
+            array.push(cLbl, label.new(array.get(cLowBar, i), array.get(cLow, i), txt, style = label.style_label_up, color = color.new(color.purple, 0), textcolor = color.white, size = size.small))
+
+// ───────── BUY POINT (pivot) ─────────
+// Pivot = high of the most recent (tightest) contraction in the current base
+pivotPrice = cnt > 0 ? array.get(cHigh, cnt - 1) : na
+pivotBar   = cnt > 0 ? array.get(cBar, cnt - 1) : na
+
+var line buyLine = na
+if showPivot and not na(pivotPrice)
+    if na(buyLine)
+        buyLine := line.new(pivotBar, pivotPrice, bar_index, pivotPrice, extend = extend.right, width = 2)
+    line.set_xy1(buyLine, pivotBar, pivotPrice)
+    line.set_xy2(buyLine, bar_index, pivotPrice)
+    line.set_color(buyLine, isVCP ? color.lime : color.gray)
+else if not na(buyLine)
+    line.delete(buyLine)
+    buyLine := na
+
+// ───────── VOLUME ─────────
+avgVol = ta.sma(volume, 50)
+bigVol = not na(avgVol) and volume > avgVol * volMult
+// Big-volume triangles are drawn ONLY inside the current base (from the base high to today).
+// Redrawn on the last bar, so old ones outside the base disappear.
+baseStartBar = baseIdx >= 0 ? array.get(hBar, baseIdx) : na
+var array<label> vLbl = array.new<label>()
+if barstate.islast
+    for lb in vLbl
+        label.delete(lb)
+    array.clear(vLbl)
+    if showVol and not na(baseStartBar)
+        span = math.min(bar_index - baseStartBar, 400)
+        for k = 0 to span
+            if bigVol[k]
+                up = close[k] >= open[k]
+                array.push(vLbl, label.new(bar_index - k, low[k], "", yloc = yloc.belowbar, style = label.style_triangleup, color = up ? color.new(color.green, 0) : color.new(color.red, 0), size = size.tiny))
+
+// ───────── ALERT ─────────
+crossUp = ta.crossover(close, pivotPrice)   // calculated every bar (Pine needs this)
+breakout = not na(pivotPrice) and crossUp and (not needVolume or bigVol) and isVCP
+plotshape(breakout, "Breakout", shape.labelup, location.belowbar, color.new(color.lime, 0), text = "BUY", textcolor = color.black, size = size.small)
+alertcondition(breakout, "VCP Breakout", "{{ticker}} closed above the VCP buy point at {{close}}")
+
+// ---------- Distance from 52-week high (separate from the template box) ----------
+showDist = input.bool(true, "Show distance from 52-week high", group = "Display")
+var table distT = table.new(position.top_right, 1, 1, bgcolor = color.new(color.black, 20), border_width = 1)
+if barstate.islast and showDist
+    pctOff = high52 > 0 ? (high52 - close) / high52 * 100 : 0.0
+    txt = pctOff <= 0.0 ? "At 52w high" : str.tostring(pctOff, "#.0") + "% below 52w high"
+    col = pctOff <= 10 ? color.lime : pctOff <= 25 ? color.orange : color.red
+    table.cell(distT, 0, 0, txt, text_color = col, text_size = size.normal)
+
+// ───────── EXIT TOOLS (Minervini-style) ─────────
+// Starts after a BUY. Every piece can be switched on/off in Settings.
+grpExit = "Exit tools"
+exitOn     = input.bool(true,  "Show exit tools (master switch)", group = grpExit)
+showStop   = input.bool(true,  "Stop line", group = grpExit)
+stopPct    = input.float(7.0,  "Stop % below buy price", minval = 1, maxval = 15, step = 0.5, group = grpExit)
+useBE      = input.bool(true,  "Move stop to breakeven", group = grpExit)
+beR        = input.float(2.5,  "...when gain = this many x risk", minval = 1, step = 0.5, group = grpExit)
+showPart   = input.bool(true,  "'Sell part' at profit target", group = grpExit)
+partPct    = input.float(20.0, "Profit target %", minval = 5, step = 1, group = grpExit)
+showClimax = input.bool(true,  "'Climax' tag on very fast run-up", group = grpExit)
+climaxPct  = input.float(25.0, "Climax = up this % in", minval = 10, step = 1, group = grpExit)
+climaxBars = input.int(10,     "...this many days", minval = 3, maxval = 30, group = grpExit)
+showTrail  = input.bool(true,  "'SELL' on close below moving average", group = grpExit)
+trailLen   = input.string("20", "Trail moving average", options = ["10", "20", "50"], group = grpExit)
+showTrailMA = input.bool(true, "Show the trail moving average line", group = grpExit)
+
+trailMA = ta.sma(close, trailLen == "10" ? 10 : trailLen == "20" ? 20 : 50)
+plot(exitOn and showTrail and showTrailMA ? trailMA : na, "Trail MA", color.new(color.yellow, 0), 1)
+
+var bool  inTrade   = false
+var float entry     = na
+var float stopLvl   = na
+var bool  beDone    = false
+var bool  partDone  = false
+var bool  climaxDone = false
+var int   entryBar  = na
+
+stopHit = false
+trailHit = false
+partHit = false
+climaxHit = false
+
+if exitOn
+    if inTrade
+        risk = entry * stopPct / 100
+        if useBE and not beDone and high >= entry + beR * risk
+            stopLvl := math.max(stopLvl, entry)
+            beDone := true
+        if showPart and not partDone and high >= entry * (1 + partPct / 100)
+            partHit := true
+            partDone := true
+        if showClimax and not climaxDone and bar_index - entryBar >= 3 and close >= close[climaxBars] * (1 + climaxPct / 100) and close > entry
+            climaxHit := true
+            climaxDone := true
+        if showStop and close < stopLvl
+            stopHit := true
+        else if showTrail and bar_index - entryBar >= 3 and close < trailMA and close[1] >= trailMA[1]
+            trailHit := true
+        if stopHit or trailHit
+            inTrade := false
+    if breakout and not inTrade
+        inTrade := true
+        entry := close
+        stopLvl := close * (1 - stopPct / 100)
+        beDone := false
+        partDone := false
+        climaxDone := false
+        entryBar := bar_index
+else
+    inTrade := false
+
+heavy = not na(avgVol) and volume > avgVol * volMult
+plot(exitOn and showStop and inTrade ? stopLvl : na, "Stop", beDone ? color.new(color.blue, 0) : color.new(color.red, 0), 2, plot.style_linebr)
+plotshape(partHit,   "Sell part", shape.labeldown, location.abovebar, color.new(color.teal, 0),   text = "Sell part", textcolor = color.white, size = size.small)
+plotshape(climaxHit, "Climax",    shape.labeldown, location.abovebar, color.new(color.fuchsia, 0), text = "Climax",    textcolor = color.white, size = size.small)
+plotshape(stopHit,   "Stop hit",  shape.labeldown, location.abovebar, color.new(color.red, 0),    text = "STOP",      textcolor = color.white, size = size.small)
+plotshape(trailHit and not heavy, "SELL",         shape.labeldown, location.abovebar, color.new(color.orange, 0), text = "SELL",        textcolor = color.white, size = size.small)
+plotshape(trailHit and heavy,     "SELL (volume)", shape.labeldown, location.abovebar, color.new(color.maroon, 0), text = "SELL\nvolume", textcolor = color.white, size = size.small)
