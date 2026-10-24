@@ -34,6 +34,7 @@ PAGES = [
     ("earnings-tracker.html", "tracker", "Earnings tracker"),
     ("company-financials.html", "company", "Company financials"),
     ("dividend-fundamentals.html", "divfund", "Dividend fundamentals"),
+    ("sector-rotation.html", "rotation", "Sector rotation"),
     ("macro.html", "macro", "Macro screener"),
     ("sector-macro.html", "secmacro", "Sector macro scores"),
     ("historical-pe.html", "histpe", "Historical P/E"),

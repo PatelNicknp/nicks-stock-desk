@@ -2051,6 +2051,282 @@
     draw();
   }
 
+  function renderRotation(ctx) {
+    const raw = ctx.files["sector_rotation.csv"] || [];
+    const rows = D.realRows(raw);
+    const tails = D.realRows(ctx.files["sector_rotation_tails.csv"] || []);
+    const scores = D.realRows(ctx.files["scores.csv"] || []);
+    const colors = {
+      XLK: "#7C9CFF", XLV: "#22C55E", XLF: "#F59E0B", XLI: "#38BDF8", XLC: "#A78BFA",
+      XLY: "#FB7185", XLP: "#FBBF24", XLE: "#EF4444", XLU: "#2DD4BF", XLRE: "#C084FC", XLB: "#94A3B8",
+    };
+    const ranked = rows.slice().sort((a, b) => (D.num(a.rank) || 99) - (D.num(b.rank) || 99) || String(a.ticker).localeCompare(b.ticker));
+    let tf = "W";
+    let tailN = 8;
+    let pick = ranked[0] ? ranked[0].ticker : "";
+    const head = ranked[0] || {};
+    const weeklyChanges = rows.filter((r) => String(r.change_weekly || "").indexOf("moved from") >= 0);
+    const dailyChanges = rows.filter((r) => String(r.change_daily || "").indexOf("moved from") >= 0);
+    const sample = rows[0] || {};
+    ctx.page.innerHTML =
+      '<div class="ctrls" id="ctrls"></div>' +
+      '<p class="cap">RS is the sector ETF divided by SPY. RS-Ratio is 100 plus the z-score of that ratio, smoothed, versus its rolling mean. RS-Momentum is 100 plus the z-score of how fast RS-Ratio is changing. 100 is the center. This is a desk calculation, not the commercial JdK indicator. Research only. This desk never places trades and it does not send a notification.</p>' +
+      '<div class="cards" id="cards"></div>' +
+      '<div class="panel pad"><div class="ptitle">Relative rotation</div><div class="chart-box rrg-box"><canvas id="rrg"></canvas></div><div class="rrglegend" id="rrglegend"></div><div class="rrgread" id="rrgread">Tap a point to read RS-Ratio and RS-Momentum.</div></div>' +
+      '<div class="split"><div class="panel pad" id="macro"></div><div class="panel pad" id="changed"></div></div>' +
+      '<div class="panel" id="tbl"></div><div class="panel" id="names"></div>';
+    document.getElementById("ctrls").innerHTML =
+      '<div class="rrgtabs" id="rrgtf">' +
+      '<button type="button" data-tf="D">Daily</button><button type="button" data-tf="W" class="on">Weekly</button><button type="button" data-tf="M">Monthly</button></div>' +
+      '<div class="rrgtabs" id="rrgtail"><span class="lab">Tail</span>' +
+      '<button type="button" data-n="4">4</button><button type="button" data-n="8" class="on">8</button><button type="button" data-n="12">12</button></div>';
+    D.placeFeed(document.getElementById("ctrls"), raw);
+    const leadN = countWhere(rows, (r) => r.quadrant_w === "Leading");
+    const lagN = countWhere(rows, (r) => r.quadrant_w === "Lagging");
+    document.getElementById("cards").innerHTML =
+      card("Top sector", D.esc(head.name || "n/a"), head.score != null && head.score !== "" ? "Score " + D.fmt(D.num(head.score), 1) : "") +
+      card("Leading", String(leadN), "Weekly") +
+      card("Lagging", String(lagN), "Weekly") +
+      card("Quadrant changes", String(weeklyChanges.length), "Versus last week") +
+      card("10-year yield", D.esc(sample.dgs10_trend || "missing"), "About 3 months");
+    function tendency(trend, downText, upText, flatText, missingText) {
+      if (trend === "down") return downText;
+      if (trend === "up") return upText;
+      if (trend === "flat") return flatText;
+      return missingText;
+    }
+    const yTrend = sample.dgs10_trend || "missing";
+    const cTrend = sample.t10y2y_trend || "missing";
+    const yLast = D.num(sample.dgs10_last);
+    const cLast = D.num(sample.t10y2y_last);
+    document.getElementById("macro").innerHTML =
+      '<div class="ptitle">Macro backdrop</div>' +
+      '<p class="cap">General tendencies, not a forecast. The trend is the latest reading versus about 63 observations earlier. Dollar, oil, and gold are not in the cached prices or the FRED files this desk already keeps.</p>' +
+      '<p><strong>10-year yield</strong> ' + D.esc(yTrend) + (yLast == null ? "" : " · " + D.fmt(yLast, 2)) + ". " +
+      D.esc(tendency(yTrend,
+        "Falling rates have historically tended to favor Technology, Real Estate, and Utilities.",
+        "Rising rates have historically tended to favor Financials.",
+        "Falling rates have historically tended to favor Technology, Real Estate, and Utilities. Rising rates have historically tended to favor Financials.",
+        "The 10-year yield is not on file.")) + "</p>" +
+      '<p style="margin-top:8px"><strong>10-year minus 2-year</strong> ' + D.esc(cTrend) + (cLast == null ? "" : " · " + D.fmt(cLast, 2)) + ". " +
+      D.esc(tendency(cTrend,
+        "A flatter or more negative curve has historically tended to favor Consumer Staples, Utilities, and Health Care.",
+        "A steeper curve has historically tended to favor Financials and Industrials.",
+        "A steeper curve has historically tended to favor Financials and Industrials. A flatter curve has historically tended to favor Consumer Staples, Utilities, and Health Care.",
+        "The yield curve is not on file.")) + "</p>" +
+      '<p class="cap" style="margin-top:8px">Dollar: not on file. A strong dollar has historically tended to favor domestic companies over multinationals. There is no current reading.</p>' +
+      '<p class="cap">Oil: not on file. Rising oil has historically tended to favor Energy. There is no current reading.</p>' +
+      '<p class="cap">Gold: not on file. This desk has no gold series, so there is no current reading and no sector map for it.</p>';
+    const lines = [];
+    dailyChanges.forEach((r) => lines.push(r.change_daily + " since yesterday."));
+    weeklyChanges.forEach((r) => lines.push(r.change_weekly + " since last week."));
+    document.getElementById("changed").innerHTML = '<div class="ptitle">What changed</div>' +
+      (lines.length ? '<ul class="changed">' + lines.map((t) => "<li>" + D.esc(t) + "</li>").join("") + "</ul>"
+        : '<p class="cap">No sector changed quadrant versus yesterday or last week.</p>');
+    document.getElementById("rrglegend").innerHTML = ranked.map((r) =>
+      '<span><i class="rrgdot" style="background:' + (colors[r.ticker] || "#8B96AD") + '"></i>' + D.esc(r.ticker) + "</span>").join("") +
+      '<span><i class="rrgdot" style="background:#22C55E"></i>Leading</span>' +
+      '<span><i class="rrgdot" style="background:#F59E0B"></i>Weakening</span>' +
+      '<span><i class="rrgdot" style="background:#EF4444"></i>Lagging</span>' +
+      '<span><i class="rrgdot" style="background:#7C9CFF"></i>Improving</span>';
+    const state = { sort: "rank", dir: "asc", page: 0 };
+    function pointsFor(ticker) {
+      return tails.filter((r) => r.timeframe === tf && r.ticker === ticker)
+        .sort((a, b) => (D.num(a.tail_index) || 0) - (D.num(b.tail_index) || 0))
+        .slice(-tailN)
+        .map((r) => ({ x: D.num(r.rs_ratio), y: D.num(r.rs_momentum), date: r.date, name: r.name, ticker: r.ticker }))
+        .filter((p) => p.x != null && p.y != null);
+    }
+    function showReadout(p) {
+      const q = p.x >= 100 && p.y >= 100 ? "Leading" : p.x >= 100 ? "Weakening" : p.y >= 100 ? "Improving" : "Lagging";
+      document.getElementById("rrgread").textContent =
+        p.ticker + " · " + (p.name || "") + " · " + p.date + " · RS-Ratio " + D.fmt(p.x, 2) + " · RS-Momentum " + D.fmt(p.y, 2) + " · " + q;
+    }
+    function drawChart() {
+      D.destroyCharts();
+      const canvas = document.getElementById("rrg");
+      const sets = ranked.map((r) => {
+        const data = pointsFor(r.ticker);
+        const color = colors[r.ticker] || "#8B96AD";
+        return { label: r.ticker, data: data, color: color, name: r.name };
+      }).filter((s) => s.data.length);
+      let minX = 100, maxX = 100, minY = 100, maxY = 100;
+      sets.forEach((s) => s.data.forEach((p) => {
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+      }));
+      const padX = Math.max(2, (maxX - minX) * 0.14);
+      const padY = Math.max(2, (maxY - minY) * 0.14);
+      const quadPlugin = {
+        id: "rrgQuad",
+        beforeDatasetsDraw(chart) {
+          const area = chart.chartArea;
+          const xs = chart.scales.x;
+          const ys = chart.scales.y;
+          if (!area || !xs || !ys) return;
+          const x0 = xs.getPixelForValue(100);
+          const y0 = ys.getPixelForValue(100);
+          const ctx2 = chart.ctx;
+          ctx2.save();
+          function fill(x1, y1, x2, y2, color) {
+            ctx2.fillStyle = color;
+            ctx2.globalAlpha = 0.28;
+            ctx2.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+          }
+          fill(x0, area.top, area.right, y0, "#22C55E");
+          fill(x0, y0, area.right, area.bottom, "#F59E0B");
+          fill(area.left, y0, x0, area.bottom, "#EF4444");
+          fill(area.left, area.top, x0, y0, "#7C9CFF");
+          ctx2.globalAlpha = 1;
+          ctx2.strokeStyle = "#94A3B8";
+          ctx2.lineWidth = 1.25;
+          ctx2.beginPath();
+          ctx2.moveTo(x0, area.top); ctx2.lineTo(x0, area.bottom);
+          ctx2.moveTo(area.left, y0); ctx2.lineTo(area.right, y0);
+          ctx2.stroke();
+          ctx2.font = "11px Roboto, Arial, sans-serif";
+          ctx2.fillStyle = "#8B96AD";
+          ctx2.textAlign = "left";
+          ctx2.fillText("Improving", area.left + 6, area.top + 14);
+          ctx2.textAlign = "right";
+          ctx2.fillText("Leading", area.right - 6, area.top + 14);
+          ctx2.fillText("Weakening", area.right - 6, area.bottom - 6);
+          ctx2.textAlign = "left";
+          ctx2.fillText("Lagging", area.left + 6, area.bottom - 6);
+          ctx2.restore();
+        },
+        afterDatasetsDraw(chart) {
+          const ctx2 = chart.ctx;
+          ctx2.save();
+          ctx2.font = "11px Roboto, Arial, sans-serif";
+          ctx2.fillStyle = "#E6EBF5";
+          ctx2.textAlign = "left";
+          const n = chart.data.datasets.length || 1;
+          chart.data.datasets.forEach((ds, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (!meta.data.length) return;
+            const pt = meta.data[meta.data.length - 1];
+            const ang = (-Math.PI / 2) + (i / n) * Math.PI * 2;
+            ctx2.fillText(ds.label, pt.x + Math.cos(ang) * 16, pt.y + Math.sin(ang) * 14);
+          });
+          ctx2.restore();
+        },
+      };
+      D.makeChart(canvas, {
+        type: "scatter",
+        data: {
+          datasets: sets.map((s) => ({
+            label: s.label,
+            data: s.data,
+            showLine: true,
+            borderColor: s.color,
+            backgroundColor: s.color,
+            borderWidth: 1.5,
+            pointRadius: s.data.map((_, i) => i === s.data.length - 1 ? 6 : 2.5),
+            pointHoverRadius: 8,
+            pointHitRadius: 16,
+            tension: 0,
+          })),
+        },
+        plugins: [quadPlugin],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          interaction: { mode: "nearest", intersect: false },
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          layout: { padding: { top: 16, right: 28, bottom: 4, left: 4 } },
+          scales: {
+            x: { min: minX - padX, max: maxX + padX, ticks: { color: "#8B96AD" }, grid: { color: "#1E293B" }, title: { display: true, text: "RS-Ratio", color: "#8B96AD" } },
+            y: { min: minY - padY, max: maxY + padY, ticks: { color: "#8B96AD" }, grid: { color: "#1E293B" }, title: { display: true, text: "RS-Momentum", color: "#8B96AD" } },
+          },
+          onHover(evt, els, chart) {
+            if (!els.length || !chart) return;
+            const ds = chart.data.datasets[els[0].datasetIndex];
+            showReadout(ds.data[els[0].index]);
+          },
+          onClick(evt, els, chart) {
+            if (!els.length || !chart) return;
+            const ds = chart.data.datasets[els[0].datasetIndex];
+            showReadout(ds.data[els[0].index]);
+          },
+        },
+      });
+      if (!sets.length) {
+        document.getElementById("rrgread").textContent = "No rotation points for this bar size yet.";
+      }
+    }
+    function drawNames() {
+      const row = ranked.find((r) => r.ticker === pick) || ranked[0];
+      const host = document.getElementById("names");
+      if (!row) {
+        host.innerHTML = "";
+        return;
+      }
+      const names = scores.filter((r) => r.sector === row.sector)
+        .sort((a, b) => (D.num(b.score) || -999) - (D.num(a.score) || -999))
+        .slice(0, 12);
+      D.drawTable(host, {
+        title: "Top stocks in " + row.name,
+        sub: row.reason || "",
+        rows: names,
+        columns: [T("ticker", "Ticker", "ticker"), T("company", "Company", "text"), T("score", "Score", "num", { dec: 0 }), T("verdict", "Verdict", "verdict")],
+        state: { sort: "score", dir: "desc", page: 0 },
+        pageSize: 12,
+        foot: false,
+        empty: "No scored stocks in this sector.",
+      });
+    }
+    function drawTable() {
+      D.drawTable(document.getElementById("tbl"), {
+        title: "Sectors",
+        rows: ranked,
+        columns: [
+          T("rank", "Rank", "num", { dec: 0 }),
+          T("ticker", "ETF", "etf"),
+          T("name", "Sector"),
+          T("score", "Score", "num", { dec: 1 }),
+          T("quadrant_d", "D", "quad"),
+          T("quadrant_w", "W", "quad"),
+          T("quadrant_m", "M", "quad"),
+          T("rs_1m", "RS 1m", "pct", { dec: 1, color: true }),
+          T("rs_3m", "RS 3m", "pct", { dec: 1, color: true }),
+          T("rs_6m", "RS 6m", "pct", { dec: 1, color: true }),
+          T("breadth_sma50", "Above 50d", "pct", { dec: 0 }),
+          T("breadth_sma200", "Above 200d", "pct", { dec: 0 }),
+          T("near_high_count", "Near high", "num", { dec: 0 }),
+          T("buy_setup_count", "Buy setups", "num", { dec: 0 }),
+          T("score_avg", "Desk avg", "num", { dec: 1 }),
+          T("buy_share", "BUY %", "pct", { dec: 0 }),
+          T("reason", "Reason", "text", { wrap: true }),
+        ],
+        state: state,
+        pageSize: 15,
+        foot: false,
+        pick: pick,
+        onPick(row) { pick = row.ticker; drawTable(); drawNames(); },
+        empty: "No sector rotation on file.",
+      });
+    }
+    document.getElementById("rrgtf").querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tf = btn.getAttribute("data-tf");
+        document.querySelectorAll("#rrgtf button").forEach((b) => b.classList.toggle("on", b === btn));
+        drawChart();
+      });
+    });
+    document.getElementById("rrgtail").querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tailN = Number(btn.getAttribute("data-n"));
+        document.querySelectorAll("#rrgtail button").forEach((b) => b.classList.toggle("on", b === btn));
+        drawChart();
+      });
+    });
+    drawChart();
+    drawTable();
+    drawNames();
+  }
+
   function renderUpdates(ctx) {
     const log = ctx.files["updates_log.csv"] || [];
     const fresh = D.realRows(ctx.files["freshness.csv"]);
@@ -2086,6 +2362,7 @@
       "earnings cards": "Report cards",
       "dividend scanner": "Dividend fundamentals",
       "macro screener": "Macro screener",
+      "sector rotation": "Sector rotation",
       "scanner growth": "Growth",
       "scanner quality": "Quality",
       "scanner dividend": "Dividend",
@@ -2197,6 +2474,7 @@
     tracker: { files: ["earnings_tracker.csv"], render: renderTracker },
     company: { files: ["company_financials.csv"], render: renderCompany },
     divfund: { files: ["dividend_scanner.csv"], render: renderDivFund },
+    rotation: { files: ["sector_rotation.csv", "sector_rotation_tails.csv", "scores.csv"], render: renderRotation },
     macro: { files: ["macro_screener.csv"], render: renderMacro },
     secmacro: { files: ["sector_macro.csv", "sectors.csv"], render: renderSecMacro },
     histpe: { files: ["historical_pe.csv"], render: renderHist },

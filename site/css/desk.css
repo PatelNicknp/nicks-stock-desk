@@ -173,6 +173,16 @@ input::placeholder{color:#5B6680;opacity:1}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{height:28px;padding:0 10px;font-size:12px;color:#8B96AD;background:#0F1420;border:1px solid #1E293B;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
 .chip b{color:#E6EBF5;font-weight:700}
+.rrgtabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rrgtabs .lab{font-size:11px;color:#8B96AD}
+.rrgtabs button{background:#121826;border:1px solid #1E293B;color:#8B96AD;border-radius:6px;height:36px;padding:0 12px;cursor:pointer;font-size:13px}
+.rrgtabs button.on{background:#1A2236;color:#E6EBF5;font-weight:700;border-color:#334155}
+.chart-box.rrg-box{height:420px}
+.rrglegend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px}
+.rrglegend span{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#8B96AD}
+.rrgdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.rrgread{margin-top:8px;font-size:13px;line-height:18px;color:#E6EBF5;min-height:18px;overflow-wrap:anywhere}
+.changed li{margin:4px 0;font-size:13px;line-height:18px}
 .toggles{display:flex;width:420px;height:36px;background:#121826;border:1px solid #1E293B;border-radius:6px;overflow:hidden}
 .toggles button{flex:1;background:transparent;border:0;color:#8B96AD;cursor:pointer;font-size:13px}
 .toggles button.on{background:#1A2236;color:#E6EBF5;font-weight:700}
@@ -204,6 +214,8 @@ input::placeholder{color:#5B6680;opacity:1}
   .cards,.cards.seven{grid-template-columns:repeat(4,minmax(0,1fr))}
   .split.chartpair{grid-template-columns:1fr}
   .toggles{width:100%;max-width:100%}
+  .rrgtabs{grid-column:1 / -1}
+  .rrgtabs button{min-height:44px;min-width:44px}
   .seg{height:44px}
   .seg button{min-width:44px;min-height:44px;font-size:14px}
   .w52tabs button{min-height:44px;height:44px}
@@ -246,6 +258,7 @@ input::placeholder{color:#5B6680;opacity:1}
   .cards,.cards.seven{grid-template-columns:repeat(3,minmax(0,1fr))}
   .chart-box{height:260px}
   .chart-box.tall,.chart-box.htall{height:280px}
+  .chart-box.rrg-box{height:320px}
   .chart-box.h300{height:240px}
   .pxtools{justify-content:flex-start}
 }
@@ -273,6 +286,7 @@ input::placeholder{color:#5B6680;opacity:1}
   table{font-size:14px}
   .chart-box{height:220px}
   .chart-box.tall,.chart-box.htall,.chart-box.h300{height:220px}
+  .chart-box.rrg-box{height:280px}
   .px-host{height:280px}
   .headrow{flex-wrap:wrap}
   .headrow .psub{text-align:left}
@@ -289,7 +303,7 @@ input::placeholder{color:#5B6680;opacity:1}
   body.search-open .upd{grid-row:3}
 }
 @media (max-width:900px) and (max-height:500px){
-  .chart-box,.chart-box.tall,.chart-box.htall,.chart-box.h300{height:180px}
+  .chart-box,.chart-box.tall,.chart-box.htall,.chart-box.h300,.chart-box.rrg-box{height:180px}
   .px-host{height:220px}
   .main{padding-top:max(10px, env(safe-area-inset-top));padding-bottom:max(10px, env(safe-area-inset-bottom))}
   h1{font-size:22px;line-height:26px}

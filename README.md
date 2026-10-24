@@ -124,6 +124,14 @@ Switch: `buy_setups`, on by default. A second switch, `buy_setups.market_filter`
 
 A name qualifies when one of those scanners is READY or BROKEN OUT today, the verdict is BUY, the close is above the 50-day and the 200-day averages, and the risk from the entry to the stop is 8% or less. Entry is the buy point of the strongest scanner that agrees. VCP uses the Minervini pivot. The stop is the tighter of 7% under that entry or the setup's own stop. Target 1 is 20% above the entry, or 20% above the breakout close. Target 2 is the entry plus three times the dollar risk. With the market filter on, the list is empty unless SPY's close is above its 50-day and 200-day averages and the 50-day is above the 200-day. QQQ is shown the same way and does not decide the list. The page can still show the hidden names greyed.
 
+### Sector rotation
+
+The sector rotation page uses the 11 SPDR sector ETFs and SPY already in the price cache. It does not add a Yahoo request. Dollar, oil, and gold are not in that cache and they are not in the two FRED files (the 10-year yield and the 10-year minus 2-year spread), so the page lists those three as missing.
+
+RS is the ETF close divided by SPY on daily, weekly, or monthly bars. RS-Ratio is 100 plus the z-score of the smoothed RS versus its rolling mean. RS-Momentum is 100 plus the z-score of the change in RS-Ratio. A flat window has z-score 0, so it sits at 100. 100 counts as the strong side of each axis. This is a desk calculation, not the commercial JdK indicator. The windows are `sector_rotation.windows` in `config.json` (daily 10/40/5/40, weekly 6/26/4/26, monthly 3/12/2/12).
+
+The 0–100 score blends relative strength versus SPY over 21, 63, and 126 sessions, breadth above the 50-day and 200-day averages, names within 5% of a 252-session high, buy setups, the average desk score, the share of BUY verdicts, and a weekly quadrant bonus. Weights are `sector_rotation.weight.*`. A missing factor is dropped and the rest are renormalized. It is not treated as zero. The rate notes are general tendencies, not a forecast. The page does not send a notification.
+
 ## Rate limits
 
 Slow sources are fetched at most once per US session and reused on the hourly runs.

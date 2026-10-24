@@ -40,6 +40,7 @@
     "company_financials": true,
     "dividend_scanner": true,
     "macro_screener": true,
+    "sector_rotation": true,
     "historical_pe": true,
     "breakouts": true,
     "trends": true,
@@ -121,5 +122,29 @@
     {"ticker": "JPM", "shares": 25, "avg_cost": 190.0, "example": "yes"},
     {"ticker": "UNH", "shares": 10, "avg_cost": 520.0, "example": "yes"}
   ],
-  "watchlist": ["AVGO", "LLY", "COST", "CAT", "PLTR"]
+  "watchlist": ["AVGO", "LLY", "COST", "CAT", "PLTR"],
+  "sector_rotation": {
+    "windows": {
+      "D": {"smooth": 10, "ratio_window": 40, "roc_span": 5, "mom_window": 40},
+      "W": {"smooth": 6, "ratio_window": 26, "roc_span": 4, "mom_window": 26},
+      "M": {"smooth": 3, "ratio_window": 12, "roc_span": 2, "mom_window": 12}
+    },
+    "weights": {
+      "rs_1m": 8,
+      "rs_3m": 12,
+      "rs_6m": 10,
+      "breadth_sma50": 12,
+      "breadth_sma200": 12,
+      "near_high": 10,
+      "buy_setups": 10,
+      "desk_score": 10,
+      "buy_share": 8,
+      "rrg": 8
+    },
+    "near_high_pct": 5,
+    "w52_bars": 252,
+    "tail_keep": 12,
+    "macro_lookback": 63,
+    "yield_flat_band": 0.05
+  }
 }
