@@ -164,7 +164,8 @@ def frames_from_download(df):
             sub = sub.to_frame()
         return sub
 
-    return grab("Close"), grab("High"), grab("Low"), grab("Volume")
+    # Open is already in this Yahoo batch. Keeping it does not add a request.
+    return grab("Close"), grab("High"), grab("Low"), grab("Volume"), grab("Open")
 
 
 def _normalize_index(df):
@@ -215,14 +216,16 @@ def download_prices(tickers, cfg):
     if not parts:
         raise RuntimeError("no prices downloaded")
     def cat(i):
-        frames = [p[i] for p in parts if p[i] is not None]
+        frames = [p[i] for p in parts if len(p) > i and p[i] is not None]
+        if not frames:
+            return None
         out = pd.concat(frames, axis=1)
         out = out.loc[:, ~out.columns.duplicated()]
         return out.sort_index()
-    return cat(0), cat(1), cat(2), cat(3)
+    return cat(0), cat(1), cat(2), cat(3), cat(4)
 
 
-def ohlcv_long(close, high, low, vol):
+def ohlcv_long(close, high, low, vol, opn=None):
     def melt(df, name):
         x = df.copy()
         x.index.name = "date"
@@ -235,6 +238,8 @@ def ohlcv_long(close, high, low, vol):
         m = m.merge(melt(low, "low"), on=["date", "ticker"], how="left")
     if vol is not None:
         m = m.merge(melt(vol, "volume"), on=["date", "ticker"], how="left")
+    if opn is not None:
+        m = m.merge(melt(opn, "open"), on=["date", "ticker"], how="left")
     m = m.dropna(subset=["close"])
     m["date"] = pd.to_datetime(m["date"]).dt.strftime("%Y-%m-%d")
     return m
@@ -259,8 +264,8 @@ def load_prices(tickers, cfg, cache, mode):
         log("Prices (Yahoo Finance)", "MISSING", "", "offline and no price cache")
         return pd.DataFrame()
     try:
-        c, h, l, v = download_prices(tickers, cfg)
-        long = ohlcv_long(c, h, l, v)
+        c, h, l, v, opn = download_prices(tickers, cfg)
+        long = ohlcv_long(c, h, l, v, opn)
         long.to_csv(path, index=False, compression="gzip")
         last = str(pd.to_datetime(long["date"]).max().date())
         log("Prices (Yahoo Finance)", "OK", last, "%d rows, batched" % len(long))
@@ -1772,6 +1777,10 @@ def build_watch(watch, scores):
 # Scorecard chart window. About half a year of sessions. The job's full history
 # stays in cache/ohlcv.csv.gz and is not copied into the sheet.
 CHART_BARS = 126
+# Daily bars for the candlestick chart. One year of sessions, so the 1Y
+# picker has a full window. Averages are computed on the whole cache first.
+CANDLE_BARS = 260
+_TICKER_FILE = re.compile(r"^[A-Z0-9][A-Z0-9.\-]{0,12}$")
 
 
 def _upside_pct(target_mean, price):
@@ -1818,6 +1827,69 @@ def price_file(close, scores):
                 "stop": rec.get("stop"), "trade_target": rec.get("trade_target"),
             })
     return pd.DataFrame(rows)
+
+
+def candle_file(long_df, tickers, bars=CANDLE_BARS):
+    """Last `bars` sessions per ticker for the site candlestick files.
+
+    High, low, close, and volume come from the price cache. Open stays blank
+    when that cache has no open column. Averages use the full close history,
+    then the window is sliced, so the left edge is not a partial average.
+    """
+    cols = ["date", "ticker", "open", "high", "low", "close", "volume", "sma20", "sma50"]
+    if long_df is None or len(long_df) == 0 or not tickers or "close" not in getattr(long_df, "columns", []):
+        return pd.DataFrame(columns=cols)
+    want = []
+    for t in tickers:
+        s = str(t or "").strip().upper()
+        if _TICKER_FILE.match(s):
+            want.append(s)
+    want = list(dict.fromkeys(want))
+    if not want:
+        return pd.DataFrame(columns=cols)
+    x = long_df[long_df["ticker"].astype(str).str.upper().isin(want)].copy()
+    if not len(x):
+        return pd.DataFrame(columns=cols)
+    x["ticker"] = x["ticker"].astype(str).str.upper()
+    x["date"] = pd.to_datetime(x["date"])
+    for col in ("open", "high", "low", "close", "volume"):
+        if col not in x.columns:
+            x[col] = np.nan
+        else:
+            x[col] = pd.to_numeric(x[col], errors="coerce")
+    x = x.dropna(subset=["close"]).sort_values(["ticker", "date"]).drop_duplicates(["ticker", "date"], keep="last")
+    parts = []
+    for _, g in x.groupby("ticker", sort=False):
+        g = g.copy()
+        close = g["close"]
+        g["sma20"] = close.rolling(20, min_periods=20).mean()
+        g["sma50"] = close.rolling(50, min_periods=50).mean()
+        parts.append(g.tail(int(bars)))
+    if not parts:
+        return pd.DataFrame(columns=cols)
+    out = pd.concat(parts, ignore_index=True)
+    for col in ("open", "high", "low", "close", "sma20", "sma50"):
+        out[col] = out[col].round(2)
+    out["volume"] = out["volume"].round(0).astype("Int64")
+    out["date"] = pd.to_datetime(out["date"]).dt.strftime("%Y-%m-%d")
+    return out[cols]
+
+
+def write_candle_files(frame, out_dir):
+    """One compact CSV per ticker. Returns how many files were written."""
+    os.makedirs(out_dir, exist_ok=True)
+    if frame is None or len(frame) == 0 or "ticker" not in frame.columns:
+        return 0
+    keep = set()
+    cols = [c for c in frame.columns if c != "ticker"]
+    for ticker, g in frame.groupby("ticker", sort=False):
+        name = str(ticker) + ".csv"
+        keep.add(name)
+        g[cols].to_csv(os.path.join(out_dir, name), index=False, na_rep="")
+    for name in os.listdir(out_dir):
+        if name.endswith(".csv") and name not in keep:
+            os.remove(os.path.join(out_dir, name))
+    return len(keep)
 
 
 def news_rows(news, scores):
@@ -2035,6 +2107,13 @@ def main(argv=None):
     port, port_sum = build_portfolio(holds, scores, history) if features.get("watchlist_portfolio", True) else (pd.DataFrame(), pd.DataFrame())
     watch_out = build_watch(watch, scores) if features.get("watchlist_portfolio", True) else pd.DataFrame()
     prices = price_file(close, scores) if features.get("scorecard", True) else pd.DataFrame()
+    if len(scores) and long is not None and len(long):
+        n_candles = write_candle_files(candle_file(long, list(scores["ticker"])), os.path.join(data, "ohlc"))
+        if n_candles:
+            note = "%d tickers, last %d sessions from the price cache. No new download." % (n_candles, CANDLE_BARS)
+            if "open" not in long.columns or not pd.to_numeric(long["open"], errors="coerce").notna().any():
+                note += " Open is blank until the next full price download."
+            log("Price candles", "OK", asof, note)
     news_out = news_rows(news, scores) if len(scores) else pd.DataFrame()
     headlines = news_out[news_out["kind"] == "headline"] if len(news_out) and "kind" in news_out.columns else pd.DataFrame()
     details = tables.score_details(scores) if len(scores) else pd.DataFrame()

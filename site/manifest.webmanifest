@@ -1,0 +1,11 @@
+{
+  "name": "Nick's Stock Desk",
+  "short_name": "Stock Desk",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0B0F17",
+  "theme_color": "#0B0F17",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

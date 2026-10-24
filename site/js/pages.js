@@ -161,8 +161,10 @@
         let pick = null;
         const drawDetail = (row, rows) => {
           const host = document.getElementById("detail");
+          D.destroyCharts();
           if (!row && !(cfg.detailRows)) { host.innerHTML = ""; return; }
-          host.innerHTML = cfg.detail(row, rows || []);
+          host.innerHTML = (cfg.price ? priceShell(cfg.priceSub || "Daily bars for the selected name") : "") + (cfg.detail ? cfg.detail(row, rows || []) : "");
+          if (cfg.price && row) D.drawPriceChart(host.querySelector("[data-px-panel]"), { ticker: row.ticker, lines: cfg.price(row) });
         };
         const strongest = (rows) => rows.slice().sort((a, b) => (D.num(b.strength) || 0) - (D.num(a.strength) || 0))[0] || null;
         const draw = () => {
@@ -183,6 +185,18 @@
     };
   }
 
+  function priceShell(sub) {
+    return '<div class="panel pad" data-px-panel><div class="rowhead wrap"><div><div class="ptitle">Price</div><div class="psub">' +
+      D.esc(sub || "Daily bars") + '</div></div><div class="pxtools" data-px-tools></div></div><div class="chart-box pxchart"><div class="px-price"><canvas data-px-price></canvas></div><div class="px-vol" data-px-volwrap hidden><canvas data-px-vol></canvas></div></div><p class="cap" data-px-cap></p></div>';
+  }
+  function setupLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.pivot) != null) lines.push({ value: D.num(row.pivot), color: "#F59E0B", label: "Buy point " + D.fmt(row.pivot, 2) });
+    if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop " + D.fmt(row.stop, 2) });
+    if (D.num(row.target) != null) lines.push({ value: D.num(row.target), color: "#22C55E", label: "Target " + D.fmt(row.target, 2) });
+    return lines;
+  }
   function reasonBlock(row, extraCols) {
     let rules = "";
     if (extraCols) {
@@ -208,7 +222,8 @@
     const mt = (ctx.files["market_today.csv"] || [])[0] || {};
     const breadth = D.lastNDays(D.realRows(ctx.files["breadth_history.csv"]), "date", 182);
     const sectors = D.realRows(ctx.files["sectors.csv"]);
-    const alerts = D.realRows(ctx.files["alerts.csv"]).filter((r) => r.kind && r.kind !== "info");
+    const alertRaw = ctx.files["alerts.csv"] || [];
+    const alerts = D.alertDataRows(alertRaw);
     const day = D.num(mt.spy_day_pct);
     const dayHtml = day == null ? D.na() : '<span style="color:' + D.retColor(day) + '">' + (day < 0 ? "▼ " : "▲ ") + D.fmt(Math.abs(day), 2) + "% today</span>";
     const b = D.num(mt.breadth_sma50);
@@ -275,7 +290,9 @@
       });
     }
     if (!panelOff("feature.alerts")) {
-      D.drawTable(document.getElementById("alerts"), {
+      const host = document.getElementById("alerts");
+      if (!alerts.length) D.showQuiet(host, D.quietMessage(alertRaw));
+      else D.drawTable(host, {
         rows: alerts, columns: [TK, T("text", "What changed", "text", { wrap: true }), T("score", "Score", "scorejump"), VE],
         state: { sort: "score", dir: "desc", page: 0 }, pageSize: 8, foot: false,
       });
@@ -371,7 +388,6 @@
       const kind = D.fieldVal(box, "kind") || "headline";
       const day = D.num(row.day_pct);
       const details = (ctx.files["score_details.csv"] || []).filter((r) => r.ticker === ticker);
-      const prices = (ctx.files["prices.csv"] || []).filter((r) => r.ticker === ticker);
       const earn = (ctx.files["earnings_history.csv"] || []).filter((r) => r.ticker === ticker && !D.isBlank(r.eps_actual))
         .sort((a, b) => a.earnings_date < b.earnings_date ? -1 : 1).slice(-8);
       const news = (ctx.files["news.csv"] || []).filter((r) => r.ticker === ticker && (kind === "" || r.kind === kind));
@@ -411,7 +427,7 @@
         miniStat("PEG target", rangeTarget(row.target_peg, row.price)) + miniStat("Blended target", blendHtml(row)) +
         miniStat("Inputs in blend", blendCount(row)) +
         "</div></div></div>" +
-        '<div class="split"><div class="panel pad"><div class="ptitle">Price, last 6 months, with plan levels</div><div class="chart-box"><canvas id="px"></canvas></div><p class="cap">Gaps in the averages are bridged.</p></div>' +
+        '<div class="split chartpair">' + priceShell("Plan levels stay on the chart") +
         '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
         '<div class="split r21"><div class="panel" id="break"></div><div><div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Versus sector</div></div><div class="scroll"><table><tbody>' + vs +
         '</tbody></table></div></div><div class="panel pad"><div class="ptitle">Data basis</div><div style="font-size:11px;margin-top:8px">' + basis + "</div></div></div></div>" +
@@ -430,11 +446,7 @@
       }
       if (D.num(row.stop) != null) hlines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop " + D.fmt(row.stop, 2) });
       if (D.num(row.trade_target) != null) hlines.push({ value: D.num(row.trade_target), color: "#22C55E", label: "Target " + D.fmt(row.trade_target, 2) });
-      D.lineChart(document.getElementById("px"), prices.map((r) => r.date), [
-        { label: "Close", data: D.seriesNum(prices, "close"), color: "#E6EBF5", spanGaps: true },
-        { label: "20-day avg", data: D.seriesNum(prices, "sma20"), color: "#7C9CFF", spanGaps: true },
-        { label: "50-day avg", data: D.seriesNum(prices, "sma50"), color: "#8B96AD", spanGaps: true },
-      ], { plugins: { hlines: hlines } });
+      D.drawPriceChart(host.querySelector("[data-px-panel]"), { ticker: ticker, lines: hlines });
       const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const earnLabels = earn.map((r) => {
         const m = /^(\d{4})-(\d{2})/.exec(r.earnings_date || "");
@@ -577,9 +589,10 @@
 
   function renderAlerts(ctx) {
     const raw = ctx.files["alerts.csv"];
-    const all = D.realRows(raw);
-    const changes = D.realRows(ctx.files["score_changes.csv"]);
-    const live = all.filter((r) => r.kind !== "info");
+    const changeRaw = ctx.files["score_changes.csv"] || [];
+    const all = D.alertDataRows(raw);
+    const changes = D.realRows(changeRaw);
+    const live = all;
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">These are changes since the previous run. Nothing is emailed and nothing is sent to a broker.</p>' +
       '<div class="cards" id="cards"></div><div class="panel" id="tbl"></div><div class="panel" id="chg" style="margin-top:24px"></div>';
@@ -605,20 +618,27 @@
       return true;
     };
     const draw = () => {
-      const rows = all.filter((r) => D.matchMulti(r, "kind", D.selectedMulti(box, "kind")) &&
-        D.matchMulti(r, "verdict", D.selectedMulti(box, "verdict")) &&
-        D.matchText(r, "ticker", D.fieldVal(box, "ticker")));
-      D.drawTable(document.getElementById("tbl"), {
-        title: "Alerts", rows: rows,
-        columns: [TK, T("kind", "Type", "kind"), T("text", "What changed", "text", { wrap: true }),
-          SC, T("score_prev", "Score before", "num", { dec: 0 }),
-          VE, T("verdict_prev", "Verdict before", "verdict"), PR],
-        state: state, pageSize: 12,
-      });
+      const alertHost = document.getElementById("tbl");
+      if (!all.length) D.showQuiet(alertHost, D.quietMessage(raw), "Alerts");
+      else {
+        const rows = all.filter((r) => D.matchMulti(r, "kind", D.selectedMulti(box, "kind")) &&
+          D.matchMulti(r, "verdict", D.selectedMulti(box, "verdict")) &&
+          D.matchText(r, "ticker", D.fieldVal(box, "ticker")));
+        D.drawTable(alertHost, {
+          title: "Alerts", rows: rows,
+          columns: [TK, T("kind", "Type", "kind"), T("text", "What changed", "text", { wrap: true }),
+            SC, T("score_prev", "Score before", "num", { dec: 0 }),
+            VE, T("verdict_prev", "Verdict before", "verdict"), PR],
+          state: state, pageSize: 12,
+        });
+      }
       const q = (D.fieldVal(box, "ticker") || "").trim();
-      D.drawTable(document.getElementById("chg"), {
+      const changeHost = document.getElementById("chg");
+      const changeRows = changes.filter((r) => D.matchText(r, "ticker", q) && D.matchMulti(r, "verdict", D.selectedMulti(box, "verdict")) && inChange(r));
+      if (!changes.length) D.showQuiet(changeHost, D.quietMessage(changeRaw), "Score changes");
+      else D.drawTable(changeHost, {
         title: "Score changes",
-        rows: changes.filter((r) => D.matchText(r, "ticker", q) && D.matchMulti(r, "verdict", D.selectedMulti(box, "verdict")) && inChange(r)),
+        rows: changeRows,
         columns: [TK, CO, SC, T("score_prev", "Score before", "num", { dec: 0 }), T("score_change", "Change", "delta", { dec: 0 }),
           VE, T("day_pct", "Day %", "pct", { color: true }), PR],
         state: st2, pageSize: 12,
@@ -792,6 +812,8 @@
       T("stop", "Stop", "num", { dec: 2, tone: "stop" }), T("target", "Target", "num", { dec: 2, tone: "target" }), T("trail", "20-day trail", "num", { dec: 2 }),
       T("trend_score", "Trend template", "of8"), T("contractions", "Pullbacks"), T("depths", "Pullback depths %"),
       T("strength", "Strength", "strengthbar"), T("freshness", "Freshness", "fresh")],
+    price: setupLines,
+    priceSub: "Buy point, stop, and target when the scan has them",
     cards(all) {
       return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
@@ -854,6 +876,7 @@
       T("target", "Target", "num", { dec: 2, tone: "target" }), T("strength", "Strength", "strengthbar"),
       T("range_days", "Range days", "num", { dec: 0 }), T("range_width_pct", "Range width %", "pct", { dec: 1, color: false }),
       T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }), T("freshness", "Data", "fresh")],
+    price: setupLines,
     cards(all) {
       return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
@@ -874,6 +897,7 @@
       T("pole_pct", "Pole rise %", "pct", { dec: 1, color: false }), T("flag_bars", "Flag days", "num", { dec: 0 }),
       T("retrace_pct", "Pullback of pole %", "retrace", { dec: 1 }), T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }),
       T("freshness", "Data", "fresh")],
+    price: setupLines,
     cards(all) {
       return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
@@ -893,6 +917,7 @@
       T("vcp_status", "VCP status", "setup"), T("canslim_status", "CANSLIM status", "setup"),
       T("pivot", "Buy point", "num", { dec: 2 }), T("stop", "Stop", "num", { dec: 2, tone: "stop" }),
       T("target", "Target", "num", { dec: 2, tone: "target" }), T("strength", "Strength", "strengthbar"), T("freshness", "Data", "fresh")],
+    price: setupLines,
     cards(all) {
       return card("On both scans", String(countWhere(all, (r) => r.on_vcp === "yes" && r.on_canslim === "yes"))) +
         card("VCP only", String(countWhere(all, (r) => r.on_vcp === "yes" && r.on_canslim === "no"))) +
@@ -1895,7 +1920,7 @@
   window.DESK_PAGES = {
     today: { files: ["market_today.csv", "breadth_history.csv", "sectors.csv", "alerts.csv"], render: renderToday },
     top: { files: ["scores.csv"], render: renderTop },
-    scorecard: { files: ["scores.csv", "score_details.csv", "prices.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
+    scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
     watchlist: { files: ["portfolio.csv", "portfolio_summary.csv", "watchlist.csv"], render: renderWatch },
     alerts: { files: ["alerts.csv", "score_changes.csv"], render: renderAlerts },
     backtest: { files: ["backtest_summary.csv", "backtest_equity.csv", "backtest_buckets.csv", "backtest_yearly.csv", "backtest_notes.csv"], render: renderBacktest },
