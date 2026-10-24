@@ -1,16 +1,16 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,"offline mode, used cache",2026-10-23 18:38 PT
-Universe (Wikipedia Nasdaq-100),OK,101,"offline mode, used cache",2026-10-23 18:38 PT
-Prices (Yahoo Finance),OK,2026-10-23,"offline mode, used cache",2026-10-23 18:38 PT
-SEC company tickers,OK,2026-10-23,reused cache,2026-10-23 18:38 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
-Analyst and profile (Yahoo Finance),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
-Earnings dates (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
-Institutional 13F and insider (Nasdaq),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 18:38 PT
-News headlines (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
-Option walls (Yahoo option chain),OK,2026-10-23,reused cache (option chains refresh at most once a day),2026-10-23 18:38 PT
-Put/call (CBOE),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
-FRED,OK,,offline mode,2026-10-23 18:38 PT
-Economic calendar (Nasdaq),OK,2026-10-23,reused cache,2026-10-23 18:38 PT
-Backtest,OK,2026-09-30,monthly point-in-time test,2026-10-23 18:40 PT
-Pattern scanners,OK,2026-10-23,"VCP 281, CANSLIM 246, box 181, flag 13, leaders 182. No new downloads.",2026-10-23 18:40 PT
+Universe (Wikipedia S&P 500),OK,503,already fetched today,2026-10-23 19:20 PT
+Universe (Wikipedia Nasdaq-100),OK,101,already fetched today,2026-10-23 19:20 PT
+Prices (Yahoo Finance),OK,2026-10-23,"671672 rows, batched",2026-10-23 19:21 PT
+SEC company tickers,OK,2026-10-23,reused cache,2026-10-23 19:21 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-10-23,518 names,2026-10-23 19:21 PT
+Analyst and profile (Yahoo Finance),OK,2026-10-23,reused cache (slow sources refresh at most once a day),2026-10-23 19:21 PT
+Earnings dates (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 19:21 PT
+Institutional 13F and insider (Nasdaq),OK,2026-10-23,"524 names, 0 failed",2026-10-23 19:21 PT
+News headlines (Yahoo Finance),OK,2026-10-23,reused cache,2026-10-23 19:21 PT
+Option walls (Yahoo option chain),OK,2026-10-23,reused cache (option chains refresh at most once a day),2026-10-23 19:21 PT
+Put/call (CBOE),OK,2026-10-23,reused cache,2026-10-23 19:21 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-10-23 19:22 PT
+Economic calendar (Nasdaq),OK,2026-10-23,reused cache,2026-10-23 19:22 PT
+Backtest,OK,2026-10-23,monthly point-in-time test,2026-10-23 19:24 PT
+Pattern scanners,OK,2026-10-23,"VCP 279, CANSLIM 240, box 135, flag 9, leaders 184. No new downloads.",2026-10-23 19:24 PT
