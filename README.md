@@ -11,7 +11,7 @@ GitHub Action (stock_desk.py on a schedule)
         |  writes CSVs
         v
 data/*.csv on GitHub
-        |  IMPORTDATA
+        |  Desk menu copies each file into a tab
         v
 Google Sheet
         |  one tab per page

@@ -97,7 +97,8 @@ COLS["scores"] = [
     "data_status", "note", "disclaimer",
 ]
 
-COLS["score_details"] = ["ticker", "group_name", "item", "points", "points_label", "now_value", "avg_value", "vs_industry", "plain_english", "data_status", "note", "disclaimer"]
+# Breakdown columns the scorecard table uses. Status and the disclaimer are not repeated on every row.
+COLS["score_details"] = ["ticker", "group_name", "item", "points", "points_label", "now_value", "avg_value", "vs_industry"]
 COLS["market_today"] = [
     "spy_price", "spy_day_pct", "breadth_sma20", "breadth_sma50", "breadth_sma100", "breadth_sma200",
     "breadth_sma50_week_ago", "advancers", "decliners", "universe_n", "highs_52w", "lows_52w",
@@ -112,7 +113,8 @@ COLS["score_changes"] = ["ticker", "company", "price", "day_pct", "score", "scor
 COLS["portfolio"] = ["ticker", "company", "shares", "avg_cost", "price", "day_pct", "value", "cost", "gain", "gain_pct", "weight_pct", "score", "score_week_ago", "score_week_change", "verdict", "stop", "status", "example", "data_status", "note", "disclaimer"]
 COLS["portfolio_summary"] = ["value", "day_pnl", "day_pnl_pct", "total_gain", "total_gain_pct", "avg_score", "needs_attention", "n_holdings", "example_warning", "data_status", "note", "disclaimer"]
 COLS["watchlist"] = ["ticker", "company", "price", "day_pct", "score", "verdict", "entry_low", "entry_high", "distance_to_entry_pct", "timing", "note_input", "data_status", "note", "disclaimer"]
-COLS["prices"] = ["date", "ticker", "close", "sma20", "sma50", "entry_low", "entry_high", "stop", "trade_target", "data_status", "note", "disclaimer"]
+# Chart columns only. Full daily history stays in cache/ohlcv.csv.gz, not in this file.
+COLS["prices"] = ["date", "ticker", "close", "sma20", "sma50", "entry_low", "entry_high", "stop", "trade_target"]
 COLS["news"] = ["ticker", "kind", "headline", "summary", "publisher", "link", "published", "data_status", "note", "disclaimer"]
 COLS["scanner_growth"] = ["ticker", "company", "sector", "price", "score", "verdict", "rev_growth", "eps_growth", "rs_spy_3m", "passes", "why", "data_status", "note", "disclaimer"]
 COLS["scanner_quality"] = ["ticker", "company", "sector", "price", "score", "verdict", "roe", "de", "pts_roe", "pts_de", "passes", "why", "data_status", "note", "disclaimer"]
@@ -252,7 +254,6 @@ def score_details(scores):
                 "points": "" if label == "n/a" else int(p), "points_label": label,
                 "now_value": r.get(now) if now else "", "avg_value": r.get(avg) if avg else "",
                 "vs_industry": "" if ind is None else ind,
-                "plain_english": item,
             })
     return pd.DataFrame(rows)
 
@@ -756,6 +757,7 @@ def help_rows():
         ("Leaders", "Leaders puts a VCP that is ready or broken out today together with a strict CANSLIM qualify. A name on both uses the VCP buy point, stop, and target. A name on only one still shows, and any missing letter stays not verified."),
         ("Your list", "Edit input/holdings.csv and input/my_watchlist.csv to change the portfolio and the watchlist. Example rows are marked example=yes. Replace them with your own shares and cost. The desk still will not place a trade."),
         ("Updates log", "OK means the source answered this run. CACHED means this run failed and an older copy was used. MISSING means there is no copy at all."),
+        ("The Google Sheet", "The sheet is filled by the Desk menu, not by IMPORTDATA. Desk > Refresh data now copies each file into the tab with the same name. Desk > Install hourly auto-refresh reloads about once an hour. The Setup tab shows the time of the last refresh. A blank cell means the number was missing. It is not a zero."),
     ]
 
 

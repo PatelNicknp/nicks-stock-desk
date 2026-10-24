@@ -28,24 +28,37 @@ If you do not see the workflow in the list, GitHub sometimes hides a workflow th
 
 ## 2. Make the Google Sheet
 
+You only need one sheet. If you already uploaded the starter workbook, keep that file. You do not have to upload it again.
+
+If you are starting fresh:
+
 1. On your iPad or computer, open [Google Drive](https://drive.google.com).
 2. Download `data/Nick_Stock_Desk_Starter.xlsx` from the repo (tap the file, then the download arrow).
 3. In Drive, tap **New** > **File upload** and choose that workbook.
 4. Double-tap it and choose **Open with Google Sheets**.
-5. If Sheets asks, let it convert the file. You should see a tab named Setup and one tab for each page.
-6. Wait a few minutes. Each tab fills from GitHub. Empty cells mean the number was missing. They are not zeros.
+5. If Sheets asks, let it convert the file. You should see a tab named Setup and one tab for each page. The tabs only have headers until you run the refresh in the next step.
 
-If a tab says the resource was not found, the pull request is not merged onto `main` yet. Wait until it is, then use the Desk menu in the next step.
+A blank Google Sheet also works. The refresh creates any tab that is missing.
 
 ## 3. Add the refresh menu
 
+The sheet does not use IMPORTDATA. A script copies each file from GitHub into the tab with the same name. That avoids the "allow access" message and the size error on the price file.
+
 1. In the sheet, tap **Extensions** > **Apps Script**. If you do not see Extensions, tap the three dots and look for it. On iPad, open the sheet in the browser (Safari or Chrome), not only the Sheets app, if the menu is missing.
-2. Delete any code that is already in the editor.
+2. Delete any code that is already in the editor, including an older copy of this script.
 3. Open `apps_script/Refresh.gs` in the repo and paste the whole file in.
-4. Tap the save icon.
+4. Tap the save icon. Name the project `Nick Stock Desk` if it asks.
 5. Close the script tab and reload the sheet.
-6. You should see a **Desk** menu. Tap **Desk** > **Set up data tabs** once. Then tap **Desk** > **Refresh data now** whenever you want the latest files without waiting for Google's own refresh.
-7. The first time, Google will ask you to allow the script. Tap **Allow**. It only updates this sheet.
+6. You should see a **Desk** menu. Tap **Desk** > **Refresh data now**.
+7. The first time, Google asks you to allow the script. Review the prompt and tap **Allow**. It reads the public files on GitHub and writes this sheet. It does not send mail and it does not place a trade.
+8. Wait until the Setup tab says the refresh finished. A big sheet can take a few minutes. If it pauses, leave it open. The script continues on its own. The time of the last refresh is in cell B6 on Setup. The sentence next to it is the status.
+9. Empty cells mean the number was missing. They are not zeros.
+
+To reload later, tap **Desk** > **Refresh data now** again. Then in Looker, tap the refresh icon on the report.
+
+Optional: **Desk** > **Install hourly auto-refresh** reloads the sheet about once an hour. **Desk** > **Remove auto-refresh** turns that off. The GitHub files still update on their own either way.
+
+If a tab says a file was not found, the pull request is not on `main` yet, or that run has not finished. Wait until the Action is green, then refresh again.
 
 ## 4. Put your real holdings in
 
@@ -88,5 +101,5 @@ Then open the `scores` tab. You should see one row per stock, a score, a BUY / H
 ## 7. If a page looks wrong
 
 1. Check `updates_log` for that source.
-2. In the sheet, **Desk** > **Refresh data now**, wait two minutes, then in Looker tap the refresh icon on the report.
+2. In the sheet, **Desk** > **Refresh data now**. When Setup says the refresh finished, in Looker tap the refresh icon on the report.
 3. If the whole Action run is red, open the run and read the last lines. You do not need to fix code. Tell the assistant what the red text says.
