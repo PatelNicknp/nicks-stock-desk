@@ -11,6 +11,7 @@
     ["Overview", [
       ["Today", "index.html", "today"],
       ["Top stocks", "top-stocks.html", "top"],
+      ["Buy setups", "buy-setups.html", "buysetups"],
       ["Stock scorecard", "scorecard.html", "scorecard"],
       ["Watchlist and portfolio", "watchlist.html", "watchlist"],
       ["Alerts", "alerts.html", "alerts"],
@@ -1774,6 +1775,7 @@
 
   const FEATURE = {
     top: "feature.top_stocks",
+    buysetups: "feature.buy_setups",
     scorecard: "feature.scorecard",
     watchlist: "feature.watchlist_portfolio",
     alerts: "feature.alerts",

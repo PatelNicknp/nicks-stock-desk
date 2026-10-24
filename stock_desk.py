@@ -2173,6 +2173,16 @@ def main(argv=None):
         _n(setup_frames.get("scanner_52w")),
         0 if setup_frames.get("highs_lows_history") is None else len(setup_frames.get("highs_lows_history")),
     ))
+    buy_on = features.get("buy_setups", True)
+    if buy_on and len(close):
+        buy = setups.build_buy_setups(
+            setup_frames.get("scanner_vcp"), setup_frames.get("scanner_box"),
+            setup_frames.get("scanner_flag"), setup_frames.get("scanner_canslim"),
+            scores, close, setup_frames.get("scanner_52w"),
+        )
+    else:
+        buy = pd.DataFrame()
+    log("Buy setups", "OK", asof, "Buy setups %d. Research list only. Built from the scanners already on the desk. No new downloads." % _n(buy))
 
     insider = holders[["ticker", "insider_buys", "insider_sells"]].rename(columns={"insider_buys": "buys_3m", "insider_sells": "sells_3m"}) if len(holders) else pd.DataFrame()
     if len(insider) and len(scores):
@@ -2209,6 +2219,7 @@ def main(argv=None):
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
+        "buy_setups": gated(buy, "buy_setups", buy_on, "No buy setups. The list is built from the scanners already on the desk. This desk never places trades."),
         "earnings_calendar": gated(earn_pages.get("calendar"), "earnings_calendar", features.get("earnings_calendar", True), "No earnings dates."),
         "earnings_heatmap": gated(earn_pages.get("heatmap"), "earnings_heatmap", features.get("earnings_heatmap", True), "No earnings history. Revenue vs estimate is not in the free feed."),
         "earnings_cards": gated(earn_pages.get("cards"), "earnings_cards", features.get("earnings_cards", True), "No earnings history to grade."),

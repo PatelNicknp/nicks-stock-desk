@@ -64,6 +64,14 @@ W52_NEAR_PCT = 5.0
 W52_VOL_MULT = 1.5  # new 52-week high on volume at least this many times the 50-day average
 W52_VOL_LEN = VOL_LEN
 
+# Buy setups. The 7% and 20% match the Pine script stop and sell-part.
+BUY_STOP_PCT = PINE["stop_pct"]
+BUY_PART_PCT = PINE["part_pct"]
+BUY_MAX_RISK_PCT = 8.0
+BUY_TARGET2_R = 3.0
+BUY_SETUP_ORDER = ("VCP", "Box", "Flag", "CANSLIM")
+BUY_LIVE_STATUS = ("READY", "BROKEN OUT today")
+
 VCP_NOTE = (
     "Stop and target before a buy apply the indicator's 7% and 20% to the pivot. "
     "On the buy bar they use that bar's close. A swing confirms 3 bars later. "
@@ -1451,6 +1459,290 @@ def _w52_history(pieces):
     ) % (W52_BARS, W52_NEAR_PCT)
     g = g.reset_index(drop=True)
     return g[["date", "new_highs", "new_lows", "near_high_count", "net", "data_status", "note"]]
+
+
+def _ma_state(series):
+    """Last close, 50-day average, and 200-day average. None when the window is short."""
+    if series is None:
+        return None
+    s = pd.Series(series, dtype=float).dropna()
+    if len(s) < 200:
+        return None
+    sma50 = float(s.rolling(50, min_periods=50).mean().iloc[-1])
+    sma200 = float(s.rolling(200, min_periods=200).mean().iloc[-1])
+    last = float(s.iloc[-1])
+    if not (np.isfinite(sma50) and np.isfinite(sma200) and np.isfinite(last)):
+        return None
+    return last, sma50, sma200
+
+
+def above_both_sma(series):
+    """Close above the 50-day and the 200-day. A stock does not also need a golden cross."""
+    state = _ma_state(series)
+    if state is None:
+        return False
+    last, sma50, sma200 = state
+    return bool(last > sma50 and last > sma200)
+
+
+def uptrend(series):
+    """Market uptrend: close above both averages, and the 50-day above the 200-day.
+
+    Used for SPY, which decides the list, and for QQQ, which is display only.
+    A series shorter than 200 sessions is not an uptrend.
+    """
+    state = _ma_state(series)
+    if state is None:
+        return False
+    last, sma50, sma200 = state
+    return bool(last > sma50 and last > sma200 and sma50 > sma200)
+
+
+def buy_stop(entry, setup_stop):
+    """Tighter of the 7% stop and the setup stop, when that stop is below the entry."""
+    entry = _num(entry)
+    if entry is None or entry <= 0:
+        return None
+    cap = entry * (1.0 - BUY_STOP_PCT / 100.0)
+    own = _num(setup_stop)
+    if own is not None and own < entry and own > cap:
+        return own
+    return cap
+
+
+def buy_levels(entry, setup_stop, price, broken_out):
+    """Stop, both targets, risk percent, and reward versus that risk.
+
+    Target 1 is 20% above the entry. After a breakout it is 20% above the close.
+    Target 2 is the entry plus three times the dollar risk.
+    """
+    entry = _num(entry)
+    stop = buy_stop(entry, setup_stop)
+    price = _num(price)
+    if entry is None or stop is None or stop >= entry:
+        return None
+    risk = entry - stop
+    risk_pct = risk / entry * 100.0
+    if not (0 < risk_pct <= BUY_MAX_RISK_PCT):
+        return None
+    base = price if broken_out and price is not None else entry
+    target1 = base * (1.0 + BUY_PART_PCT / 100.0)
+    target2 = entry + BUY_TARGET2_R * risk
+    reward = (target1 - entry) / risk
+    return {
+        "stop": stop,
+        "target1": target1,
+        "target2": target2,
+        "risk_pct": risk_pct,
+        "reward_risk": reward,
+    }
+
+
+def _yn_flag(flag):
+    return "yes" if flag else "no"
+
+
+def _setup_records(df, source):
+    if df is None or len(getattr(df, "index", [])) == 0 or "ticker" not in getattr(df, "columns", []):
+        return []
+    rows = []
+    for rec in df.to_dict("records"):
+        status = str(rec.get("status") or "").strip()
+        ticker = str(rec.get("ticker") or "").strip()
+        if not ticker or status not in BUY_LIVE_STATUS:
+            continue
+        rows.append({
+            "ticker": ticker,
+            "source": source,
+            "status": status,
+            "pivot": _num(rec.get("pivot")),
+            "stop": _num(rec.get("stop")),
+            "strength": _num(rec.get("strength")),
+            "company": _w52_text(rec.get("company")),
+            "sector": _w52_text(rec.get("sector")),
+            "index_membership": _w52_text(rec.get("index_membership")),
+            "price": _num(rec.get("price")),
+            "price_as_of": _w52_text(rec.get("price_as_of")),
+        })
+    return rows
+
+
+def _buy_reason(sources, best, entry, broken_out):
+    joined = " + ".join(sources)
+    state = "broke out today" if broken_out else "is ready"
+    if len(sources) > 1:
+        state = "agree, and the strongest " + state
+    base = "today's close" if broken_out else "the entry"
+    return (
+        "%s %s. Entry is the %s buy point at %s. Target 1 is 20%% above %s. "
+        "The stop is shown because many breakouts fail."
+    ) % (joined, state, best["source"], _round(entry), base)
+
+
+def buy_rows_visible(df, market_filter):
+    """Rows the page lists. The market switch hides them when SPY is not in an uptrend."""
+    if df is None or len(df) == 0 or "ticker" not in df.columns:
+        return df.iloc[0:0] if df is not None else pd.DataFrame()
+    rows = df[df["ticker"].astype(str).str.strip() != ""].copy()
+    if len(rows) == 0 or not market_filter:
+        return rows
+    ok = str(rows.iloc[0].get("market_ok") or "").strip().lower() == "yes"
+    if ok:
+        return rows
+    return rows.iloc[0:0]
+
+
+def build_buy_setups(vcp, box, flag, canslim, scores, close=None, week=None, sma_ok=None, market=None):
+    """Names that pass the stock rules. market_ok is SPY's uptrend, for the page filter.
+
+    No network. Scanners, scores, the 52-week file, and the cached closes are the inputs.
+    The market switch does not delete rows, so the page can show them greyed.
+    """
+    grouped = {}
+    for source, frame in (("VCP", vcp), ("Box", box), ("Flag", flag), ("CANSLIM", canslim)):
+        for rec in _setup_records(frame, source):
+            grouped.setdefault(rec["ticker"], []).append(rec)
+    score_idx = None
+    if scores is not None and len(scores) and "ticker" in getattr(scores, "columns", []):
+        score_idx = scores.drop_duplicates("ticker", keep="last").set_index("ticker")
+    week_idx = None
+    if week is not None and len(week) and "ticker" in getattr(week, "columns", []):
+        week_idx = week.drop_duplicates("ticker", keep="last").set_index("ticker")
+    if market is None:
+        spy_ok = uptrend(close["SPY"]) if close is not None and "SPY" in getattr(close, "columns", []) else False
+        qqq_ok = uptrend(close["QQQ"]) if close is not None and "QQQ" in getattr(close, "columns", []) else False
+    else:
+        spy_ok = bool(market.get("spy"))
+        qqq_ok = bool(market.get("qqq"))
+    market_ok = _yn_flag(spy_ok)
+    qqq_flag = _yn_flag(qqq_ok)
+    order = {name: i for i, name in enumerate(BUY_SETUP_ORDER)}
+    rows = []
+    for ticker, setups_for in grouped.items():
+        verdict = _w52_text(_w52_lookup(score_idx, ticker, "verdict"))
+        if verdict != "BUY":
+            continue
+        if sma_ok is not None:
+            if not sma_ok.get(ticker):
+                continue
+            price = None
+            price_as_of = ""
+        else:
+            price, price_as_of = _close_last(close, ticker)
+            series = close[ticker] if close is not None and ticker in getattr(close, "columns", []) else None
+            if price is None or not above_both_sma(series):
+                continue
+        usable = [rec for rec in setups_for if rec["pivot"] is not None and rec["pivot"] > 0]
+        if not usable:
+            continue
+        usable.sort(key=lambda rec: (-(rec["strength"] if rec["strength"] is not None else -1), order[rec["source"]]))
+        best = usable[0]
+        if price is None:
+            price = best["price"]
+        if not price_as_of:
+            price_as_of = best["price_as_of"]
+        broken = best["status"] == "BROKEN OUT today"
+        levels = buy_levels(best["pivot"], best["stop"], price, broken)
+        if levels is None:
+            continue
+        sources = [
+            name for name in BUY_SETUP_ORDER
+            if any(rec["source"] == name and rec["pivot"] is not None and rec["pivot"] > 0 for rec in setups_for)
+        ]
+        meta_company = _w52_text(_w52_lookup(score_idx, ticker, "company")) or best["company"]
+        meta_sector = _w52_text(_w52_lookup(score_idx, ticker, "sector")) or best["sector"]
+        meta_index = _w52_text(_w52_lookup(score_idx, ticker, "index_membership")) or best["index_membership"]
+        score = _num(_w52_lookup(score_idx, ticker, "score"))
+        range_pos = _num(_w52_lookup(week_idx, ticker, "range_position_pct"))
+        from_high = _num(_w52_lookup(week_idx, ticker, "pct_from_high"))
+        dist = None if price is None else (price / best["pivot"] - 1.0) * 100.0
+        dist_val = _round(dist)
+        if dist_val == 0:
+            dist_val = 0.0
+        rows.append({
+            "ticker": ticker,
+            "company": meta_company,
+            "sector": meta_sector,
+            "index_membership": meta_index,
+            "price": _round(price),
+            "price_as_of": price_as_of,
+            "setup_sources": " + ".join(sources),
+            "sources_count": len(sources),
+            "best_status": best["status"],
+            "entry": _round(best["pivot"]),
+            "stop": _round(levels["stop"]),
+            "target1": _round(levels["target1"]),
+            "target2": _round(levels["target2"]),
+            "risk_pct": _round(levels["risk_pct"]),
+            "reward_risk": _round(levels["reward_risk"]),
+            "dist_to_entry_pct": dist_val,
+            "score": score,
+            "verdict": verdict,
+            "range_position_52w": _round(range_pos) if range_pos is not None else None,
+            "pct_from_high_52w": _round(from_high) if from_high is not None else None,
+            "reason": _buy_reason(sources, best, best["pivot"], broken),
+            "market_ok": market_ok,
+            "spy_uptrend": market_ok,
+            "qqq_uptrend": qqq_flag,
+            "data_status": "OK",
+            "note": "Research list, not a recommendation. This desk never places trades.",
+        })
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return _buy_market_row(market_ok, qqq_flag)
+    out["_status"] = out["best_status"].map(lambda s: 0 if s == "BROKEN OUT today" else 1)
+    out["_dist"] = pd.to_numeric(out["dist_to_entry_pct"], errors="coerce").abs()
+    out["_score"] = pd.to_numeric(out["score"], errors="coerce")
+    out = out.sort_values(
+        ["_status", "sources_count", "_dist", "_score", "ticker"],
+        ascending=[True, False, True, False, True],
+        na_position="last",
+    )
+    return out.drop(columns=["_status", "_dist", "_score"]).reset_index(drop=True)
+
+
+def _close_last(close, ticker):
+    if close is None or ticker not in getattr(close, "columns", []):
+        return None, ""
+    s = close[ticker].dropna()
+    if len(s) == 0:
+        return None, ""
+    dt = pd.Timestamp(s.index[-1])
+    if getattr(dt, "tzinfo", None) is not None:
+        dt = dt.tz_localize(None)
+    return float(s.iloc[-1]), dt.strftime("%Y-%m-%d")
+
+
+def _buy_market_row(market_ok, qqq_flag):
+    """One row so the page can show SPY and QQQ when no stock passed."""
+    return pd.DataFrame([{
+        "ticker": "",
+        "company": "",
+        "sector": "",
+        "index_membership": "",
+        "price": None,
+        "price_as_of": "",
+        "setup_sources": "",
+        "sources_count": None,
+        "best_status": "",
+        "entry": None,
+        "stop": None,
+        "target1": None,
+        "target2": None,
+        "risk_pct": None,
+        "reward_risk": None,
+        "dist_to_entry_pct": None,
+        "score": None,
+        "verdict": "",
+        "range_position_52w": None,
+        "pct_from_high_52w": None,
+        "reason": "",
+        "market_ok": market_ok,
+        "spy_uptrend": market_ok,
+        "qqq_uptrend": qqq_flag,
+        "data_status": "OK",
+        "note": "No names passed the buy-setup rules. Research list, not a recommendation. This desk never places trades.",
+    }])
 
 
 def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None):

@@ -118,6 +118,10 @@ td.num,th.num{font-variant-numeric:tabular-nums}
 input::placeholder{color:#5B6680;opacity:1}
 .banner{border:1px solid #F59E0B;color:#F59E0B;background:#121826;border-radius:6px;padding:10px 12px;font-size:13px;margin:12px 0;line-height:18px}
 .banner b{margin-right:6px}
+.buybanner{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.buybanner span{min-width:0;flex:1 1 220px}
+.buybanner button{min-height:36px;padding:0 14px;background:#121826;border:1px solid #F59E0B;border-radius:6px;color:#F59E0B;cursor:pointer;font:inherit;font-size:13px;font-weight:700}
+.dimmed{opacity:.62}
 .banner.miss{border-color:#EF4444;color:#F59E0B}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .split > *{min-width:0}
@@ -203,6 +207,7 @@ input::placeholder{color:#5B6680;opacity:1}
   .seg{height:44px}
   .seg button{min-width:44px;min-height:44px;font-size:14px}
   .w52tabs button{min-height:44px;height:44px}
+  .buybanner button{min-height:44px}
   .qwrap input{min-height:44px;height:44px;font-size:16px}
   .qrow{min-height:44px}
   .machip{min-height:44px;height:44px;padding:0 12px;font-size:13px}

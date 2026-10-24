@@ -4,6 +4,7 @@ import os
 PAGES = [
     ("index.html", "today", "Today"),
     ("top-stocks.html", "top", "Top stocks"),
+    ("buy-setups.html", "buysetups", "Buy setups"),
     ("scorecard.html", "scorecard", "Stock scorecard"),
     ("watchlist.html", "watchlist", "Watchlist and portfolio"),
     ("alerts.html", "alerts", "Alerts"),
