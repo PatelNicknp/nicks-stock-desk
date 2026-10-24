@@ -154,6 +154,7 @@
         ctx.page.querySelector(".cap").textContent = cfg.caption || D.noteOf(raw);
         const box = document.getElementById("ctrls");
         standardFilters(box, all, cfg.filters);
+        if (cfg.chips) box.insertAdjacentHTML("afterbegin", cfg.chips(all));
         D.placeFeed(box, raw);
         document.getElementById("cards").innerHTML = cfg.cards(all);
         const state = { sort: cfg.sort || "status", dir: cfg.dir || "asc", sort2: cfg.sort2 || "strength", dir2: "desc", page: 0 };
@@ -230,8 +231,8 @@
     const pc = D.num(mt.put_call);
     const pc5 = D.num(mt.put_call_ma5);
     ctx.page.innerHTML =
-      '<div class="cards">' +
-      card("SPY", D.num(mt.spy_price) == null ? D.na() : D.esc(D.fmt(mt.spy_price, 2)), "S&P 500 ETF · " + dayHtml) +
+      '<div class="cards seven">' +
+      card("SPY", D.num(mt.spy_price) == null ? D.na() : D.esc(D.fmt(mt.spy_price, 2)), "S&P 500 ETF " + (day == null ? D.na() : '<span style="color:' + D.retColor(day) + '">' + (day < 0 ? "▼" : "▲") + D.fmt(Math.abs(day), 2) + "%</span>")) +
       card("% above 50-day", b == null ? D.na() : D.esc(D.fmt(b, 1) + "%"), deltaHtml) +
       card("Advancers / decliners", adv + '<span style="color:#5B6680"> / </span>' + dec, "of " + D.esc(nStocks) + " stocks") +
       card("New 52-week highs", D.isBlank(mt.highs_52w) ? D.na() : D.esc(mt.highs_52w), (D.isBlank(mt.lows_52w) ? D.na() : D.esc(mt.lows_52w)) + " new lows") +
@@ -242,7 +243,7 @@
       "</div>" +
       '<div class="split today-top">' +
       (panelOff("feature.breadth") ? offBox() :
-        '<div class="panel pad"><div class="rowhead"><div><div class="ptitle">Market breadth</div><div class="psub">% of the ' + D.esc(nStocks) + ' desk stocks above each average, 6 months</div></div><div class="chips">' + chips + '</div></div><div class="chart-box"><canvas id="br"></canvas></div><div class="psub note">Gaps = days with no breadth data (shown as breaks, not 0)</div></div>') +
+        '<div class="panel pad"><div class="rowhead stack"><div><div class="ptitle">Market breadth</div><div class="psub">% of the ' + D.esc(nStocks) + ' desk stocks above each average, 6 months</div></div><div class="chips nowrap">' + chips + '</div></div><div class="chart-box"><canvas id="br"></canvas></div><div class="psub note">Gaps = days with no breadth data (shown as breaks, not 0)</div></div>') +
       (panelOff("feature.top_sectors") ? offBox() :
         '<div class="panel pad"><div class="ptitle">Sectors today</div><div class="psub">Day % change, 11 S&P sector ETFs</div><div class="chart-box"><canvas id="sec"></canvas></div></div>') +
       "</div>" +
@@ -263,13 +264,13 @@
       D.barChart(document.getElementById("sec"), eleven.map((r) => D.SPD[r.ticker]), eleven.map((r) => D.num(r.day_pct)),
         eleven.map((r) => (D.num(r.day_pct) || 0) >= 0 ? "#1F9D55" : "#D14343"),
         { horizontal: true, labels: true, dec: 1, suffix: "%",
-          x: { ticks: { color: "#5B6680", callback: (v) => (Number(v) > 0 ? "+" : "") + v + "%" }, grid: { color: "#1E293B" } },
+          x: { ticks: { color: "#5B6680", callback: (v) => { const n = Number(v); const sign = n > 0 ? "+" : n < 0 ? "−" : ""; return sign + Math.abs(n) + "%"; } }, grid: { color: "#1E293B" } },
           cat: { ticks: { color: "#C3CBDB", autoSkip: false }, grid: { display: false } } });
       const top = sectors.slice().sort((a, b) => (D.num(b.day_pct) || -999) - (D.num(a.day_pct) || -999)).slice(0, 5)
-        .map((r, i) => Object.assign({}, r, { n: String(i + 1) }));
+        .map((r, i) => Object.assign({}, r, { n: String(i + 1), day_bar: r.day_pct }));
       D.drawTable(document.getElementById("top5"), {
         title: "Top 5 sectors today", sub: "Best day % of the 19 sector and industry ETFs",
-        rows: top, columns: [T("n", "#", "num", { dec: 0 }), T("name", "Sector"), T("day_pct", "", "daybar"), T("day_pct", "Day %", "pct", Object.assign({ dec: 2 }, RET))],
+        rows: top, columns: [T("n", "#", "num", { dec: 0 }), T("name", "Sector"), T("day_bar", "", "daybar"), T("day_pct", "Day %", "pct", Object.assign({ dec: 2 }, RET))],
         state: { sort: "day_pct", dir: "desc", page: 0 }, pageSize: 5, foot: false,
       });
     }
@@ -369,7 +370,7 @@
         ptsCard("Technical", row.pts_tech) + ptsCard("Financials", row.pts_fin) + ptsCard("Sentiment", row.pts_sent) +
         ptsCard("Earnings", row.pts_earnings) + ptsCard("Sector", row.pts_sector) +
         card("Total score", D.scoreHtml(row.score)) + "</div>" +
-        '<div class="split"><div class="panel pad"><div class="ptitle">Plan</div><div class="mini">' +
+        '<div class="split plan"><div class="panel pad"><div class="ptitle">Plan</div><div class="mini">' +
         miniStat("Entry low", px2(row.entry_low)) + miniStat("Entry high", px2(row.entry_high)) +
         miniStat("Stop", D.num(row.stop) == null ? D.na() : '<span style="color:#EF4444">' + D.esc(D.fmt(row.stop, 2)) + "</span>") +
         miniStat("Trade target", D.num(row.trade_target) == null ? D.na() : '<span style="color:#22C55E">' + D.esc(D.fmt(row.trade_target, 2)) + "</span>") +
@@ -381,24 +382,33 @@
         miniStat("Inputs in blend", D.isBlank(row.target_blend_n) ? D.na() : D.esc(row.target_blend_n)) +
         "</div></div></div>" +
         '<div class="split"><div class="panel pad"><div class="ptitle">Price, last 6 months, with plan levels</div><div class="chart-box"><canvas id="px"></canvas></div><p class="cap">Gaps in the averages are bridged.</p></div>' +
-        '<div class="panel pad"><div class="ptitle">Last 8 reports: surprise and next-day move %</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
+        '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
         '<div class="split r21"><div class="panel" id="break"></div><div><div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Versus sector</div></div><div class="scroll"><table><tbody>' + vs +
         '</tbody></table></div></div><div class="panel pad"><div class="ptitle">Data basis</div><div style="font-size:11px;margin-top:8px">' + basis + "</div></div></div></div>" +
         '<div class="panel" id="news"></div><p class="cap">' + D.esc(newsEmpty) + "</p>";
-      const hlines = [
-        { value: D.num(row.entry_low), color: "#F59E0B", label: "Entry low " + (D.fmt(row.entry_low, 2) || "") },
-        { value: D.num(row.entry_high), color: "#F59E0B", label: "Entry high " + (D.fmt(row.entry_high, 2) || "") },
-        { value: D.num(row.stop), color: "#EF4444", label: "Stop " + (D.fmt(row.stop, 2) || "") },
-        { value: D.num(row.trade_target), color: "#22C55E", label: "Target " + (D.fmt(row.trade_target, 2) || "") },
-      ].filter((x) => x.value != null);
+      const entryLo = D.num(row.entry_low);
+      const entryHi = D.num(row.entry_high);
+      const hlines = [];
+      if (entryLo != null && entryHi != null) {
+        hlines.push({
+          zone: [entryLo, entryHi], color: "rgba(124,156,255,.10)", labelColor: "#F59E0B",
+          label: "Entry " + D.fmt(Math.min(entryLo, entryHi), 0) + "–" + D.fmt(Math.max(entryLo, entryHi), 0),
+        });
+      } else if (entryLo != null || entryHi != null) {
+        const one = entryLo != null ? entryLo : entryHi;
+        hlines.push({ value: one, color: "#F59E0B", label: "Entry " + D.fmt(one, 2) });
+      }
+      if (D.num(row.stop) != null) hlines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop " + D.fmt(row.stop, 2) });
+      if (D.num(row.trade_target) != null) hlines.push({ value: D.num(row.trade_target), color: "#22C55E", label: "Target " + D.fmt(row.trade_target, 2) });
       D.lineChart(document.getElementById("px"), prices.map((r) => r.date), [
         { label: "Close", data: D.seriesNum(prices, "close"), color: "#E6EBF5", spanGaps: true },
         { label: "20-day avg", data: D.seriesNum(prices, "sma20"), color: "#7C9CFF", spanGaps: true },
         { label: "50-day avg", data: D.seriesNum(prices, "sma50"), color: "#8B96AD", spanGaps: true },
       ], { plugins: { hlines: hlines } });
+      const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const earnLabels = earn.map((r) => {
         const m = /^(\d{4})-(\d{2})/.exec(r.earnings_date || "");
-        return m ? m[1].slice(2) + "-" + m[2] : r.earnings_date;
+        return m ? mon[Number(m[2]) - 1] + " " + m[1].slice(2) : r.earnings_date;
       });
       D.makeChart(document.getElementById("eh"), {
         type: "bar",
@@ -422,7 +432,7 @@
         title: "Score breakdown",
         rows: details,
         columns: [T("group_name", "Group"), T("item", "Item", "text", { wrap: true }), T("points_label", "Points", "plabel"),
-          T("now_value", "Now", "text"), T("avg_value", "Own 3-yr avg", "text"), T("vs_industry", "Vs sector", "text", { wrap: true })],
+          T("now_value", "Now", "num", { dec: 2 }), T("avg_value", "Own 3-yr avg", "num", { dec: 2 }), T("vs_industry", "Vs sector", "points")],
         state: { sort: "group_name", dir: "asc", sort2: "item", dir2: "asc", page: 0 }, pageSize: 20,
       });
       D.drawTable(document.getElementById("news"), {
@@ -476,8 +486,8 @@
     });
   }
   function whyLines(rows) {
-    return rows.map((r) => '<div class="rowhead"><span>' + D.tickerHtml(r.ticker) +
-      '</span><span class="m2" style="text-align:right">' + D.esc(r.reason || "") + "</span></div>").join("") ||
+    return (rows || []).filter(Boolean).map((r) => '<div class="why"><span>' + D.tickerHtml(r.ticker) +
+      '</span><span class="m2">' + D.esc(r.reason || "") + "</span></div>").join("") ||
       '<div class="m2">No names in this view.</div>';
   }
 
@@ -594,16 +604,27 @@
     const buckets = D.realRows(ctx.files["backtest_buckets.csv"]).map((r) => Object.assign({}, r, { bucket_short: shortBucket(r.bucket) }));
     const yearly = D.realRows(ctx.files["backtest_yearly.csv"]);
     const notes = ctx.files["backtest_notes.csv"] || [];
-    summary.forEach((r) => { r._label = r.window || (r.start + " to " + r.end); });
-    const prefer = summary.find((r) => r.window === "5y") || summary.slice().sort((a, b) => (D.num(b.months) || 0) - (D.num(a.months) || 0))[0];
+    function windowLabel(r) {
+      const name = r.window || "";
+      if (name === "5y" && r.start && r.end) {
+        const days = (Date.parse(r.end) - Date.parse(r.start)) / 86400000;
+        const years = days / 365.25;
+        if (Number.isFinite(years) && years < 4.6) return "Full history (" + years.toFixed(1) + "y)";
+      }
+      return name || ((r.start || "") + " to " + (r.end || ""));
+    }
+    summary.forEach((r) => { r._label = windowLabel(r); });
+    const prefer = summary.find((r) => r.is_headline === "yes") || summary.slice().sort((a, b) => (D.num(b.months) || 0) - (D.num(a.months) || 0))[0];
     const head = summary.find((r) => r.is_headline === "yes") || prefer || summary[0] || {};
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="panel pad" id="head"></div><div class="cards" id="cards"></div>' +
       '<div class="split r21"><div class="panel pad"><div class="ptitle">Growth of 10,000, monthly test</div><div class="chart-box tall"><canvas id="eq"></canvas></div><p class="cap" id="eqcap"></p></div>' +
       '<div class="panel pad"><div class="ptitle">Excess return vs S&P 500 by score bucket</div><div class="psub">12-week horizon, % per signal</div><div class="chart-box tall"><canvas id="bk"></canvas></div></div></div>' +
       '<div class="split r21"><div class="panel" id="btbl"></div><div class="panel" id="ytbl"></div></div><div class="panel" id="notes"></div>';
+    const spanAvail = String(head._label || "").match(/Full history \(([\d.]+)y\)/);
     document.getElementById("head").innerHTML = '<div style="font-size:20px;line-height:26px">' + D.esc(head.headline || "") + "</div>" +
       '<div class="m2" style="font-size:11px;margin-top:6px">From ' + D.esc(head.start || "") + " to " + D.esc(head.end || "") + " · " +
-      D.esc(head.months || "") + " months · every month, buy the 20 highest-scoring stocks, compare with the S&P 500.</div>";
+      D.esc(head.months || "") + " months" + (spanAvail ? " · " + spanAvail[1] + " of 5 years available" : "") +
+      " · every month, buy the 20 highest-scoring stocks, compare with the S&P 500.</div>";
     const box = document.getElementById("ctrls");
     const windows = summary.map((r) => r._label);
     const horizons = D.uniq(buckets, "horizon");
@@ -674,7 +695,7 @@
 
   const quality = passesPage({
     file: "scanner_quality.csv",
-    caption: "Passes when return on equity is above the company's own history and debt/equity is at most 1.5, and the label is not AVOID.",
+    caption: "Passes = ROE point +1 and debt/equity under 1.5. Debt points compare to the sector and can be −1.",
     sort: "roe",
     filters: { passes: "yes", sector: true, verdict: true, ticker: true },
     columns: [TK, CO, SE, T("roe", "Return on equity %", "pct", { dec: 1, color: false }), T("de", "Debt / equity", "num", { dec: 2 }),
@@ -752,8 +773,8 @@
       const head = "<th>Ticker</th>" + vcpRuleLabels.map((l) => '<th class="c">' + D.esc(l) + "</th>").join("");
       const body = list.map((r) => "<tr><td>" + D.tickerHtml(r.ticker) + "</td>" +
         vcpRuleLabels.map((_, i) => '<td class="c">' + passCell(r["r" + (i + 1)]) + "</td>").join("") + "</tr>").join("");
-      return '<div class="split"><div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(list) + "</div>" +
-        '<div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Trend template, 8 rules</div></div><div class="scroll"><table><thead><tr>' +
+      return '<div class="split r12"><div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>" +
+        '<div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Trend template, 8 rules</div></div><div class="scroll"><table class="rules"><thead><tr>' +
         head + "</tr></thead><tbody>" + body + "</tbody></table></div></div></div>";
     },
   });
@@ -766,14 +787,13 @@
       order: ["status", "qualify", "index", "ticker"],
       single: [{ key: "qualify", label: "Qualify", value: "strict" }],
     },
-    strip(all) {
+    chips(all) {
       const row = all[0] || {};
-      return '<div class="panel marketstrip"><div><div class="l">Market (SPY)</div><div class="v" style="color:' + moodColor(row.m_market) + '">' +
-        D.esc(moodShort(row.m_market)) + '</div></div><div><div class="l">QQQ</div><div class="v" style="color:#8B96AD">' +
-        D.esc(moodShort(row.m_qqq)) + "</div></div></div>";
+      return '<span class="moodchip">Market: ' + D.esc(moodShort(row.m_market)) + '</span>' +
+        '<span class="moodchip">QQQ: ' + D.esc(moodShort(row.m_qqq)) + "</span>";
     },
     columns: [TK, T("index_membership", "Index"), T("status", "Status", "setup"), T("pivot", "Buy point", "num", { dec: 2 }),
-      T("strength", "Strength", "num", { dec: 0 }), T("qualify", "Qualify", "pass"),
+      T("strength", "CANSLIM strength (raw)", "num", { dec: 0 }), T("qualify", "Qualify", "pass"),
       T("c_quarterly_eps", "C: quarter EPS vs yr ago %", "pct", { dec: 1 }), T("a_annual_eps", "A: annual EPS %", "pct", { dec: 1 }),
       T("n_pct_from_high", "N: % from 52w high", "pct", { dec: 1 }), T("s_adv", "S: avg daily volume", "compact"),
       T("l_rs_percentile", "L: RS percentile", "num", { dec: 0 }), T("i_trend", "I: holders trend", "itrend"), T("freshness", "Data", "fresh")],
@@ -809,9 +829,8 @@
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
     },
-    detail(row, rows) {
-      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(byStatus(rows).slice(0, 3)) +
-        '<p class="cap">Click a row to read why it is on the list.</p></div>';
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>";
     },
   });
 
@@ -830,9 +849,8 @@
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
     },
-    detail(row, rows) {
-      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(byStatus(rows).slice(0, 3)) +
-        '<p class="cap">Click a row to read why it is on the list.</p></div>';
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>";
     },
   });
 
@@ -843,7 +861,6 @@
     columns: [TK, T("index_membership", "Index"), T("status", "Status", "setup"),
       T("on_vcp", "VCP", "flag", { width: "60px" }), T("on_canslim", "CANSLIM", "flag", { width: "60px" }),
       T("vcp_status", "VCP status", "setup"), T("canslim_status", "CANSLIM status", "setup"),
-      T("vcp_strength", "VCP strength", "num", { dec: 0 }), T("canslim_strength", "CANSLIM strength", "num", { dec: 0 }),
       T("pivot", "Buy point", "num", { dec: 2 }), T("stop", "Stop", "num", { dec: 2, tone: "stop" }),
       T("target", "Target", "num", { dec: 2, tone: "target" }), T("strength", "Strength", "strengthbar"), T("freshness", "Data", "fresh")],
     cards(all) {
@@ -852,8 +869,8 @@
         card("CANSLIM only", String(countWhere(all, (r) => r.on_vcp === "no" && r.on_canslim === "yes"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY")));
     },
-    detail(row, rows) {
-      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(byStatus(rows).slice(0, 3)) + "</div>";
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>";
     },
   });
 
@@ -909,7 +926,8 @@
       '<p class="cap">Green = EPS beat, red = miss, grey = in line. Revenue is n/a in this free feed, so a double beat cannot be shown.</p>' +
       '<div class="split r21"><div class="panel" id="pivot"></div><div class="panel" id="detail"></div></div>';
     const quartersAll = Array.from(new Set(all.map((r) => yq(r.quarter)))).sort();
-    const last6 = quartersAll.slice(-6);
+    const filledQ = quartersAll.filter((qtr) => all.some((r) => yq(r.quarter) === qtr && !D.isBlank(r.eps_flag)));
+    const last6 = (filledQ.length ? filledQ : quartersAll).slice(-6);
     const q0 = /^(\d{4}) Q(\d)/.exec(last6[0] || "");
     const fromDefault = q0 ? q0[1] + "-" + String((Number(q0[2]) - 1) * 3 + 1).padStart(2, "0") + "-01" : "";
     const end = maxDate(all, "quarter");
@@ -925,7 +943,8 @@
       const q = (D.fieldVal(box, "ticker") || "").trim().toLowerCase();
       const rows = all.filter((r) => (!from || r.quarter >= from) && (!to || r.quarter <= to) &&
         (!eps || r.eps_flag === eps) && (!q || r.ticker.toLowerCase().indexOf(q) >= 0));
-      const quarters = Array.from(new Set(rows.map((r) => yq(r.quarter)))).sort();
+      const quarters = Array.from(new Set(rows.map((r) => yq(r.quarter)))).sort()
+        .filter((qtr) => rows.some((r) => yq(r.quarter) === qtr && !D.isBlank(r.eps_flag)));
       const by = {};
       rows.forEach((r) => { by[r.ticker + "|" + yq(r.quarter)] = r; });
       const tickers = Array.from(new Set(rows.map((r) => r.ticker))).sort();
@@ -996,7 +1015,7 @@
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><p class="cap">Market mood only. Not an option position.</p>' +
       '<div id="latest"></div><div class="panel pad"><div class="ptitle">Put/call and its 5-day average</div><div class="chart-box tall"><canvas id="pc"></canvas></div></div><div class="panel" id="tbl"></div>';
     const box = document.getElementById("ctrls");
-    box.innerHTML = D.dateHtml("from", "Period", shift(end, -90)) + D.selectHtml("zone", "Zone", D.uniq(raw, "zone"), "");
+    box.innerHTML = D.dateHtml("from", "From", shift(end, -90)) + D.selectHtml("zone", "Zone", D.uniq(raw, "zone"), "");
     const latest = raw.slice().sort((a, b) => a.date < b.date ? 1 : -1)[0] || {};
     document.getElementById("latest").innerHTML = latestBox(
       '<div><div class="l">Date</div><div class="v">' + D.esc(latest.date || "–") + "</div></div>" +
@@ -1016,6 +1035,7 @@
         { label: "5-day avg", data: D.seriesNum(series, "ma5"), color: "#E6EBF5", spanGaps: true },
       ], {
         y: { suggestedMin: 0.3, suggestedMax: 1.1 },
+        layout: { padding: { right: 24 } },
         plugins: { hlines: [{ value: fear, color: "#EF4444", label: "Fear" }, { value: greed, color: "#22C55E", label: "Greed" }] },
       });
       D.drawTable(document.getElementById("tbl"), {
@@ -1036,11 +1056,11 @@
     const start = tickers.indexOf("NVDA") >= 0 ? "NVDA" : (tickers[0] || "");
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">Open interest by strike. Sentiment only. Not a contract to trade. Chains refresh once a day for the focus list, so most of the universe is not on this page.</p>' +
-      '<div class="panel pad"><div class="chart-box tall"><canvas id="oi"></canvas></div></div><div class="split r21"><div class="panel" id="walls"></div><div class="panel pad" id="note"></div></div>';
+      '<div class="panel pad"><div class="ptitle" id="oititle">Open interest by strike</div><div class="legend"><span><i style="background:#22C55E"></i>Calls</span><span><i style="background:#EF4444;height:8px"></i>Puts</span></div><div class="chart-box tall"><canvas id="oi"></canvas></div></div><div class="split r21"><div class="panel" id="walls"></div><div class="panel pad" id="note"></div></div>';
     const box = document.getElementById("ctrls");
     box.innerHTML = D.searchHtml("ticker", "Ticker", "wtk", tickers) +
       '<label class="ctl"><span class="lab">Expiry</span><select data-filter="expiry"></select></label>' +
-      D.selectHtml("band", "Strike range", [{ value: "near", label: "Within 25% of spot" }, { value: "all", label: "All strikes" }], "near", { all: false });
+      D.selectHtml("band", "Strike range", [{ value: "near", label: "±25% of spot" }, { value: "all", label: "All strikes" }], "near", { all: false });
     box.querySelector("[data-filter=ticker]").value = start;
     const fillExpiry = () => {
       const t = (D.fieldVal(box, "ticker") || start).trim().toUpperCase();
@@ -1069,7 +1089,16 @@
       const call = strikes.map((s) => { const r = rows.find((x) => x.strike === s && x.side === "call"); return r ? D.num(r.open_interest) : 0; });
       const put = strikes.map((s) => { const r = rows.find((x) => x.strike === s && x.side === "put"); return r ? D.num(r.open_interest) : 0; });
       D.destroyCharts();
-      D.barChart(document.getElementById("oi"), strikes, call, call.map(() => "#22C55E"), { label: "Calls" });
+      const title = document.getElementById("oititle");
+      if (title) title.textContent = "Open interest by strike, " + t + (exp ? " " + exp : "");
+      D.barChart(document.getElementById("oi"), strikes, call, call.map(() => "#22C55E"), {
+        label: "Calls",
+        cat: { ticks: { color: "#8B96AD", autoSkip: false, maxRotation: 0, callback(v) {
+          const label = this.getLabelForValue(v);
+          const n = Number(label);
+          return Number.isFinite(n) ? String(n).replace(/\.0$/, "") : label;
+        } } },
+      });
       const chart = (typeof Chart !== "undefined") ? Chart.getChart(document.getElementById("oi")) : null;
       if (chart) {
         chart.data.datasets.push({ label: "Puts", data: put, backgroundColor: "#EF4444", borderWidth: 0 });
@@ -1116,15 +1145,15 @@
     const all = D.realRows(raw);
     const summary = all.filter((r) => r.row_type === "summary");
     const holders = all.filter((r) => r.row_type === "top_holder");
-    const capped = summary.some((r) => String(r.note || "").indexOf("Capped at 100%") >= 0);
+    const capped = summary.some((r) => String(r.note || "").toLowerCase().indexOf("capped") >= 0 || (D.num(r.ownership_pct) || 0) > 100);
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">Summary of the latest public holdings file, plus the largest holders. Not every fund. Built this way so the page stays fast.' +
-      (capped ? " Ownership above 100% is capped at 100% and noted on the row." : "") + "</p>" +
+      (capped ? " When reported holdings exceed shares outstanding, the cell reads 100%+." : "") + "</p>" +
       '<div class="split r21"><div class="panel" id="sum"></div><div class="panel" id="top"></div></div>';
     const box = document.getElementById("ctrls");
     box.innerHTML = D.searchHtml("ticker", "Ticker", "f-tk", D.uniq(summary, "ticker")) +
       D.multiHtml("pts", "Institutional points", D.uniq(summary, "pts_institutional"));
-    const s1 = { sort: "ownership_pct", dir: "desc", page: 0 };
+    const s1 = { sort: "holders", dir: "desc", page: 0 };
     const s2 = { sort: "shares", dir: "desc", page: 0 };
     const draw = () => {
       const q = (D.fieldVal(box, "ticker") || "").trim();
@@ -1134,7 +1163,7 @@
       D.drawTable(document.getElementById("sum"), {
         title: "Summary", rows: sums,
         columns: [TK, T("increased_shares", "Shares added", "compact"), T("decreased_shares", "Shares cut", "compact"),
-          T("holders", "Holders", "num", { dec: 0 }), T("ownership_pct", "Owned by funds %", "pct", { dec: 1, color: false }),
+          T("holders", "Holders", "num", { dec: 0 }), T("ownership_pct", "Owned by funds %", "owncap", { dec: 1 }),
           T("as_of", "As of", "date"), T("pts_institutional", "Points", "points")],
         state: s1, pageSize: 20,
       });
@@ -1154,7 +1183,7 @@
     const raw = ctx.files["aaii_sentiment.csv"] || [];
     const row = raw[0] || {};
     ctx.page.innerHTML =
-      '<div class="panel pad w740"><div class="m2" style="font-size:11px">Status</div><div style="font-size:18px;font-weight:700;color:#F59E0B;margin:8px 0">' +
+      '<div class="panel pad w740 aaii"><div class="m2" style="font-size:11px">Status</div><div style="font-size:18px;font-weight:700;color:#F59E0B;margin:8px 0">' +
       D.esc(row.data_status || "MISSING") + '</div><p style="font-size:13px">' + D.esc(row.note || "") + "</p></div>" +
       '<p style="margin-top:12px"><a class="linkish" href="put-call.html">Use the put/call ratio as the free mood gauge ›</a></p>';
   }
@@ -1230,7 +1259,7 @@
       '<div><div class="l">50-day avg</div><div class="v">' + (D.num(latest.ratio_sma50) == null ? D.na() : D.esc(D.fmt(latest.ratio_sma50, 3))) + "</div></div>",
       latest.zone);
     const box = document.getElementById("ctrls");
-    box.innerHTML = D.dateHtml("from", "Period", shift(end, -182)) + D.selectHtml("zone", "Zone", D.uniq(raw, "zone"), "");
+    box.innerHTML = D.dateHtml("from", "From", shift(end, -182)) + D.selectHtml("zone", "Zone", D.uniq(raw, "zone"), "");
     const state = { sort: "date", dir: "desc", page: 0 };
     const draw = () => {
       const from = D.fieldVal(box, "from");
@@ -1273,7 +1302,7 @@
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
         columns: [T("metric", "Metric"), T("direction", "Better when"), T("now_value", "Now", "num", { dec: 2 }),
-          T("avg_3y", "Own 3-yr avg", "num", { dec: 2 }), T("pts_vs_self", "Points vs own history", "points"),
+          T("avg_3y", "Own 3-yr avg", "num", { dec: 2 }), T("pts_vs_self", "Points vs own history", "ownpts"),
           T("industry_median", "Sector median", "num", { dec: 2 }), T("pts_vs_industry", "Points vs sector", "points")],
         state: state, pageSize: 12, foot: false,
       });
@@ -1289,7 +1318,7 @@
     const tickers = D.uniq(all, "ticker");
     const start = tickers.indexOf("ADSK") >= 0 ? "ADSK" : (tickers[0] || "");
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="split r21">' +
-      '<div class="panel pad"><div class="ptitle">EPS surprise %</div><div class="chart-box"><canvas id="su"></canvas></div></div>' +
+      '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="su"></canvas></div></div>' +
       '<div class="cards col" id="cards"></div></div><div class="panel" id="tbl"></div>';
     const box = document.getElementById("ctrls");
     let upcoming = false;
@@ -1311,15 +1340,16 @@
       const chartRows = all.filter((r) => r.ticker === q && D.num(r.surprise_pct) != null)
         .sort((a, b) => a.earnings_date < b.earnings_date ? -1 : 1).slice(-8);
       D.destroyCharts();
+      const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       D.barChart(document.getElementById("su"), chartRows.map((r) => {
         const m = /^(\d{4})-(\d{2})/.exec(r.earnings_date || "");
-        return m ? m[1].slice(2) + "-" + m[2] : r.earnings_date;
+        return m ? mon[Number(m[2]) - 1] + " " + m[1].slice(2) : r.earnings_date;
       }), chartRows.map((r) => D.num(r.surprise_pct)),
       chartRows.map((r) => (D.num(r.surprise_pct) || 0) >= 0 ? "#22C55E" : "#EF4444"),
       { labels: true, dec: 1, suffix: "%" });
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
-        columns: [TK, T("earnings_date", "Report date", "shortdate"), T("eps_estimate", "EPS estimate", "num", { dec: 2 }),
+        columns: [TK, T("earnings_date", "Report date", "date"), T("eps_estimate", "EPS estimate", "num", { dec: 2 }),
           T("eps_actual", "EPS actual", "num", { dec: 2 }), T("surprise_pct", "Surprise %", "pct", { dec: 1, color: true }), T("result", "Result", "result")],
         state: state, pageSize: 12,
       });
@@ -1346,10 +1376,11 @@
     const end = maxDate(all, "fy_end");
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">Annual figures from SEC filings. Margins are blank when the filing did not include that line.</p>' +
-      '<div class="split"><div class="panel pad"><div class="ptitle">Revenue and net income</div><div class="chart-box"><canvas id="rev"></canvas></div></div>' +
+      '<div class="split"><div class="panel pad"><div class="ptitle">Revenue and net income</div><div class="chart-box"><canvas id="rev"></canvas></div><p class="cap" id="nicap"></p></div>' +
       '<div class="panel pad"><div class="ptitle">Margins</div><div class="chart-box"><canvas id="mg"></canvas></div></div></div><div class="panel" id="tbl"></div>';
     const box = document.getElementById("ctrls");
-    box.innerHTML = D.searchHtml("ticker", "Ticker", "co-tk", tickers) + D.dateHtml("from", "Years", shift(end, -3650));
+    box.innerHTML = D.searchHtml("ticker", "Ticker", "co-tk", tickers) +
+      D.selectHtml("years", "Years", [{ value: "5", label: "Last 5 years" }, { value: "10", label: "Last 10 years" }], "10", { all: false });
     box.querySelector("[data-filter=ticker]").value = start;
     const state = { sort: "fy_end", dir: "desc", page: 0 };
     const moneyTick = (v) => {
@@ -1360,9 +1391,13 @@
     };
     const draw = () => {
       const t = (D.fieldVal(box, "ticker") || start).trim().toUpperCase();
-      const from = D.fieldVal(box, "from");
-      const rows = all.filter((r) => r.ticker === t && (!from || r.fy_end >= from)).sort((a, b) => a.fy_end < b.fy_end ? -1 : 1);
+      const nYears = Number(D.fieldVal(box, "years") || 10);
+      const mine = all.filter((r) => r.ticker === t).sort((a, b) => a.fy_end < b.fy_end ? -1 : 1);
+      const rows = mine.slice(-nYears);
       const labels = rows.map((r) => fyLabel(r.fy_end));
+      const missingNi = rows.some((r) => D.num(r.revenue) != null && D.num(r.net_income) == null);
+      const note = document.getElementById("nicap");
+      if (note) note.textContent = missingNi ? "Net income not parsed for these years." : "";
       D.destroyCharts();
       D.makeChart(document.getElementById("rev"), {
         type: "bar",
@@ -1372,7 +1407,7 @@
         ] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: "#8B96AD", boxWidth: 12 } } },
+          plugins: { legend: { labels: { color: "#8B96AD", boxWidth: 12 } }, barLabels: { level: true, money: true, lines: true, dec: 1 } },
           scales: {
             x: { ticks: { color: "#8B96AD", maxRotation: 0, autoSkip: false }, grid: { display: false } },
             y: { ticks: { color: "#8B96AD", callback: moneyTick }, grid: { color: "#1E293B" } },
@@ -1383,7 +1418,7 @@
         { label: "Gross margin", data: D.seriesNum(rows, "gross_margin"), color: "#E6EBF5", spanGaps: false },
         { label: "Operating margin", data: D.seriesNum(rows, "operating_margin"), color: "#7C9CFF", spanGaps: false },
         { label: "Net margin", data: D.seriesNum(rows, "net_margin"), color: "#8B96AD", spanGaps: false },
-      ], { x: { ticks: { autoSkip: false, maxRotation: 0, color: "#8B96AD" } } });
+      ], { x: { ticks: { autoSkip: false, maxRotation: 0, color: "#8B96AD" } }, plugins: { barLabels: { level: true, lines: true, suffix: "%", dec: 1 } } });
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
         columns: [T("fy_end", "Fiscal year", "fy"), T("revenue", "Revenue", "compact"), T("gross_profit", "Gross profit", "compact"),
@@ -1437,22 +1472,23 @@
     const all = D.realRows(raw);
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
       '<p class="cap">Signal is +1 when the surprise is in the direction that usually helps stocks (for unemployment and jobless claims, lower is the helpful direction). It is a label, not a forecast.</p>' +
-      '<div class="cards" id="cards"></div><p class="m2" id="countline"></p><div class="panel" id="tbl"></div>';
+      '<div class="cards" id="cards"></div><div class="panel" id="tbl"></div>';
     document.getElementById("cards").innerHTML =
       card("Helpful surprises (+1)", String(countWhere(all, (r) => String(D.num(r.signal)) === "1"))) +
       card("Neutral (0)", String(countWhere(all, (r) => String(D.num(r.signal)) === "0"))) +
       card("Unhelpful (−1)", String(countWhere(all, (r) => String(D.num(r.signal)) === "-1")));
-    document.getElementById("countline").textContent = all.length + " releases in the last 14 days";
+    const countline = all.length + " releases in the last 14 days";
     const box = document.getElementById("ctrls");
     box.innerHTML = D.multiHtml("cat", "Category", D.uniq(all, "category")) +
       D.multiHtml("ind", "Indicator", D.uniq(all, "indicator")) +
       D.multiHtml("sig", "Signal", D.uniq(all, "signal"));
     const state = { sort: "date", dir: "desc", page: 0 };
     const draw = () => D.drawTable(document.getElementById("tbl"), {
+      title: "Releases", sub: countline,
       rows: all.filter((r) => D.matchMulti(r, "category", D.selectedMulti(box, "cat")) &&
         D.matchMulti(r, "indicator", D.selectedMulti(box, "ind")) && D.matchMulti(r, "signal", D.selectedMulti(box, "sig"))),
       columns: [T("date", "Date", "date"), T("category", "Category"), T("indicator", "Indicator", "text", { wrap: true }),
-        T("actual", "Actual"), T("forecast", "Forecast"), T("surprise", "Surprise", "signedcompact"), T("signal", "Signal", "tone")],
+        T("actual", "Actual"), T("forecast", "Forecast"), T("surprise", "Surprise", "surprise"), T("signal", "Signal", "tone")],
       state: state, pageSize: 25,
       empty: all.length ? "No rows match." : "No releases on file.",
     });
@@ -1494,14 +1530,11 @@
     const raw = ctx.files["historical_pe.csv"] || [];
     const all = D.realRows(raw);
     const end = maxDate(all, "date");
-    const official = (raw[0] && raw[0].official_status) || "MISSING";
-    const note = (raw[0] && raw[0].note) || "The line below is this desk's median trailing P/E. The official series has no free source, so it stays blank.";
-    ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="split r12">' +
-      '<div class="panel pad"><div class="m2" style="font-size:11px">Official S&P 500 P/E</div><div style="font-size:18px;font-weight:700;color:#F59E0B;margin-top:6px">' + D.esc(official) + "</div></div>" +
-      '<div class="panel pad"><p class="cap" style="margin:0">' + D.esc(note) + "</p></div></div>" +
+    ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div>' +
+      '<p class="cap">Median trailing P/E of the stocks on this desk. There is no free official S&P 500 P/E series, so that line is not drawn.</p>' +
       '<div class="panel pad"><div class="ptitle">Desk median trailing P/E</div><div class="chart-box tall"><canvas id="pe"></canvas></div></div><div class="panel" id="tbl"></div>';
     const box = document.getElementById("ctrls");
-    box.innerHTML = D.dateHtml("from", "Period", shift(end, -1825));
+    box.innerHTML = D.dateHtml("from", "From", shift(end, -1825));
     const state = { sort: "date", dir: "desc", page: 0 };
     const draw = () => {
       const from = D.fieldVal(box, "from");
@@ -1666,7 +1699,8 @@
       D.destroyCharts();
       D.barChart(document.getElementById("sp"), ordered.map((r) => r.sector), ordered.map((r) => D.num(r.month_pct)),
         ordered.map((r) => (D.num(r.month_pct) || 0) >= 0 ? "#1F9D55" : "#D14343"),
-        { horizontal: true, labels: true, dec: 1, suffix: "%" });
+        { horizontal: true, labels: true, dec: 1, suffix: "%",
+          x: { ticks: { color: "#5B6680", callback: (v) => { const n = Number(v); const sign = n > 0 ? "+" : n < 0 ? "−" : ""; return sign + Math.abs(n) + "%"; } }, grid: { color: "#1E293B" } } });
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
         columns: [SE, T("day_pct", "Day %", "pct", { color: true }), T("week_pct", "Week %", "pct", { color: true }), T("month_pct", "Month %", "pct", { color: true }),
@@ -1719,19 +1753,66 @@
   function renderUpdates(ctx) {
     const log = ctx.files["updates_log.csv"] || [];
     const fresh = D.realRows(ctx.files["freshness.csv"]);
-    const features = (ctx.settings || []).filter((r) => String(r.setting || "").indexOf("feature.") === 0).map((r) => ({
-      feature: String(r.setting).replace(/^feature\./, "").replace(/_/g, " "),
-      value: r.value,
-    }));
-    ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="panel" id="feat"></div><div class="split r21"><div class="panel" id="log"></div><div class="panel" id="fr"></div></div>';
+    const featureName = {
+      "aaii sentiment": "AAII",
+      "institutional 13f": "13F tracker",
+      "historical pe": "Historical P/E",
+      "xly xlp": "XLY/XLP",
+      "put call": "Put/call",
+      "option walls": "Put and call walls",
+      "analyst ratings": "Analyst ratings",
+      "insider trading": "Insider trading",
+      "headline sentiment": "Headline sentiment",
+      "financials summary": "Financials summary",
+      "company financials": "Company financials",
+      "earnings tracker": "Earnings tracker",
+      "earnings calendar": "Calendar",
+      "earnings heatmap": "Strength heatmap",
+      "verdicts": "Verdicts",
+      "backtest": "Backtest",
+      "alerts": "Alerts",
+      "universe": "Universe",
+      "scorecard": "Stock scorecard",
+      "breakouts": "52-week breakouts",
+      "trends": "Trends",
+      "pullbacks": "Pullbacks",
+      "gainers losers": "Gainers and losers",
+      "breadth": "Breadth",
+      "sector performance": "Sector performance",
+      "heatmaps": "Heatmaps",
+      "updates log": "Data updates",
+      "help": "Help",
+      "earnings cards": "Report cards",
+      "dividend scanner": "Dividend fundamentals",
+      "macro screener": "Macro screener",
+      "scanner growth": "Growth",
+      "scanner quality": "Quality",
+      "scanner dividend": "Dividend",
+      "scanner wheel": "Wheel",
+      "scanner vcp": "VCP",
+      "scanner canslim": "CANSLIM",
+      "scanner box": "Box breakout",
+      "scanner flag": "Flag breakout",
+      "scanner leaders": "Leaders",
+      "top stocks": "Top stocks",
+      "top sectors": "Today's sectors",
+      "watchlist portfolio": "Watchlist and portfolio",
+      "score breakdown": "Score breakdown",
+      "freshness flags": "Freshness",
+      "news earnings summaries": "News",
+      "momentum timing": "Timing",
+    };
+    const features = (ctx.settings || []).filter((r) => String(r.setting || "").indexOf("feature.") === 0).map((r) => {
+      const key = String(r.setting).replace(/^feature\./, "").replace(/_/g, " ");
+      const on = String(r.value || "").toLowerCase();
+      const live = on === "true" || on === "yes" || on === "1";
+      return { name: featureName[key] || key, on: live };
+    });
+    ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="panel pad"><div class="ptitle">Feature switches</div><div class="featgrid">' +
+      features.map((f) => '<div><span>' + D.esc(f.name) + '</span><span style="color:' + (f.on ? "#22C55E" : "#8B96AD") + '">' + (f.on ? "On" : "Off") + "</span></div>").join("") +
+      '</div></div><div class="split r21"><div class="panel" id="log"></div><div class="panel" id="fr"></div></div>';
     const box = document.getElementById("ctrls");
     box.innerHTML = D.multiHtml("status", "Status", D.uniq(log, "status"));
-    D.drawTable(document.getElementById("feat"), {
-      title: "Feature switches",
-      rows: features,
-      columns: [T("feature", "Feature"), T("value", "On/Off", "onoff")],
-      state: { sort: "feature", dir: "asc", page: 0 }, pageSize: 60, foot: false,
-    });
     const draw = () => {
       D.drawTable(document.getElementById("log"), {
         title: "Updates log",
@@ -1759,7 +1840,7 @@
     ctx.page.innerHTML = '<div class="ctrls" id="ctrls"></div><div class="panel" id="help"></div><div class="panel w740" id="set"></div>';
     const box = document.getElementById("ctrls");
     box.innerHTML = D.searchHtml("topic", "Topic", "topics", D.uniq(help, "topic")) +
-      '<label class="ctl"><span class="lab">Setting contains</span><input data-filter="setting" placeholder="scoring."></label>';
+      '<label class="ctl"><span class="lab">Setting contains</span><input data-filter="setting" placeholder="Search settings"></label>';
     const draw = () => {
       const topic = (D.fieldVal(box, "topic") || "").trim().toLowerCase();
       const setting = (D.fieldVal(box, "setting") || "").trim().toLowerCase();

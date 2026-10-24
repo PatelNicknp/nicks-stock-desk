@@ -248,6 +248,108 @@ def _attach_by_end(df, by_end, column):
     return df
 
 
+def _unframed_one(gaap, names, forms, dur_lo, dur_hi):
+    """One annual flow concept with no CY#### frame, keyed by period end.
+
+    Companyfacts often leaves `frame` null on a 10-K. Those facts are still
+    the fiscal year when fp is FY, the form is an annual report, and the
+    period is about 365 days. The latest filing wins.
+    """
+    rows, used = _units(gaap, names)
+    best = {}
+    for row in rows:
+        frame = row.get("frame") or ""
+        if ANNUAL_FRAME.fullmatch(frame):
+            continue
+        if not _ok_form(row.get("form"), forms):
+            continue
+        if (row.get("fp") or "") != "FY":
+            continue
+        dur = _duration(row)
+        if dur is None or dur < dur_lo or dur > dur_hi:
+            continue
+        end = str(row.get("end") or "")[:10]
+        if len(end) < 10:
+            continue
+        prev = best.get(end)
+        if prev is None or str(row.get("filed") or "") >= str(prev.get("filed") or ""):
+            best[end] = {
+                "val": row.get("val"),
+                "end": row.get("end"),
+                "filed": row.get("filed"),
+                "concept": used,
+                "fy": row.get("fy"),
+            }
+    return best
+
+
+def _unframed_fallback(gaap, names, forms, dur_lo=350, dur_hi=380):
+    """First concept wins. Later concepts fill only the period ends it missed."""
+    merged = {}
+    for name in names:
+        got = _unframed_one(gaap, [name], forms, dur_lo, dur_hi)
+        for end, item in got.items():
+            if end not in merged:
+                merged[end] = item
+    return merged
+
+
+def _apply_unframed_flows(df, maps):
+    """Attach unframed annual flows by period end.
+
+    A CY row for that end keeps its values. Blank columns are filled. An end
+    with no CY row becomes its own row, labeled FY{year}.
+    """
+    if not maps or not any(maps.values()):
+        return df if df is not None else pd.DataFrame()
+    if df is None or len(df) == 0:
+        df = pd.DataFrame(columns=["frame", "end", "filed"])
+    else:
+        df = df.copy()
+    existing = {}
+    if "end" in df.columns:
+        for i, end in df["end"].astype(str).str[:10].items():
+            existing.setdefault(end, []).append(i)
+    for col, by_end in maps.items():
+        if col not in df.columns:
+            df[col] = np.nan
+        for end, idxs in existing.items():
+            item = by_end.get(end)
+            if not item:
+                continue
+            for i in idxs:
+                if pd.isna(df.at[i, col]):
+                    df.at[i, col] = item["val"]
+    new_rows = []
+    ends = set()
+    for by_end in maps.values():
+        ends.update(by_end)
+    for end in sorted(ends):
+        if end in existing:
+            continue
+        rec = {col: np.nan for col in maps}
+        rec["frame"] = "FY" + end[:4]
+        rec["end"] = end
+        rec["filed"] = None
+        for col, by_end in maps.items():
+            item = by_end.get(end)
+            if not item:
+                continue
+            rec[col] = item["val"]
+            rec["filed"] = item.get("filed") or rec["filed"]
+            rec["end"] = item.get("end") or end
+            fy = item.get("fy")
+            try:
+                if fy is not None and str(fy).strip() != "":
+                    rec["frame"] = "FY" + str(int(float(fy)))
+            except (TypeError, ValueError):
+                pass
+        new_rows.append(rec)
+    if new_rows:
+        df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+    return df
+
+
 def parse_companyfacts(payload):
     """Return (annual_df, quarter_df) for one company. Empty frames if nothing usable."""
     facts = (payload or {}).get("facts") or {}
@@ -285,6 +387,21 @@ def parse_companyfacts(payload):
     # Real filings usually omit the CY#### frame on the balance sheet. Attach by period end.
     annual = _attach_by_end(annual, _instant_by_end(gaap, EQUITY_CONCEPTS, annual_forms), "equity")
     annual = _attach_by_end(annual, _debt_by_end(gaap, annual_forms), "debt")
+    # The same filings often omit the CY#### frame on the income statement.
+    # Keep those fiscal years. A framed value for the same period end still wins.
+    flow_names = {
+        "revenue": REVENUE_CONCEPTS,
+        "net_income": NI_CONCEPTS,
+        "eps": EPS_CONCEPTS,
+        "gross_profit": GP_CONCEPTS,
+        "op_income": OI_CONCEPTS,
+        "ocf": OCF_CONCEPTS,
+        "capex": CAPEX_CONCEPTS,
+        "dps": DPS_CONCEPTS,
+        "shares": SHARES_FLOW,
+    }
+    unframed = {key: _unframed_fallback(gaap, names, annual_forms) for key, names in flow_names.items()}
+    annual = _apply_unframed_flows(annual, unframed)
 
     qmaps = {}
     q_flow = {
@@ -333,6 +450,195 @@ def _price_on_or_after(closes, day):
     return float(val) if pd.notna(val) else np.nan
 
 
+_SPLIT_FACTORS = (2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50)
+
+
+def _near_split(ratio):
+    """Nearest common split, or None when the share-count jump is not one."""
+    import math
+    if ratio is None or not np.isfinite(ratio) or ratio < 1.7:
+        return None
+    best = min(_SPLIT_FACTORS, key=lambda f: abs(math.log(ratio / f)))
+    if abs(math.log(ratio / best)) > math.log(1.12):
+        return None
+    return int(best)
+
+
+def _split_factor_for_ticker(shares_rows):
+    """Vote a split factor from share-count jumps on overlapping filings.
+
+    A later 10-K often restates shares after a split. Older rows stay on the
+    pre-split count. Prices in the cache are already split-adjusted, so the
+    per-share figures have to be scaled by that same ratio. Buybacks move the
+    count a few percent and do not match a whole split.
+    """
+    obs = []
+    for end, filed, shares in shares_rows:
+        sh = _num(shares)
+        if not np.isfinite(sh) or sh <= 0:
+            continue
+        end_ts = pd.to_datetime(end, errors="coerce")
+        filed_ts = pd.to_datetime(filed, errors="coerce")
+        if pd.isna(end_ts):
+            continue
+        obs.append((end_ts, filed_ts, float(sh)))
+    if len(obs) < 2:
+        return None
+    votes = {}
+    for i, (end_a, filed_a, sh_a) in enumerate(obs):
+        for end_b, filed_b, sh_b in obs[i + 1:]:
+            if abs((end_a - end_b).days) > 800:
+                continue
+            big, small = (sh_b, sh_a) if sh_b > sh_a else (sh_a, sh_b)
+            factor = _near_split(big / small)
+            if not factor:
+                continue
+            # The larger count should be the one filed later, or on a later period.
+            later_is_big = False
+            if sh_b > sh_a:
+                later_is_big = (pd.notna(filed_b) and pd.notna(filed_a) and filed_b >= filed_a) or end_b >= end_a
+            else:
+                later_is_big = (pd.notna(filed_a) and pd.notna(filed_b) and filed_a >= filed_b) or end_a >= end_b
+            if not later_is_big:
+                continue
+            votes[factor] = votes.get(factor, 0) + 1
+    if not votes:
+        return None
+    factor = max(votes, key=lambda f: (votes[f], f))
+    if votes[factor] < 1:
+        return None
+    return factor
+
+
+def _apply_factor(df, factor, pre_mask, cols):
+    if df is None or len(df) == 0 or not factor or not pre_mask.any():
+        return df
+    out = df
+    for col in cols:
+        if col not in out.columns:
+            continue
+        vals = pd.to_numeric(out[col], errors="coerce")
+        if col == "shares":
+            out.loc[pre_mask, col] = vals[pre_mask] * factor
+        else:
+            out.loc[pre_mask, col] = vals[pre_mask] / factor
+    return out
+
+
+def _normalize_share_units(frame):
+    """Put share counts on a raw-share basis.
+
+    A few filers switch the shares tag to millions (McDonald's 2021+ is 716.4
+    next to a 2020 count of 750,100,000). That is the same share count, not a
+    reverse split. Values under one million that land on the larger cluster
+    after multiplying by one million are scaled. A real count such as NVR's
+    2.8 million is left alone.
+    """
+    if frame is None or len(frame) == 0 or "shares" not in frame.columns or "ticker" not in frame.columns:
+        return frame
+    out = frame
+    grouped = out.groupby(out["ticker"].astype(str)).groups
+    for _ticker, idx in grouped.items():
+        sh = pd.to_numeric(out.loc[idx, "shares"], errors="coerce")
+        vals = sh[sh > 0]
+        if len(vals) == 0:
+            continue
+        big = vals[vals >= 1_000_000]
+        if len(big):
+            med = float(big.median())
+            if med <= 0:
+                continue
+            close = (sh > 0) & (sh < 1_000_000) & ((sh * 1_000_000 - med).abs() / med <= 0.35)
+            if close.any():
+                out.loc[close[close].index, "shares"] = sh[close] * 1_000_000
+        elif float(vals.median()) < 100_000:
+            small = (sh > 0) & (sh < 1_000_000)
+            out.loc[small[small].index, "shares"] = sh[small] * 1_000_000
+    return out
+
+
+def adjust_pershare_for_splits(annual, quarters):
+    """Scale pre-split EPS, dividends and share counts onto the adjusted-price basis.
+
+    The price cache is already split-adjusted. SEC per-share facts are not, until
+    a filing after the split restates them. Rows still on the old count are divided
+    (EPS, DPS) or multiplied (shares) by the split. A ratio under 1 or over 500,
+    and a yield over 15%, is dropped later by the sanity guard.
+    """
+    annual = annual.copy() if annual is not None and len(annual) else pd.DataFrame()
+    quarters = quarters.copy() if quarters is not None and len(quarters) else pd.DataFrame()
+    annual = _normalize_share_units(annual)
+    quarters = _normalize_share_units(quarters)
+    if (len(annual) == 0 and len(quarters) == 0) or "ticker" not in (annual.columns if len(annual) else quarters.columns):
+        return annual, quarters
+    tickers = set()
+    if len(annual) and "ticker" in annual.columns:
+        tickers.update(annual["ticker"].astype(str))
+    if len(quarters) and "ticker" in quarters.columns:
+        tickers.update(quarters["ticker"].astype(str))
+    for ticker in tickers:
+        rows = []
+        for frame in (annual, quarters):
+            if len(frame) == 0 or "ticker" not in frame.columns or "shares" not in frame.columns:
+                continue
+            sub = frame[frame["ticker"].astype(str) == ticker]
+            for _, r in sub.iterrows():
+                rows.append((r.get("end"), r.get("filed"), r.get("shares")))
+        factor = _split_factor_for_ticker(rows)
+        if not factor:
+            continue
+        dated = []
+        for end, _filed, shares in rows:
+            sh = _num(shares)
+            end_ts = pd.to_datetime(end, errors="coerce")
+            if np.isfinite(sh) and sh > 0 and pd.notna(end_ts):
+                dated.append((end_ts, float(sh)))
+        if len(dated) < 2:
+            continue
+        sizes = sorted(sh for _end, sh in dated)
+        cut = max(range(len(sizes) - 1), key=lambda i: sizes[i + 1] / sizes[i])
+        if sizes[cut + 1] / sizes[cut] < 1.7:
+            continue
+        post = float(np.median(sizes[cut + 1:]))
+        # The bigger share count has to be the newer one. A reverse split, or an
+        # old un-restated count, leaves the latest year on the smaller number.
+        small_ends = [end for end, sh in dated if sh < post / 1.8]
+        large_ends = [end for end, sh in dated if sh >= post / 1.8]
+        if not small_ends or not large_ends:
+            continue
+        if pd.Series(large_ends).median() <= pd.Series(small_ends).median():
+            continue
+        newest = max(dated, key=lambda item: item[0])
+        if newest[1] < post / 1.8:
+            continue
+        def _pre_mask(frame):
+            if len(frame) == 0 or "ticker" not in frame.columns or "shares" not in frame.columns:
+                return pd.Series(False, index=frame.index)
+            sh = pd.to_numeric(frame["shares"], errors="coerce")
+            mine = frame["ticker"].astype(str) == ticker
+            scaled = sh * factor
+            return mine & sh.notna() & (sh > 0) & (scaled / post).between(0.45, 2.2) & (sh < post / 1.8)
+        annual = _apply_factor(annual, factor, _pre_mask(annual), ("eps", "dps", "shares"))
+        quarters = _apply_factor(quarters, factor, _pre_mask(quarters), ("eps", "dps", "shares"))
+    return annual, quarters
+
+
+def guard_multiple(value, lo=1.0, hi=500.0):
+    """Drop a P/E that is still on the wrong split basis. Missing stays missing."""
+    x = _num(value)
+    if not np.isfinite(x) or x < lo or x > hi:
+        return None
+    return float(x)
+
+
+def guard_yield(value, hi=0.15):
+    """Drop a yield above 15%. A split-mismatched dividend prints in that range."""
+    x = _num(value)
+    if not np.isfinite(x) or x < 0 or x > hi:
+        return None
+    return float(x)
+
+
 def prepare_annual(annual, closes):
     """One row per fiscal year with historical multiples and the prior 3-year averages.
 
@@ -361,6 +667,8 @@ def prepare_annual(annual, closes):
     df["hist_px"] = df["known_on"].map(lambda d: _price_on_or_after(closes, d))
     df["pe"] = df["hist_px"] / df["eps"]
     df.loc[df["eps"] <= 0, "pe"] = np.nan
+    # A P/E under 1, or over 500, is a split mismatch (pre-split EPS, post-split price).
+    df.loc[(df["pe"] < 1) | (df["pe"] > 500), "pe"] = np.nan
     mcap = df["hist_px"] * df["shares"]
     df["ps"] = mcap / df["revenue"]
     df.loc[(df["revenue"] <= 0) | df["shares"].isna(), "ps"] = np.nan
@@ -378,6 +686,7 @@ def prepare_annual(annual, closes):
     df.loc[prev_eps <= 0, "eps_g"] = np.nan
     df["div_y"] = df["dps"] / df["hist_px"]
     df.loc[df["hist_px"] <= 0, "div_y"] = np.nan
+    df.loc[(df["div_y"] < 0) | (df["div_y"] > 0.15), "div_y"] = np.nan
     for col in ("pe", "ps", "pfcf", "de", "rev_g", "eps_g", "roe", "div_y"):
         df[col + "_avg"] = df[col].shift(1).rolling(3, min_periods=2).mean()
     df["avg_years"] = df["revenue"].shift(1).rolling(3, min_periods=1).count()
@@ -512,22 +821,22 @@ def metrics_asof(prep, asof, price, quarters=None):
         "filed": None if pd.isna(filed) else str(pd.Timestamp(filed).date()),
         "fy_end": None if pd.isna(fy_end) else str(pd.Timestamp(fy_end).date()),
         "avg_years": int(row["avg_years"]) if pd.notna(row.get("avg_years")) else 0,
-        "ttm_pe": _sane_multiple(pe, 2000),
+        "ttm_pe": guard_multiple(pe),
         "ps": _sane_multiple(ps, 500),
         "pfcf": _sane_multiple(pfcf, 2000),
         "de": _sane_ratio(de, 0, 50),
         "rev_growth": _sane_ratio(rev_g, -0.95, 10),
         "eps_growth": _sane_ratio(eps_g, -0.95, 10),
         "roe": _sane_ratio(roe, -1.5, 3),
-        "div_yield": _sane_ratio(div_y, 0, 0.25),
-        "ttm_pe_avg": _sane_multiple(_num(row.get("pe_avg")), 2000),
+        "div_yield": guard_yield(div_y),
+        "ttm_pe_avg": guard_multiple(_num(row.get("pe_avg"))),
         "ps_avg": _sane_multiple(_num(row.get("ps_avg")), 500),
         "pfcf_avg": _sane_multiple(_num(row.get("pfcf_avg")), 2000),
         "de_avg": _sane_ratio(_num(row.get("de_avg")), 0, 50),
         "rev_growth_avg": _sane_ratio(_num(row.get("rev_g_avg")), -0.95, 10),
         "eps_growth_avg": _sane_ratio(_num(row.get("eps_g_avg")), -0.95, 10),
         "roe_avg": _sane_ratio(_num(row.get("roe_avg")), -1.5, 3),
-        "div_yield_avg": _sane_ratio(_num(row.get("div_y_avg")), 0, 0.25),
+        "div_yield_avg": guard_yield(_num(row.get("div_y_avg"))),
         "eps": None if not np.isfinite(eps) else float(eps),
         "revenue": None if not np.isfinite(revenue) else float(revenue),
         "fcf": None if not np.isfinite(fcf) else float(fcf),

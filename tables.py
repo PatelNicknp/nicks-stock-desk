@@ -331,7 +331,7 @@ def scanners(scores, cfg):
     q["passes"] = np.where((q["pts_roe"] == 1) & (q["de"].map(_num).fillna(99) < cfg["quality_max_de"]) & q["verdict"].ne("AVOID"), "yes", "no")
     q["why"] = np.where(
         q["passes"].eq("yes"),
-        "Return on equity is above the company's own history, or its sector when that history is missing, and debt/equity is at most the desk limit. The label is not AVOID.",
+        "Return on equity point is +1 and debt/equity is under the desk limit. Debt points compare to the sector and can be -1. The label is not AVOID.",
         "Does not pass the quality screen.")
     d = scores.copy()
     d["passes"] = np.where(d["div_yield"].map(_num).ge(cfg["dividend_min_pct"]) & d["verdict"].ne("AVOID"), "yes", "no")
@@ -457,10 +457,18 @@ def financials_long(scores):
     }
     for _, r in scores.iterrows():
         for key, (label, direction) in labels.items():
+            avg = r.get(key + "_avg")
+            pts = r.get("pts_" + key)
+            note = ""
+            # A sector fallback used to be written into the own-history column.
+            if key in ("roe", "de") and _cell_blank(avg) and not _cell_blank(pts):
+                note = "sector fallback"
+                pts = ""
             rows.append({
                 "ticker": r["ticker"], "sector": r.get("sector"), "metric": label, "direction": direction,
-                "now_value": r.get(key), "avg_3y": r.get(key + "_avg"), "pts_vs_self": r.get("pts_" + key),
+                "now_value": r.get(key), "avg_3y": avg, "pts_vs_self": pts,
                 "industry_median": r.get("ind_" + key), "pts_vs_industry": r.get("pts_" + key + "_ind"),
+                "note": note,
             })
     return pd.DataFrame(rows)
 
@@ -516,7 +524,7 @@ def company_rows(annual, close):
             "operating_margin": None if om is None else round(om * 100, 2),
             "net_margin": None if nm is None else round(nm * 100, 2),
             "fcf": fcf,
-            "pe": _multiple(px, eps),
+            "pe": fund.guard_multiple(_multiple(px, eps)),
             "ps": _multiple(mcap, rev),
             "pfcf": _multiple(mcap, fcf),
         })

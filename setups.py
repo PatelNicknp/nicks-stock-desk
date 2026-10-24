@@ -655,10 +655,17 @@ def _holder_trend(holders, ticker):
     up = _num(r.get("inst_up"))
     down = _num(r.get("inst_down"))
     own = _num(r.get("ownership_pct"))
+    if own is not None and own > 100:
+        own_txt = " Reported holdings exceed shares outstanding, so the ownership percent is not used."
+        own = None
+    else:
+        own_txt = " Ownership %s%%." % _round(own, 1) if own is not None else " Ownership percent is not verified."
     if up is None or down is None:
         level = ""
         if own is not None:
             level = " Ownership is %s%%, which is a level, not a trend." % _round(own, 1)
+        elif "not used" in own_txt:
+            level = own_txt
         return NOT_VERIFIED, "Institutional trend is not verified.%s" % level
     if up > down:
         trend = "up"
@@ -666,7 +673,6 @@ def _holder_trend(holders, ticker):
         trend = "down"
     else:
         trend = "flat"
-    own_txt = " Ownership %s%%." % _round(own, 1) if own is not None else " Ownership percent is not verified."
     text = "Institutional shares increased %s versus decreased %s, so the trend is %s.%s" % (
         _round(up, 0), _round(down, 0), trend, own_txt)
     return trend, text

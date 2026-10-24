@@ -18,7 +18,7 @@ async function loadChromium() {
 }
 
 const base = process.argv[2] || "http://127.0.0.1:8765/site/";
-const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v2";
+const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v3";
 const pages = [
   "index.html", "top-stocks.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
   "growth.html", "quality.html", "dividend.html", "wheel.html", "vcp.html", "canslim.html",
@@ -35,6 +35,111 @@ function ignore(text) {
   const t = String(text || "");
   return /favicon|net::ERR_BLOCKED|Download the React DevTools/i.test(t);
 }
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { cell += '"'; i++; }
+        else quoted = false;
+      } else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell);
+      cell = "";
+      if (row.length > 1 || row[0] !== "") rows.push(row);
+      row = [];
+    } else cell += ch;
+  }
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  if (!rows.length) return [];
+  const header = rows[0];
+  return rows.slice(1).filter((r) => r.some((c) => c !== "")).map((r) => {
+    const obj = {};
+    header.forEach((key, i) => { obj[key] = r[i] == null ? "" : r[i]; });
+    return obj;
+  });
+}
+
+function sameNum(a, b) {
+  if (String(a).trim() === "" && String(b).trim() === "") return true;
+  const na = Number(a);
+  const nb = Number(b);
+  if (Number.isFinite(na) && Number.isFinite(nb)) return Math.abs(na - nb) < 1e-6;
+  return String(a).trim() === String(b).trim();
+}
+
+function checkScores(dataDir) {
+  const scoresPath = path.join(dataDir, "scores.csv");
+  if (!fs.existsSync(scoresPath)) {
+    console.error("missing " + scoresPath);
+    return 1;
+  }
+  const scores = parseCsv(fs.readFileSync(scoresPath, "utf8"));
+  const byTicker = new Map();
+  let buys = 0;
+  for (const row of scores) {
+    const ticker = String(row.ticker || "").trim();
+    if (!ticker) continue;
+    byTicker.set(ticker, row);
+    if (String(row.verdict || "").trim() === "BUY") buys += 1;
+  }
+  const problems = [];
+  for (const name of fs.readdirSync(dataDir).filter((n) => n.endsWith(".csv")).sort()) {
+    const rows = parseCsv(fs.readFileSync(path.join(dataDir, name), "utf8"));
+    if (!rows.length) continue;
+    if (name === "market_today.csv" && Object.prototype.hasOwnProperty.call(rows[0], "buy_count")) {
+      const got = Number(rows[0].buy_count);
+      if (got !== buys) problems.push("market_today.csv buy_count " + rows[0].buy_count + " != " + buys + " BUY rows in scores.csv");
+      continue;
+    }
+    const hasScore = Object.prototype.hasOwnProperty.call(rows[0], "score");
+    const hasVerdict = Object.prototype.hasOwnProperty.call(rows[0], "verdict");
+    if (!Object.prototype.hasOwnProperty.call(rows[0], "ticker") || (!hasScore && !hasVerdict)) continue;
+    if (name === "scores.csv") continue;
+    let use = rows;
+    if (name === "score_history.csv") {
+      const latest = new Map();
+      for (const row of rows) {
+        const ticker = String(row.ticker || "").trim();
+        if (!ticker) continue;
+        const prev = latest.get(ticker);
+        if (!prev || String(row.date || "") >= String(prev.date || "")) latest.set(ticker, row);
+      }
+      use = [...latest.values()];
+    }
+    let scoreMiss = 0;
+    let verdictMiss = 0;
+    for (const row of use) {
+      const ticker = String(row.ticker || "").trim();
+      if (!ticker || !byTicker.has(ticker)) continue;
+      const truth = byTicker.get(ticker);
+      if (hasScore && !sameNum(row.score, truth.score)) scoreMiss += 1;
+      if (hasVerdict && String(row.verdict || "").trim() !== String(truth.verdict || "").trim()) verdictMiss += 1;
+    }
+    if (scoreMiss || verdictMiss) problems.push(name + " score " + scoreMiss + " verdict " + verdictMiss);
+  }
+  if (problems.length) {
+    console.error("score consistency:\n" + problems.join("\n"));
+    return problems.length;
+  }
+  console.log("scores agree across data/*.csv (" + buys + " BUY)");
+  return 0;
+}
+
+const dataDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../data");
+const scoreFails = checkScores(dataDir);
+if (scoreFails) process.exit(1);
 
 fs.mkdirSync(outDir, { recursive: true });
 const chromium = await loadChromium();

@@ -197,6 +197,32 @@ def test_ownership_cap():
     assert stock_desk.cap_ownership(None) == (None, False)
 
 
+def test_ownership_uses_sec_shares_not_a_cap():
+    import stock_desk
+    pct, over = stock_desk.ownership_percent(283040169, 439000000, 201, 140.52)
+    assert over is False
+    assert abs(pct - (283040169 / 439000000 * 100)) < 0.02
+    mcd, mcd_over = stock_desk.ownership_percent(603835580, 716.4, 708, 85.33)
+    assert mcd_over is False
+    assert 80 < mcd < 90
+    # SEC shares are one class here. The larger Nasdaq count is the denominator.
+    vmrk, vmrk_over = stock_desk.ownership_percent(857253691, 383878000, 774, 110.8)
+    assert vmrk_over is True
+    assert vmrk < 120
+    still, over2 = stock_desk.ownership_percent(84320994, 66581000, 63, 133.53)
+    assert over2 is True
+    assert still > 100
+    assert stock_desk.filer_name("Fmr Llc") == "FMR LLC"
+    assert stock_desk.filer_name("Blackrock, Inc.") == "BlackRock, Inc."
+    rows = stock_desk._latest_holder_rows([
+        {"ticker": "A", "owner": "Vanguard", "shares": 1, "as_of": "12/31/2025"},
+        {"ticker": "A", "owner": "BlackRock, Inc.", "shares": 2, "as_of": "6/30/2026"},
+        {"ticker": "A", "owner": "BlackRock, Inc.", "shares": 9, "as_of": "12/31/2025"},
+    ])
+    assert len(rows) == 1
+    assert rows[0]["shares"] == 2
+
+
 def test_no_broker_order_api_in_source():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     banned = ("api.alpaca", "place_order", "/v2/orders", "ib_insync")
@@ -218,5 +244,6 @@ if __name__ == "__main__":
     test_duplicate_backtest_window_is_dropped()
     test_pullbacks_skip_avoid_and_blank_entries()
     test_ownership_cap()
+    test_ownership_uses_sec_shares_not_a_cap()
     test_no_broker_order_api_in_source()
     print("scoring ok")

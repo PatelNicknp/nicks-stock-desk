@@ -892,8 +892,12 @@ def _books(px, spy, books, cost, sig, buckets):
             "hit_rate_12w_pct": None if not np.isfinite(hit) else round(hit, 1),
             "signals": int(len(sub)),
         })
-    # mark the headline window
-    prefer = "5y" if any(r["window"] == "5y" for r in summary_rows) else (summary_rows[-1]["window"] if summary_rows else None)
+    # mark the headline window. "5y" is renamed when the file is shorter than five years.
+    def _long_window(name):
+        return name == "5y" or str(name).startswith("Full history")
+    prefer = next((r["window"] for r in summary_rows if _long_window(r["window"])), None)
+    if prefer is None and summary_rows:
+        prefer = summary_rows[-1]["window"]
     for r in summary_rows:
         r["is_headline"] = "yes" if r["window"] == prefer else "no"
     if prefer:
@@ -956,8 +960,13 @@ def _window_summary(label, dates, mask_dates, top_rets, spy_rets, bot_rets, sig,
                 break
         if np.isfinite(excess):
             break
+    shown = label
+    if label == "5y" and years < 4.6:
+        shown = "Full history (%.1fy)" % years
+    elif label == "3y" and years < 2.6:
+        shown = "Full history (%.1fy)" % years
     return {
-        "window": label,
+        "window": shown,
         "start": str(pd.Timestamp(dates[mask_dates[0]]).date()),
         "end": str(d1.date()),
         "months": len(mask_dates),
