@@ -847,9 +847,10 @@ def _window_summary(label, dates, mask_dates, top_rets, spy_rets, bot_rets, sig,
         if len(base):
             hit = float((base["12w"] > base["12w_spy"]).mean()) * 100
     excess = np.nan
-    for label in ("Scores 10 or more", "Scores 8 to 9"):
+    # Do not reuse the name `label`: that argument is the window (3y, 5y, full).
+    for bucket_name in ("Scores 10 or more", "Scores 8 to 9"):
         for b in buckets:
-            if b["horizon"] == "12w" and b["bucket"] == label and b.get("excess_pct") is not None:
+            if b["horizon"] == "12w" and b["bucket"] == bucket_name and b.get("excess_pct") is not None:
                 excess = b["excess_pct"]
                 break
         if np.isfinite(excess):
