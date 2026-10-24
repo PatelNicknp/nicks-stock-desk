@@ -1609,6 +1609,113 @@
     draw();
   }
 
+  function renderWeek52(ctx) {
+    const raw = ctx.files["scanner_52w.csv"];
+    const all = D.realRows(raw);
+    const hist = D.realRows(ctx.files["highs_lows_history.csv"]).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+    const yes = (r, key) => String(r[key] || "").toLowerCase() === "yes";
+    const nHigh = countWhere(all, (r) => yes(r, "new_high_today"));
+    const nLow = countWhere(all, (r) => yes(r, "new_low_today"));
+    const nNear = countWhere(all, (r) => yes(r, "near_high"));
+    const nVol = countWhere(all, (r) => yes(r, "high_on_volume"));
+    const net = nHigh - nLow;
+    const netText = net < 0 ? "−" + Math.abs(net) : String(net);
+    const netColor = net > 0 ? "#22C55E" : net < 0 ? "#EF4444" : "#8B96AD";
+    ctx.page.innerHTML =
+      '<p class="cap">A 52-week high is the highest intraday price of the last 252 trading days, and a 52-week low is the lowest. New highs and new lows on this page use the close, so a name can touch a new high during the day and still not count if it does not close there. Near the high means the close is within 5% of that high. That band is the zone Minervini prefers. A high on big volume also needs volume at least 1.5 times the 50-day average. Research only. This page does not place trades or send alerts.</p>' +
+      '<div class="cards" id="cards"></div>' +
+      '<div class="panel pad"><div class="rowhead wrap"><div style="min-width:0;flex:1"><div class="ptitle">Highs and lows</div><div class="psub">Green bars are new highs. Red bars are new lows. The line is highs minus lows.</div></div>' +
+      '<div class="seg" id="hlrange"><button type="button" data-d="92">3M</button><button type="button" data-d="183" class="on">6M</button><button type="button" data-d="365">1Y</button></div></div>' +
+      '<div class="chart-box tall"><canvas id="hl"></canvas></div></div>' +
+      '<div class="ctrls" id="ctrls"></div><div class="panel" id="tbl"></div>';
+    document.getElementById("cards").innerHTML =
+      card("New 52w highs today", '<span style="color:#22C55E">' + nHigh + "</span>") +
+      card("New 52w lows today", '<span style="color:#EF4444">' + nLow + "</span>") +
+      card("Near high (within 5%)", '<span style="color:#F59E0B">' + nNear + "</span>") +
+      card("New highs on big volume", '<span style="color:#22C55E">' + nVol + "</span>", "At least 1.5× the 50-day average") +
+      card("Net highs minus lows", '<span style="color:' + netColor + '">' + netText + "</span>");
+    const tabs = [
+      ["highs", "New highs"],
+      ["lows", "New lows"],
+      ["near", "Near high"],
+      ["vol", "On volume"],
+      ["all", "All"],
+    ];
+    const titles = {
+      highs: "New highs today",
+      lows: "New lows today",
+      near: "Near the high",
+      vol: "Breakout to a new high on volume",
+      all: "All stocks",
+    };
+    const box = document.getElementById("ctrls");
+    standardFilters(box, all, { index: true, sector: true, verdict: true, ticker: true, order: ["index", "sector", "verdict", "ticker"], list: "w52" });
+    box.insertAdjacentHTML("afterbegin", '<div class="w52tabs" id="w52tabs">' + tabs.map((t, i) =>
+      '<button type="button" data-tab="' + t[0] + '"' + (i === 0 ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") + "</div>");
+    D.placeFeed(box, raw);
+    let tab = "highs";
+    let days = 183;
+    const state = { sort: "range_position_pct", dir: "desc", sort2: "score", dir2: "desc", page: 0 };
+    const columns = [TK, CO, SE, PR,
+      T("high_52w", "52w high", "num", { dec: 2 }), T("low_52w", "52w low", "num", { dec: 2 }),
+      T("pct_from_high", "% from high", "pct", { dec: 1, color: true }),
+      T("pct_above_low", "% above low", "pct", { dec: 1, color: true }),
+      T("range_position_pct", "Range", "rangepos"),
+      T("volume_ratio", "Vol ×", "volx", { dec: 2 }), SC, VE];
+    const inTab = (r) => {
+      if (tab === "highs") return yes(r, "new_high_today");
+      if (tab === "lows") return yes(r, "new_low_today");
+      if (tab === "near") return yes(r, "near_high");
+      if (tab === "vol") return yes(r, "high_on_volume");
+      return true;
+    };
+    const applySort = () => {
+      if (tab === "lows") {
+        state.sort = "pct_from_high"; state.dir = "asc"; state.sort2 = "score"; state.dir2 = "desc";
+      } else {
+        state.sort = "range_position_pct"; state.dir = "desc"; state.sort2 = "score"; state.dir2 = "desc";
+      }
+      state.page = 0;
+    };
+    const paint = () => {
+      const rows = D.lastNDays(hist, "date", days).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+      D.destroyCharts();
+      if (!rows.length) return;
+      D.comboChart(document.getElementById("hl"), rows.map((r) => r.date), [
+        { label: "New highs", data: D.seriesNum(rows, "new_highs"), color: "#22C55E" },
+        { label: "New lows", data: D.seriesNum(rows, "new_lows"), color: "#EF4444" },
+      ], { label: "Net", data: D.seriesNum(rows, "net"), color: "#7C9CFF" });
+    };
+    const draw = () => {
+      D.drawTable(document.getElementById("tbl"), {
+        title: titles[tab],
+        rows: all.filter((r) => inTab(r) && readCommon(box, r)),
+        columns: columns,
+        state: state,
+        pageSize: 25,
+        empty: "No names in this group.",
+      });
+    };
+    box.querySelectorAll("#w52tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tab = btn.getAttribute("data-tab");
+        box.querySelectorAll("#w52tabs button").forEach((b) => b.classList.toggle("on", b === btn));
+        applySort();
+        draw();
+      });
+    });
+    document.getElementById("hlrange").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("button");
+      if (!btn) return;
+      days = Number(btn.getAttribute("data-d"));
+      document.querySelectorAll("#hlrange button").forEach((b) => b.classList.toggle("on", b === btn));
+      paint();
+    });
+    hook(box, state, draw);
+    paint();
+    draw();
+  }
+
   function renderBreakouts(ctx) {
     const raw = ctx.files["breakouts.csv"];
     const all = D.realRows(raw);
@@ -1850,6 +1957,7 @@
       "scanner box": "Box breakout",
       "scanner flag": "Flag breakout",
       "scanner leaders": "Leaders",
+      "scanner 52w": "52-week",
       "top stocks": "Top stocks",
       "top sectors": "Today's sectors",
       "watchlist portfolio": "Watchlist and portfolio",
@@ -1933,6 +2041,7 @@
     box: box,
     flag: flag,
     leaders: leaders,
+    week52: { files: ["scanner_52w.csv", "highs_lows_history.csv"], render: renderWeek52 },
     calendar: { files: ["earnings_calendar.csv"], render: renderCalendar },
     heatmap: { files: ["earnings_heatmap.csv"], render: renderHeat },
     cards: { files: ["earnings_cards.csv"], render: renderCards },

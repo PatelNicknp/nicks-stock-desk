@@ -346,9 +346,127 @@ def test_switches_skip_the_work():
     out = setups.build_setups(
         pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(),
         _uni(["AAA"]), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(),
-        {"scanner_vcp": False, "scanner_canslim": False, "scanner_box": False, "scanner_flag": False, "scanner_leaders": False},
+        {"scanner_vcp": False, "scanner_canslim": False, "scanner_box": False, "scanner_flag": False, "scanner_leaders": False, "scanner_52w": False},
     )
+    assert "scanner_52w" in out and "highs_lows_history" in out
     assert all(len(v) == 0 for v in out.values())
+
+
+def _flat_bars(n, high, low, close, vol=1000.0):
+    idx = _dates(n)
+    return pd.DataFrame({
+        "high": np.full(n, high, dtype=float),
+        "low": np.full(n, low, dtype=float),
+        "close": np.full(n, close, dtype=float),
+        "volume": np.full(n, vol, dtype=float),
+    }, index=idx)
+
+
+def test_52w_flags_range_position_and_backfill():
+    """Close-based new high/low, high/low range, and at least a year of counts."""
+    assert setups.W52_BARS == 252
+    assert setups.W52_NEAR_PCT == 5.0
+    assert setups.W52_VOL_MULT == 1.5
+    n = 252 + 252
+    aaa = _flat_bars(n, 100, 90, 95)
+    aaa.iloc[-1, aaa.columns.get_loc("high")] = 112
+    aaa.iloc[-1, aaa.columns.get_loc("low")] = 108
+    aaa.iloc[-1, aaa.columns.get_loc("close")] = 110
+    aaa.iloc[-1, aaa.columns.get_loc("volume")] = 2000
+    bbb = _flat_bars(n, 80, 70, 75)
+    bbb.iloc[-1, bbb.columns.get_loc("high")] = 72
+    bbb.iloc[-1, bbb.columns.get_loc("low")] = 60
+    bbb.iloc[-1, bbb.columns.get_loc("close")] = 61
+    ccc = _flat_bars(n, 50, 40, 45)
+    ccc.iloc[-1, ccc.columns.get_loc("high")] = 55
+    ccc.iloc[-1, ccc.columns.get_loc("low")] = 44
+    ccc.iloc[-1, ccc.columns.get_loc("close")] = 49
+    ddd = _flat_bars(n, 100, 50, 100)
+    eee = _flat_bars(n, 100, 50, 50)
+    fff = _flat_bars(n, 100, 80, 95)
+    ggg = _flat_bars(n, 100, 80, 94)
+    frames = {"AAA": aaa, "BBB": bbb, "CCC": ccc, "DDD": ddd, "EEE": eee, "FFF": fff, "GGG": ggg}
+    close, high, low, vol = _panel(list(frames), frames)
+    scores = pd.DataFrame([
+        {"ticker": "AAA", "score": 9, "verdict": "BUY"},
+        {"ticker": "BBB", "score": 2, "verdict": "AVOID"},
+    ])
+    scan, hist = setups.scan_52w(close, high, low, vol, _uni(list(frames)), scores)
+    by = scan.set_index("ticker")
+    aaa_r = by.loc["AAA"]
+    assert aaa_r["new_high_today"] == "yes"
+    assert aaa_r["new_low_today"] == "no"
+    assert aaa_r["near_high"] == "yes"
+    assert aaa_r["high_on_volume"] == "yes"
+    assert int(aaa_r["days_since_high"]) == 0
+    assert aaa_r["data_status"] == "OK"
+    assert float(aaa_r["score"]) == 9
+    assert aaa_r["verdict"] == "BUY"
+    assert aaa_r["index_membership"] == "SP500"
+    assert abs(float(aaa_r["range_position_pct"]) - (110 - 90) / (112 - 90) * 100) < 0.02
+    assert abs(float(aaa_r["pct_from_high"]) - (110 / 112 - 1) * 100) < 0.02
+    assert abs(float(aaa_r["pct_above_low"]) - (110 / 90 - 1) * 100) < 0.02
+    assert abs(float(aaa_r["volume_ratio"]) - (2000 / ((49 * 1000 + 2000) / 50.0))) < 0.02
+    assert "close" in aaa_r["note"] and "1.5" in aaa_r["note"]
+    bbb_r = by.loc["BBB"]
+    assert bbb_r["new_low_today"] == "yes" and bbb_r["new_high_today"] == "no"
+    assert bbb_r["near_high"] == "no" and bbb_r["high_on_volume"] == "no"
+    assert int(bbb_r["days_since_high"]) == 1
+    assert abs(float(bbb_r["pct_from_high"]) - (61 / 80 - 1) * 100) < 0.02
+    # Intraday high without a closing break is not a new high. The range still uses the high.
+    ccc_r = by.loc["CCC"]
+    assert ccc_r["new_high_today"] == "no"
+    assert float(ccc_r["high_52w"]) == 55
+    assert float(ccc_r["price"]) == 49
+    assert by.loc["DDD", "range_position_pct"] == 100 or abs(float(by.loc["DDD", "range_position_pct"]) - 100) < 0.02
+    assert by.loc["DDD", "new_high_today"] == "yes" and by.loc["DDD", "high_on_volume"] == "no"
+    assert by.loc["EEE", "new_low_today"] == "yes"
+    assert abs(float(by.loc["EEE", "range_position_pct"]) - 0) < 0.02
+    assert by.loc["FFF", "near_high"] == "yes" and by.loc["FFF", "new_high_today"] == "no"
+    assert by.loc["GGG", "near_high"] == "no"
+    assert pd.isna(by.loc["CCC", "score"]) or by.loc["CCC", "score"] == ""
+    assert len(hist) >= 252
+    assert hist["date"].is_monotonic_increasing
+    assert hist["date"].nunique() == len(hist)
+    assert (hist["net"] == hist["new_highs"] - hist["new_lows"]).all()
+    last = hist.iloc[-1]
+    assert int(last["new_highs"]) == 2
+    assert int(last["new_lows"]) == 2
+    assert int(last["near_high_count"]) == 3
+    assert int(last["net"]) == 0
+    assert last["date"] == str(aaa.index[-1].date())
+    # The same last session, counted from the snapshot flags, matches the history row.
+    assert int((scan["new_high_today"] == "yes").sum()) == int(last["new_highs"])
+    assert int((scan["new_low_today"] == "yes").sum()) == int(last["new_lows"])
+    assert int((scan["near_high"] == "yes").sum()) == int(last["near_high_count"])
+
+
+def test_52w_short_history_is_not_a_new_high():
+    n = 40
+    frame = _flat_bars(n, 10, 8, 9)
+    frame.iloc[-1, frame.columns.get_loc("close")] = 12
+    frame.iloc[-1, frame.columns.get_loc("high")] = 12
+    close, high, low, vol = _panel(["AAA"], {"AAA": frame})
+    scan, hist = setups.scan_52w(close, high, low, vol, _uni(["AAA"]))
+    row = scan.iloc[0]
+    assert row["new_high_today"] == "no"
+    assert row["new_low_today"] == "no"
+    assert row["near_high"] == "no"
+    assert row["data_status"] == "PARTIAL"
+    assert pd.isna(row["high_52w"]) or row["high_52w"] == ""
+    assert len(hist) == 0
+
+
+def test_52w_switch_skips_the_scan():
+    idx = _dates(30)
+    close = pd.DataFrame({"AAA": np.arange(30, dtype=float)}, index=idx)
+    out = setups.build_setups(
+        close, close + 1, close - 1, close * 0 + 100,
+        _uni(["AAA"]), None, None, None,
+        {"scanner_vcp": False, "scanner_canslim": False, "scanner_box": False, "scanner_flag": False, "scanner_leaders": False, "scanner_52w": False},
+    )
+    assert len(out["scanner_52w"]) == 0
+    assert len(out["highs_lows_history"]) == 0
 
 
 if __name__ == "__main__":
@@ -363,4 +481,7 @@ if __name__ == "__main__":
     test_leaders_prefers_the_vcp_plan()
     test_freshness_follows_spy_not_a_later_vix_bar()
     test_switches_skip_the_work()
+    test_52w_flags_range_position_and_backfill()
+    test_52w_short_history_is_not_a_new_high()
+    test_52w_switch_skips_the_scan()
     print("setups ok")

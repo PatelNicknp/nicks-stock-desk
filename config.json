@@ -22,6 +22,7 @@
     "scanner_box": true,
     "scanner_flag": true,
     "scanner_leaders": true,
+    "scanner_52w": true,
     "earnings_calendar": true,
     "earnings_heatmap": true,
     "earnings_cards": true,

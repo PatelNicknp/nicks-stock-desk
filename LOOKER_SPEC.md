@@ -68,51 +68,52 @@ Scanners
 13. Box breakout
 14. Flag breakout
 15. Leaders
+16. 52-week
 
 Earnings
 
-16. Calendar
-17. Strength heatmap
-18. Report cards
+17. Calendar
+18. Strength heatmap
+19. Report cards
 
 Sentiment
 
-19. Put/call ratio
-20. Put and call walls
-21. Analyst ratings
-22. 13F tracker
-23. AAII
-24. Insider trading
-25. Headline sentiment
-26. XLY/XLP
+20. Put/call ratio
+21. Put and call walls
+22. Analyst ratings
+23. 13F tracker
+24. AAII
+25. Insider trading
+26. Headline sentiment
+27. XLY/XLP
 
 Financials
 
-27. Summary
-28. Earnings tracker
-29. Company financials
-30. Dividend fundamentals
+28. Summary
+29. Earnings tracker
+30. Company financials
+31. Dividend fundamentals
 
 Macro
 
-31. Macro screener
-32. Sector macro scores
-33. Historical P/E
+32. Macro screener
+33. Sector macro scores
+34. Historical P/E
 
 Technicals
 
-34. 52-week breakouts
-35. Trends
-36. Pullbacks
-37. Gainers and losers
-38. Breadth
-39. Sector performance
-40. Heatmaps
+35. 52-week breakouts
+36. Trends
+37. Pullbacks
+38. Gainers and losers
+39. Breadth
+40. Sector performance
+41. Heatmaps
 
 System
 
-41. Data updates
-42. Help
+42. Data updates
+43. Help
 
 ## Page template
 
@@ -300,7 +301,21 @@ Columns: ticker, index_membership, status, on_vcp, on_canslim, pivot, stop, targ
 
 Sort by strength descending. When a name is on both scans, the buy point, stop, and target are the VCP ones. A CANSLIM-only row leaves stop and target blank.
 
-## 16. Earnings calendar
+## 16. 52-week
+
+Source: `scanner_52w`, with the chart from `highs_lows_history`. Switch: `scanner_52w`.
+
+This is not the 52-week breakouts page. Breakouts are names within 1% of the 52-week closing high. This page uses the intraday high and low over 252 sessions.
+
+Scorecards: new 52-week highs today, new 52-week lows today, names within 5% of the high, new highs on volume of at least 1.5 times the 50-day average, and net (highs minus lows).
+
+Chart: bars for new highs (green) and new lows (red), and a line for the net. Ranges 3M, 6M, and 1Y.
+
+Table sections: new highs today, new lows today, near the high, breakout to a new high on volume, and all stocks. Columns: ticker, company, sector, price, 52-week high, 52-week low, percent from high, percent above low, range position (0 at the low, 100 at the high), volume ratio, score, verdict.
+
+`new_high_today` and `new_low_today` compare the close with the prior 252 sessions. The high and low columns are the intraday range. A blank cell is missing history, not zero.
+
+## 17. Earnings calendar
 
 Source: `earnings_calendar`.
 
@@ -312,7 +327,7 @@ Color `last_1d_move_pct` and `last_surprise_pct` with the return scale. Blank mo
 
 Caption: "The one-day move is the next session after a report that hit at or after 4pm Eastern, otherwise the session of the report. The average is the last eight reports."
 
-## 17. Earnings strength heatmap
+## 18. Earnings strength heatmap
 
 Source: `earnings_heatmap`.
 
@@ -320,7 +335,7 @@ Pivot: rows are tickers, columns are `quarter`, values are `heat`. Color `heat` 
 
 A double beat would require both lines. This free feed does not have the revenue estimate.
 
-## 18. Earnings report cards
+## 19. Earnings report cards
 
 Source: `earnings_cards`.
 
@@ -328,7 +343,7 @@ Cards or a table: ticker, grade, summary, sources. Grade colors: A `#166534`, B 
 
 Caption: "Grades are a fixed rule on the last few earnings beats and revenue growth versus the company's own history. They are not a write-up from a person, and they are not a trade."
 
-## 19. Put/call ratio
+## 20. Put/call ratio
 
 Source: `put_call`. Filter `name = EQUITY PUT/CALL RATIO`.
 
@@ -338,7 +353,7 @@ Latest zone (`zone`) as a chip: Fear red, Greed green, Neutral muted.
 
 Caption: "Market mood only. Not an option position."
 
-## 20. Put and call walls
+## 21. Put and call walls
 
 Source: `option_walls`.
 
@@ -352,7 +367,7 @@ Caption under the title, not optional: "Open interest by strike. Sentiment only.
 
 If the page is the MISSING row, show the note and no chart.
 
-## 21. Analyst ratings
+## 22. Analyst ratings
 
 Source: `analyst_ratings`.
 
@@ -360,7 +375,7 @@ Columns: ticker, company, analyst_mean, analyst_count, pts_analyst, target_analy
 
 `upside_pct` may be blank. Do not calculate it inside Looker if the column is blank. Leave it.
 
-## 22. 13F tracker
+## 23. 13F tracker
 
 Source: `institutional_13f`.
 
@@ -370,7 +385,7 @@ Second table, filter `row_type = top_holder`, driven by the same ticker control:
 
 Caption: "Summary of the latest public holdings file, plus the largest holders. Not every fund. Built this way so the page stays fast."
 
-## 23. AAII
+## 24. AAII
 
 Source: `aaii_sentiment`.
 
@@ -378,7 +393,7 @@ This page is a MISSING state on purpose. Show `note` in the body text, large eno
 
 Link text to the put/call page: "The free mood gauge is the put/call ratio."
 
-## 24. Insider trading
+## 25. Insider trading
 
 Source: `insider_trading`.
 
@@ -386,7 +401,7 @@ Columns: ticker, buys_3m, sells_3m, pts_insider. Sort buys descending. Color the
 
 Caption: "Open-market buy and sell counts over three months, from Nasdaq's public insider summary."
 
-## 25. Headline sentiment
+## 26. Headline sentiment
 
 Source: `headline_sentiment`.
 
@@ -394,7 +409,7 @@ List: ticker, headline, publisher, published, tone, tone_note. Color `tone` with
 
 Caption: "Tone is a word rule on the headline (beat, upgrade, probe, layoff, and similar). It is not added into the desk score."
 
-## 26. XLY/XLP
+## 27. XLY/XLP
 
 Source: `xly_xlp`.
 
@@ -402,7 +417,7 @@ Line chart: `ratio` and `ratio_sma50`. Latest `zone` as a chip (Risk on / Risk o
 
 Caption: "Consumer discretionary divided by consumer staples. Above the 50-day average of the ratio is labeled risk on."
 
-## 27. Financials summary
+## 28. Financials summary
 
 Source: `financials_summary`.
 
@@ -412,13 +427,13 @@ Color both point columns with the point scale. Blank is `n/a`.
 
 Caption: "Direction says whether a lower or a higher number earns the point. The industry median needs four peers."
 
-## 28. Earnings tracker
+## 29. Earnings tracker
 
 Source: `earnings_tracker`.
 
 Columns: ticker, earnings_date, eps_estimate, eps_actual, surprise_pct. Sort by earnings_date descending. Color surprise. A blank actual is a future date. Do not mark it as a miss.
 
-## 29. Company financials
+## 30. Company financials
 
 Source: `company_financials`.
 
@@ -428,13 +443,13 @@ If gross profit was not in the filing, the margin cells are blank. Leave them bl
 
 Caption: "Annual figures from SEC filings. Margins are blank when the filing did not include that line."
 
-## 30. Dividend fundamentals
+## 31. Dividend fundamentals
 
 Source: `dividend_scanner`. This is the full list, not only the names that pass the screen.
 
 Columns: ticker, company, sector, price, div_yield, div_yield_avg, dps, pts_div_yield, verdict. Sort by div_yield descending. A yield of 0 can be real (the company does not pay). A blank yield means we could not tell. The freshness page separates those.
 
-## 31. Macro screener
+## 32. Macro screener
 
 Source: `macro_screener`.
 
@@ -444,7 +459,7 @@ Caption: "Signal is +1 when the surprise is in the direction that usually helps 
 
 If the only row is MISSING, show the note. Do not invent a CPI number.
 
-## 32. Sector macro scores
+## 33. Sector macro scores
 
 Source: `sector_macro`. Also show `sectors` if you want the price change next to the macro score. Keep them as two tables. Do not blend.
 
@@ -452,7 +467,7 @@ Columns: ticker, name, macro_growth, macro_inflation, macro_jobs, macro_score, p
 
 These weights are fixed in the job (for example, hotter inflation helps energy and hurts technology). The help page says they are a sketch.
 
-## 33. Historical P/E
+## 34. Historical P/E
 
 Source: `historical_pe`.
 
@@ -462,7 +477,7 @@ A text box bound to `official_status`: it should read MISSING. Next to it, the n
 
 Do not add a line for `official_sp500_pe`. It is blank.
 
-## 34. 52-week breakouts
+## 35. 52-week breakouts
 
 Source: `breakouts`.
 
@@ -470,7 +485,7 @@ Columns: ticker, company, sector, price, dist_52w_high_pct, volume_ratio, score,
 
 If the table's only row is the MISSING note, that means nobody is within 1% of a 52-week high today. That is a result, not a broken feed. The note says which.
 
-## 35. Trends
+## 36. Trends
 
 Source: `trends`.
 
@@ -482,7 +497,7 @@ Filter chips for Uptrend, Downtrend, Mixed. Default Uptrend.
 
 Uptrend means the price is above all four averages. Downtrend means it is below all four.
 
-## 36. Pullbacks
+## 37. Pullbacks
 
 Source: `pullbacks`. Default filter `passes = yes`.
 
@@ -490,13 +505,13 @@ Columns: ticker, company, price, rsi14, entry_low, entry_high, score, verdict, w
 
 Caption: "An uptrend (above the 50-day and the 200-day) with price back in the pullback or entry area, and RSI under 70."
 
-## 37. Gainers and losers
+## 38. Gainers and losers
 
 Source: `gainers_losers`.
 
 Two tables, or one table with a side filter. Gainers: `side = gainer`, sort day_pct descending. Losers: `side = loser`, sort day_pct ascending. Columns: ticker, company, sector, price, day_pct, score, verdict. Color day_pct.
 
-## 38. Breadth
+## 39. Breadth
 
 Source: `breadth_history`.
 
@@ -504,13 +519,13 @@ Line chart, four series: pct_above_sma20, pct_above_sma50, pct_above_sma100, pct
 
 Scorecards for the latest point of each line.
 
-## 39. Sector performance
+## 40. Sector performance
 
 Source: `sector_performance`.
 
 Table: sector, day_pct, week_pct, month_pct, month3_pct, ytd_pct, pct_above_sma50, score_avg, n. Color the return columns. This is equal-weight across the desk's stocks in that sector, not the ETF. The ETF view is the Top sectors numbers inside `sectors`.
 
-## 40. Heatmaps
+## 41. Heatmaps
 
 Source: `heatmaps`.
 
@@ -520,7 +535,7 @@ A sector drop-down filters the rows. Default all.
 
 Optional second view: a pivot of average `ret_1d` by sector. If you build it, label it "average of the stocks above", so it is not confused with the ETF.
 
-## 41. Data updates
+## 42. Data updates
 
 Source: `updates_log`.
 
@@ -530,7 +545,7 @@ Status colors: OK `#166534`, CACHED `#92400E`, MISSING `#7F1D1D`, text `#E6EBF5`
 
 No other decoration. This page is how you see whether a number is fresh.
 
-## 42. Help
+## 43. Help
 
 Source: `help`.
 

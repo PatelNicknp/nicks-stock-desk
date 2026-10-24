@@ -180,6 +180,9 @@ input::placeholder{color:#5B6680;opacity:1}
 .seg{display:inline-flex;height:32px;background:#121826;border:1px solid #1E293B;border-radius:6px;overflow:hidden}
 .seg button{background:transparent;border:0;color:#8B96AD;cursor:pointer;font:inherit;font-size:12px;padding:0 12px;min-width:44px}
 .seg button.on{background:#1A2236;color:#E6EBF5;font-weight:700}
+.w52tabs{display:flex;flex-wrap:wrap;gap:8px;flex:1 0 100%;width:100%;max-width:100%;grid-column:1 / -1}
+.w52tabs button{height:36px;padding:0 12px;background:#121826;border:1px solid #1E293B;border-radius:6px;color:#8B96AD;cursor:pointer;font:inherit;font-size:13px}
+.w52tabs button.on{background:#1A2236;color:#E6EBF5;font-weight:700}
 .chart-box.pxchart{height:auto;display:flex;flex-direction:column}
 .pxmas{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
 .machip{height:28px;padding:0 8px;border-radius:6px;border:1px solid #1E293B;background:#0B0F17;color:#8B96AD;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
@@ -199,6 +202,7 @@ input::placeholder{color:#5B6680;opacity:1}
   .toggles{width:100%;max-width:100%}
   .seg{height:44px}
   .seg button{min-width:44px;min-height:44px;font-size:14px}
+  .w52tabs button{min-height:44px;height:44px}
   .qwrap input{min-height:44px;height:44px;font-size:16px}
   .qrow{min-height:44px}
   .machip{min-height:44px;height:44px;padding:0 12px;font-size:13px}

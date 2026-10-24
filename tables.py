@@ -187,6 +187,16 @@ COLS["scanner_leaders"] = _SETUP + [
     "vcp_status", "canslim_status", "vcp_strength", "canslim_strength", "on_vcp", "on_canslim",
     "data_status", "note", "disclaimer",
 ]
+# high_52w and low_52w are the high and low columns. new_high_today and new_low_today are the close.
+COLS["scanner_52w"] = [
+    "ticker", "company", "sector", "index_membership", "price", "price_as_of",
+    "high_52w", "low_52w", "pct_from_high", "pct_above_low", "range_position_pct",
+    "new_high_today", "new_low_today", "near_high", "high_on_volume", "volume_ratio",
+    "days_since_high", "score", "verdict", "data_status", "note", "disclaimer",
+]
+COLS["highs_lows_history"] = [
+    "date", "new_highs", "new_lows", "near_high_count", "net", "data_status", "note", "disclaimer",
+]
 COLS["earnings_calendar"] = ["ticker", "company", "next_earnings", "when_hint", "days_away", "last_eps_actual", "last_eps_estimate", "last_surprise_pct", "last_1d_move_pct", "avg_1d_move_pct", "n_past", "owns", "data_status", "note", "disclaimer"]
 COLS["earnings_heatmap"] = ["ticker", "quarter", "eps_flag", "rev_flag", "label", "heat", "data_status", "note", "disclaimer"]
 COLS["earnings_cards"] = ["ticker", "company", "grade", "summary", "sources", "data_status", "note", "disclaimer"]
@@ -913,6 +923,7 @@ def help_rows():
         ("CANSLIM scanner", "C and A are the year-ago EPS change from the cached filings. N is how close the price is to its 52-week closing high. S is the 20-day average volume. L is the relative-strength percentile versus SPY inside this universe. I is the cached institutional increase versus decrease. M is SPY, and QQQ when that price is already on file, versus the 21, 50, and 200 day averages. A blank that says not verified was not in the cache. It is not a guess. This page does not set a stop or a target."),
         ("Box and flag", "A box is a tight sideways range that closes out the top on above-average volume. A flag is a sharp rise, a short shallow pause, then a close above the pause on volume. Stop and target are the pattern levels described on the page. These two are desk rules. They are not the TradingView indicator."),
         ("Leaders", "Leaders puts a VCP that is ready or broken out today together with a strict CANSLIM qualify. A name on both uses the VCP buy point, stop, and target. A name on only one still shows, and any missing letter stays not verified."),
+        ("52-week highs and lows", "The 52-week high is the highest intraday high of the last 252 trading sessions, and the 52-week low is the lowest intraday low. A new high today means the close is at or above the prior 252-session high. A new low today means the close is at or below the prior 252-session low. A stock can touch a new intraday high and still not count if it does not close there. Near the high means the close is within 5% of that high. That band is the zone Minervini prefers. A high on volume is a new high with volume at least 1.5 times the 50-day average. The page is research only. It does not place trades or send alerts. The count chart is built from the same cached daily bars."),
         ("Your list", "Edit input/holdings.csv and input/my_watchlist.csv to change the portfolio and the watchlist. Example rows are marked example=yes. Replace them with your own shares and cost. The desk still will not place a trade."),
         ("Updates log", "OK means the source answered and its columns have values. PARTIAL means a column is blank on every row. CACHED means this run failed and an older copy was used. MISSING means there is no copy at all. A blank cell is missing data. It is not a zero."),
         ("The Google Sheet", "The sheet is filled by the Desk menu, not by IMPORTDATA. Desk > Refresh data now copies each file into the tab with the same name. Desk > Install hourly auto-refresh reloads about once an hour. The Setup tab shows the time of the last refresh. A blank cell means the number was missing. It is not a zero."),

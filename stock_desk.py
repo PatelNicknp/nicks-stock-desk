@@ -2157,16 +2157,21 @@ def main(argv=None):
             })
     inst = pd.DataFrame(inst_rows)
     if len(close) and len(universe):
-        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features)
+        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores)
     else:
-        setup_frames = {k: pd.DataFrame() for k in ("scanner_vcp", "scanner_canslim", "scanner_box", "scanner_flag", "scanner_leaders")}
+        setup_frames = {k: pd.DataFrame() for k in (
+            "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_flag", "scanner_leaders",
+            "scanner_52w", "highs_lows_history",
+        )}
     def _n(frame):
         if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []):
             return 0
         return int((frame["ticker"].astype(str) != "").sum())
-    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, flag %d, leaders %d. No new downloads." % (
+    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, flag %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
         _n(setup_frames["scanner_box"]), _n(setup_frames["scanner_flag"]), _n(setup_frames["scanner_leaders"]),
+        _n(setup_frames.get("scanner_52w")),
+        0 if setup_frames.get("highs_lows_history") is None else len(setup_frames.get("highs_lows_history")),
     ))
 
     insider = holders[["ticker", "insider_buys", "insider_sells"]].rename(columns={"insider_buys": "buys_3m", "insider_sells": "sells_3m"}) if len(holders) else pd.DataFrame()
@@ -2202,6 +2207,8 @@ def main(argv=None):
         "scanner_box": gated(setup_frames["scanner_box"], "scanner_box", features.get("scanner_box", True), "No box setups in the cached prices."),
         "scanner_flag": gated(setup_frames["scanner_flag"], "scanner_flag", features.get("scanner_flag", True), "No flag setups in the cached prices."),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
+        "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
+        "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
         "earnings_calendar": gated(earn_pages.get("calendar"), "earnings_calendar", features.get("earnings_calendar", True), "No earnings dates."),
         "earnings_heatmap": gated(earn_pages.get("heatmap"), "earnings_heatmap", features.get("earnings_heatmap", True), "No earnings history. Revenue vs estimate is not in the free feed."),
         "earnings_cards": gated(earn_pages.get("cards"), "earnings_cards", features.get("earnings_cards", True), "No earnings history to grade."),

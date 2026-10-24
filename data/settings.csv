@@ -20,6 +20,7 @@ feature.scanner_canslim,True
 feature.scanner_box,True
 feature.scanner_flag,True
 feature.scanner_leaders,True
+feature.scanner_52w,True
 feature.earnings_calendar,True
 feature.earnings_heatmap,True
 feature.earnings_cards,True
