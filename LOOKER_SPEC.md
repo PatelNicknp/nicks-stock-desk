@@ -133,14 +133,16 @@ Source: `market_today`. Also a small table from `sectors` (top 5 by `day_pct`) a
 Scorecards in one row:
 
 - S&P 500 price and `spy_day_pct`
-- Breadth, `% above the 50-day` (`breadth_sma50`) with `breadth_sma50_week_ago` as the comparison
+- Nasdaq-100 ETF day change, `qqq_day_pct`. Leave it blank when that cell is empty. Do not draw it as 0.
+- How many names are labeled BUY, `buy_count`
+- Breadth, `% above the 50-day` (`breadth_sma50`) with `breadth_sma50_week_ago` as the comparison. A blank cell is a missing reading, not 0.
 - Advancers and decliners
 - 52-week highs (`highs_52w`)
 - Put/call zone (`put_call_zone`) and the 5-day average
 - VIX
 - 10-year yield (`fred_dgs10`) and the 10y-2y (`fred_t10y2y`). If those are blank, the card says `n/a`, not 0. FRED is often blocked.
 
-Under that, a line from `breadth_history`: four lines, `% above 20 / 50 / 100 / 200`, last six months.
+Under that, a line from `breadth_history`: four lines, `% above 20 / 50 / 100 / 200`, last six months. A blank point is a session that did not have enough prices. Leave the gap. Do not plot it as zero.
 
 A bar of `sectors.day_pct` for the 11 big sector ETFs (filter `ticker` in XLK, XLV, XLF, XLI, XLC, XLY, XLP, XLE, XLU, XLRE, XLB).
 

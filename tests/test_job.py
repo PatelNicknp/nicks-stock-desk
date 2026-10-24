@@ -162,7 +162,67 @@ def test_feature_off_writes_header_only():
         shutil.rmtree(root, ignore_errors=True)
 
 
+def test_breadth_holiday_does_not_become_zero():
+    dates = pd.bdate_range("2024-01-02", periods=80)
+    frame = {("S%d" % i): np.linspace(50 + i, 90 + i, len(dates)) for i in range(25)}
+    close = pd.DataFrame(frame, index=dates)
+    # A holiday row: stocks are blank, only VIX printed. That used to zero the averages after it.
+    close.loc[dates[40], :] = np.nan
+    close["^VIX"] = np.nan
+    close.loc[dates[40], "^VIX"] = 16.0
+    out = tables.breadth_history(close)
+    assert dates[40].strftime("%Y-%m-%d") not in set(out["date"])
+    after = out[out["date"] > dates[40].strftime("%Y-%m-%d")]
+    assert len(after) > 10
+    assert after["pct_above_sma20"].notna().all()
+    assert (after["pct_above_sma20"] > 0).all()
+    sma50 = after["pct_above_sma50"].dropna()
+    assert len(sma50) > 0
+    assert (sma50 > 0).all()
+    assert not (out["pct_above_sma20"].fillna(-1) == 0).any()
+
+
+def test_breadth_without_enough_days_stays_blank():
+    dates = pd.bdate_range("2024-01-02", periods=30)
+    close = pd.DataFrame({"S%d" % i: np.linspace(10, 20, len(dates)) for i in range(25)}, index=dates)
+    out = tables.breadth_history(close)
+    assert out["pct_above_sma20"].notna().all()
+    # No 50-day or 200-day reading yet. The column is absent or blank, never 0.
+    for col in ("pct_above_sma50", "pct_above_sma200"):
+        if col not in out.columns:
+            continue
+        assert out[col].isna().all()
+        assert not (out[col].fillna(-1) == 0).any()
+
+
+def test_market_row_buy_count_and_qqq():
+    dates = pd.bdate_range("2024-06-03", periods=5)
+    close = pd.DataFrame({
+        "SPY": [100, 102, 101, 103, 104],
+        "QQQ": [200, 202, 201, 205, 210],
+    }, index=dates)
+    scores = pd.DataFrame({
+        "verdict": ["BUY", "HOLD", "BUY", "AVOID"],
+        "day_pct": [1, -1, 0.5, -2],
+        "dist_52w_high_pct": [0, -5, -10, -20],
+    })
+    breadth = pd.DataFrame([{
+        "pct_above_sma20": 60.0, "pct_above_sma50": 55.0,
+        "pct_above_sma100": np.nan, "pct_above_sma200": np.nan,
+    }])
+    row = tables.market_row(close, breadth, None, {}, None, "t", "2024-06-07", 4, scores).iloc[0]
+    assert row["qqq_day_pct"] == round((210 / 205 - 1) * 100, 2)
+    assert int(row["buy_count"]) == 2
+    assert row["breadth_sma50"] == 55.0
+    no_qqq = close.drop(columns=["QQQ"])
+    blank = tables.market_row(no_qqq, breadth, None, {}, None, "t", "2024-06-07", 4, scores).iloc[0]
+    assert "qqq_day_pct" not in blank or pd.isna(blank.get("qqq_day_pct"))
+
+
 if __name__ == "__main__":
     test_offline_job()
     test_feature_off_writes_header_only()
+    test_breadth_holiday_does_not_become_zero()
+    test_breadth_without_enough_days_stays_blank()
+    test_market_row_buy_count_and_qqq()
     print("job ok")
