@@ -1308,9 +1308,32 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
     df = pd.DataFrame(rows)
     if len(df):
         df = scoring.add_industry(df, scfg["flat_band_pct"])
-        df = df.sort_values(["score", "ticker"], ascending=[False, True], na_position="last")
-        df.insert(0, "rank", range(1, len(df) + 1))
+        df = assign_ranks(df)
     return df, prepared
+
+
+def assign_ranks(df):
+    """Rank 1..N by score, then fewer missing inputs, then ticker.
+
+    A row with no score stays blank. Missing is not ranked as zero, and it does not take a number.
+    """
+    if df is None or len(df) == 0 or "score" not in getattr(df, "columns", []):
+        return df
+    out = df.copy()
+    score = pd.to_numeric(out["score"], errors="coerce")
+    if "missing_count" in out.columns:
+        miss = pd.to_numeric(out["missing_count"], errors="coerce").fillna(10 ** 9)
+    else:
+        miss = pd.Series(0, index=out.index)
+    ticker = out["ticker"].astype(str) if "ticker" in out.columns else pd.Series("", index=out.index)
+    order = pd.DataFrame({"score": score, "miss": miss, "ticker": ticker}, index=out.index)
+    order = order.sort_values(["score", "miss", "ticker"], ascending=[False, True, True], na_position="last", kind="mergesort")
+    out = out.loc[order.index].copy()
+    n = int(order["score"].notna().sum())
+    ranks = list(range(1, n + 1)) + [pd.NA] * (len(out) - n)
+    out["rank"] = pd.array(ranks, dtype="Int64")
+    front = ["rank"] + [c for c in out.columns if c != "rank"]
+    return out[front]
 
 
 def _pct(x):
@@ -1630,6 +1653,7 @@ def main(argv=None):
     scores = attach_status(scores, price_status, fin_status, an_status, hold_status)
     if len(scores):
         scores["in_holdings"] = np.where(scores["ticker"].isin(hold_tickers), "yes", "no")
+    scores = assign_ranks(scores)
 
     # focus list for heavy sentiment feeds
     focus = list(dict.fromkeys(hold_tickers + watch_tickers))
