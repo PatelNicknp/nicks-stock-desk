@@ -373,6 +373,45 @@ def test_equity_curve_starts_at_10000_and_buckets_stay_text():
     assert scoring.BUCKET_ORDER["Scores 10 or more"] == 6
 
 
+def test_price_batch_keeps_open_from_the_same_download():
+    idx = pd.to_datetime(["2024-01-02", "2024-01-03"])
+    cols = pd.MultiIndex.from_product([["Open", "High", "Low", "Close", "Volume"], ["AAA"]])
+    raw = pd.DataFrame(
+        [[1.0, 2.0, 0.5, 1.5, 10], [1.5, 2.2, 1.4, 2.0, 11]],
+        index=idx, columns=cols,
+    )
+    close, high, low, vol, opn = stock_desk.frames_from_download(raw)
+    assert float(close["AAA"].iloc[-1]) == 2.0
+    assert float(opn["AAA"].iloc[0]) == 1.0
+    long = stock_desk.ohlcv_long(close, high, low, vol, opn)
+    assert list(long["open"]) == [1.0, 1.5]
+    assert "volume" in long.columns
+
+
+def test_candle_file_publishes_high_low_volume_and_leaves_open_blank():
+    dates = pd.bdate_range("2024-01-02", periods=80)
+    rows = []
+    for i, d in enumerate(dates):
+        px = 10 + i * 0.1
+        rows.append({
+            "date": str(d.date()), "ticker": "AAA", "close": px,
+            "high": px + 0.4, "low": px - 0.4, "volume": 1000 + i,
+        })
+    long = pd.DataFrame(rows)
+    out = stock_desk.candle_file(long, ["AAA", "../nope"], bars=10)
+    assert list(out["ticker"].unique()) == ["AAA"]
+    assert len(out) == 10
+    assert out["open"].isna().all()
+    assert out["high"].notna().all() and out["low"].notna().all()
+    assert out["volume"].notna().all()
+    assert out["sma20"].notna().all() and out["sma50"].notna().all()
+    assert out["date"].iloc[-1] == str(dates[-1].date())
+    long["open"] = long["close"] - 0.25
+    kept = stock_desk.candle_file(long, ["aaa"], bars=5)
+    assert kept["open"].notna().all()
+    assert abs(float(kept["open"].iloc[-1]) - (float(kept["close"].iloc[-1]) - 0.25)) < 0.02
+
+
 if __name__ == "__main__":
     test_offline_job()
     test_feature_off_writes_header_only()
@@ -386,4 +425,6 @@ if __name__ == "__main__":
     test_blank_column_is_partial_not_ok()
     test_nearest_expiry_flag()
     test_equity_curve_starts_at_10000_and_buckets_stay_text()
+    test_price_batch_keeps_open_from_the_same_download()
+    test_candle_file_publishes_high_low_volume_and_leaves_open_blank()
     print("job ok")

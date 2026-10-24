@@ -1062,6 +1062,255 @@
     return rows.map((r) => num(r[key]));
   }
 
+  function alertDataRows(rows) {
+    return realRows(rows).filter((r) => r.kind && r.kind !== "info");
+  }
+  function quietMessage(rows) {
+    const list = rows || [];
+    const info = list.find((r) => String(r.kind || "") === "info");
+    const fromInfo = info ? String(info.text || info.note || "").trim() : "";
+    if (fromInfo) return fromInfo;
+    const noted = list.find((r) => String(r.note || "").trim());
+    if (noted) return String(noted.note).trim();
+    return "No changes since the last run.";
+  }
+  function showQuiet(host, text, title) {
+    if (!host) return;
+    host.innerHTML = (title ? '<div class="pad" style="padding-bottom:0"><div class="ptitle">' + esc(title) + "</div></div>" : "") +
+      '<div class="empty">' + esc(text) + "</div>";
+  }
+
+  let financialPromise = null;
+  function candlesReady() {
+    try { return !!(typeof Chart !== "undefined" && Chart.registry.getController("candlestick")); }
+    catch (e) { return false; }
+  }
+  function ensureFinancial() {
+    if (candlesReady()) return Promise.resolve();
+    if (!financialPromise) {
+      financialPromise = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "vendor/chartjs-chart-financial.min.js";
+        s.onload = () => { if (candlesReady()) resolve(); else reject(new Error("candlestick chart did not register")); };
+        s.onerror = () => reject(new Error("candlestick chart failed to load"));
+        document.head.appendChild(s);
+      });
+    }
+    return financialPromise;
+  }
+  function storedChoice(key, fallback, allowed) {
+    try {
+      const v = localStorage.getItem(key);
+      if (allowed.indexOf(v) >= 0) return v;
+    } catch (e) { /* storage can be blocked */ }
+    return fallback;
+  }
+  function storeChoice(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+  function priceStyle() { return storedChoice("desk-price-style", "candles", ["line", "candles"]); }
+  function priceRange() { return storedChoice("desk-price-range", "6M", ["3M", "6M", "1Y"]); }
+  function priceBars(range) {
+    if (range === "3M") return 63;
+    if (range === "1Y") return 252;
+    return 126;
+  }
+  function dropHeld(panel) {
+    (panel._charts || []).forEach((c) => {
+      const i = charts.indexOf(c);
+      if (i >= 0) charts.splice(i, 1);
+      try { c.destroy(); } catch (e) { /* already gone */ }
+    });
+    panel._charts = [];
+  }
+  function holdChart(panel, c) {
+    if (!c) return;
+    panel._charts = panel._charts || [];
+    panel._charts.push(c);
+  }
+  function barsFromRows(rows) {
+    const sorted = (rows || []).filter((r) => num(r.close) != null).slice()
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    let prev = null;
+    return sorted.map((r) => {
+      const c = num(r.close);
+      let o = num(r.open);
+      let prior = false;
+      if (o == null) {
+        if (prev != null) { o = prev; prior = true; }
+        else o = c;
+      }
+      const h0 = num(r.high);
+      const l0 = num(r.low);
+      const bar = {
+        date: r.date, o: o, h: h0 == null ? Math.max(o, c) : h0, l: l0 == null ? Math.min(o, c) : l0, c: c,
+        v: num(r.volume), sma20: num(r.sma20), sma50: num(r.sma50), prior: prior,
+      };
+      prev = c;
+      return bar;
+    });
+  }
+  function paintPrice(panel, bars, lines, token) {
+    if (panel._token !== token || !panel.isConnected) return;
+    const cap = panel.querySelector("[data-px-cap]");
+    const volWrap = panel.querySelector("[data-px-volwrap]");
+    dropHeld(panel);
+    if (!bars.length) {
+      if (volWrap) volWrap.hidden = true;
+      if (cap) cap.textContent = "No saved daily bars for this name.";
+      return;
+    }
+    const style = priceStyle();
+    const labels = bars.map((b) => b.date);
+    const finite = [];
+    bars.forEach((b) => {
+      [b.o, b.h, b.l, b.c, b.sma20, b.sma50].forEach((n) => { if (n != null) finite.push(n); });
+    });
+    let ymin = Math.min.apply(null, finite);
+    let ymax = Math.max.apply(null, finite);
+    const pad = (ymax - ymin) * 0.06 || 1;
+    ymin -= pad;
+    ymax += pad;
+    const yw = Math.max(36, String(Math.round(Math.max(Math.abs(ymin), Math.abs(ymax)))).length * 8 + 16);
+    const fitY = (scale) => { scale.width = yw; };
+    const datasets = [];
+    if (style === "line") {
+      datasets.push({
+        type: "line", label: "Close", data: bars.map((b) => b.c),
+        borderColor: TX, backgroundColor: TX, pointRadius: 0, borderWidth: 2, spanGaps: true,
+      });
+    } else {
+      datasets.push({
+        type: "candlestick", label: "Price",
+        data: bars.map((b, i) => ({ x: i, o: b.o, h: b.h, l: b.l, c: b.c })),
+        barPercentage: 0.62, categoryPercentage: 0.9,
+        backgroundColors: { up: UP, down: DN, unchanged: MU },
+        borderColors: { up: UP, down: DN, unchanged: MU },
+      });
+    }
+    datasets.push(
+      { type: "line", label: "20-day avg", data: bars.map((b) => b.sma20), borderColor: AC, pointRadius: 0, borderWidth: 2, spanGaps: true },
+      { type: "line", label: "50-day avg", data: bars.map((b) => b.sma50), borderColor: MU, pointRadius: 0, borderWidth: 2, spanGaps: true }
+    );
+    const draw = () => {
+      if (panel._token !== token || !panel.isConnected) return;
+      holdChart(panel, makeChart(panel.querySelector("[data-px-price]"), {
+        type: style === "line" ? "line" : "candlestick",
+        data: { labels: labels, datasets: datasets },
+        options: {
+          animation: false,
+          animations: false,
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: { legend: lineLegend(), tooltip: { intersect: false, mode: "index" }, hlines: lines || [] },
+          scales: {
+            x: Object.assign(axis(), { type: "category", offset: true, ticks: dateTicks(labels) }),
+            y: Object.assign(axis(), {
+              min: ymin, max: ymax, afterFit: fitY,
+              ticks: { color: MU, maxRotation: 0, callback: (v) => Math.round(v).toLocaleString("en-US") },
+            }),
+          },
+        },
+      }));
+      const hasVol = bars.some((b) => b.v != null);
+      if (volWrap) volWrap.hidden = !hasVol;
+      if (hasVol) {
+        holdChart(panel, makeChart(panel.querySelector("[data-px-vol]"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              data: bars.map((b) => b.v),
+              backgroundColor: bars.map((b) => (b.c >= b.o ? "rgba(34,197,94,.7)" : "rgba(239,68,68,.7)")),
+              barPercentage: 0.62,
+              categoryPercentage: 0.9,
+            }],
+          },
+          options: {
+            animation: false,
+            animations: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { intersect: false, mode: "index" } },
+            scales: {
+              x: Object.assign(axis(), { type: "category", offset: true, ticks: { display: false }, grid: { display: false }, border: { display: false } }),
+              y: Object.assign(axis(), { beginAtZero: true, afterFit: fitY, ticks: { display: false }, grid: { display: false }, border: { display: false } }),
+            },
+          },
+        }));
+      }
+      if (!cap) return;
+      let text = style === "line"
+        ? "Close, with the 20-day and 50-day averages."
+        : "Green is an up day and red is a down day. Lines are the 20-day and 50-day averages.";
+      if (style === "candles" && bars.some((b) => b.prior)) {
+        text += " Opens are not in the saved prices yet, so each candle starts at the prior close until the next full price download.";
+      }
+      cap.textContent = text;
+    };
+    if (style === "candles") {
+      ensureFinancial().then(draw).catch(() => {
+        if (panel._token !== token) return;
+        storeChoice("desk-price-style", "line");
+        paintPrice(panel, bars, lines, token);
+      });
+    } else draw();
+  }
+  function drawPriceChart(panel, opts) {
+    if (!panel) return;
+    opts = opts || {};
+    const tools = panel.querySelector("[data-px-tools]");
+    const cap = panel.querySelector("[data-px-cap]");
+    if (!tools) return;
+    const style = priceStyle();
+    const range = priceRange();
+    const btn = (group, value, label, on) =>
+      '<button type="button" data-g="' + group + '" data-v="' + esc(value) + '"' + (on ? ' class="on"' : "") + ">" + esc(label) + "</button>";
+    tools.innerHTML =
+      '<div class="seg">' + btn("style", "line", "Line", style === "line") + btn("style", "candles", "Candles", style === "candles") + "</div>" +
+      '<div class="seg">' + btn("range", "3M", "3M", range === "3M") + btn("range", "6M", "6M", range === "6M") + btn("range", "1Y", "1Y", range === "1Y") + "</div>";
+    tools.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const group = button.getAttribute("data-g");
+        const value = button.getAttribute("data-v");
+        if (group === "style") storeChoice("desk-price-style", value);
+        if (group === "range") storeChoice("desk-price-range", value);
+        drawPriceChart(panel, opts);
+      });
+    });
+    const ticker = String(opts.ticker || "").trim().toUpperCase();
+    const token = (panel._token || 0) + 1;
+    panel._token = token;
+    const show = (rows) => {
+      if (panel._token !== token || !panel.isConnected) return;
+      const n = priceBars(priceRange());
+      paintPrice(panel, barsFromRows(rows).slice(-n), opts.lines || [], token);
+    };
+    if (panel._ticker === ticker && panel._rows) {
+      show(panel._rows);
+      return;
+    }
+    if (cap) cap.textContent = "";
+    if (!ticker) {
+      dropHeld(panel);
+      if (cap) cap.textContent = "No saved daily bars for this name.";
+      return;
+    }
+    loadCsv("ohlc/" + ticker + ".csv").then((rows) => {
+      if (panel._token !== token) return;
+      panel._ticker = ticker;
+      panel._rows = rows || [];
+      show(panel._rows);
+    }).catch(() => {
+      if (panel._token !== token) return;
+      dropHeld(panel);
+      const volWrap = panel.querySelector("[data-px-volwrap]");
+      if (volWrap) volWrap.hidden = true;
+      if (cap) cap.textContent = "No saved daily bars for " + ticker + ".";
+    });
+  }
+
   function navOn(items) {
     return items.filter((it) => !FEATURE[it[2]] || featureOn(FEATURE[it[2]]));
   }
@@ -1216,7 +1465,8 @@
   window.Desk = {
     UP: UP, DN: DN, AM: AM, AC: AC, MU: MU, TX: TX, SPD: SPD,
     num: num, isBlank: isBlank, esc: esc, na: na, fmt: fmt, compact: compact,
-    realRows: realRows, banner: banner, noteOf: noteOf, statusOf: statusOf,
+    realRows: realRows, alertDataRows: alertDataRows, quietMessage: quietMessage, showQuiet: showQuiet,
+    banner: banner, noteOf: noteOf, statusOf: statusOf, drawPriceChart: drawPriceChart,
     scoreHtml: scoreHtml, scoreFill: scoreFill, tickerHtml: tickerHtml, etfHtml: etfHtml, pctHtml: pctHtml, moneyHtml: moneyHtml,
     verdictHtml: verdictHtml, trendHtml: trendHtml, pointsHtml: pointsHtml, zoneHtml: zoneHtml, signedPts: signedPts,
     drawTable: drawTable, uniq: uniq, indexTokens: indexTokens,

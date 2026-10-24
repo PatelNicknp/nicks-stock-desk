@@ -160,6 +160,15 @@ input::placeholder{color:#5B6680;opacity:1}
 .dot{width:8px;height:8px;border-radius:4px;display:inline-block}
 .rowhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
 .empty{padding:24px;color:#8B96AD;font-size:13px}
+.rowhead.wrap{flex-wrap:wrap;align-items:center}
+.pxtools{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.seg{display:inline-flex;height:32px;background:#121826;border:1px solid #1E293B;border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;color:#8B96AD;cursor:pointer;font:inherit;font-size:12px;padding:0 12px;min-width:44px}
+.seg button.on{background:#1A2236;color:#E6EBF5;font-weight:700}
+.chart-box.pxchart{height:auto;display:flex;flex-direction:column}
+.chart-box.pxchart .px-price{position:relative;height:248px}
+.chart-box.pxchart .px-vol{position:relative;height:64px}
+.chart-box.pxchart .px-vol[hidden]{display:none}
 .linkish{font-size:13px;font-weight:400;color:#7C9CFF}
 .note-strip{font-size:12px;color:#F59E0B;border:1px solid #F59E0B;border-radius:6px;padding:8px 12px;margin-bottom:12px;background:#121826}
 .warn{font-size:12px;color:#F59E0B;margin-bottom:12px}
