@@ -208,7 +208,22 @@ def plan_levels(price, sma20, sma50, atr, target_rr, stop_atr):
     return entry_low, entry_high, stop, trade_target
 
 
-def valuation_targets(fin, target_median, target_mean):
+def _target_for_blend(value, price):
+    """Drop a cash-flow or PEG target that is under 0.5x or over 2x the price.
+
+    The raw figure is still returned to the caller. It is only left out of the average.
+    """
+    if value is None or not np.isfinite(value):
+        return None
+    if price is None or not np.isfinite(price) or price <= 0:
+        return float(value)
+    ratio = float(value) / float(price)
+    if ratio < 0.5 or ratio > 2.0:
+        return None
+    return float(value)
+
+
+def valuation_targets(fin, target_median, target_mean, price=None):
     """Analyst, P/FCF, and PEG-style targets. Missing stays missing."""
     analyst = None
     kind = None
@@ -225,7 +240,7 @@ def valuation_targets(fin, target_median, target_mean):
     if g is not None and eps is not None and eps > 0 and 0.05 <= g <= 0.40:
         # Fair P/E equals the growth rate in percent (a 15% grower is compared with a P/E of 15).
         peg_t = float(eps * (g * 100.0))
-    parts = [x for x in (analyst, pfcf_t, peg_t) if x is not None]
+    parts = [x for x in (analyst, _target_for_blend(pfcf_t, price), _target_for_blend(peg_t, price)) if x is not None]
     blended = float(np.mean(parts)) if parts else None
     return analyst, kind, pfcf_t, peg_t, blended, len(parts)
 
@@ -381,7 +396,7 @@ def score_components(fin, mkt, extra, cfg):
         mkt.get("price"), mkt.get("sma20"), mkt.get("sma50"), mkt.get("sma200"),
         mkt.get("high252"), entry_low, entry_high, mkt.get("rsi"))
     analyst_t, analyst_kind, pfcf_t, peg_t, blended, blend_n = valuation_targets(
-        fin, extra.get("target_median"), extra.get("target_mean"))
+        fin, extra.get("target_median"), extra.get("target_mean"), mkt.get("price"))
     verdict = decide_verdict(score, timing, n_fin, mkt.get("price"), stop, cfg)
     reward = None
     if trade_target and entry_low and entry_high and stop:

@@ -27,7 +27,7 @@ feature.put_call,True
 feature.option_walls,True
 feature.analyst_ratings,True
 feature.institutional_13f,True
-feature.aaii_sentiment,True
+feature.aaii_sentiment,False
 feature.insider_trading,True
 feature.headline_sentiment,True
 feature.xly_xlp,True
