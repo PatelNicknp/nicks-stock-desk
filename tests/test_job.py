@@ -401,15 +401,40 @@ def test_candle_file_publishes_high_low_volume_and_leaves_open_blank():
     out = stock_desk.candle_file(long, ["AAA", "../nope"], bars=10)
     assert list(out["ticker"].unique()) == ["AAA"]
     assert len(out) == 10
+    assert list(out.columns) == ["date", "ticker", "open", "high", "low", "close", "volume"]
     assert out["open"].isna().all()
     assert out["high"].notna().all() and out["low"].notna().all()
     assert out["volume"].notna().all()
-    assert out["sma20"].notna().all() and out["sma50"].notna().all()
     assert out["date"].iloc[-1] == str(dates[-1].date())
     long["open"] = long["close"] - 0.25
     kept = stock_desk.candle_file(long, ["aaa"], bars=5)
     assert kept["open"].notna().all()
     assert abs(float(kept["open"].iloc[-1]) - (float(kept["close"].iloc[-1]) - 0.25)) < 0.02
+
+
+def test_candle_file_keeps_full_history_for_average_warmup():
+    dates = pd.bdate_range("2022-01-04", periods=500)
+    rows = []
+    for i, d in enumerate(dates):
+        px = 20 + i * 0.05
+        rows.append({
+            "date": str(d.date()), "ticker": "AAA", "open": px - 0.2,
+            "high": px + 0.4, "low": px - 0.4, "close": px, "volume": 1000 + i,
+        })
+    out = stock_desk.candle_file(pd.DataFrame(rows), ["AAA"])
+    assert stock_desk.CANDLE_BARS is None
+    assert len(out) == 500
+    assert len(out) - 252 >= 200
+    assert out["open"].notna().all()
+
+
+def test_published_aapl_candles_use_real_opens():
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "ohlc", "AAPL.csv")
+    df = pd.read_csv(path)
+    assert len(df) >= 450
+    assert df["open"].notna().all()
+    assert float(df["open"].iloc[-1]) > 0
+    assert "sma20" not in df.columns
 
 
 if __name__ == "__main__":
@@ -427,4 +452,6 @@ if __name__ == "__main__":
     test_equity_curve_starts_at_10000_and_buckets_stay_text()
     test_price_batch_keeps_open_from_the_same_download()
     test_candle_file_publishes_high_low_volume_and_leaves_open_blank()
+    test_candle_file_keeps_full_history_for_average_warmup()
+    test_published_aapl_candles_use_real_opens()
     print("job ok")

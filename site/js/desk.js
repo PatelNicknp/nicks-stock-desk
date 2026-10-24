@@ -790,10 +790,15 @@
     return n >= Number(min);
   }
 
+  const tvCharts = [];
   function destroyCharts() {
     while (charts.length) {
       const c = charts.pop();
       try { c.destroy(); } catch (e) { /* already gone */ }
+    }
+    while (tvCharts.length) {
+      const c = tvCharts.pop();
+      try { c.remove(); } catch (e) { /* already gone */ }
     }
   }
   function basePlugins(legend) {
@@ -1080,23 +1085,47 @@
       '<div class="empty">' + esc(text) + "</div>";
   }
 
-  let financialPromise = null;
-  function candlesReady() {
-    try { return !!(typeof Chart !== "undefined" && Chart.registry.getController("candlestick")); }
-    catch (e) { return false; }
+  const MA_DEFS = [
+    { id: "sma21", label: "SMA 21", kind: "sma", n: 21, color: "#7C9CFF" },
+    { id: "sma50", label: "SMA 50", kind: "sma", n: 50, color: "#C3CBDB" },
+    { id: "sma150", label: "SMA 150", kind: "sma", n: 150, color: "#F59E0B" },
+    { id: "sma200", label: "SMA 200", kind: "sma", n: 200, color: "#E879F9" },
+    { id: "ema21", label: "EMA 21", kind: "ema", n: 21, color: "#38BDF8" },
+    { id: "ema50", label: "EMA 50", kind: "ema", n: 50, color: "#F472B6" },
+    { id: "ema150", label: "EMA 150", kind: "ema", n: 150, color: "#34D399" },
+    { id: "ema200", label: "EMA 200", kind: "ema", n: 200, color: "#FB923C" },
+  ];
+  const MA_DEFAULT = { sma21: false, sma50: true, sma150: false, sma200: true, ema21: true, ema50: false, ema150: false, ema200: false };
+
+  let tvPromise = null;
+  function tvReady() {
+    return typeof LightweightCharts !== "undefined" && !!LightweightCharts.createChart;
   }
-  function ensureFinancial() {
-    if (candlesReady()) return Promise.resolve();
-    if (!financialPromise) {
-      financialPromise = new Promise((resolve, reject) => {
+  function ensureTv() {
+    if (tvReady()) return Promise.resolve();
+    if (!tvPromise) {
+      tvPromise = new Promise((resolve, reject) => {
         const s = document.createElement("script");
-        s.src = "vendor/chartjs-chart-financial.min.js";
-        s.onload = () => { if (candlesReady()) resolve(); else reject(new Error("candlestick chart did not register")); };
-        s.onerror = () => reject(new Error("candlestick chart failed to load"));
+        s.src = "vendor/lightweight-charts/lightweight-charts.standalone.production.js";
+        s.onload = () => { if (tvReady()) resolve(); else reject(new Error("price chart did not load")); };
+        s.onerror = () => reject(new Error("price chart failed to load"));
         document.head.appendChild(s);
       });
     }
-    return financialPromise;
+    return tvPromise;
+  }
+  function maState() {
+    const out = Object.assign({}, MA_DEFAULT);
+    try {
+      const raw = JSON.parse(localStorage.getItem("desk-ma") || "");
+      if (raw && typeof raw === "object") {
+        MA_DEFS.forEach((d) => { if (typeof raw[d.id] === "boolean") out[d.id] = raw[d.id]; });
+      }
+    } catch (e) { /* storage can be blocked or hold an older value */ }
+    return out;
+  }
+  function storeMa(state) {
+    try { localStorage.setItem("desk-ma", JSON.stringify(state)); } catch (e) { /* ignore */ }
   }
   function storedChoice(key, fallback, allowed) {
     try {
@@ -1109,24 +1138,14 @@
     try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
   }
   function priceStyle() { return storedChoice("desk-price-style", "candles", ["line", "candles"]); }
-  function priceRange() { return storedChoice("desk-price-range", "6M", ["3M", "6M", "1Y"]); }
-  function priceBars(range) {
-    if (range === "3M") return 63;
-    if (range === "1Y") return 252;
-    return 126;
-  }
-  function dropHeld(panel) {
-    (panel._charts || []).forEach((c) => {
-      const i = charts.indexOf(c);
-      if (i >= 0) charts.splice(i, 1);
-      try { c.destroy(); } catch (e) { /* already gone */ }
-    });
-    panel._charts = [];
-  }
-  function holdChart(panel, c) {
+  function priceRange() { return storedChoice("desk-price-range", "6M", ["3M", "6M", "1Y", "All"]); }
+  function dropTv(panel) {
+    const c = panel._tv;
     if (!c) return;
-    panel._charts = panel._charts || [];
-    panel._charts.push(c);
+    const i = tvCharts.indexOf(c);
+    if (i >= 0) tvCharts.splice(i, 1);
+    try { c.remove(); } catch (e) { /* already gone */ }
+    panel._tv = null;
   }
   function barsFromRows(rows) {
     const sorted = (rows || []).filter((r) => num(r.close) != null).slice()
@@ -1144,148 +1163,285 @@
       const l0 = num(r.low);
       const bar = {
         date: r.date, o: o, h: h0 == null ? Math.max(o, c) : h0, l: l0 == null ? Math.min(o, c) : l0, c: c,
-        v: num(r.volume), sma20: num(r.sma20), sma50: num(r.sma50), prior: prior,
+        v: num(r.volume), prior: prior,
       };
       prev = c;
       return bar;
     });
   }
+  function smaValues(closes, n) {
+    const out = new Array(closes.length).fill(null);
+    let sum = 0;
+    for (let i = 0; i < closes.length; i++) {
+      sum += closes[i];
+      if (i >= n) sum -= closes[i - n];
+      if (i >= n - 1) out[i] = sum / n;
+    }
+    return out;
+  }
+  function emaValues(closes, n) {
+    const out = new Array(closes.length).fill(null);
+    const k = 2 / (n + 1);
+    let prev = null;
+    let seed = 0;
+    for (let i = 0; i < closes.length; i++) {
+      if (i < n) {
+        seed += closes[i];
+        if (i === n - 1) {
+          prev = seed / n;
+          out[i] = prev;
+        }
+        continue;
+      }
+      prev = closes[i] * k + prev * (1 - k);
+      out[i] = prev;
+    }
+    return out;
+  }
+  function maSeries(closes, def) {
+    return def.kind === "ema" ? emaValues(closes, def.n) : smaValues(closes, def.n);
+  }
+  function timeKey(t) {
+    if (!t) return "";
+    if (typeof t === "string") return t.slice(0, 10);
+    if (typeof t === "object" && t.year) {
+      return t.year + "-" + String(t.month).padStart(2, "0") + "-" + String(t.day).padStart(2, "0");
+    }
+    return "";
+  }
+  function levelSpecs(lines) {
+    const out = [];
+    (lines || []).forEach((line) => {
+      if (line.zone && line.zone.length === 2) {
+        const lo = Math.min(line.zone[0], line.zone[1]);
+        const hi = Math.max(line.zone[0], line.zone[1]);
+        const color = line.labelColor || AM;
+        out.push({ price: lo, color: color, title: "Entry low" });
+        out.push({ price: hi, color: color, title: "Entry high" });
+      } else if (line.value != null && isFinite(line.value)) {
+        const title = String(line.label || "Level").replace(/\s+[\d.,–+-]+$/, "").trim() || "Level";
+        out.push({ price: line.value, color: line.color || AM, title: title });
+      }
+    });
+    return out;
+  }
+  function rangeWindow(bars, range) {
+    const end = bars[bars.length - 1].date;
+    if (range === "All") return { from: bars[0].date, to: end, fit: true };
+    const months = range === "3M" ? 3 : range === "1Y" ? 12 : 6;
+    const cut = new Date(end + "T00:00:00Z");
+    cut.setUTCMonth(cut.getUTCMonth() - months);
+    const iso = cut.toISOString().slice(0, 10);
+    let from = bars[0].date;
+    for (let i = 0; i < bars.length; i++) {
+      if (bars[i].date >= iso) { from = bars[i].date; break; }
+    }
+    return { from: from, to: end, fit: from === end };
+  }
+  function applyRange(chart, bars, range) {
+    if (!bars.length) return;
+    const win = rangeWindow(bars, range);
+    try {
+      chart.panes().forEach((pane) => {
+        try { pane.priceScale("right").applyOptions({ autoScale: true }); } catch (e) { /* pane has no scale yet */ }
+      });
+      if (win.fit) chart.timeScale().fitContent();
+      else chart.timeScale().setVisibleRange({ from: win.from, to: win.to });
+    } catch (e) {
+      try { chart.timeScale().fitContent(); } catch (err) { /* chart is gone */ }
+    }
+  }
+  function legendHtml(bar, prevClose, averages) {
+    if (!bar) return "";
+    const up = prevClose == null ? bar.c >= bar.o : bar.c >= prevClose;
+    const cls = up ? "up" : "dn";
+    const px = (n) => esc(fmt(n, 2) || "–");
+    let html = "<div><b class=\"" + cls + "\">O</b> " + px(bar.o) +
+      "  <b class=\"" + cls + "\">H</b> " + px(bar.h) +
+      "  <b class=\"" + cls + "\">L</b> " + px(bar.l) +
+      "  <b class=\"" + cls + "\">C</b> " + px(bar.c) +
+      "  <b>V</b> " + esc(compact(bar.v) || "–") + "</div>";
+    if (averages.length) {
+      html += "<div>" + averages.map((a) =>
+        '<span style="color:' + a.color + '">' + esc(a.label) + " " + px(a.value) + "</span>"
+      ).join("  ") + "</div>";
+    }
+    return html;
+  }
   function paintPrice(panel, bars, lines, token) {
     if (panel._token !== token || !panel.isConnected) return;
     const cap = panel.querySelector("[data-px-cap]");
-    const volWrap = panel.querySelector("[data-px-volwrap]");
-    dropHeld(panel);
-    if (!bars.length) {
-      if (volWrap) volWrap.hidden = true;
+    const host = panel.querySelector("[data-px-host]");
+    const legend = panel.querySelector("[data-px-legend]");
+    dropTv(panel);
+    if (!host || !bars.length) {
+      if (legend) legend.innerHTML = "";
       if (cap) cap.textContent = "No saved daily bars for this name.";
       return;
     }
-    const style = priceStyle();
-    const labels = bars.map((b) => b.date);
-    const finite = [];
-    bars.forEach((b) => {
-      [b.o, b.h, b.l, b.c, b.sma20, b.sma50].forEach((n) => { if (n != null) finite.push(n); });
-    });
-    let ymin = Math.min.apply(null, finite);
-    let ymax = Math.max.apply(null, finite);
-    const pad = (ymax - ymin) * 0.06 || 1;
-    ymin -= pad;
-    ymax += pad;
-    const yw = Math.max(36, String(Math.round(Math.max(Math.abs(ymin), Math.abs(ymax)))).length * 8 + 16);
-    const fitY = (scale) => { scale.width = yw; };
-    const datasets = [];
-    if (style === "line") {
-      datasets.push({
-        type: "line", label: "Close", data: bars.map((b) => b.c),
-        borderColor: TX, backgroundColor: TX, pointRadius: 0, borderWidth: 2, spanGaps: true,
-      });
-    } else {
-      datasets.push({
-        type: "candlestick", label: "Price",
-        data: bars.map((b, i) => ({ x: i, o: b.o, h: b.h, l: b.l, c: b.c })),
-        barPercentage: 0.62, categoryPercentage: 0.9,
-        backgroundColors: { up: UP, down: DN, unchanged: MU },
-        borderColors: { up: UP, down: DN, unchanged: MU },
-      });
-    }
-    datasets.push(
-      { type: "line", label: "20-day avg", data: bars.map((b) => b.sma20), borderColor: AC, pointRadius: 0, borderWidth: 2, spanGaps: true },
-      { type: "line", label: "50-day avg", data: bars.map((b) => b.sma50), borderColor: MU, pointRadius: 0, borderWidth: 2, spanGaps: true }
-    );
     const draw = () => {
-      if (panel._token !== token || !panel.isConnected) return;
-      holdChart(panel, makeChart(panel.querySelector("[data-px-price]"), {
-        type: style === "line" ? "line" : "candlestick",
-        data: { labels: labels, datasets: datasets },
-        options: {
-          animation: false,
-          animations: false,
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: "index", intersect: false },
-          plugins: { legend: lineLegend(), tooltip: { intersect: false, mode: "index" }, hlines: lines || [] },
-          scales: {
-            x: Object.assign(axis(), { type: "category", offset: true, ticks: dateTicks(labels) }),
-            y: Object.assign(axis(), {
-              min: ymin, max: ymax, afterFit: fitY,
-              ticks: { color: MU, maxRotation: 0, callback: (v) => Math.round(v).toLocaleString("en-US") },
-            }),
-          },
+      if (panel._token !== token || !panel.isConnected || !tvReady()) return;
+      const LC = LightweightCharts;
+      const style = priceStyle();
+      const mas = maState();
+      const closes = bars.map((b) => b.c);
+      const averages = {};
+      MA_DEFS.forEach((def) => { averages[def.id] = maSeries(closes, def); });
+      const byDate = new Map();
+      bars.forEach((b, i) => byDate.set(b.date, i));
+      const chart = LC.createChart(host, {
+        autoSize: true,
+        layout: {
+          background: { type: "solid", color: "#121826" },
+          textColor: MU,
+          fontFamily: "Roboto, Arial, sans-serif",
+          fontSize: 12,
+          attributionLogo: true,
+          panes: { separatorColor: "#1E293B", enableResize: true },
         },
-      }));
-      const hasVol = bars.some((b) => b.v != null);
-      if (volWrap) volWrap.hidden = !hasVol;
-      if (hasVol) {
-        holdChart(panel, makeChart(panel.querySelector("[data-px-vol]"), {
-          type: "bar",
-          data: {
-            labels: labels,
-            datasets: [{
-              data: bars.map((b) => b.v),
-              backgroundColor: bars.map((b) => (b.c >= b.o ? "rgba(34,197,94,.7)" : "rgba(239,68,68,.7)")),
-              barPercentage: 0.62,
-              categoryPercentage: 0.9,
-            }],
-          },
-          options: {
-            animation: false,
-            animations: false,
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { intersect: false, mode: "index" } },
-            scales: {
-              x: Object.assign(axis(), { type: "category", offset: true, ticks: { display: false }, grid: { display: false }, border: { display: false } }),
-              y: Object.assign(axis(), { beginAtZero: true, afterFit: fitY, ticks: { display: false }, grid: { display: false }, border: { display: false } }),
-            },
-          },
-        }));
+        grid: { vertLines: { color: "#1E293B" }, horzLines: { color: "#1E293B" } },
+        crosshair: { mode: LC.CrosshairMode.Magnet },
+        rightPriceScale: { borderColor: "#1E293B" },
+        timeScale: { borderColor: "#1E293B", rightOffset: 4 },
+        handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+        handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
+        kineticScroll: { touch: true, mouse: false },
+      });
+      panel._tv = chart;
+      tvCharts.push(chart);
+      const priceOpts = { priceLineVisible: false, lastValueVisible: true };
+      let priceSeries;
+      if (style === "line") {
+        priceSeries = chart.addSeries(LC.LineSeries, Object.assign({ color: TX, lineWidth: 2 }, priceOpts));
+        priceSeries.setData(bars.map((b) => ({ time: b.date, value: b.c })));
+      } else {
+        priceSeries = chart.addSeries(LC.CandlestickSeries, Object.assign({
+          upColor: UP, downColor: DN, borderUpColor: UP, borderDownColor: DN, wickUpColor: UP, wickDownColor: DN,
+        }, priceOpts));
+        priceSeries.setData(bars.map((b) => ({ time: b.date, open: b.o, high: b.h, low: b.l, close: b.c })));
       }
+      const vol = chart.addSeries(LC.HistogramSeries, {
+        priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false,
+      }, 1);
+      vol.setData(bars.filter((b) => b.v != null).map((b) => ({
+        time: b.date, value: b.v, color: b.c >= b.o ? "rgba(34,197,94,.65)" : "rgba(239,68,68,.65)",
+      })));
+      const panes = chart.panes();
+      if (panes[0]) panes[0].setStretchFactor(3);
+      if (panes[1]) panes[1].setStretchFactor(1);
+      levelSpecs(lines).forEach((level) => {
+        priceSeries.createPriceLine({
+          price: level.price, color: level.color, lineWidth: 1, lineStyle: LC.LineStyle.Dashed,
+          axisLabelVisible: true, title: level.title,
+        });
+      });
+      MA_DEFS.forEach((def) => {
+        if (!mas[def.id]) return;
+        const series = chart.addSeries(LC.LineSeries, {
+          color: def.color, lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+        });
+        const data = [];
+        averages[def.id].forEach((value, i) => {
+          if (value != null) data.push({ time: bars[i].date, value: value });
+        });
+        series.setData(data);
+      });
+      const showLegend = (key) => {
+        if (!legend) return;
+        let i = key ? byDate.get(key) : bars.length - 1;
+        if (i == null) i = bars.length - 1;
+        const bar = bars[i];
+        const prev = i > 0 ? bars[i - 1].c : null;
+        const shown = MA_DEFS.filter((def) => mas[def.id] && averages[def.id][i] != null).map((def) => ({
+          label: def.label, color: def.color, value: averages[def.id][i],
+        }));
+        legend.innerHTML = legendHtml(bar, prev, shown);
+      };
+      showLegend("");
+      chart.subscribeCrosshairMove((param) => {
+        if (panel._token !== token) return;
+        showLegend(param && param.time ? timeKey(param.time) : "");
+      });
+      if (host._fit) host.removeEventListener("dblclick", host._fit);
+      host._fit = (event) => {
+        event.preventDefault();
+        applyRange(chart, bars, priceRange());
+      };
+      host.addEventListener("dblclick", host._fit);
+      requestAnimationFrame(() => {
+        if (panel._token !== token || !panel.isConnected) return;
+        applyRange(chart, bars, priceRange());
+      });
       if (!cap) return;
       let text = style === "line"
-        ? "Close, with the 20-day and 50-day averages."
-        : "Green is an up day and red is a down day. Lines are the 20-day and 50-day averages.";
-      if (style === "candles" && bars.some((b) => b.prior)) {
-        text += " Opens are not in the saved prices yet, so each candle starts at the prior close until the next full price download.";
+        ? "Close, with volume underneath."
+        : "Green is an up day and red is a down day. Volume sits underneath.";
+      if (bars.some((b) => b.prior)) {
+        text += " Opens are not in the saved prices yet, so each candle starts at the prior close.";
       }
-      cap.textContent = text;
+      text += " Averages are calculated in the browser from the saved daily bars.";
+      cap.innerHTML = esc(text) + ' Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.';
     };
-    if (style === "candles") {
-      ensureFinancial().then(draw).catch(() => {
-        if (panel._token !== token) return;
-        storeChoice("desk-price-style", "line");
-        paintPrice(panel, bars, lines, token);
-      });
-    } else draw();
+    ensureTv().then(draw).catch(() => {
+      if (panel._token !== token) return;
+      if (cap) cap.textContent = "The price chart could not load.";
+    });
   }
   function drawPriceChart(panel, opts) {
     if (!panel) return;
     opts = opts || {};
     const tools = panel.querySelector("[data-px-tools]");
+    const chips = panel.querySelector("[data-px-mas]");
     const cap = panel.querySelector("[data-px-cap]");
     if (!tools) return;
     const style = priceStyle();
     const range = priceRange();
+    const mas = maState();
     const btn = (group, value, label, on) =>
       '<button type="button" data-g="' + group + '" data-v="' + esc(value) + '"' + (on ? ' class="on"' : "") + ">" + esc(label) + "</button>";
     tools.innerHTML =
       '<div class="seg">' + btn("style", "line", "Line", style === "line") + btn("style", "candles", "Candles", style === "candles") + "</div>" +
-      '<div class="seg">' + btn("range", "3M", "3M", range === "3M") + btn("range", "6M", "6M", range === "6M") + btn("range", "1Y", "1Y", range === "1Y") + "</div>";
+      '<div class="seg">' + ["3M", "6M", "1Y", "All"].map((r) => btn("range", r, r, range === r)).join("") + "</div>" +
+      '<div class="seg"><button type="button" data-g="reset" data-v="reset">Reset</button></div>';
+    if (chips) {
+      chips.innerHTML = MA_DEFS.map((def) =>
+        '<button type="button" class="machip' + (mas[def.id] ? " on" : "") + '" data-ma="' + def.id + '" aria-pressed="' + (mas[def.id] ? "true" : "false") + '">' +
+        '<i style="background:' + def.color + '"></i>' + esc(def.label) + "</button>"
+      ).join("");
+    }
+    const rerun = () => drawPriceChart(panel, opts);
     tools.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
         const group = button.getAttribute("data-g");
         const value = button.getAttribute("data-v");
         if (group === "style") storeChoice("desk-price-style", value);
         if (group === "range") storeChoice("desk-price-range", value);
-        drawPriceChart(panel, opts);
+        if (group === "reset" && panel._tv && panel._bars) {
+          applyRange(panel._tv, panel._bars, priceRange());
+          return;
+        }
+        rerun();
       });
     });
+    if (chips) {
+      chips.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const next = maState();
+          const id = button.getAttribute("data-ma");
+          next[id] = !next[id];
+          storeMa(next);
+          rerun();
+        });
+      });
+    }
     const ticker = String(opts.ticker || "").trim().toUpperCase();
     const token = (panel._token || 0) + 1;
     panel._token = token;
     const show = (rows) => {
       if (panel._token !== token || !panel.isConnected) return;
-      const n = priceBars(priceRange());
-      paintPrice(panel, barsFromRows(rows).slice(-n), opts.lines || [], token);
+      const bars = barsFromRows(rows);
+      panel._bars = bars;
+      paintPrice(panel, bars, opts.lines || [], token);
     };
     if (panel._ticker === ticker && panel._rows) {
       show(panel._rows);
@@ -1293,7 +1449,7 @@
     }
     if (cap) cap.textContent = "";
     if (!ticker) {
-      dropHeld(panel);
+      dropTv(panel);
       if (cap) cap.textContent = "No saved daily bars for this name.";
       return;
     }
@@ -1304,15 +1460,193 @@
       show(panel._rows);
     }).catch(() => {
       if (panel._token !== token) return;
-      dropHeld(panel);
-      const volWrap = panel.querySelector("[data-px-volwrap]");
-      if (volWrap) volWrap.hidden = true;
+      dropTv(panel);
       if (cap) cap.textContent = "No saved daily bars for " + ticker + ".";
     });
   }
 
   function navOn(items) {
     return items.filter((it) => !FEATURE[it[2]] || featureOn(FEATURE[it[2]]));
+  }
+  const SEARCH_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16.5L20.5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  let deskNames = null;
+  function deskList() {
+    if (deskNames) return Promise.resolve(deskNames);
+    return loadCsv("scores.csv").then((rows) => {
+      deskNames = realRows(rows).filter((r) => r.ticker).map((r) => ({
+        ticker: String(r.ticker).trim().toUpperCase(),
+        company: String(r.company || ""),
+        score: r.score,
+        verdict: String(r.verdict || ""),
+      }));
+      return deskNames;
+    });
+  }
+  function searchRank(q, row) {
+    const query = q.toLowerCase();
+    const ticker = row.ticker.toLowerCase();
+    const company = row.company.toLowerCase();
+    if (ticker.startsWith(query)) return 0;
+    if (company.startsWith(query)) return 1;
+    if (company.split(/[^a-z0-9]+/).some((w) => w && w.startsWith(query))) return 2;
+    if (ticker.indexOf(query) >= 0) return 3;
+    if (company.indexOf(query) >= 0) return 4;
+    return -1;
+  }
+  function searchHits(q, rows) {
+    const ranked = [];
+    rows.forEach((row) => {
+      const rank = searchRank(q, row);
+      if (rank >= 0) ranked.push([rank, row]);
+    });
+    ranked.sort((a, b) => a[0] - b[0] || (a[1].ticker < b[1].ticker ? -1 : a[1].ticker > b[1].ticker ? 1 : 0));
+    return ranked.slice(0, 8).map((pair) => pair[1]);
+  }
+  function wireSearch(setNav) {
+    const input = document.getElementById("q");
+    const pop = document.getElementById("qlist");
+    const btn = document.getElementById("qbtn");
+    const narrowQ = window.matchMedia("(max-width: 1179px)");
+    let active = 0;
+    let hits = [];
+    function place() {
+      const search = document.getElementById("search");
+      if (narrowQ.matches) document.querySelector(".hdr").insertBefore(search, document.querySelector(".titles"));
+      else {
+        document.getElementById("qslot").appendChild(search);
+        document.body.classList.remove("search-open");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    }
+    function position() {
+      if (!pop || pop.hidden) return;
+      const rect = input.getBoundingClientRect();
+      const width = Math.min(360, Math.max(rect.width, 260), window.innerWidth - 16);
+      let left = rect.left;
+      if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - width - 8);
+      pop.style.left = left + "px";
+      pop.style.top = Math.round(rect.bottom + 4) + "px";
+      pop.style.width = Math.round(width) + "px";
+    }
+    function paint(message, rows) {
+      hits = rows || [];
+      if (!input.value.trim() && !message) {
+        pop.hidden = true;
+        pop.innerHTML = "";
+        input.setAttribute("aria-expanded", "false");
+        input.removeAttribute("aria-activedescendant");
+        return;
+      }
+      if (message) {
+        pop.innerHTML = '<div class="qmiss">' + esc(message) + "</div>";
+        pop.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+        input.removeAttribute("aria-activedescendant");
+        position();
+        return;
+      }
+      if (!hits.length) {
+        pop.hidden = true;
+        pop.innerHTML = "";
+        input.setAttribute("aria-expanded", "false");
+        return;
+      }
+      if (active >= hits.length) active = 0;
+      pop.innerHTML = hits.map((row, i) => {
+        const color = row.verdict === "BUY" ? UP : row.verdict === "HOLD" ? AM : row.verdict === "AVOID" ? DN : TX;
+        const score = num(row.score);
+        const scoreText = score == null ? "–" : (Number.isInteger(score) ? String(score) : fmt(score, 1));
+        return '<button type="button" class="qrow' + (i === active ? " on" : "") + '" role="option" id="qopt' + i + '" data-t="' + esc(row.ticker) + '" aria-selected="' + (i === active ? "true" : "false") + '">' +
+          '<span class="tk">' + esc(row.ticker) + '</span><span class="qname">' + esc(row.company || "") + "</span>" +
+          '<span class="qscore">' + esc(scoreText) + '</span><span class="pill" style="color:' + color + '">' + esc(row.verdict || "–") + "</span></button>";
+      }).join("");
+      pop.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      input.setAttribute("aria-activedescendant", "qopt" + active);
+      const current = document.getElementById("qopt" + active);
+      if (current) {
+        const top = current.offsetTop;
+        if (top < pop.scrollTop) pop.scrollTop = top;
+        else if (top + current.offsetHeight > pop.scrollTop + pop.clientHeight) pop.scrollTop = top + current.offsetHeight - pop.clientHeight;
+      }
+      position();
+    }
+    function renderList() {
+      const q = input.value.trim();
+      if (!q) { paint("", []); return; }
+      deskList().then((rows) => {
+        if (input.value.trim() !== q) return;
+        const found = searchHits(q, rows);
+        if (!found.length) paint("Not in the desk's " + rows.length + " stocks", []);
+        else paint("", found);
+      }).catch(() => {
+        if (input.value.trim() !== q) return;
+        paint("The desk list could not load.", []);
+      });
+    }
+    function openSearch() {
+      if (narrowQ.matches) {
+        setNav(false);
+        document.body.classList.add("search-open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+      input.focus();
+      if (input.value.trim()) renderList();
+    }
+    function closeSearch() {
+      document.body.classList.remove("search-open");
+      btn.setAttribute("aria-expanded", "false");
+      paint("", []);
+    }
+    place();
+    if (narrowQ.addEventListener) narrowQ.addEventListener("change", () => { place(); position(); });
+    btn.addEventListener("click", () => {
+      if (document.body.classList.contains("search-open")) closeSearch();
+      else openSearch();
+    });
+    input.addEventListener("input", () => { active = 0; renderList(); });
+    input.addEventListener("focus", () => { if (input.value.trim()) renderList(); });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" && hits.length) {
+        e.preventDefault();
+        active = (active + 1) % hits.length;
+        paint("", hits);
+      } else if (e.key === "ArrowUp" && hits.length) {
+        e.preventDefault();
+        active = (active - 1 + hits.length) % hits.length;
+        paint("", hits);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (hits[active]) location.href = "scorecard.html?t=" + encodeURIComponent(hits[active].ticker);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        input.value = "";
+        closeSearch();
+        input.blur();
+      }
+    });
+    pop.addEventListener("mousedown", (e) => { e.preventDefault(); });
+    pop.addEventListener("click", (e) => {
+      const row = e.target.closest(".qrow");
+      if (row) location.href = "scorecard.html?t=" + encodeURIComponent(row.getAttribute("data-t"));
+    });
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target && e.target.tagName || "").toLowerCase();
+      const typing = tag === "input" || tag === "textarea" || (e.target && e.target.isContentEditable);
+      const slash = e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey;
+      const chord = (e.metaKey || e.ctrlKey) && !e.altKey && (e.key === "k" || e.key === "K");
+      if (slash || chord) {
+        e.preventDefault();
+        openSearch();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("#search") || e.target.closest("#qbtn") || e.target.closest("#qlist")) return;
+      if (narrowQ.matches) closeSearch();
+      else paint("", []);
+    });
+    window.addEventListener("resize", position);
+    deskList().catch(() => {});
   }
   function renderShell(page) {
     const groups = NAV.map(([name, items]) => {
@@ -1330,8 +1664,11 @@
     document.getElementById("app").innerHTML =
       '<div class="scrim" id="scrim"></div>' +
       '<div class="app"><nav class="nav" id="nav"><a class="brand" href="index.html"><span class="logo">N</span>Nick\'s Stock Desk</a>' +
+      '<div id="qslot"><div class="qwrap" id="search"><input id="q" type="search" placeholder="Search stocks" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="Search stocks" role="combobox" aria-autocomplete="list" aria-controls="qlist" aria-expanded="false" title="Search stocks. Press / or Ctrl+K">' +
+      '<div class="qpop" id="qlist" role="listbox" hidden></div></div></div>' +
       groups + "</nav><div class=\"main\"><div class=\"hdr\">" +
       '<button type="button" class="menu-btn" id="menu" aria-label="Open menu" aria-controls="nav" aria-expanded="false">☰</button>' +
+      '<button type="button" class="search-btn" id="qbtn" aria-label="Search stocks" aria-expanded="false" aria-controls="q">' + SEARCH_ICON + "</button>" +
       "<div class=\"titles\"><h1>" + esc(page.title) + "</h1><div class=\"rl\">" + esc(RESEARCH) + "</div></div>" +
       '<div class="upd">Updated <b id="updated">…</b></div></div><div id="page"></div></div></div>';
     document.getElementById("nav").addEventListener("click", (e) => {
@@ -1367,11 +1704,16 @@
       menu.setAttribute("aria-expanded", open ? "true" : "false");
       menu.setAttribute("aria-label", open ? "Close menu" : "Open menu");
     };
-    menu.addEventListener("click", () => setNav(!document.body.classList.contains("nav-open")));
+    menu.addEventListener("click", () => {
+      const open = !document.body.classList.contains("nav-open");
+      setNav(open);
+      if (open) document.body.classList.remove("search-open");
+    });
     scrim.addEventListener("click", () => setNav(false));
     document.getElementById("nav").addEventListener("click", (e) => {
       if (e.target.closest("a.item")) setNav(false);
     });
+    wireSearch(setNav);
   }
 
   function findPage(id) {
