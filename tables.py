@@ -329,7 +329,10 @@ def scanners(scores, cfg):
     g["why"] = np.where(g["passes"].eq("yes"), "Revenue growth is at least the screen level and the label is not AVOID.", "Does not pass the growth screen.")
     q = scores.copy()
     q["passes"] = np.where((q["pts_roe"] == 1) & (q["de"].map(_num).fillna(99) < cfg["quality_max_de"]) & q["verdict"].ne("AVOID"), "yes", "no")
-    q["why"] = np.where(q["passes"].eq("yes"), "Return on equity is above the company's own history and debt is not heavy.", "Does not pass the quality screen.")
+    q["why"] = np.where(
+        q["passes"].eq("yes"),
+        "Return on equity is above the company's own history, or its sector when that history is missing, and debt/equity is at most the desk limit. The label is not AVOID.",
+        "Does not pass the quality screen.")
     d = scores.copy()
     d["passes"] = np.where(d["div_yield"].map(_num).ge(cfg["dividend_min_pct"]) & d["verdict"].ne("AVOID"), "yes", "no")
     d["why"] = np.where(d["passes"].eq("yes"), "Dividend yield clears the screen and the label is not AVOID.", "Does not pass the dividend screen.")
@@ -661,8 +664,10 @@ def technical_pages(scores):
         return "Mixed"
     tr["trend_label"] = tr.apply(trend_label, axis=1)
     pb = scores.copy()
+    has_entry = pb["entry_low"].map(_num).notna() & pb["entry_high"].map(_num).notna() if "entry_low" in pb.columns else False
     pb["passes"] = np.where(
-        (pb["above_sma200"] == 1) & (pb["above_sma50"] == 1) & pb["timing"].isin(["Pullback", "In entry zone"]) & pb["rsi14"].map(_num).lt(70),
+        (pb["above_sma200"] == 1) & (pb["above_sma50"] == 1) & pb["timing"].isin(["Pullback", "In entry zone"])
+        & pb["rsi14"].map(_num).lt(70) & pb["verdict"].ne("AVOID") & has_entry,
         "yes", "no")
     pb["why"] = np.where(pb["passes"].eq("yes"), "Uptrend structure with price back near the entry area.", "Not a pullback setup.")
     gl = []

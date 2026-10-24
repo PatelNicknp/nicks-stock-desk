@@ -18,7 +18,7 @@ async function loadChromium() {
 }
 
 const base = process.argv[2] || "http://127.0.0.1:8765/site/";
-const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots";
+const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v2";
 const pages = [
   "index.html", "top-stocks.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
   "growth.html", "quality.html", "dividend.html", "wheel.html", "vcp.html", "canslim.html",

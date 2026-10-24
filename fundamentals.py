@@ -20,7 +20,15 @@ REVENUE_CONCEPTS = [
     "RevenuesNetOfInterestExpense",
     "RegulatedAndUnregulatedOperatingRevenue",
 ]
-NI_CONCEPTS = ["NetIncomeLoss"]
+# Later tags fill a year the earlier tag left blank. NetIncomeLoss is still preferred.
+NI_CONCEPTS = [
+    "NetIncomeLoss",
+    "ProfitLoss",
+    "NetIncomeLossAvailableToCommonStockholdersBasic",
+    "NetIncomeLossAvailableToCommonStockholdersDiluted",
+    "IncomeLossFromContinuingOperations",
+    "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+]
 EPS_CONCEPTS = ["EarningsPerShareDiluted"]
 GP_CONCEPTS = ["GrossProfit"]
 OI_CONCEPTS = ["OperatingIncomeLoss"]
@@ -96,6 +104,22 @@ def _series(gaap, names, frame_re, dur_lo, dur_hi, flow, forms):
             "concept": used,
         }
     return out, used
+
+
+def _series_fallback(gaap, names, frame_re, dur_lo, dur_hi, flow, forms):
+    """Prefer the first concept. Later concepts fill only the frames it missed."""
+    merged = {}
+    used = None
+    for name in names:
+        got, tag = _series(gaap, [name], frame_re, dur_lo, dur_hi, flow, forms)
+        if not got:
+            continue
+        if used is None:
+            used = tag
+        for frame, item in got.items():
+            if frame not in merged:
+                merged[frame] = item
+    return merged, used
 
 
 def _first_with_rows(gaap, concept_groups, frame_re, dur_lo, dur_hi, flow, forms, minimum):
@@ -243,9 +267,13 @@ def parse_companyfacts(payload):
         "dps": [DPS_CONCEPTS],
         "shares": [SHARES_FLOW, SHARES_INSTANT],
     }
+    annual_forms = ("10-K", "20-F", "40-F")
     amaps = {}
     for key, groups in annual_specs.items():
-        amaps[key], _ = _first_with_rows(gaap, groups, ANNUAL_FRAME, 300, 380, True, ("10-K", "20-F", "40-F"), 1)
+        if key == "net_income":
+            amaps[key], _ = _series_fallback(gaap, NI_CONCEPTS, ANNUAL_FRAME, 300, 380, True, annual_forms)
+            continue
+        amaps[key], _ = _first_with_rows(gaap, groups, ANNUAL_FRAME, 300, 380, True, annual_forms, 1)
     # shares and equity and debt are instant (a stock, not a flow)
     shares_i, _ = _first_with_rows(gaap, [SHARES_INSTANT], ANNUAL_FRAME, 0, 0, False, ("10-K", "20-F", "40-F"), 1)
     if shares_i and not amaps.get("shares"):
@@ -255,7 +283,6 @@ def parse_companyfacts(payload):
     amaps["debt"] = _debt_map(gaap, ANNUAL_FRAME, ("10-K", "20-F", "40-F"), False)
     annual = _merge_frames(amaps, [], [])
     # Real filings usually omit the CY#### frame on the balance sheet. Attach by period end.
-    annual_forms = ("10-K", "20-F", "40-F")
     annual = _attach_by_end(annual, _instant_by_end(gaap, EQUITY_CONCEPTS, annual_forms), "equity")
     annual = _attach_by_end(annual, _debt_by_end(gaap, annual_forms), "debt")
 
@@ -268,15 +295,18 @@ def parse_companyfacts(payload):
         "capex": [CAPEX_CONCEPTS],
         "dps": [DPS_CONCEPTS],
     }
+    quarter_forms = ("10-Q", "10-K", "20-F", "40-F")
     for key, groups in q_flow.items():
-        qmaps[key], _ = _first_with_rows(gaap, groups, QUARTER_FRAME, 75, 110, True, ("10-Q", "10-K", "20-F", "40-F"), 1)
+        if key == "net_income":
+            qmaps[key], _ = _series_fallback(gaap, NI_CONCEPTS, QUARTER_FRAME, 75, 110, True, quarter_forms)
+            continue
+        qmaps[key], _ = _first_with_rows(gaap, groups, QUARTER_FRAME, 75, 110, True, quarter_forms, 1)
     qmaps["equity"], _ = _first_with_rows(gaap, [EQUITY_CONCEPTS], QUARTER_FRAME, 0, 0, False, ("10-Q", "10-K", "20-F", "40-F"), 1)
     qmaps["debt"] = _debt_map(gaap, QUARTER_FRAME, ("10-Q", "10-K", "20-F", "40-F"), False)
     qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT, SHARES_FLOW], QUARTER_FRAME, 75, 110, True, ("10-Q", "10-K", "20-F", "40-F"), 1)
     if not qmaps["shares"]:
         qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT], QUARTER_FRAME, 0, 0, False, ("10-Q", "10-K", "20-F", "40-F"), 1)
     quarters = _merge_frames(qmaps, [], [])
-    quarter_forms = ("10-Q", "10-K", "20-F", "40-F")
     quarters = _attach_by_end(quarters, _instant_by_end(gaap, EQUITY_CONCEPTS, quarter_forms), "equity")
     quarters = _attach_by_end(quarters, _debt_by_end(gaap, quarter_forms), "debt")
     return annual, quarters

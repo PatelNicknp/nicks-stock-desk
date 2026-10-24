@@ -127,6 +127,22 @@ def test_equity_without_cy_frame_matches_on_period_end():
     assert metrics["de"] is not None
 
 
+def test_net_income_falls_back_when_a_later_tag_has_the_year():
+    payload = _facts()
+    gaap = payload["facts"]["us-gaap"]
+    # Drop the newest NetIncomeLoss year. ProfitLoss supplies it.
+    ni = gaap["NetIncomeLoss"]["units"]["USD"]
+    gaap["NetIncomeLoss"]["units"]["USD"] = [r for r in ni if r["frame"] != "CY2024"]
+    gaap["ProfitLoss"] = {"units": {"USD": [
+        _row(21, "CY2024", "2024-01-01", "2024-12-31", "2025-02-01", "10-K"),
+    ]}}
+    annual, _ = fund.parse_companyfacts(payload)
+    row = annual[annual.frame == "CY2024"].iloc[0]
+    assert row["net_income"] == 21
+    older = annual[annual.frame == "CY2023"].iloc[0]
+    assert older["net_income"] == 14
+
+
 def test_dividend_zero_is_real_when_concept_absent_from_one_year():
     # covered by fillna only when some years report a dividend. All-missing is also 0 (no dividend tag).
     annual, _ = fund.parse_companyfacts(_facts())
@@ -141,5 +157,6 @@ if __name__ == "__main__":
     test_parser_drops_ytd_and_combines_debt()
     test_known_on_blocks_same_day_and_missing_fcf()
     test_equity_without_cy_frame_matches_on_period_end()
+    test_net_income_falls_back_when_a_later_tag_has_the_year()
     test_dividend_zero_is_real_when_concept_absent_from_one_year()
     print("fundamentals ok")

@@ -419,6 +419,93 @@ def score_components(fin, mkt, extra, cfg):
     return row
 
 
+def apply_sector_point_fallback(df, cfg=None):
+    """Use the sector comparison when the stock's own average is missing.
+
+    A present ROE or debt ratio with no own-history baseline was left unscored.
+    The sector point then counts in the financials subtotal and the total.
+    """
+    if df is None or len(df) == 0:
+        return df
+    out = df.copy()
+    touched = False
+    fin_cols = ["pts_" + key for key, _ in FIN_SPECS]
+    for key in ("roe", "de"):
+        pts_col = "pts_" + key
+        ind_col = "pts_" + key + "_ind"
+        avg_col = key + "_avg"
+        basis_col = "_" + key + "_from_sector"
+        out[basis_col] = False
+        if pts_col not in out.columns or ind_col not in out.columns or key not in out.columns:
+            continue
+        now = pd.to_numeric(out[key], errors="coerce")
+        own = pd.to_numeric(out[pts_col], errors="coerce")
+        sector = pd.to_numeric(out[ind_col], errors="coerce")
+        avg = pd.to_numeric(out[avg_col], errors="coerce") if avg_col in out.columns else pd.Series(np.nan, index=out.index)
+        mask = own.isna() & now.notna() & avg.isna() & sector.notna()
+        if not mask.any():
+            continue
+        out.loc[mask, pts_col] = sector.loc[mask].round().astype(int)
+        out[basis_col] = mask
+        touched = True
+    if not touched:
+        return out
+    fin_vals = []
+    totals = []
+    nfins = []
+    for i in out.index:
+        fin = nansum_strict([out.at[i, c] if c in out.columns else None for c in fin_cols])
+        fin_vals.append(fin)
+        totals.append(nansum_strict([
+            out.at[i, "pts_tech"] if "pts_tech" in out.columns else None,
+            fin,
+            out.at[i, "pts_sent"] if "pts_sent" in out.columns else None,
+            out.at[i, "pts_earnings"] if "pts_earnings" in out.columns else None,
+            out.at[i, "pts_sector"] if "pts_sector" in out.columns else None,
+        ]))
+        nfins.append(sum(
+            1 for c in fin_cols
+            if c in out.columns and pd.notna(pd.to_numeric(out.at[i, c], errors="coerce"))
+        ))
+    out["pts_fin"] = fin_vals
+    out["score"] = totals
+    if "n_fin" in out.columns or True:
+        out["n_fin"] = nfins
+        out["confidence"] = [confidence(n) for n in nfins]
+    if "reason" in out.columns:
+        reasons = []
+        for _, row in out.iterrows():
+            if not row.get("_roe_from_sector") and not row.get("_de_from_sector"):
+                reasons.append(row.get("reason"))
+                continue
+            text = plain_reason(row)
+            if row.get("_roe_from_sector"):
+                text = text.replace("return on equity is above its own history", "return on equity is above its sector")
+                text = text.replace("return on equity is below its own history", "return on equity is below its sector")
+            if row.get("_de_from_sector"):
+                text = text.replace("debt is lighter than its own history", "debt is lighter than its sector")
+                text = text.replace("debt is heavier than its own history", "debt is heavier than its sector")
+            reasons.append(text)
+        out["reason"] = reasons
+    if cfg is not None and "timing" in out.columns:
+        verdicts = []
+        for _, row in out.iterrows():
+            score = row.get("score")
+            if score is not None and not (isinstance(score, float) and not np.isfinite(score)) and not pd.isna(score):
+                score = int(score)
+            else:
+                score = None
+            n_fin = row.get("n_fin")
+            verdicts.append(decide_verdict(score, row.get("timing"), n_fin, _f(row.get("price")), _f(row.get("stop")), cfg))
+        out["verdict"] = verdicts
+        if "verdict" in out.columns:
+            avoid = out["verdict"].eq("AVOID")
+            for col in ("entry_low", "entry_high", "trade_target"):
+                if col in out.columns:
+                    out.loc[avoid, col] = np.nan
+    return out
+
+
 def add_industry(df, band):
     """Peer median inside the sector. Needs at least 4 other stocks with a value."""
     if df is None or len(df) == 0:
@@ -781,6 +868,7 @@ def _books(px, spy, books, cost, sig, buckets):
         if len(mask_dates) < 6:
             continue
         summary_rows.append(_window_summary(label, dates, mask_dates, top_rets, spy_rets, bot_rets, sig, buckets))
+    summary_rows = _unique_windows(summary_rows)
     # yearly from the full top-20 path
     by_year = {}
     for d, r in top_rets:
@@ -814,6 +902,19 @@ def _books(px, spy, books, cost, sig, buckets):
         for r in summary_rows:
             r["headline"] = text if r["window"] == prefer else ""
     return equity_rows, yearly_rows, summary_rows
+
+
+def _unique_windows(rows):
+    """Drop a later window that covers the same dates as an earlier one."""
+    seen = set()
+    unique = []
+    for row in rows:
+        key = (row.get("start"), row.get("end"), row.get("months"))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(row)
+    return unique
 
 
 def _window_summary(label, dates, mask_dates, top_rets, spy_rets, bot_rets, sig, buckets):
