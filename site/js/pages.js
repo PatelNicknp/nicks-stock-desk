@@ -1746,7 +1746,7 @@
     const yn = (on) => on ? '<span style="color:#22C55E">yes</span>' : '<span style="color:#EF4444">no</span>';
     ctx.page.innerHTML =
       '<p class="cap">Research list, not a recommendation. This desk never places trades.</p>' +
-      '<div id="buybanner"></div>' +
+      '<div id="buybanner" class="buybanner"></div>' +
       '<div class="cards" id="cards"></div>' +
       '<div class="ctrls" id="ctrls"></div>' +
       '<div id="chart"></div>' +
