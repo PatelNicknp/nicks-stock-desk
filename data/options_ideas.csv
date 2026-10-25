@@ -1,2 +1,2 @@
 ticker,company,setup,direction,strikes,expiry,dte,cost,max_profit,max_loss,breakeven,move_pct,price_check,price_score,liquidity,exit_plan,sizing,education,side,long_strike,short_strike,debit,spot,stop,sma50,target,market_ok,narrowed,quote_as_of,price_as_of,data_status,note,disclaimer
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,MISSING,No debit spread passed the rules. Education only. This desk never places a trade.,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,MISSING,No debit spreads. Education only. This desk never places a trade.,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
