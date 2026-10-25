@@ -180,6 +180,22 @@
     return '<div class="panel pad" data-px-panel><div class="rowhead wrap"><div><div class="ptitle">Price</div><div class="psub">' +
       D.esc(sub || "Daily bars") + '</div></div><div class="pxtools" data-px-tools></div></div><div class="pxmas" data-px-mas></div><div class="chart-box pxchart"><div class="px-host" data-px-host><div class="px-legend" data-px-legend></div></div></div><p class="cap" data-px-cap></p></div>';
   }
+  function breakdownLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.pivot) != null) lines.push({ value: D.num(row.pivot), color: "#F59E0B", label: "Base low" });
+    if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop" });
+    return lines;
+  }
+  function optionLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.long_strike) != null) lines.push({ value: D.num(row.long_strike), color: "#7C9CFF", label: "Long" });
+    if (D.num(row.short_strike) != null) lines.push({ value: D.num(row.short_strike), color: "#F59E0B", label: "Short" });
+    if (D.num(row.breakeven) != null) lines.push({ value: D.num(row.breakeven), color: "#22C55E", label: "Breakeven" });
+    if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop" });
+    return lines;
+  }
   function setupLines(row) {
     const lines = [];
     if (!row) return lines;
@@ -224,6 +240,7 @@
   }
 
   const readyDefault = ["READY", "BROKEN OUT today"];
+  const breakDefault = ["BROKEN DOWN today", "WATCHING"];
 
   function panelOff(key) {
     return !D.featureOn(key);
@@ -910,6 +927,26 @@
     cards(all) {
       return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
+        card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
+    },
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>";
+    },
+  });
+
+  const breakdowns = patternPage({
+    file: "scanner_breakdown.csv",
+    caption: "Desk rule: close under the 50-day and the 50-day under the 200-day, with the 200-day not rising. A 20 to 60 day base that tightens, then a close under the base low on volume at least 1.4 times the 50-day average. The stop on the chart is the base high.",
+    filters: { status: true, statusDefault: breakDefault, index: true, sector: true, ticker: true },
+    columns: [TK, CO, T("index_membership", "Index"), T("status", "Status", "setup"), PR,
+      T("pivot", "Base low", "num", { dec: 2 }), T("stop", "Stop (base high)", "num", { dec: 2, tone: "stop" }),
+      T("target", "Target", "num", { dec: 2, tone: "target" }), T("strength", "Strength", "strengthbar"),
+      T("range_days", "Base days", "num", { dec: 0 }), T("range_width_pct", "Base width %", "pct", { dec: 1, color: false }),
+      T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }), T("freshness", "Data", "fresh")],
+    price: breakdownLines,
+    priceSub: "Base low, and a stop at the base high",
+    cards(all) {
+      return card("Broken down today", String(countWhere(all, (r) => r.status === "BROKEN DOWN today"))) +
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
     },
     detail(row) {
@@ -2500,6 +2537,91 @@
     draw();
   }
 
+  function renderOptions(ctx) {
+    const ideas = D.realRows(ctx.files["options_ideas.csv"]);
+    const skipped = D.realRows(ctx.files["options_skipped.csv"]);
+    let tab = "call";
+    ctx.page.innerHTML =
+      '<p class="cap" id="optedu">Education, not financial advice. Research only. This desk does not place a trade.</p>' +
+      '<div class="ctrls" id="ctrls"></div><div id="optnote" class="cap"></div><div class="cards" id="cards"></div>' +
+      '<div class="panel" id="tbl"></div><div class="panel" id="skip"></div>';
+    const box = document.getElementById("ctrls");
+    box.innerHTML = '<div class="seg" id="opttabs">' +
+      '<button type="button" data-side="call" class="on">Calls</button>' +
+      '<button type="button" data-side="put">Puts</button></div>';
+    const state = { sort: "ticker", dir: "asc", page: 0 };
+    const skipState = { sort: "ticker", dir: "asc", page: 0 };
+    const columns = [
+      TK, T("setup", "Setup"), T("direction", "Direction"),
+      T("strikes", "Strikes"), T("expiry", "Expiry"), T("dte", "DTE", "num", { dec: 0 }),
+      T("cost", "Cost", "money"), T("max_profit", "Max profit", "money"),
+      T("max_loss", "Max loss", "money"), T("breakeven", "Breakeven", "num", { dec: 2 }),
+      T("move_pct", "Move needed", "pct", { dec: 1, color: false }),
+      T("price_check", "Price check"), T("price_score", "Score", "num", { dec: 0 }),
+      T("liquidity", "Liquidity"),
+      T("exit_plan", "Exit", "text", { inDetail: true }),
+      T("sizing", "Sizing", "text", { inDetail: true }),
+      T("education", "Notice", "text", { inDetail: true }),
+    ];
+    const draw = () => {
+      const rows = ideas.filter((r) => r.side === tab);
+      const skips = skipped.filter((r) => r.side === tab);
+      const asof = (rows.concat(skips).map((r) => r.quote_as_of).filter(Boolean)[0]) || (ideas.map((r) => r.quote_as_of).filter(Boolean)[0]) || "";
+      const grey = tab === "call" && rows.some((r) => String(r.market_ok || "").toLowerCase() === "no");
+      document.getElementById("optnote").textContent = (tab === "call"
+        ? "Bullish call debit spreads from the buy-setup list. Greyed names failed the market filter and stay on the list."
+        : "Bearish put debit spreads from the breakdown list. Broken down today comes first.") +
+        (asof ? " Quotes as of " + asof + "." : "");
+      document.getElementById("cards").innerHTML =
+        card(tab === "call" ? "Call ideas" : "Put ideas", String(rows.length)) +
+        card("Cheap", String(countWhere(rows, (r) => r.price_check === "CHEAP"))) +
+        card("Fair", String(countWhere(rows, (r) => r.price_check === "FAIR"))) +
+        card("Overpaying", String(countWhere(rows, (r) => r.price_check === "OVERPAYING"))) +
+        card("Skipped", String(skips.length));
+      const host = document.getElementById("tbl");
+      D.drawTable(host, {
+        title: tab === "call" ? "Call debit spreads" : "Put debit spreads",
+        sub: "Education, not financial advice.",
+        rows: rows,
+        columns: columns,
+        state: state,
+        pageSize: 15,
+        expandable: true,
+        lines: optionLines,
+        priceSub: "Long strike, short strike, breakeven, and the setup stop",
+        expandKey: (r) => (r.ticker || "") + "|" + (r.side || ""),
+        rowClass: (r) => (tab === "call" && String(r.market_ok || "").toLowerCase() === "no") ? "greyed" : "",
+        empty: tab === "call" ? "No call debit spread passed the rules." : "No put debit spread passed the rules.",
+      });
+      D.drawTable(document.getElementById("skip"), {
+        title: "Skipped and why",
+        sub: "One reason for each name that did not pass.",
+        rows: skips,
+        columns: [TK, CO, T("reason", "Why", "text")],
+        state: skipState,
+        pageSize: 20,
+        expandable: true,
+        lines: (r) => [],
+        priceSub: "Saved daily prices. This name did not pass the spread rules.",
+        detail: (r) => '<p class="whytext"><span class="droplab">Why</span> ' + D.esc(r.reason || "") +
+          '</p><p class="whytext">Education, not financial advice.</p>',
+        rowClass: (r) => (tab === "call" && String(r.market_ok || "").toLowerCase() === "no") ? "greyed" : "",
+        expandKey: (r) => "skip|" + (r.ticker || "") + "|" + (r.side || ""),
+        empty: "No names were skipped on this side.",
+      });
+    };
+    box.querySelectorAll("#opttabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tab = btn.getAttribute("data-side");
+        state.page = 0;
+        skipState.page = 0;
+        box.querySelectorAll("#opttabs button").forEach((b) => b.classList.toggle("on", b === btn));
+        draw();
+      });
+    });
+    draw();
+  }
+
   function renderHelp(ctx) {
     const help = ctx.files["help.csv"] || [];
     const settings = ctx.files["settings.csv"] || [];
@@ -2543,6 +2665,7 @@
     canslim: canslim,
     box: box,
     flag: flag,
+    breakdowns: breakdowns,
     leaders: leaders,
     week52: { files: ["scanner_52w.csv", "highs_lows_history.csv"], render: renderWeek52 },
     calendar: { files: ["earnings_calendar.csv"], render: renderCalendar },
@@ -2573,6 +2696,7 @@
     heatmaps: { files: ["heatmaps.csv"], render: renderHeatmaps },
     updates: { files: ["updates_log.csv", "freshness.csv"], render: renderUpdates },
     help: { files: ["help.csv", "settings.csv"], render: renderHelp },
+    options: { files: ["options_ideas.csv", "options_skipped.csv"], render: renderOptions },
   };
 
   D.boot();

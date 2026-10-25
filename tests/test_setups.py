@@ -679,6 +679,80 @@ def test_buy_setups_settings_default_on():
     assert got["buy_setups.market_filter"] is True
     topics = [topic for topic, _ in tables.help_rows()]
     assert "Buy setups" in topics
+    assert "Options" in topics
+    assert "Breakdowns" in topics
+    assert cfg["features"]["options"] is True
+    assert cfg["features"]["scanner_breakdown"] is True
+    assert got["feature.options"] is True
+    assert got["feature.scanner_breakdown"] is True
+
+
+def _breakdown_frame(n=260, break_today=True, close_today=None, vol_today=None):
+    idx = _dates(n)
+    close = np.zeros(n)
+    high = np.zeros(n)
+    low = np.zeros(n)
+    vol = np.full(n, 1_000_000.0)
+    for i in range(219):
+        px = 300 - (300 - 180) * i / 218
+        close[i] = px
+        high[i] = px * 1.01
+        low[i] = px * 0.99
+    # 40-session base ending yesterday. The first half is wider than the second.
+    for i in range(219, 239):
+        close[i] = 144
+        high[i] = 150
+        low[i] = 138
+    for i in range(239, 259):
+        close[i] = 143
+        high[i] = 146
+        low[i] = 141
+    close[258] = 143.2
+    if close_today is None:
+        close_today = 136 if break_today else 140.8
+    close[-1] = close_today
+    high[-1] = close_today + 1
+    low[-1] = close_today - 1
+    vol[-1] = 2_000_000 if vol_today is None else vol_today
+    frame = pd.DataFrame({"close": close, "high": high, "low": low, "volume": vol}, index=idx)
+    return frame
+
+
+def test_breakdown_break_watch_and_trend():
+    assert setups.BREAK_MIN_DAYS == 20
+    assert setups.BREAK_MAX_DAYS == 60
+    assert setups.BREAK_VOL_MULT == 1.4
+    broken = _breakdown_frame(break_today=True)
+    c, h, l, v = _panel(["AAA"], {"AAA": broken})
+    out = setups.scan_breakdown(c, h, l, v, _uni(["AAA"]))
+    assert len(out) == 1, out.to_dict("records") if len(out) else "no row"
+    row = out.iloc[0]
+    assert row["status"] == "BROKEN DOWN today"
+    assert float(row["pivot"]) == 138.0
+    assert float(row["stop"]) == 150.0
+    # Entry is today's close. Risk is the base high minus that close. Target is entry minus 2x risk.
+    entry = float(row["price"])
+    assert abs(float(row["target"]) - (entry - 2 * (150.0 - entry))) < 0.02
+    assert float(row["sma50"]) > entry
+    assert float(row["sma200"]) > float(row["sma50"])
+    watch = _breakdown_frame(break_today=False, close_today=140.8, vol_today=1_000_000)
+    c, h, l, v = _panel(["BBB"], {"BBB": watch})
+    out = setups.scan_breakdown(c, h, l, v, _uni(["BBB"]))
+    assert len(out) == 1
+    assert out.iloc[0]["status"] == "WATCHING"
+    assert abs(float(out.iloc[0]["entry"]) - 138.0) < 0.02
+    quiet = _breakdown_frame(close_today=148, vol_today=1_000_000)
+    c, h, l, v = _panel(["CCC"], {"CCC": quiet})
+    assert len(setups.scan_breakdown(c, h, l, v, _uni(["CCC"]))) == 0
+    # An uptrend does not qualify, even with a tight range at the highs.
+    n = 260
+    idx = _dates(n)
+    up = 80 * (1.002 ** np.arange(n))
+    frame = pd.DataFrame({
+        "close": up, "high": up * 1.01, "low": up * 0.99, "volume": np.full(n, 2_000_000.0),
+    }, index=idx)
+    c, h, l, v = _panel(["UP"], {"UP": frame})
+    assert len(setups.scan_breakdown(c, h, l, v, _uni(["UP"]))) == 0
 
 
 if __name__ == "__main__":
@@ -701,4 +775,5 @@ if __name__ == "__main__":
     test_buy_market_filter_and_sort()
     test_buy_stock_uses_close_above_both_averages()
     test_buy_setups_settings_default_on()
+    test_breakdown_break_watch_and_trend()
     print("setups ok")

@@ -2161,16 +2161,17 @@ def main(argv=None):
         setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores)
     else:
         setup_frames = {k: pd.DataFrame() for k in (
-            "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_flag", "scanner_leaders",
+            "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_breakdown", "scanner_flag", "scanner_leaders",
             "scanner_52w", "highs_lows_history",
         )}
     def _n(frame):
         if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []):
             return 0
         return int((frame["ticker"].astype(str) != "").sum())
-    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, flag %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
+    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, breakdown %d, flag %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
-        _n(setup_frames["scanner_box"]), _n(setup_frames["scanner_flag"]), _n(setup_frames["scanner_leaders"]),
+        _n(setup_frames["scanner_box"]), _n(setup_frames.get("scanner_breakdown")),
+        _n(setup_frames["scanner_flag"]), _n(setup_frames["scanner_leaders"]),
         _n(setup_frames.get("scanner_52w")),
         0 if setup_frames.get("highs_lows_history") is None else len(setup_frames.get("highs_lows_history")),
     ))
@@ -2184,6 +2185,29 @@ def main(argv=None):
     else:
         buy = pd.DataFrame()
     log("Buy setups", "OK", asof, "Buy setups %d. Research list only. Built from the scanners already on the desk. No new downloads." % _n(buy))
+    opt_on = features.get("options", True)
+    ideas = pd.DataFrame()
+    skipped_opt = pd.DataFrame()
+    if not opt_on:
+        log("Options chains", "OK", "", "feature off. Education only. No broker.")
+    else:
+        try:
+            import options.ideas as options_ideas
+            now_et = pd.Timestamp.now(tz=ET).to_pydatetime()
+            cal = earn_pages.get("calendar") if isinstance(earn_pages, dict) else pd.DataFrame()
+            ideas, skipped_opt, check, logged, new_stamp = options_ideas.publish(
+                close, vol, buy, setup_frames.get("scanner_breakdown"), cal,
+                cache, mode, now_et, STAMPS.get("options_chains"),
+            )
+            if new_stamp:
+                STAMPS["options_chains"] = new_stamp
+            if check is not None:
+                check.to_csv(os.path.join(data, "options_spreads_check.csv"), index=False)
+            log("Options chains", logged[0], logged[1], logged[2])
+        except Exception as ex:
+            log("Options chains", "CACHED", "", "kept the last options file. %s" % ex)
+            ideas = read_csv(os.path.join(data, "options_ideas.csv"))
+            skipped_opt = read_csv(os.path.join(data, "options_skipped.csv"))
     rot = sector_rotation.build(
         close, high, scores, cfg.get("sector_etfs") or [],
         scanners={
@@ -2232,11 +2256,14 @@ def main(argv=None):
         "scanner_vcp": gated(setup_frames["scanner_vcp"], "scanner_vcp", features.get("scanner_vcp", True), "No VCP setups. The scan used cached prices only."),
         "scanner_canslim": gated(setup_frames["scanner_canslim"], "scanner_canslim", features.get("scanner_canslim", True), "No CANSLIM setups. Missing letters stay not verified. No new downloads."),
         "scanner_box": gated(setup_frames["scanner_box"], "scanner_box", features.get("scanner_box", True), "No box setups in the cached prices."),
+        "scanner_breakdown": gated(setup_frames.get("scanner_breakdown"), "scanner_breakdown", features.get("scanner_breakdown", True), "No breakdowns in the cached prices."),
         "scanner_flag": gated(setup_frames["scanner_flag"], "scanner_flag", features.get("scanner_flag", True), "No flag setups in the cached prices."),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
         "buy_setups": gated(buy, "buy_setups", buy_on, "No buy setups. The list is built from the scanners already on the desk. This desk never places trades."),
+        "options_ideas": gated(ideas, "options_ideas", opt_on, "No debit spreads. Education only. This desk never places a trade."),
+        "options_skipped": gated(skipped_opt, "options_skipped", opt_on, "No names were skipped. Education only. This desk never places a trade."),
         "earnings_calendar": gated(earn_pages.get("calendar"), "earnings_calendar", features.get("earnings_calendar", True), "No earnings dates."),
         "earnings_heatmap": gated(earn_pages.get("heatmap"), "earnings_heatmap", features.get("earnings_heatmap", True), "No earnings history. Revenue vs estimate is not in the free feed."),
         "earnings_cards": gated(earn_pages.get("cards"), "earnings_cards", features.get("earnings_cards", True), "No earnings history to grade."),

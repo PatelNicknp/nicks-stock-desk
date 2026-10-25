@@ -317,6 +317,7 @@ input::placeholder{color:#5B6680;opacity:1}
 tr.selrow .rowexp{color:#7C9CFF}
 .rowchev{display:block;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);margin-left:-2px}
 .rowchev.open{transform:rotate(45deg);margin-left:0;margin-top:-3px}
+.buy-scroll tr.datarow.greyed td{opacity:.62}
 .buy-scroll tr.datarow.z0 td{background:#0F1420}
 .buy-scroll tr.datarow.z1 td{background:#121826}
 .buy-scroll tr.datarow:hover td,.buy-scroll tr.datarow.selrow td{background:#1A2236 !important}

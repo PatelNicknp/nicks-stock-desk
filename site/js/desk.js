@@ -26,8 +26,12 @@
       ["CANSLIM", "canslim.html", "canslim"],
       ["Box breakout", "box.html", "box"],
       ["Flag breakout", "flag.html", "flag"],
+      ["Breakdowns", "breakdowns.html", "breakdowns"],
       ["Leaders", "leaders.html", "leaders"],
       ["52-week", "52-week.html", "week52"],
+    ]],
+    ["Options", [
+      ["Debit spreads", "options.html", "options"],
     ]],
     ["Earnings", [
       ["Calendar", "earnings-calendar.html", "calendar"],
@@ -710,10 +714,11 @@
       const on = (picked || opened) ? " selrow" : "";
       if (!hasDetail) return '<tr data-i="' + (start + i) + '" class="' + on + '">' + tds + "</tr>";
       const zebra = i % 2 === 0 ? "z0" : "z1";
+      const extra = typeof opts.rowClass === "function" ? (" " + (opts.rowClass(r) || "")) : "";
       const name = r.ticker || "details";
       const exp = '<td class="exp"><button type="button" class="rowexp" aria-expanded="' + (opened ? "true" : "false") +
         '" aria-label="' + esc((opened ? "Hide " : "Show ") + name) + '"><span class="rowchev' + (opened ? " open" : "") + '"></span></button></td>';
-      let html = '<tr data-i="' + (start + i) + '" class="datarow ' + zebra + on + '">' + exp + tds + "</tr>";
+      let html = '<tr data-i="' + (start + i) + '" class="datarow ' + zebra + on + extra + '">' + exp + tds + "</tr>";
       if (opened) {
         const inner = expandable ? expandHtml(r, opts, parked) : opts.detail(r);
         html += '<tr class="detailrow"><td colspan="' + (shown.length + 1) + '">' + inner + "</td></tr>";
@@ -1913,7 +1918,9 @@
     canslim: "feature.scanner_canslim",
     box: "feature.scanner_box",
     flag: "feature.scanner_flag",
+    breakdowns: "feature.scanner_breakdown",
     leaders: "feature.scanner_leaders",
+    options: "feature.options",
     week52: "feature.scanner_52w",
     calendar: "feature.earnings_calendar",
     heatmap: "feature.earnings_heatmap",

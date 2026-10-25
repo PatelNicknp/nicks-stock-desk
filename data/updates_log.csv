@@ -18,3 +18,5 @@ Pattern scanners,OK,2026-10-23,"VCP 279, CANSLIM 240, box 134, flag 9, leaders 1
 Buy setups,OK,2026-10-23,Buy setups 16. Research list only. Built from the scanners already on the desk. No new downloads.,2026-10-24 15:53 PT
 Sector rotation,OK,2026-10-23,"11 sectors, 2 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-10-24 15:53 PT
 Column check,PARTIAL,,"A column is blank on every row: portfolio, scanner_canslim, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-10-24 15:53 PT
+Breakdowns,OK,6,6 names from cached prices. No new downloads.,2026-10-24 19:23 PT
+Options chains,OK,,"calls 0, puts 0, skipped 21. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 10/23/2026. Education, not financial advice. No broker.",2026-10-24 19:23 PT
