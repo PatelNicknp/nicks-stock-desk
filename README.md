@@ -2,7 +2,7 @@
 
 A stock research desk for Nick. It scores stocks, writes the tables, and stops there.
 
-It does not place trades. It does not call a broker. It does not pick option contracts. The wheel page is a stock screen. Put and call walls are a mood gauge.
+It does not place trades. It does not call a broker. The wheel page is a stock screen. Put and call walls are a mood gauge. The Options page is education on debit spreads, not an order. Every options card says education, not financial advice.
 
 ## How the numbers get to the screen
 
@@ -123,6 +123,24 @@ The 52-week high and low are the highest high and the lowest low of the last 252
 Switch: `buy_setups`, on by default. A second switch, `buy_setups.market_filter`, is also on by default. The page is `buy-setups.html`. It reads the VCP, box, flag, and CANSLIM files, the scores, the 52-week file, and the cached closes. It does not call Yahoo. Research list, not a recommendation. This desk never places trades and it does not send alerts.
 
 A name qualifies when one of those scanners is READY or BROKEN OUT today, the verdict is BUY, the close is above the 50-day and the 200-day averages, and the risk from the entry to the stop is 8% or less. Entry is the buy point of the strongest scanner that agrees. VCP uses the Minervini pivot. The stop is the tighter of 7% under that entry or the setup's own stop. Target 1 is 20% above the entry, or 20% above the breakout close. Target 2 is the entry plus three times the dollar risk. With the market filter on, the list is empty unless SPY's close is above its 50-day and 200-day averages and the 50-day is above the 200-day. QQQ is shown the same way and does not decide the list. The page can still show the hidden names greyed.
+
+### Breakdowns
+
+Switch: `scanner_breakdown`, on by default. The page is `breakdowns.html`. It reads the cached daily high, low, close, and volume. It does not call Yahoo.
+
+The trend is the close under the 50-day average, the 50-day under the 200-day, and the 200-day not higher than it was 20 sessions ago. The base is the longest window of 20 to 60 sessions, ending yesterday, whose high-to-low range is at most 10% of the middle, whose first and last closes drift by at most 5%, and whose second half is tighter than its first half. BROKEN DOWN today is a close under that low on volume at least 1.4 times the 50-day average. WATCHING is a close within 3% above that low, or a close under it without that volume. The chart line is the base low. The stop is the base high. The target is the entry minus twice the dollar risk from the entry up to the base high. A broken-down name uses today's close as the entry. A name that is still above the low uses the base low.
+
+### Options
+
+Switch: `options`, on by default. The page is `options.html`, under its own Options menu group, with Calls and Puts tabs. Education, not financial advice. The desk does not place a trade and it does not call a broker.
+
+Calls are debit spreads for the first 15 names on the buy-setup list, in that list's order, including names the market filter greys out. Those stay greyed on the Calls tab. Puts are debit spreads for the first 15 breakdowns, with BROKEN DOWN today ahead of WATCHING.
+
+Expiry is 45 to 60 days, falling back to 30 to 75. The long strike is about 0.55 to 0.65 delta. The short strike is about 0.30 delta, or the strike nearest the setup target when that target is closer to the stock than the 0.30-delta strike. For calls the target is buy-setup target 1. For puts it is the breakdown target. The debit has to be at most 40% of the width. When it is not, the long strike walks toward the short strike until it fits. A name is skipped, with one plain reason, when earnings fall on or before expiry, when at-the-money implied vol is more than 1.3 times the 20-day realized vol, when either leg has open interest under 500 or a bid-ask wider than 10% of the mid (or wider than $0.10 when the mid is under $1), when the stock is under $10, or when average volume is under 1 million.
+
+Price Check solves implied vol from the mid and compares the debit with a blend of the 20-day realized vol, the 60-day realized vol, and at-the-money implied vol. CHEAP is under 0.9 times that fair value. FAIR is 0.9 to 1.2. OVERPAYING is above 1.2. The score runs from 0 to 100. Liquidity is A, B, or C from the worse leg. The exit is a double, or the stock at the short strike, or the setup failing (a close under the buy-setup stop or the 50-day average for calls, a close back above the breakdown level for puts), and the spread is closed by 21 days to expiry. Sizing is the contract count for a $2k, $5k, and $10k account at about 2% to 5% of the debit.
+
+Quotes are one delayed Cboe request per ticker, only for those names, with a pause of about a second and a half. Raw chains stay in `cache/options_chains/` and are not committed. A full run refreshes them. An hourly run refreshes them only around 10:30 ET and 3:30 ET, once per window. The risk-free rate is the Treasury 3-month yield, with a fallback. Greeks are computed in `options/`. If Cboe fails, the last good chain is kept and the page shows its as-of time. A failure here does not stop the rest of the update. `options_spreads_check.csv` is the same math in a small file for a cross-check. It is not a sheet tab.
 
 ### Sector rotation
 

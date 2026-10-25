@@ -1,0 +1,1 @@
+ticker,side,direction,setup,spot,long_strike,short_strike,long_delta,short_delta,long_iv,short_iv,expiry,dte,debit,width,debit_over_width,cost,max_profit,max_loss,breakeven,move_pct,iv_atm,rv20,rv60,blend,iv_over_rv20,price_ratio,price_check,price_score,long_oi,short_oi,long_bid,long_ask,short_bid,short_ask,liquidity,risk_free,quote_as_of,narrowed,target,stop,education

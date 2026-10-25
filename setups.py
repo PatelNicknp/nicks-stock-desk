@@ -82,6 +82,22 @@ BOX_NOTE = (
     "whose first and last closes drift by 5% or less, then a close through the range high "
     "on volume above 1.5 times the 50-day average."
 )
+# Breakdown is the box turned over. The window is 20 to 60 sessions. Volume
+# has to be at least 1.4 times the 50-day average to count as broken down.
+BREAK_MIN_DAYS = 20
+BREAK_MAX_DAYS = 60
+BREAK_MAX_WIDTH = 0.10
+BREAK_MAX_DRIFT = 0.05
+BREAK_NEAR = 0.03
+BREAK_VOL_MULT = 1.4
+BREAKDOWN_NOTE = (
+    "Desk rule: close under the 50-day and the 50-day under the 200-day, with the 200-day not rising. "
+    "The base is the longest 20 to 60 day range, ending yesterday, no wider than 10%, "
+    "with the first and last closes drifting by 5% or less, and the second half tighter than the first. "
+    "BROKEN DOWN today is a close under that low on volume at least 1.4 times the 50-day average. "
+    "WATCHING is within 3% of that low, or a close under it without that volume. "
+    "The stop is the base high. The target is the entry minus twice the risk up to that high."
+)
 FLAG_NOTE = (
     "Desk rule, not the Pine script: a pole of at least 15% in 3 to 12 sessions, "
     "then a 3 to 15 day flag that retraces less than half the pole, "
@@ -1028,6 +1044,135 @@ def scan_box(close, high, low, vol, universe):
     return out.sort_values(["_k", "strength"], ascending=[True, False]).drop(columns="_k")
 
 
+def _volume_ratio(volume, mult):
+    vol = np.asarray(volume, dtype=float)
+    if len(vol) < VOL_LEN or not np.isfinite(vol[-1]):
+        return False, None
+    avg = pd.Series(vol).rolling(VOL_LEN, min_periods=VOL_LEN).mean().iloc[-1]
+    if not np.isfinite(avg) or avg <= 0:
+        return False, None
+    ratio = float(vol[-1] / avg)
+    return bool(ratio >= mult), ratio
+
+
+def scan_breakdown(close, high, low, vol, universe):
+    """Downside base break from cached bars. No network."""
+    rows = []
+    if close is None or len(close) == 0 or universe is None or len(universe) == 0:
+        return pd.DataFrame(rows)
+    panel = _panel_date(close)
+    names = list(universe["ticker"]) if "ticker" in universe.columns else []
+    for ticker in names:
+        got = _bars(close, high, low, vol, ticker, None)
+        if got is None:
+            continue
+        frame, _ = got
+        h = frame["high"].to_numpy(dtype=float)
+        l = frame["low"].to_numpy(dtype=float)
+        c = frame["close"].to_numpy(dtype=float)
+        v = frame["volume"].to_numpy(dtype=float)
+        n = len(c)
+        if n < 221:
+            continue
+        sma50 = _sma(c, 50)
+        sma200 = _sma(c, 200)
+        s50 = float(sma50[-1])
+        s200 = float(sma200[-1])
+        s200_ago = float(sma200[-21])
+        last = float(c[-1])
+        if not (np.isfinite(s50) and np.isfinite(s200) and np.isfinite(s200_ago)):
+            continue
+        if not (last < s50 < s200 and s200 <= s200_ago):
+            continue
+        chosen = None
+        for length in range(min(BREAK_MAX_DAYS, n - 1), BREAK_MIN_DAYS - 1, -1):
+            seg_h = h[n - 1 - length:n - 1]
+            seg_l = l[n - 1 - length:n - 1]
+            seg_c = c[n - 1 - length:n - 1]
+            if not np.isfinite(seg_h).all() or not np.isfinite(seg_l).all() or not np.isfinite(seg_c).all():
+                continue
+            rh = float(seg_h.max())
+            rl = float(seg_l.min())
+            mid = (rh + rl) / 2.0
+            if mid <= 0 or seg_c[0] == 0:
+                continue
+            width = (rh - rl) / mid
+            drift = abs(seg_c[-1] - seg_c[0]) / abs(seg_c[0])
+            half = length // 2
+            if half < 1:
+                continue
+            first = float(seg_h[:half].max() - seg_l[:half].min())
+            second = float(seg_h[half:].max() - seg_l[half:].min())
+            if width <= BREAK_MAX_WIDTH and drift <= BREAK_MAX_DRIFT and second < first:
+                chosen = (length, rh, rl, width, drift)
+                break
+        if chosen is None:
+            continue
+        length, rh, rl, width, drift = chosen
+        big, ratio = _volume_ratio(v, BREAK_VOL_MULT)
+        if last < rl and big:
+            status = "BROKEN DOWN today"
+        elif last < rl or (last <= rl * (1.0 + BREAK_NEAR) and last >= rl):
+            status = "WATCHING"
+        else:
+            continue
+        if status == "BROKEN DOWN today":
+            entry = last
+        elif last < rl:
+            entry = last
+        else:
+            entry = rl
+        risk = rh - entry
+        if not np.isfinite(risk) or risk <= 0:
+            continue
+        target = entry - 2.0 * risk
+        tight = max(0.0, 1.0 - width / BREAK_MAX_WIDTH)
+        length_score = (length - BREAK_MIN_DAYS) / float(BREAK_MAX_DAYS - BREAK_MIN_DAYS)
+        vol_bonus = 0.15 if big else 0.0
+        strength = round(min(100.0, 100.0 * (0.55 * tight + 0.30 * length_score + vol_bonus)), 1)
+        if status == "BROKEN DOWN today":
+            lead = "Closed under the %d-day base low on volume %.1f times the 50-day average." % (length, ratio or 0)
+        elif last < rl:
+            lead = "Closed under the base low, but volume was under 1.4 times the 50-day average, so it is still watching."
+        else:
+            lead = "Tight %d-day base and the close is within 3%% of the base low." % length
+        meta = _meta_row(universe, ticker)
+        rows.append({
+            "ticker": ticker,
+            "company": meta["company"],
+            "sector": meta["sector"],
+            "index_membership": meta["index_membership"],
+            "status": status,
+            "pivot": _round(rl),
+            "stop": _round(rh),
+            "target": _round(target),
+            "strength": strength,
+            "reason": (
+                "%s The base is %.1f%% wide and the close drifted %.1f%%. "
+                "The second half of the base is tighter than the first. "
+                "Price %.2f is under the 50-day at %.2f, and that is under the 200-day at %.2f, which is not rising. "
+                "Stop is the base high. Target is the entry minus twice the risk up to that high."
+            ) % (lead, width * 100.0, drift * 100.0, last, s50, s200),
+            "freshness": _freshness(frame.index[-1], panel, n, 221),
+            "price": _round(last),
+            "price_as_of": str(pd.Timestamp(frame.index[-1]).date()),
+            "range_days": length,
+            "range_width_pct": round(width * 100.0, 1),
+            "volume_ratio": "" if ratio is None else round(ratio, 2),
+            "sma50": _round(s50),
+            "sma200": _round(s200),
+            "entry": _round(entry),
+            "data_status": "OK",
+            "note": BREAKDOWN_NOTE,
+        })
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return out
+    rank = {"BROKEN DOWN today": 0, "WATCHING": 1}
+    out["_k"] = out["status"].map(rank)
+    return out.sort_values(["_k", "strength"], ascending=[True, False]).drop(columns="_k")
+
+
 def _flag_candidate(h, l, c, flag_len):
     n = len(c)
     # Flag occupies the bars after the pole and before today.
@@ -1754,9 +1899,11 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_f = features.get("scanner_flag", True)
     want_l = features.get("scanner_leaders", True)
     want_w = features.get("scanner_52w", True)
+    want_bd = features.get("scanner_breakdown", True)
     vcp = scan_vcp(close, high, low, vol, universe) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
+    breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()
     leaders = combine_leaders(vcp, canslim) if want_l else pd.DataFrame()
     if want_w:
@@ -1771,6 +1918,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
         "scanner_vcp": vcp,
         "scanner_canslim": canslim,
         "scanner_box": box,
+        "scanner_breakdown": breakdown,
         "scanner_flag": flag,
         "scanner_leaders": leaders,
         "scanner_52w": week,

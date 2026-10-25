@@ -71,6 +71,8 @@ Scanners
 16. Leaders
 17. 52-week
 
+Also on the site, under Scanners: Breakdowns (`scanner_breakdown`). Under a separate Options group: Debit spreads (`options_ideas`, with `options_skipped`).
+
 Earnings
 
 18. Calendar
@@ -598,6 +600,24 @@ Columns: ticker, name, day_pct, week_pct, month_pct, month3_pct, ytd_pct, rs_3m_
 Color returns with the diverging scale. Color the macro columns with the point scale. If the macro cells are blank, show the note that the surprise feed was missing. Performance can still be on the page.
 
 The nineteen names are the 11 SPDR sector ETFs plus semiconductors, biotech, regional banks, homebuilders, retail, oil and gas, aerospace and defense, and metals and mining.
+
+## Breakdowns
+
+Source: `scanner_breakdown`. Cached prices only.
+
+Default filter: `status` is `BROKEN DOWN today` or `WATCHING`.
+
+Columns: ticker, index_membership, status, pivot, stop, target, strength, range_days, range_width_pct, volume_ratio, reason, freshness.
+
+`pivot` is the base low. `stop` is the base high. Sort broken down today ahead of watching.
+
+## Debit spreads
+
+Source: `options_ideas`. Skipped names are `options_skipped`, one reason per name.
+
+This page is education, not an order. Put "Education, not financial advice" on the page. Calls and puts are the `side` column. Grey a call row when `market_ok` is `no`. Show strikes, expiry, dte, cost, max profit, max loss, breakeven, move_pct, price_check, price_score, liquidity, and the exit plan.
+
+`options_spreads_check.csv` is a cross-check file. It is not a sheet tab.
 
 ## Field reminder
 
