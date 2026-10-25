@@ -322,7 +322,9 @@ tr.selrow .rowexp{color:#7C9CFF}
 .buy-scroll tr.datarow:hover td,.buy-scroll tr.datarow.selrow td{background:#1A2236 !important}
 .buy-scroll tr.datarow.selrow td:first-child{box-shadow:inset 3px 0 0 #7C9CFF}
 .buy-scroll tr.detailrow td,.buy-scroll tr.detailrow td:first-child{position:static;left:auto;z-index:auto;height:auto;padding:0;white-space:normal;overflow:visible;text-overflow:clip;background:#0F1420 !important;border-bottom:1px solid #1E293B}
-.buydrop{position:sticky;left:0;box-sizing:border-box;max-width:100%;padding:14px 14px 12px;background:#0F1420}
+.buydrop{position:sticky;left:0;box-sizing:border-box;max-width:100%;padding:14px 14px 12px;background:#0F1420;overflow-x:auto}
+.rulepills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.rulepill{font-size:12px;line-height:16px;background:#121826;border:1px solid #1E293B;border-radius:6px;padding:6px 8px;color:#C3CBDB}
 .buyid{font-size:15px;font-weight:700;margin-bottom:6px}
 .buyid .mut{font-weight:400}
 .whytext{font-size:14px;line-height:21px;color:#E6EBF5;margin:0 0 12px;white-space:normal}
@@ -340,24 +342,25 @@ tr.selrow .rowexp{color:#7C9CFF}
 .buydrop .panel{margin:0}
 .buydrop .px-host{height:360px}
 .buydrop .cap{margin-bottom:0}
+.droplab{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8B96AD;margin-bottom:2px}
 @media (min-width:1000px){
-  .buy-scroll table.buys{table-layout:fixed;width:100%}
-  .buy-scroll table.buys th,.buy-scroll table.buys td{padding-left:5px;padding-right:5px}
-  .buy-scroll table.buys th:nth-child(1),.buy-scroll table.buys td.exp{width:44px}
-  .buy-scroll table.buys th:nth-child(2){width:6%}
-  .buy-scroll table.buys th:nth-child(3){width:13%}
-  .buy-scroll table.buys th:nth-child(4){width:11%}
-  .buy-scroll table.buys th:nth-child(5){width:8%}
-  .buy-scroll table.buys th:nth-child(6){width:6.5%}
-  .buy-scroll table.buys th:nth-child(7){width:6.5%}
-  .buy-scroll table.buys th:nth-child(8){width:7%}
-  .buy-scroll table.buys th:nth-child(9){width:7%}
-  .buy-scroll table.buys th:nth-child(10){width:6%}
-  .buy-scroll table.buys th:nth-child(11){width:8%}
-  .buy-scroll table.buys th:nth-child(12){width:7.5%}
-  .buy-scroll table.buys th:nth-child(13),.buy-scroll table.buys td.score{width:48px}
-  .buy-scroll table.buys th:nth-child(14){width:64px}
-  .buy-scroll table.buys td.score .scorefill{height:36px}
+  .buy-scroll table.buyfit{table-layout:fixed;width:100%}
+  .buy-scroll table.buyfit th,.buy-scroll table.buyfit td{padding-left:5px;padding-right:5px}
+  .buy-scroll table.buyfit th:nth-child(1),.buy-scroll table.buyfit td.exp{width:44px}
+  .buy-scroll table.buyfit th:nth-child(2){width:6%}
+  .buy-scroll table.buyfit th:nth-child(3){width:13%}
+  .buy-scroll table.buyfit th:nth-child(4){width:11%}
+  .buy-scroll table.buyfit th:nth-child(5){width:8%}
+  .buy-scroll table.buyfit th:nth-child(6){width:6.5%}
+  .buy-scroll table.buyfit th:nth-child(7){width:6.5%}
+  .buy-scroll table.buyfit th:nth-child(8){width:7%}
+  .buy-scroll table.buyfit th:nth-child(9){width:7%}
+  .buy-scroll table.buyfit th:nth-child(10){width:6%}
+  .buy-scroll table.buyfit th:nth-child(11){width:8%}
+  .buy-scroll table.buyfit th:nth-child(12){width:7.5%}
+  .buy-scroll table.buyfit th:nth-child(13),.buy-scroll table.buyfit td.score{width:48px}
+  .buy-scroll table.buyfit th:nth-child(14){width:64px}
+  .buy-scroll table.buyfit td.score .scorefill{height:36px}
 }
 @media (max-width:1279px){
   .buy-scroll th.exp,.buy-scroll td.exp{width:44px;min-width:44px}
