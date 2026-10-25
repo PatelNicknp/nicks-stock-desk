@@ -308,3 +308,68 @@ input::placeholder{color:#5B6680;opacity:1}
   .main{padding-top:max(10px, env(safe-area-inset-top));padding-bottom:max(10px, env(safe-area-inset-bottom))}
   h1{font-size:22px;line-height:26px}
 }
+.buy-scroll{container-type:inline-size;max-width:100%}
+.buy-scroll tr.datarow{cursor:pointer}
+.buy-scroll tr.datarow td,.buy-scroll th.ellip{overflow:hidden;text-overflow:ellipsis}
+.buy-scroll th.exp,.buy-scroll td.exp{width:36px;min-width:36px;padding:0;text-align:center;overflow:visible;cursor:default}
+.rowexp{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;min-width:32px;min-height:32px;padding:0;border:0;border-radius:6px;background:transparent;color:#8B96AD;cursor:pointer}
+.rowexp:hover,.rowexp:focus-visible{background:#1A2236;color:#E6EBF5;outline:none}
+tr.selrow .rowexp{color:#7C9CFF}
+.rowchev{display:block;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);margin-left:-2px}
+.rowchev.open{transform:rotate(45deg);margin-left:0;margin-top:-3px}
+.buy-scroll tr.datarow.z0 td{background:#0F1420}
+.buy-scroll tr.datarow.z1 td{background:#121826}
+.buy-scroll tr.datarow:hover td,.buy-scroll tr.datarow.selrow td{background:#1A2236 !important}
+.buy-scroll tr.datarow.selrow td:first-child{box-shadow:inset 3px 0 0 #7C9CFF}
+.buy-scroll tr.detailrow td,.buy-scroll tr.detailrow td:first-child{position:static;left:auto;z-index:auto;height:auto;padding:0;white-space:normal;overflow:visible;text-overflow:clip;background:#0F1420 !important;border-bottom:1px solid #1E293B}
+.buydrop{position:sticky;left:0;box-sizing:border-box;max-width:100%;padding:14px 14px 12px;background:#0F1420}
+.buyid{font-size:15px;font-weight:700;margin-bottom:6px}
+.buyid .mut{font-weight:400}
+.whytext{font-size:14px;line-height:21px;color:#E6EBF5;margin:0 0 12px;white-space:normal}
+.tradeplan{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.tp{background:#121826;border:1px solid #1E293B;border-radius:8px;padding:8px 10px;min-width:0}
+.tp .l{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8B96AD}
+.tp .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:#E6EBF5}
+.tp .s{display:block;margin-top:2px;font-size:12px;font-weight:700;color:#8B96AD}
+.tp.stop .v,.tp.stop .s{color:#EF4444}
+.tp.tgt .v,.tp.tgt .s{color:#22C55E}
+.buyfacts{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:12px}
+.fact{min-width:88px;max-width:100%}
+.fact .l{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8B96AD}
+.fact .v{font-size:13px;margin-top:2px;color:#E6EBF5}
+.buydrop .panel{margin:0}
+.buydrop .px-host{height:360px}
+.buydrop .cap{margin-bottom:0}
+@media (min-width:1000px){
+  .buy-scroll table.buys{table-layout:fixed;width:100%}
+  .buy-scroll table.buys th,.buy-scroll table.buys td{padding-left:5px;padding-right:5px}
+  .buy-scroll table.buys th:nth-child(1),.buy-scroll table.buys td.exp{width:44px}
+  .buy-scroll table.buys th:nth-child(2){width:6%}
+  .buy-scroll table.buys th:nth-child(3){width:13%}
+  .buy-scroll table.buys th:nth-child(4){width:11%}
+  .buy-scroll table.buys th:nth-child(5){width:8%}
+  .buy-scroll table.buys th:nth-child(6){width:6.5%}
+  .buy-scroll table.buys th:nth-child(7){width:6.5%}
+  .buy-scroll table.buys th:nth-child(8){width:7%}
+  .buy-scroll table.buys th:nth-child(9){width:7%}
+  .buy-scroll table.buys th:nth-child(10){width:6%}
+  .buy-scroll table.buys th:nth-child(11){width:8%}
+  .buy-scroll table.buys th:nth-child(12){width:7.5%}
+  .buy-scroll table.buys th:nth-child(13),.buy-scroll table.buys td.score{width:48px}
+  .buy-scroll table.buys th:nth-child(14){width:64px}
+  .buy-scroll table.buys td.score .scorefill{height:36px}
+}
+@media (max-width:1279px){
+  .buy-scroll th.exp,.buy-scroll td.exp{width:44px;min-width:44px}
+  .buy-scroll tr.datarow td{height:44px}
+  .rowexp{width:44px;height:44px;min-width:44px;min-height:44px}
+  .buy-scroll td.score .scorefill{height:44px}
+  .buydrop .px-host{height:280px}
+}
+@media (max-width:699px){
+  .tradeplan{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tradeplan .tp:last-child{grid-column:1 / -1}
+  .buydrop{padding:12px 12px 8px}
+  .buydrop .px-host{height:240px}
+  .whytext{font-size:15px;line-height:22px}
+}

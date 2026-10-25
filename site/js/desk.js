@@ -605,6 +605,8 @@
     const columns = opts.columns;
     const state = opts.state;
     const pageSize = opts.pageSize || 25;
+    const hasDetail = typeof opts.detail === "function";
+    if (typeof opts.beforeDraw === "function") opts.beforeDraw();
     const sorted = rows.slice().sort((a, b) => {
       const col = columns.find((c) => c.key === state.sort) || columns[0];
       let c = compare(a, b, col, state.dir);
@@ -620,19 +622,30 @@
     const start = state.page * pageSize;
     const view = sorted.slice(start, start + pageSize);
     const shown = columns.filter((c) => !c.hidden);
-    const head = shown.map((c) => {
+    const head = (hasDetail ? '<th class="exp"></th>' : "") + shown.map((c) => {
       const mark = state.sort === c.key ? '<span class="sort">' + (state.dir === "asc" ? "▲" : "▼") + "</span>" : "";
-      const cls = [align(c), c.hide === "md" ? "hide-md" : ""].filter(Boolean).join(" ");
+      const cls = [align(c), c.hide === "md" ? "hide-md" : "", c.ellipsis ? "ellip" : ""].filter(Boolean).join(" ");
       return '<th class="' + cls + '" data-k="' + esc(c.key) + '">' + esc(c.label) + mark + "</th>";
     }).join("");
     const body = view.map((r, i) => {
       const tds = shown.map((c) => {
-        const cls = [align(c), c.wrap ? "wrap" : "", c.kind === "score" ? "score" : "", c.hide === "md" ? "hide-md" : ""].filter(Boolean).join(" ");
+        const cls = [align(c), c.wrap ? "wrap" : "", c.kind === "score" ? "score" : "", c.hide === "md" ? "hide-md" : "", c.ellipsis ? "ellip" : ""].filter(Boolean).join(" ");
         const width = c.width ? " style=\"width:" + c.width + "\"" : "";
-        return "<td class=\"" + cls + "\"" + width + ">" + cell(r, c) + "</td>";
+        const raw = r[c.key];
+        const tip = c.ellipsis && raw != null && String(raw).trim() !== "" ? ' title="' + esc(String(raw)) + '"' : "";
+        return "<td class=\"" + cls + "\"" + width + tip + ">" + cell(r, c) + "</td>";
       }).join("");
-      const on = opts.pick && opts.pick === (r.ticker || "") && opts.pick !== "" ? " selrow" : "";
-      return '<tr data-i="' + (start + i) + '" class="' + on + '">' + tds + "</tr>";
+      const picked = opts.pick && opts.pick === (r.ticker || "") && opts.pick !== "";
+      const opened = hasDetail && opts.open && opts.open === (r.ticker || "") && opts.open !== "";
+      const on = (picked || opened) ? " selrow" : "";
+      if (!hasDetail) return '<tr data-i="' + (start + i) + '" class="' + on + '">' + tds + "</tr>";
+      const zebra = i % 2 === 0 ? "z0" : "z1";
+      const name = r.ticker || "details";
+      const exp = '<td class="exp"><button type="button" class="rowexp" aria-expanded="' + (opened ? "true" : "false") +
+        '" aria-label="' + esc((opened ? "Hide " : "Show ") + name) + '"><span class="rowchev' + (opened ? " open" : "") + '"></span></button></td>';
+      let html = '<tr data-i="' + (start + i) + '" class="datarow ' + zebra + on + '">' + exp + tds + "</tr>";
+      if (opened) html += '<tr class="detailrow"><td colspan="' + (shown.length + 1) + '">' + opts.detail(r) + "</td></tr>";
+      return html;
     }).join("");
     const empty = rows.length ? "" : '<div class="empty">' + esc(opts.empty || "No rows match these filters.") + "</div>";
     const from = rows.length ? start + 1 : 0;
@@ -641,14 +654,15 @@
     host.innerHTML =
       (opts.title ? '<div class="pad headrow" style="padding-bottom:0"><div class="ptitle">' + esc(opts.title) + "</div>" +
         (opts.sub ? '<div class="psub">' + esc(opts.sub) + "</div>" : "") + "</div>" : "") +
-      '<div class="scroll"><table><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+      '<div class="scroll' + (hasDetail ? " buy-scroll" : "") + '"><table' + (hasDetail ? ' class="buys"' : "") + '><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       empty +
       (showFoot ? '<div class="foot"><span>' + from + "–" + to + " of " + rows.length + '</span><div class="pg">' +
       '<button type="button" data-pg="prev"' + (state.page <= 0 ? " disabled" : "") + ">‹</button>" +
       '<button type="button" data-pg="next"' + (state.page >= pages - 1 ? " disabled" : "") + ">›</button></div></div>" : "");
-    host.querySelectorAll("th").forEach((th) => {
+    host.querySelectorAll("th[data-k]").forEach((th) => {
       th.addEventListener("click", () => {
         const k = th.getAttribute("data-k");
+        if (!k) return;
         if (state.sort === k) state.dir = state.dir === "asc" ? "desc" : "asc";
         else { state.sort = k; state.dir = "desc"; }
         drawTable(host, opts);
@@ -661,15 +675,18 @@
       });
     });
     if (opts.onPick) {
-      host.querySelectorAll("tbody tr").forEach((tr) => {
+      host.querySelectorAll(hasDetail ? "tbody tr.datarow" : "tbody tr").forEach((tr) => {
         tr.addEventListener("click", (ev) => {
-          if (ev.target.closest("a")) return;
+          const link = ev.target.closest("a");
+          if (link && !opts.activateRow) return;
+          if (link && opts.activateRow) ev.preventDefault();
           const i = Number(tr.getAttribute("data-i"));
           opts.onPick(sorted[i]);
         });
       });
     }
     host._sorted = sorted;
+    if (typeof opts.afterDraw === "function") opts.afterDraw(host);
   }
 
   function uniq(rows, key) {
