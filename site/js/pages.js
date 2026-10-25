@@ -133,6 +133,7 @@
           const rows = all.filter((r) => readCommon(box, r) && (!cfg.match || cfg.match(r, box)));
           D.drawTable(document.getElementById("tbl"), {
             rows: rows, columns: cfg.columns, state: state, pageSize: cfg.pageSize || 25, foot: cfg.foot, title: cfg.tableTitle, sub: cfg.tableSub,
+            expandable: true, lines: cfg.lines, priceSub: cfg.priceSub, detail: cfg.detail,
           });
         };
         hook(box, state, draw);
@@ -149,7 +150,7 @@
         const all = D.realRows(raw);
         ctx.page.innerHTML = (cfg.strip ? '<div id="strip"></div>' : "") +
           '<div class="ctrls" id="ctrls"></div><div class="cards" id="cards"></div>' +
-          '<div class="panel" id="tbl"></div><div id="detail"></div><p class="cap"></p>';
+          '<div class="panel" id="tbl"></div><p class="cap"></p>';
         if (cfg.strip) document.getElementById("strip").innerHTML = cfg.strip(all);
         ctx.page.querySelector(".cap").textContent = cfg.caption || D.noteOf(raw);
         const box = document.getElementById("ctrls");
@@ -158,26 +159,16 @@
         D.placeFeed(box, raw);
         document.getElementById("cards").innerHTML = cfg.cards(all);
         const state = { sort: cfg.sort || "status", dir: cfg.dir || "asc", sort2: cfg.sort2 || "strength", dir2: "desc", page: 0 };
-        let pick = null;
-        const drawDetail = (row, rows) => {
-          const host = document.getElementById("detail");
-          D.destroyCharts();
-          if (!row && !(cfg.detailRows)) { host.innerHTML = ""; return; }
-          host.innerHTML = (cfg.price ? priceShell(cfg.priceSub || "Daily bars for the selected name") : "") + (cfg.detail ? cfg.detail(row, rows || []) : "");
-          if (cfg.price && row) D.drawPriceChart(host.querySelector("[data-px-panel]"), { ticker: row.ticker, lines: cfg.price(row) });
-        };
-        const strongest = (rows) => rows.slice().sort((a, b) => (D.num(b.strength) || 0) - (D.num(a.strength) || 0))[0] || null;
         const draw = () => {
           const rows = all.filter((r) => readCommon(box, r) && (!cfg.match || cfg.match(r, box)));
-          if (pick && !rows.some((r) => r.ticker === pick)) pick = null;
-          const selected = rows.find((r) => r.ticker === pick) || strongest(rows);
-          pick = selected ? selected.ticker : null;
           D.drawTable(document.getElementById("tbl"), {
-            rows: rows, columns: cfg.columns, state: state, pageSize: 12, pick: pick,
+            rows: rows, columns: cfg.columns, state: state, pageSize: 12,
+            expandable: true,
+            lines: cfg.price || setupLines,
+            priceSub: cfg.priceSub || "Buy point, stop, and target when the scan has them",
+            detail: cfg.detail ? (row) => cfg.detail(row, rows) : null,
             empty: "No names match. Open Status and tick WATCHING to see names still forming.",
-            onPick: (row) => { pick = row.ticker; draw(); },
           });
-          drawDetail(selected, rows);
         };
         hook(box, state, draw);
         draw();
@@ -196,6 +187,28 @@
     if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop " + D.fmt(row.stop, 2) });
     if (D.num(row.target) != null) lines.push({ value: D.num(row.target), color: "#22C55E", label: "Target " + D.fmt(row.target, 2) });
     return lines;
+  }
+  function zoneLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    const lo = D.num(row.entry_low);
+    const hi = D.num(row.entry_high);
+    if (lo != null && hi != null) lines.push({ zone: [lo, hi], labelColor: "#F59E0B" });
+    if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop" });
+    const tgt = D.num(row.trade_target != null && row.trade_target !== "" ? row.trade_target : row.target);
+    if (tgt != null) lines.push({ value: tgt, color: "#22C55E", label: "Target" });
+    return lines;
+  }
+  function weekLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.high_52w) != null) lines.push({ value: D.num(row.high_52w), color: "#22C55E", label: "52w high" });
+    if (D.num(row.low_52w) != null) lines.push({ value: D.num(row.low_52w), color: "#EF4444", label: "52w low" });
+    return lines;
+  }
+  function targetLine(row) {
+    const n = D.num(row && row.target_analyst);
+    return n == null ? [] : [{ value: n, color: "#22C55E", label: "Target" }];
   }
   function reasonBlock(row, extraCols) {
     let rules = "";
@@ -294,7 +307,7 @@
       if (!alerts.length) D.showQuiet(host, D.quietMessage(alertRaw));
       else D.drawTable(host, {
         rows: alerts, columns: [TK, T("text", "What changed", "text", { wrap: true }), T("score", "Score", "scorejump"), VE],
-        state: { sort: "score", dir: "desc", page: 0 }, pageSize: 8, foot: false,
+        state: { sort: "score", dir: "desc", page: 0 }, pageSize: 8, foot: false, expandable: true,
       });
     }
   }
@@ -312,6 +325,7 @@
     const draw = () => {
       D.drawTable(document.getElementById("tbl"), {
         rows: all.filter((r) => readCommon(box, r)), columns: cols, state: state, pageSize: 25,
+        expandable: true, lines: zoneLines, priceSub: "Entry zone, stop, and target when the score has them",
       });
     };
     hook(box, state, draw);
@@ -571,7 +585,8 @@
           T("gain_pct", "Gain %", "pct", { color: true }), T("weight_pct", "Weight %", "pct", { color: false }), SC,
           T("score_week_change", "Score vs week ago", "delta", { dec: 0 }),
           VE, T("stop", "Stop", "num", { dec: 2, tone: "stop" }), T("status", "Status", "hold")],
-        state: hs, pageSize: 25,
+        state: hs, pageSize: 25, expandable: true, lines: zoneLines,
+        priceSub: "Stop when the holding has one",
       });
       D.drawTable(document.getElementById("watch"), {
         title: "Watchlist, not owned yet",
@@ -580,7 +595,8 @@
           T("entry_low", "Entry low", "num", { dec: 2 }), T("entry_high", "Entry high", "num", { dec: 2 }),
           T("distance_to_entry_pct", "Distance to entry %", "dist"), T("timing", "Trend", "trend"),
           T("note_input", "Nick's note", "muted", { wrap: true })],
-        state: ws, pageSize: 25,
+        state: ws, pageSize: 25, expandable: true, lines: zoneLines,
+        priceSub: "Entry zone when the watchlist has one",
       });
     };
     hook(box, hs, draw);
@@ -629,7 +645,7 @@
           columns: [TK, T("kind", "Type", "kind"), T("text", "What changed", "text", { wrap: true }),
             SC, T("score_prev", "Score before", "num", { dec: 0 }),
             VE, T("verdict_prev", "Verdict before", "verdict"), PR],
-          state: state, pageSize: 12,
+          state: state, pageSize: 12, expandable: true,
         });
       }
       const q = (D.fieldVal(box, "ticker") || "").trim();
@@ -641,7 +657,7 @@
         rows: changeRows,
         columns: [TK, CO, SC, T("score_prev", "Score before", "num", { dec: 0 }), T("score_change", "Change", "delta", { dec: 0 }),
           VE, T("day_pct", "Day %", "pct", { color: true }), PR],
-        state: st2, pageSize: 12,
+        state: st2, pageSize: 12, expandable: true,
       });
     };
     hook(box, state, draw);
@@ -820,14 +836,10 @@
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING"))) +
         card("In a trade (buy printed)", String(countWhere(all, (r) => r.in_trade === "yes")));
     },
-    detail(row, rows) {
-      const list = byStatus(rows).slice(0, 12);
-      const head = "<th>Ticker</th>" + vcpRuleLabels.map((l) => '<th class="c">' + D.esc(l) + "</th>").join("");
-      const body = list.map((r) => "<tr><td>" + D.tickerHtml(r.ticker) + "</td>" +
-        vcpRuleLabels.map((_, i) => '<td class="c">' + passCell(r["r" + (i + 1)]) + "</td>").join("") + "</tr>").join("");
-      return '<div class="split r12"><div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>" +
-        '<div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Trend template, 8 rules</div></div><div class="scroll"><table class="rules"><thead><tr>' +
-        head + "</tr></thead><tbody>" + body + "</tbody></table></div></div></div>";
+    detail(row) {
+      const pills = vcpRuleLabels.map((label, i) => '<span class="rulepill">' + passCell(row["r" + (i + 1)]) + " " + D.esc(label) + "</span>").join("");
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) +
+        '<div class="ptitle" style="margin-top:12px">Trend template</div><div class="rulepills">' + pills + "</div></div>";
     },
   });
 
@@ -855,15 +867,12 @@
         card("Strict qualify", String(countWhere(all, (r) => r.qualify === "strict"))) +
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
     },
-    detail(row, rows) {
-      const list = byStatus(rows).slice(0, 8);
+    detail(row) {
       const cols = [["c_status", "C"], ["a_status", "A"], ["n_status", "N"], ["s_status", "S"], ["l_status", "L"], ["i_status", "I"]];
-      const head = "<th>Ticker</th>" + cols.map((c) => "<th>" + c[1] + "</th>").join("");
-      const body = list.map((r) => "<tr><td>" + D.tickerHtml(r.ticker) + "</td>" + cols.map((c) =>
-        '<td class="wrap">' + (D.isBlank(r[c[0]]) ? D.na() : D.esc(r[c[0]])) + "</td>").join("") + "</tr>").join("");
-      return '<div class="split r21"><div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Letter details</div></div><div class="scroll"><table><thead><tr>' +
-        head + "</tr></thead><tbody>" + body + "</tbody></table></div></div><div class=\"panel pad\"><div class=\"ptitle\">Why this name</div><p class=\"cap\">" +
-        D.esc((row && row.reason) || "") + "</p></div></div>";
+      const letters = cols.map((c) => '<p class="whytext"><span class="droplab">' + c[1] + "</span> " +
+        (D.isBlank(row[c[0]]) ? D.na() : D.esc(row[c[0]])) + "</p>").join("");
+      return letters + '<div class="panel pad"><div class="ptitle">Why this name</div><p class="cap">' +
+        D.esc((row && row.reason) || "") + "</p></div>";
     },
   });
 
@@ -962,7 +971,8 @@
           T("last_surprise_pct", "Last surprise %", "pct", { dec: 1, color: true }), T("last_1d_move_pct", "Last next-day move %", "pct", { dec: 1, color: true }),
           T("avg_1d_move_pct", "Avg next-day move %", "pct", { dec: 1, color: true }), T("n_past", "Reports on file", "num", { dec: 0 }),
           T("owns", "Held", "owns")],
-        state: state, pageSize: 25,
+        state: state, pageSize: 25, expandable: true,
+        priceSub: "Daily price. The report date stays in the row.",
       });
     };
     hook(box, state, draw);
@@ -1031,6 +1041,7 @@
         title: "Quarter detail", rows: detail,
         columns: [TK, T("quarter", "Quarter", "date"), T("label", "Result", "earnlabel", { wrap: true })],
         state: { sort: "quarter", dir: "desc", page: 0 }, pageSize: 12,
+        expandable: true, priceSub: "Daily price around this report",
       });
     };
     hook(box, state, draw);
@@ -1051,7 +1062,8 @@
     const draw = () => D.drawTable(document.getElementById("tbl"), {
       rows: all.filter((r) => D.matchMulti(r, "grade", D.selectedMulti(box, "grade")) && D.matchText(r, "ticker", D.fieldVal(box, "ticker"))),
       columns: [TK, CO, T("grade", "Grade", "grade"), T("summary", "Summary", "text", { wrap: true })],
-      state: state, pageSize: 25,
+      state: state, pageSize: 25, expandable: true,
+      priceSub: "Daily price. The grade note is above the chart.",
     });
     hook(box, state, draw);
     draw();
@@ -1190,7 +1202,8 @@
       columns: [TK, CO, T("analyst_mean", "Mean rating (1 = strong buy)", "num", { dec: 2 }), T("analyst_count", "Analysts", "num", { dec: 0 }),
         T("pts_analyst", "Analyst points", "points"), T("target_analyst", "Median target", "num", { dec: 2 }), PR,
         T("upside_pct", "Upside %", "pct", { dec: 1, color: true })],
-      state: state, pageSize: 25,
+      state: state, pageSize: 25, expandable: true, lines: targetLine,
+      priceSub: "Median analyst target",
     });
     hook(box, state, draw);
     draw();
@@ -1216,19 +1229,25 @@
       const pts = D.selectedMulti(box, "pts");
       const sums = summary.filter((r) => D.matchText(r, "ticker", q) && D.matchMulti(r, "pts_institutional", pts));
       const names = new Set(sums.map((r) => r.ticker));
+      const filingNote = (row) => {
+        const note = String(row.note || "").trim();
+        return note ? '<p class="whytext">' + D.esc(note) + "</p>" : "";
+      };
       D.drawTable(document.getElementById("sum"), {
         title: "Summary", rows: sums,
         columns: [TK, T("increased_shares", "Shares added", "compact"), T("decreased_shares", "Shares cut", "compact"),
           T("holders", "Holders", "num", { dec: 0 }), T("ownership_pct", "Owned by funds %", "owncap", { dec: 1 }),
           T("as_of", "As of", "date"), T("pts_institutional", "Points", "points")],
-        state: s1, pageSize: 20,
+        state: s1, pageSize: 20, expandable: true, detail: filingNote,
+        priceSub: "Daily price",
       });
       D.drawTable(document.getElementById("top"), {
-        title: "Largest holders (click a ticker)",
+        title: "Largest holders",
         rows: holders.filter((r) => !q || names.has(r.ticker)),
         columns: [TK, T("owner", "Holder", "text", { wrap: true }), T("shares", "Shares", "compact"),
           T("share_change", "Change", "signedcompact"), T("as_of", "As of", "date")],
-        state: s2, pageSize: 10,
+        state: s2, pageSize: 10, expandable: true, detail: filingNote,
+        priceSub: "Daily price. The holder name is above the chart.",
       });
     };
     hook(box, s1, draw);
@@ -1265,7 +1284,8 @@
       D.drawTable(document.getElementById("tbl"), {
         rows: rows,
         columns: [TK, T("buys_3m", "Buys, 3 mo", "count", { up: "#22C55E" }), T("sells_3m", "Sells, 3 mo", "count", { up: "#EF4444" }), T("pts_insider", "Points", "points")],
-        state: state, pageSize: 25,
+        state: state, pageSize: 25, expandable: true,
+        priceSub: "Daily price. The bar chart stays the 3-month buy count.",
       });
       const top = all.slice().sort((a, b) => (D.num(b.buys_3m) || 0) - (D.num(a.buys_3m) || 0)).slice(0, 10);
       D.destroyCharts();
@@ -1294,8 +1314,9 @@
         rows: all.filter((r) => (!tone || String(D.num(r.tone)) === tone) &&
           D.matchMulti(r, "publisher", D.selectedMulti(box, "pub")) && D.matchText(r, "ticker", D.fieldVal(box, "ticker"))),
         columns: [TK, T("tone", "Tone", "tone"), T("headline", "Headline", "text", { wrap: true }), T("publisher", "Source"),
-          T("published", "Published"), T("tone_note", "Why this tone", "muted", { width: "200px" })],
-        state: state, pageSize: 20,
+          T("published", "Published"), T("tone_note", "Why this tone", "muted", { inDetail: true })],
+        state: state, pageSize: 20, expandable: true,
+        priceSub: "Daily price. The headline and tone note are above the chart.",
       });
     };
     hook(box, state, draw);
@@ -1516,7 +1537,8 @@
         }),
         columns: [TK, CO, SE, PR, T("div_yield", "Yield %", "pct", { color: false }), T("div_yield_avg", "Own avg yield %", "pct", { color: false }),
           T("dps", "Dividend per share", "num", { dec: 2 }), T("pts_div_yield", "Points", "points"), VE],
-        state: state, pageSize: 25,
+        state: state, pageSize: 25, expandable: true,
+        priceSub: "Daily price",
       });
     };
     hook(box, state, draw);
@@ -1693,6 +1715,9 @@
         columns: columns,
         state: state,
         pageSize: 25,
+        expandable: true,
+        lines: weekLines,
+        priceSub: "52-week high and 52-week low",
         empty: "No names in this group.",
       });
     };
@@ -1716,6 +1741,66 @@
     draw();
   }
 
+  function buyDetailHtml(row) {
+    const px = (key) => {
+      const n = D.num(row[key]);
+      return n == null ? D.na() : D.esc(D.fmt(n, 2));
+    };
+    const gain = (key) => {
+      const entry = D.num(row.entry);
+      const value = D.num(row[key]);
+      if (entry == null || value == null || entry === 0) return "";
+      const pct = (value - entry) / entry * 100;
+      const sign = pct > 0 ? "+" : pct < 0 ? "−" : "";
+      return D.esc(sign + D.fmt(Math.abs(pct), 1) + "%");
+    };
+    const risk = D.num(row.risk_pct);
+    const riskText = risk == null ? "" : D.esc(D.fmt(Math.abs(risk), 1) + "% risk");
+    const rr = D.num(row.reward_risk);
+    const rrText = rr == null || Math.abs(rr) > 500 ? D.na() : D.esc(D.fmt(rr, 2));
+    const plan = (label, value, sub, tone) =>
+      '<div class="tp' + (tone ? " " + tone : "") + '"><div class="l">' + D.esc(label) +
+      '</div><div class="v">' + value + "</div>" + (sub ? '<div class="s">' + sub + "</div>" : "") + "</div>";
+    const fact = (label, value) =>
+      '<div class="fact"><div class="l">' + D.esc(label) + '</div><div class="v">' + value + "</div></div>";
+    const rangeN = D.num(row.range_position_52w);
+    let range = D.na();
+    if (rangeN != null) {
+      const clamped = Math.max(0, Math.min(100, rangeN));
+      const w = Math.max(0, Math.round(clamped / 100 * 88));
+      const color = clamped >= 95 ? "#22C55E" : clamped <= 15 ? "#EF4444" : "#7C9CFF";
+      range = '<span class="track" title="' + D.esc(D.fmt(rangeN, 0)) + '"><span class="fill" style="width:' + w +
+        'px;background:' + color + '"></span></span> ' + D.esc(D.fmt(rangeN, 0));
+    }
+    const asOfMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(row.price_as_of || ""));
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const asOf = asOfMatch ? D.esc(months[Number(asOfMatch[2]) - 1] + " " + Number(asOfMatch[3]) + ", " + asOfMatch[1]) :
+      (D.isBlank(row.price_as_of) ? D.na() : D.esc(row.price_as_of));
+    const mkt = String(row.market_ok || "").toLowerCase();
+    const mktHtml = mkt === "yes" ? '<span style="color:#22C55E">yes</span>' :
+      mkt === "no" ? '<span style="color:#EF4444">no</span>' :
+      (D.isBlank(row.market_ok) ? D.na() : D.esc(row.market_ok));
+    const count = D.num(row.sources_count);
+    const why = String(row.reason || "").trim();
+    return '<p class="whytext">' + (why ? D.esc(why) : '<span class="m2">No reason was saved for this name.</span>') + "</p>" +
+      '<div class="tradeplan">' +
+        plan("Entry", px("entry"), "", "") +
+        plan("Stop", px("stop"), riskText, "stop") +
+        plan("Target 1", px("target1"), gain("target1"), "tgt") +
+        plan("Target 2", px("target2"), gain("target2"), "tgt") +
+        plan("Reward/risk", rrText, "", "") +
+      "</div>" +
+      '<div class="buyfacts">' +
+        fact("Sector", D.isBlank(row.sector) ? D.na() : D.esc(row.sector)) +
+        fact("Index", D.isBlank(row.index_membership) ? D.na() : D.esc(row.index_membership)) +
+        fact("Price", px("price")) +
+        fact("As of", asOf) +
+        fact("Count", count == null ? D.na() : D.esc(D.fmt(count, 0))) +
+        fact("52w range", range) +
+        fact("% from 52w high", D.pctHtml(row.pct_from_high_52w, 1, true)) +
+        fact("Market ok", mktHtml) +
+      "</div>";
+  }
   function buyLines(row) {
     const lines = [];
     if (!row) return lines;
@@ -1749,9 +1834,8 @@
       '<div id="buybanner" class="buybanner"></div>' +
       '<div class="cards" id="cards"></div>' +
       '<div class="ctrls" id="ctrls"></div>' +
-      '<div id="chart"></div>' +
       '<div class="panel" id="tbl"></div>' +
-      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
+      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Tap a row for the reason, the trade plan, and the price chart. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
     const box = document.getElementById("ctrls");
     box.innerHTML =
       D.multiHtml("index", "Index", D.indexTokens(named)) +
@@ -1761,20 +1845,20 @@
       D.searchHtml("ticker", "Ticker", "tick-list-buy", D.uniq(named, "ticker"));
     D.placeFeed(box, raw);
     let showAnyway = false;
-    let pick = null;
     const state = { sort: "_ord", dir: "asc", page: 0 };
     const columns = [
       T("_ord", "", "num", { hidden: true }),
-      TK, CO, SE, T("index_membership", "Index", "text"), PR, T("price_as_of", "As of", "date"),
-      T("setup_sources", "Setup", "text"), T("sources_count", "Count", "num", { dec: 0 }),
-      T("best_status", "Status", "setup"),
-      T("entry", "Entry", "num", { dec: 2 }), T("stop", "Stop", "num", { dec: 2 }),
-      T("target1", "Target 1", "num", { dec: 2 }), T("target2", "Target 2", "num", { dec: 2 }),
-      T("risk_pct", "Risk %", "pct", { dec: 1 }), T("reward_risk", "Reward/risk", "multiple", { dec: 2 }),
+      TK, T("company", "Company", "text", { ellipsis: true }),
+      T("setup_sources", "Setup", "text", { ellipsis: true }),
+      T("best_status", "Status", "setup", { ellipsis: true }),
+      T("entry", "Entry", "num", { dec: 2 }),
+      T("stop", "Stop", "num", { dec: 2, tone: "stop" }),
+      T("target1", "Target 1", "num", { dec: 2, tone: "target" }),
+      T("target2", "Target 2", "num", { dec: 2, tone: "target" }),
+      T("risk_pct", "Risk %", "pct", { dec: 1 }),
+      T("reward_risk", "Reward/risk", "multiple", { dec: 2 }),
       T("dist_to_entry_pct", "Dist. to entry", "pct", { dec: 1, color: true }),
-      SC, VE, T("range_position_52w", "52w range", "rangepos"),
-      T("pct_from_high_52w", "% from 52w high", "pct", { dec: 1, color: true }),
-      T("reason", "Why", "text", { wrap: true, width: "280px" }), T("market_ok", "Market ok", "pass"),
+      SC, VE,
     ];
     const sourceOk = (row) => {
       const picked = D.selectedMulti(box, "source");
@@ -1827,27 +1911,19 @@
         banner.hidden = true;
         banner.innerHTML = "";
       }
-      if (pick && !rows.some((r) => r.ticker === pick)) pick = null;
-      const selected = rows.find((r) => r.ticker === pick) || rows[0] || null;
-      pick = selected ? selected.ticker : null;
-      const chart = document.getElementById("chart");
-      chart.classList.toggle("dimmed", grey);
-      document.getElementById("tbl").classList.toggle("dimmed", grey);
-      D.destroyCharts();
-      if (!selected) {
-        chart.innerHTML = "";
-      } else {
-        chart.innerHTML = priceShell("Entry, stop, and both targets. The stop stays on the chart because many breakouts fail.");
-        D.drawPriceChart(chart.querySelector("[data-px-panel]"), { ticker: selected.ticker, lines: buyLines(selected) });
-      }
-      D.drawTable(document.getElementById("tbl"), {
+      const host = document.getElementById("tbl");
+      host.classList.toggle("dimmed", grey);
+      D.drawTable(host, {
         rows: rows,
         columns: columns,
         state: state,
         pageSize: 25,
-        pick: pick,
+        expandable: true,
+        fit: true,
+        lines: buyLines,
+        priceSub: "Entry, stop, and both targets. The stop stays on the chart because many breakouts fail.",
+        detail: buyDetailHtml,
         empty: marketDown && !showAnyway ? "No buy setups are listed." : (named.length ? "No names match these filters." : "No stock passed the buy-setup rules today."),
-        onPick: (row) => { pick = row.ticker; draw(); },
       });
     };
     hook(box, state, draw);
@@ -1870,7 +1946,8 @@
       rows: all.filter((r) => readCommon(box, r)),
       columns: [TK, CO, SE, PR, T("dist_52w_high_pct", "From 52-week high %", "pct", { dec: 2, color: false, abs: true }),
         T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }), SC, VE],
-      state: state, pageSize: 15,
+      state: state, pageSize: 15, expandable: true,
+      priceSub: "Daily price. Distance to the 52-week high stays in the row.",
     });
     hook(box, state, draw);
     draw();
@@ -1907,7 +1984,8 @@
         columns: [TK, CO, T("trend_label", "Trend", "trend"),
           T("above_sma20", "Above 20d", "flag", { no: "#EF4444" }), T("above_sma50", "Above 50d", "flag", { no: "#EF4444" }),
           T("above_sma100", "Above 100d", "flag", { no: "#EF4444" }), T("above_sma200", "Above 200d", "flag", { no: "#EF4444" }), SC],
-        state: state, pageSize: 25,
+        state: state, pageSize: 25, expandable: true,
+        priceSub: "Daily price. Turn the moving averages on or off above the chart.",
       });
     };
     hook(box, state, draw);
@@ -1920,6 +1998,8 @@
     captionAbove: true,
     pageSize: 20,
     filters: { passes: "yes", sector: true, verdict: true, ticker: true },
+    lines: zoneLines,
+    priceSub: "Pullback entry zone",
     columns: [TK, CO, PR, T("rsi14", "RSI-14", "num", { dec: 1 }), T("entry_low", "Entry low", "num", { dec: 2 }),
       T("entry_high", "Entry high", "num", { dec: 2 }), SC, VE],
     cards(all) {
@@ -1942,11 +2022,13 @@
       const rows = all.filter((r) => readCommon(box, r));
       D.drawTable(document.getElementById("up"), {
         title: "Biggest gainers today", rows: rows.filter((r) => r.side === "gainer"), columns: cols,
-        state: { sort: "day_pct", dir: "desc", page: 0 }, pageSize: 15,
+        state: { sort: "day_pct", dir: "desc", page: 0 }, pageSize: 15, expandable: true,
+        priceSub: "Daily price",
       });
       D.drawTable(document.getElementById("dn"), {
         title: "Biggest losers today", rows: rows.filter((r) => r.side === "loser"), columns: cols,
-        state: { sort: "day_pct", dir: "asc", page: 0 }, pageSize: 15,
+        state: { sort: "day_pct", dir: "asc", page: 0 }, pageSize: 15, expandable: true,
+        priceSub: "Daily price",
       });
     };
     hook(box, { page: 0 }, draw);
@@ -2035,7 +2117,8 @@
         columns: [TK, CO, T("ret_1d", "1 day %", "heatpct", { dec: 1 }), T("ret_1w", "1 week %", "heatpct", { dec: 1 }),
           T("ret_1m", "1 month %", "heatpct", { dec: 1 }), T("ret_ytd", "YTD %", "heatpct", { dec: 1 }),
           T("above_sma20", "20d", "flag"), T("above_sma50", "50d", "flag"), T("above_sma100", "100d", "flag"), T("above_sma200", "200d", "flag")],
-        state: state, pageSize: 25,
+        state: state, pageSize: 25, expandable: true,
+        priceSub: "Daily price",
       });
       const sectors = D.uniq(rows, "sector").map((s) => {
         const sub = rows.filter((r) => r.sector === s);
@@ -2274,6 +2357,9 @@
         state: { sort: "score", dir: "desc", page: 0 },
         pageSize: 12,
         foot: false,
+        expandable: true,
+        lines: zoneLines,
+        priceSub: "Entry zone, stop, and target when the score has them",
         empty: "No scored stocks in this sector.",
       });
     }
@@ -2298,7 +2384,7 @@
           T("buy_setup_count", "Buy setups", "num", { dec: 0 }),
           T("score_avg", "Desk avg", "num", { dec: 1 }),
           T("buy_share", "BUY %", "pct", { dec: 0 }),
-          T("reason", "Reason", "text", { wrap: true }),
+          T("reason", "Reason", "text", { ellipsis: true }),
         ],
         state: state,
         pageSize: 15,

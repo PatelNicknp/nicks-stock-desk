@@ -600,11 +600,79 @@
     return dir === "asc" ? c : -c;
   }
 
+  let expandSlot = null;
+  function pricePanel(sub) {
+    return '<div class="panel pad" data-px-panel><div class="rowhead wrap"><div><div class="ptitle">Price</div><div class="psub">' +
+      esc(sub || "Daily bars") + '</div></div><div class="pxtools" data-px-tools></div></div><div class="pxmas" data-px-mas></div><div class="chart-box pxchart"><div class="px-host" data-px-host><div class="px-legend" data-px-legend></div></div></div><p class="cap" data-px-cap></p></div>';
+  }
+  function expandKeyOf(row, opts) {
+    if (opts.expandKey) return String(opts.expandKey(row) || "");
+    return [row.ticker || "", row.kind || "", row.published || "", row.quarter || "", row.owner || "", row.earnings_date || "",
+      String(row.headline || "").slice(0, 80), String(row.text || "").slice(0, 80)].join("|");
+  }
+  function fitOpenDrop(host) {
+    const sc = host.querySelector(".buy-scroll");
+    const drop = host.querySelector(".buydrop");
+    if (sc && drop) drop.style.width = sc.clientWidth + "px";
+  }
+  function paintOpenChart(host, row, opts) {
+    const panel = host.querySelector("[data-px-panel]");
+    if (!panel || !row) return;
+    fitOpenDrop(host);
+    const lines = typeof opts.lines === "function" ? (opts.lines(row) || []) : (opts.lines || []);
+    const sub = typeof opts.priceSub === "function" ? opts.priceSub(row) : opts.priceSub;
+    requestAnimationFrame(() => {
+      if (!panel.isConnected) return;
+      fitOpenDrop(host);
+      drawPriceChart(panel, { ticker: row.ticker, lines: lines });
+    });
+  }
+  function expandNotes(row, parked) {
+    return parked.map((c) => {
+      const v = row[c.key];
+      if (isBlank(v)) return "";
+      return '<p class="whytext"><span class="droplab">' + esc(c.label) + "</span> " + esc(v) + "</p>";
+    }).join("");
+  }
+  function expandStory(row, opts, parked) {
+    if (typeof opts.detail === "function") return "";
+    const parkedKeys = {};
+    parked.forEach((c) => { parkedKeys[c.key] = true; });
+    return ["why", "reason"].map((key) => {
+      if (parkedKeys[key] || isBlank(row[key])) return "";
+      return '<p class="whytext">' + esc(row[key]) + "</p>";
+    }).join("");
+  }
+  function expandHtml(row, opts, parked) {
+    const custom = typeof opts.detail === "function" ? (opts.detail(row) || "") : "";
+    const sub = typeof opts.priceSub === "function" ? opts.priceSub(row) : (opts.priceSub || "Daily bars from the saved prices.");
+    const company = isBlank(row.company) ? "" : ' <span class="mut">' + esc(row.company) + "</span>";
+    return '<div class="buydrop"><div class="buyid">' + tickerHtml(row.ticker) + company + "</div>" +
+      expandNotes(row, parked) + expandStory(row, opts, parked) + custom + pricePanel(sub) + "</div>";
+  }
+  if (typeof window !== "undefined" && !window.__rowDropFit) {
+    window.__rowDropFit = true;
+    window.addEventListener("resize", () => {
+      document.querySelectorAll(".buydrop").forEach((drop) => {
+        const sc = drop.closest(".buy-scroll");
+        if (sc) drop.style.width = sc.clientWidth + "px";
+      });
+    });
+  }
+
   function drawTable(host, opts) {
     const rows = opts.rows || [];
     const columns = opts.columns;
     const state = opts.state;
     const pageSize = opts.pageSize || 25;
+    const expandable = !!opts.expandable;
+    const hasDetail = expandable || typeof opts.detail === "function";
+    host._tableOpts = opts;
+    if (expandSlot && !expandSlot.host.isConnected) expandSlot = null;
+    const openKey = expandable && expandSlot && expandSlot.host === host ? expandSlot.key : "";
+    if (typeof opts.beforeDraw === "function") opts.beforeDraw();
+    const oldPanel = host.querySelector("[data-px-panel]");
+    if (oldPanel) dropTv(oldPanel);
     const sorted = rows.slice().sort((a, b) => {
       const col = columns.find((c) => c.key === state.sort) || columns[0];
       let c = compare(a, b, col, state.dir);
@@ -619,20 +687,38 @@
     if (state.page < 0) state.page = 0;
     const start = state.page * pageSize;
     const view = sorted.slice(start, start + pageSize);
-    const shown = columns.filter((c) => !c.hidden);
-    const head = shown.map((c) => {
+    const parked = expandable ? columns.filter((c) => !c.hidden && (c.wrap || c.inDetail)) : [];
+    const shown = columns.filter((c) => !c.hidden && parked.indexOf(c) < 0);
+    if (expandable && openKey && !rows.some((r) => expandKeyOf(r, opts) === openKey)) expandSlot = null;
+    const liveKey = expandable && expandSlot && expandSlot.host === host ? expandSlot.key : "";
+    const head = (hasDetail ? '<th class="exp"></th>' : "") + shown.map((c) => {
       const mark = state.sort === c.key ? '<span class="sort">' + (state.dir === "asc" ? "▲" : "▼") + "</span>" : "";
-      const cls = [align(c), c.hide === "md" ? "hide-md" : ""].filter(Boolean).join(" ");
+      const cls = [align(c), c.hide === "md" ? "hide-md" : "", c.ellipsis ? "ellip" : ""].filter(Boolean).join(" ");
       return '<th class="' + cls + '" data-k="' + esc(c.key) + '">' + esc(c.label) + mark + "</th>";
     }).join("");
     const body = view.map((r, i) => {
       const tds = shown.map((c) => {
-        const cls = [align(c), c.wrap ? "wrap" : "", c.kind === "score" ? "score" : "", c.hide === "md" ? "hide-md" : ""].filter(Boolean).join(" ");
+        const cls = [align(c), c.wrap ? "wrap" : "", c.kind === "score" ? "score" : "", c.hide === "md" ? "hide-md" : "", c.ellipsis ? "ellip" : ""].filter(Boolean).join(" ");
         const width = c.width ? " style=\"width:" + c.width + "\"" : "";
-        return "<td class=\"" + cls + "\"" + width + ">" + cell(r, c) + "</td>";
+        const raw = r[c.key];
+        const tip = c.ellipsis && raw != null && String(raw).trim() !== "" ? ' title="' + esc(String(raw)) + '"' : "";
+        return "<td class=\"" + cls + "\"" + width + tip + ">" + cell(r, c) + "</td>";
       }).join("");
-      const on = opts.pick && opts.pick === (r.ticker || "") && opts.pick !== "" ? " selrow" : "";
-      return '<tr data-i="' + (start + i) + '" class="' + on + '">' + tds + "</tr>";
+      const picked = opts.pick && opts.pick === (r.ticker || "") && opts.pick !== "";
+      const mine = expandKeyOf(r, opts);
+      const opened = expandable ? (!!liveKey && mine === liveKey) : (hasDetail && opts.open && opts.open === (r.ticker || "") && opts.open !== "");
+      const on = (picked || opened) ? " selrow" : "";
+      if (!hasDetail) return '<tr data-i="' + (start + i) + '" class="' + on + '">' + tds + "</tr>";
+      const zebra = i % 2 === 0 ? "z0" : "z1";
+      const name = r.ticker || "details";
+      const exp = '<td class="exp"><button type="button" class="rowexp" aria-expanded="' + (opened ? "true" : "false") +
+        '" aria-label="' + esc((opened ? "Hide " : "Show ") + name) + '"><span class="rowchev' + (opened ? " open" : "") + '"></span></button></td>';
+      let html = '<tr data-i="' + (start + i) + '" class="datarow ' + zebra + on + '">' + exp + tds + "</tr>";
+      if (opened) {
+        const inner = expandable ? expandHtml(r, opts, parked) : opts.detail(r);
+        html += '<tr class="detailrow"><td colspan="' + (shown.length + 1) + '">' + inner + "</td></tr>";
+      }
+      return html;
     }).join("");
     const empty = rows.length ? "" : '<div class="empty">' + esc(opts.empty || "No rows match these filters.") + "</div>";
     const from = rows.length ? start + 1 : 0;
@@ -641,14 +727,15 @@
     host.innerHTML =
       (opts.title ? '<div class="pad headrow" style="padding-bottom:0"><div class="ptitle">' + esc(opts.title) + "</div>" +
         (opts.sub ? '<div class="psub">' + esc(opts.sub) + "</div>" : "") + "</div>" : "") +
-      '<div class="scroll"><table><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+      '<div class="scroll' + (hasDetail ? " buy-scroll" : "") + '"><table' + (hasDetail ? (' class="buys' + (opts.fit ? " buyfit" : "") + '"') : "") + '><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       empty +
       (showFoot ? '<div class="foot"><span>' + from + "–" + to + " of " + rows.length + '</span><div class="pg">' +
       '<button type="button" data-pg="prev"' + (state.page <= 0 ? " disabled" : "") + ">‹</button>" +
       '<button type="button" data-pg="next"' + (state.page >= pages - 1 ? " disabled" : "") + ">›</button></div></div>" : "");
-    host.querySelectorAll("th").forEach((th) => {
+    host.querySelectorAll("th[data-k]").forEach((th) => {
       th.addEventListener("click", () => {
         const k = th.getAttribute("data-k");
+        if (!k) return;
         if (state.sort === k) state.dir = state.dir === "asc" ? "desc" : "asc";
         else { state.sort = k; state.dir = "desc"; }
         drawTable(host, opts);
@@ -660,16 +747,38 @@
         drawTable(host, opts);
       });
     });
-    if (opts.onPick) {
-      host.querySelectorAll("tbody tr").forEach((tr) => {
+    if (expandable) {
+      host.querySelectorAll("tbody tr.datarow").forEach((tr) => {
         tr.addEventListener("click", (ev) => {
-          if (ev.target.closest("a")) return;
+          const link = ev.target.closest("a");
+          if (link) ev.preventDefault();
+          const row = sorted[Number(tr.getAttribute("data-i"))];
+          if (!row) return;
+          const key = expandKeyOf(row, opts);
+          const next = liveKey === key ? "" : key;
+          const prev = expandSlot && expandSlot.host;
+          expandSlot = next ? { host: host, key: next } : null;
+          if (prev && prev !== host && prev.isConnected && prev._tableOpts) drawTable(prev, prev._tableOpts);
+          drawTable(host, opts);
+        });
+      });
+    } else if (opts.onPick) {
+      host.querySelectorAll(hasDetail ? "tbody tr.datarow" : "tbody tr").forEach((tr) => {
+        tr.addEventListener("click", (ev) => {
+          const link = ev.target.closest("a");
+          if (link && !opts.activateRow) return;
+          if (link && opts.activateRow) ev.preventDefault();
           const i = Number(tr.getAttribute("data-i"));
           opts.onPick(sorted[i]);
         });
       });
     }
     host._sorted = sorted;
+    if (typeof opts.afterDraw === "function") opts.afterDraw(host);
+    if (expandable && liveKey) {
+      const row = view.find((r) => expandKeyOf(r, opts) === liveKey);
+      if (row) paintOpenChart(host, row, opts);
+    }
   }
 
   function uniq(rows, key) {
@@ -806,13 +915,24 @@
   }
 
   const tvCharts = [];
+  function tvStillOnScreen(chart) {
+    try {
+      if (typeof chart.chartElement !== "function") return false;
+      const el = chart.chartElement();
+      return !!(el && el.isConnected);
+    } catch (e) {
+      return false;
+    }
+  }
   function destroyCharts() {
     while (charts.length) {
       const c = charts.pop();
       try { c.destroy(); } catch (e) { /* already gone */ }
     }
-    while (tvCharts.length) {
-      const c = tvCharts.pop();
+    for (let i = tvCharts.length - 1; i >= 0; i--) {
+      const c = tvCharts[i];
+      if (tvStillOnScreen(c)) continue;
+      tvCharts.splice(i, 1);
       try { c.remove(); } catch (e) { /* already gone */ }
     }
   }
