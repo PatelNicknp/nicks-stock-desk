@@ -158,6 +158,10 @@ RS is the ETF close divided by SPY on daily, weekly, or monthly bars. RS-Ratio i
 
 The 0–100 score blends relative strength versus SPY over 21, 63, and 126 sessions, breadth above the 50-day and 200-day averages, names within 5% of a 252-session high, buy setups, the average desk score, the share of BUY verdicts, and a weekly quadrant bonus. Weights are `sector_rotation.weight.*`. A missing factor is dropped and the rest are renormalized. It is not treated as zero. The rate notes are general tendencies, not a forecast. The page does not send a notification.
 
+## Missed updates (self-heal)
+
+Switch: `self_heal_schedule`, on by default. GitHub sometimes skips or delays scheduled runs. `.github/workflows/watchdog.yml` runs at 7, 22, 37, and 52 minutes past the hour, Monday to Friday, 14:00 to 23:59 UTC (the update hours). It runs `watchdog.py check`, which reads the update workflow's recent runs with the built-in GITHUB_TOKEN and reads this switch from `config.json`. It does nothing when the switch is off, when an update is queued or running, or when the latest expected slot (the same times as the update crons) already has a run. It starts one update only when that slot is at least 20 minutes past, at most 3 hours old, and the last update started more than 75 minutes ago. The make-up uses the slot's own mode: `hourly`, or `full` for the 22:30 UTC slot. A failed run counts as having run, so it is not retried. The update's crons stay as they were. Both workflows have a concurrency group, so runs never overlap. The first step of the update, `watchdog.py guard`, makes a late cron and a make-up for the same slot collapse into one run. Manual runs are never skipped. If the guard cannot read the run list, the update runs as it always did. The total number of runs, and the Yahoo traffic, stays the same as the schedule. Run the watchdog by hand from the Actions tab. `dry_run` is on by default and only prints the decision. The update does not chain into another run when it finishes, because that could loop and add Yahoo traffic.
+
 ## Rate limits
 
 Slow sources are fetched at most once per US session and reused on the hourly runs.
