@@ -6,10 +6,23 @@ on:
     - cron: "15 14-21 * * 1-5"
     # Once after the cash close. This is the run that refreshes fundamentals, 13F, insiders, and option chains.
     - cron: "30 22 * * 1-5"
-  workflow_dispatch: {}
+  # The crons above stay as the main schedule. The watchdog workflow only fills in a slot GitHub skipped.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "full (default, same as before) or hourly"
+        required: false
+        default: "full"
+        type: choice
+        options: ["full", "hourly"]
+      reason:
+        description: "Set to watchdog by the watchdog workflow. Leave blank for a manual run."
+        required: false
+        default: ""
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: nick-stock-desk
@@ -21,13 +34,24 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      # A cron that GitHub delivers late and a watchdog make-up run for the same slot collapse into one.
+      # Manual runs are never skipped. If the check cannot read the run list, the update runs as before.
+      - name: Skip a duplicate run for the same slot
+        id: guard
+        if: github.event_name == 'schedule' || inputs.reason == 'watchdog'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 watchdog.py guard
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != 'true'
         with:
           python-version: "3.12"
           cache: pip
       - name: Install pinned dependencies
+        if: steps.guard.outputs.skip != 'true'
         run: pip install -r requirements.txt
       - name: Run the tests
+        if: steps.guard.outputs.skip != 'true'
         run: |
           python tests/test_net.py
           python tests/test_scoring.py
@@ -36,15 +60,21 @@ jobs:
           python tests/test_job.py
           python tests/test_setups.py
           python tests/test_sector_rotation.py
+          python tests/test_watchdog.py
       - name: Update the desk
+        if: steps.guard.outputs.skip != 'true'
         run: |
           set -e
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then
+          # A manual run is full, as before. A watchdog make-up uses the mode of the slot it replaces.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" = "hourly" ]; then
+            python stock_desk.py --hourly
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then
             python stock_desk.py --full
           else
             python stock_desk.py --hourly
           fi
       - name: Save the new numbers
+        if: steps.guard.outputs.skip != 'true'
         run: |
           git config user.name "stock-desk-bot"
           git config user.email "stock-desk-bot@users.noreply.github.com"

@@ -54,7 +54,8 @@
     "heatmaps": true,
     "updates_log": true,
     "help": true,
-    "company_blurbs": true
+    "company_blurbs": true,
+    "self_heal_schedule": true
   },
   "buy_setups": {
     "market_filter": true

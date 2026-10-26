@@ -1,0 +1,42 @@
+name: Update watchdog
+
+# Fills in an update run only when GitHub skipped or badly delayed a scheduled one.
+# It never adds extra runs: it does nothing while an update is queued or running,
+# or when the latest expected slot already ran. It reads no market data.
+# Switch: features.self_heal_schedule in config.json.
+on:
+  schedule:
+    # Odd minutes, same weekdays as the update, from its first slot (14:15 UTC) to after its last (22:30 UTC).
+    - cron: "7,22,37,52 14-23 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only print the decision. Do not start an update."
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: update-watchdog
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            config.json
+            watchdog.py
+          sparse-checkout-cone-mode: false
+      - name: Decide and, if a slot was missed, start one update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: python3 watchdog.py check
