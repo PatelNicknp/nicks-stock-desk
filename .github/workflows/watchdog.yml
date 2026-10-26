@@ -6,8 +6,11 @@ name: Update watchdog
 # Switch: features.self_heal_schedule in config.json.
 on:
   schedule:
-    # Odd minutes, same weekdays as the update, from its first slot (14:15 UTC) to after its last (22:30 UTC).
+    # Odd minutes over the update hours in UTC for both EDT and EST: the first slot is 14:15 UTC (EDT)
+    # and the last is 23:30 UTC (EST), so the window runs into 00:xx UTC of the next day.
+    # The script works out the real slots in New York time.
     - cron: "7,22,37,52 14-23 * * 1-5"
+    - cron: "7,22,37,52 0 * * 2-6"
   workflow_dispatch:
     inputs:
       dry_run:

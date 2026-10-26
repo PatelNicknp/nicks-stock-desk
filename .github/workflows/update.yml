@@ -1,11 +1,16 @@
 name: Update Nick's Stock Desk
 
 on:
+  # The schedule is New York market time, Monday to Friday: hourly at 10:15 .. 17:15 ET
+  # (prices refresh, slow sources stay on today's cache) and the full run at 18:30 ET
+  # (fundamentals, 13F, insiders, option chains). Cron is UTC only, so these list the UTC
+  # times for both EDT (UTC-4) and EST (UTC-5). The first step (watchdog.py guard) lets
+  # through only the cron that lands on a New York slot, so there is still one run per slot.
   schedule:
-    # Hourly while the US market is open. Prices refresh. Slow sources stay on today's cache.
-    - cron: "15 14-21 * * 1-5"
-    # Once after the cash close. This is the run that refreshes fundamentals, 13F, insiders, and option chains.
-    - cron: "30 22 * * 1-5"
+    # Hourly: 14-21 UTC in EDT, 15-22 UTC in EST.
+    - cron: "15 14-22 * * 1-5"
+    # Full run: 22:30 UTC in EDT, 23:30 UTC in EST.
+    - cron: "30 22,23 * * 1-5"
   # The crons above stay as the main schedule. The watchdog workflow only fills in a slot GitHub skipped.
   workflow_dispatch:
     inputs:
@@ -34,13 +39,16 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      # A cron that GitHub delivers late and a watchdog make-up run for the same slot collapse into one.
-      # Manual runs are never skipped. If the check cannot read the run list, the update runs as before.
-      - name: Skip a duplicate run for the same slot
+      # Scheduled runs: skip unless this cron is a New York-time slot (the other DST twin stops here).
+      # Scheduled and watchdog runs: a late cron and a make-up for the same slot collapse into one.
+      # Manual runs are never skipped. If the run list cannot be read, the duplicate check lets it run.
+      - name: Keep to New York slots and skip duplicates
         id: guard
         if: github.event_name == 'schedule' || inputs.reason == 'watchdog'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
         run: python3 watchdog.py guard
       - uses: actions/setup-python@v5
         if: steps.guard.outputs.skip != 'true'
@@ -66,9 +74,10 @@ jobs:
         run: |
           set -e
           # A manual run is full, as before. A watchdog make-up uses the mode of the slot it replaces.
+          # A scheduled run uses the mode of its New York slot (the 18:30 ET slot is the full run).
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" = "hourly" ]; then
             python stock_desk.py --hourly
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ steps.guard.outputs.mode }}" = "full" ]; then
             python stock_desk.py --full
           else
             python stock_desk.py --hourly
