@@ -51,6 +51,7 @@ feature.sector_performance,True
 feature.heatmaps,True
 feature.updates_log,True
 feature.help,True
+feature.company_blurbs,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
