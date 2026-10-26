@@ -755,6 +755,41 @@ def test_breakdown_break_watch_and_trend():
     assert len(setups.scan_breakdown(c, h, l, v, _uni(["UP"]))) == 0
 
 
+def test_high_volume_spike_streak_and_quiet():
+    n = 260
+    idx = _dates(n)
+    base = np.full(n, 1_000_000.0)
+    # SPK: 3x spike today on a down close.
+    spk_close = np.linspace(50, 60, n)
+    spk_close[-1] = spk_close[-2] * 0.95
+    spk_vol = base.copy()
+    spk_vol[-1] = 3_000_000.0
+    # STR: four busy days in a row, mild.
+    str_close = np.linspace(40, 44, n)
+    str_vol = base.copy()
+    str_vol[-4:] = 1_300_000.0
+    # QUI: volume dries up near a 3-month high, above the 50-day.
+    qui_close = np.linspace(30, 60, n)
+    qui_vol = base.copy()
+    qui_vol[-10:] = 400_000.0
+    # NON: nothing unusual.
+    non_close = np.linspace(20, 18, n)
+    frames = {}
+    for t, cl, vo in (("SPK", spk_close, spk_vol), ("STR", str_close, str_vol), ("QUI", qui_close, qui_vol), ("NON", non_close, base)):
+        frames[t] = pd.DataFrame({"close": cl, "high": cl * 1.005, "low": cl * 0.995, "volume": vo}, index=idx)
+    c, h, l, v = _panel(list(frames), frames)
+    out = setups.scan_volume(c, h, l, v, _uni(list(frames))).set_index("ticker")
+    assert "NON" not in out.index
+    assert abs(float(out.loc["SPK", "volume_ratio"]) - 3.0) < 1e-6
+    assert out.loc["SPK", "direction"] == "SELLING" and out.loc["SPK", "spike"] == "yes"
+    assert int(out.loc["STR", "streak_days"]) == 4 and out.loc["STR", "streak"] == "yes"
+    assert out.loc["STR", "spike"] == "no"
+    assert out.loc["QUI", "quiet"] == "yes" and out.loc["QUI", "spike"] == "no"
+    off = setups.build_setups(c, h, l, v, _uni(list(frames)), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(),
+                              {"scanner_volume": False})
+    assert len(off["scanner_volume"]) == 0
+
+
 if __name__ == "__main__":
     test_pivot_is_strict_and_delayed()
     test_vcp_ready_matches_pine_levels()
@@ -776,4 +811,5 @@ if __name__ == "__main__":
     test_buy_stock_uses_close_above_both_averages()
     test_buy_setups_settings_default_on()
     test_breakdown_break_watch_and_trend()
+    test_high_volume_spike_streak_and_quiet()
     print("setups ok")
