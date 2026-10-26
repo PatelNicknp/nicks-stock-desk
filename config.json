@@ -21,6 +21,7 @@
     "scanner_canslim": true,
     "scanner_box": true,
     "scanner_breakdown": true,
+    "scanner_volume": true,
     "scanner_flag": true,
     "scanner_leaders": true,
     "scanner_52w": true,

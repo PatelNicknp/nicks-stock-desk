@@ -105,6 +105,20 @@ FLAG_NOTE = (
 )
 
 NOT_VERIFIED = "not verified"
+# High volume scanner. Cached daily bars only. No new downloads.
+HV_AVG_LEN = 50          # average volume over the 50 sessions before the day being checked
+HV_LIST_MIN = 1.5        # rows are written from 1.5x so the page can filter 1.5x / 2x / 3x / 5x
+HV_SPIKE = 2.0           # default spike line
+HV_STREAK_MIN = 3        # days in a row above the 50-day average
+HV_QUIET_LEN = 10        # recent window for the dry-up check
+HV_QUIET_MAX = 0.6       # 10-day average under 0.6x the 50-day average
+HV_HIGH_LEN = 63         # "recent high" = highest high of the last 63 sessions (about 3 months)
+HV_NEAR_HIGH = 0.05      # within 5% of that high
+HIGH_VOLUME_NOTE = (
+    "Built from the saved daily prices and volume. No extra download. "
+    "Volume ratio is today's volume divided by the average of the 50 sessions before today. "
+    "During market hours today's volume is still adding up."
+)
 
 
 def _num(v):
@@ -1173,6 +1187,127 @@ def scan_breakdown(close, high, low, vol, universe):
     return out.sort_values(["_k", "strength"], ascending=[True, False]).drop(columns="_k")
 
 
+def _prior_avg(v, i, n=HV_AVG_LEN):
+    """Average volume of the n sessions before bar i. None when there is not enough history."""
+    if i < n:
+        return None
+    seg = v[i - n:i]
+    if not np.isfinite(seg).all():
+        return None
+    a = float(seg.mean())
+    return a if a > 0 else None
+
+
+def scan_volume(close, high, low, vol, universe):
+    """High volume scanner from cached daily bars. No network.
+
+    One row per name that is in at least one group:
+    spike (volume >= 1.5x the prior 50-day average today), streak (3+ days in a row
+    above that average), or quiet (10-day average volume under 0.6x the 50-day average
+    while the close is within 5% of the 63-session high and above the 50-day average).
+    """
+    rows = []
+    if close is None or len(close) == 0 or vol is None or len(vol) == 0 or universe is None or len(universe) == 0:
+        return pd.DataFrame(rows)
+    panel = _panel_date(close)
+    names = list(universe["ticker"]) if "ticker" in universe.columns else []
+    for ticker in names:
+        got = _bars(close, high, low, vol, ticker, None)
+        if got is None:
+            continue
+        frame, _ = got
+        frame = frame.dropna(subset=["volume"])
+        n = len(frame)
+        if n < HV_AVG_LEN + 2:
+            continue
+        if panel is not None and pd.Timestamp(frame.index[-1]).normalize() < pd.Timestamp(panel).normalize():
+            continue  # stale bar: today's volume is not on file
+        c = frame["close"].to_numpy(dtype=float)
+        h = frame["high"].to_numpy(dtype=float)
+        v = frame["volume"].to_numpy(dtype=float)
+        last = float(c[-1])
+        prev = float(c[-2])
+        today = float(v[-1])
+        avg50 = _prior_avg(v, n - 1)
+        if avg50 is None or not np.isfinite(today) or not np.isfinite(last) or not np.isfinite(prev) or prev <= 0:
+            continue
+        ratio = today / avg50
+        change = (last / prev - 1.0) * 100.0
+        streak = 0
+        i = n - 1
+        while i >= HV_AVG_LEN:
+            a = _prior_avg(v, i)
+            if a is None or not np.isfinite(v[i]) or v[i] <= a:
+                break
+            streak += 1
+            i -= 1
+        sma50 = float(np.mean(c[-50:])) if n >= 50 else float("nan")
+        sma200 = float(np.mean(c[-200:])) if n >= 200 else float("nan")
+        avg10 = float(np.mean(v[-HV_QUIET_LEN:]))
+        avg50_now = float(np.mean(v[-HV_AVG_LEN:]))
+        dry = avg10 / avg50_now if avg50_now > 0 else float("nan")
+        hi = float(np.nanmax(h[-HV_HIGH_LEN:]))
+        from_high = (last / hi - 1.0) * 100.0 if hi > 0 else float("nan")
+        spike = ratio >= HV_LIST_MIN
+        streaky = streak >= HV_STREAK_MIN
+        quiet = (np.isfinite(dry) and dry < HV_QUIET_MAX and np.isfinite(sma50) and last > sma50
+                 and np.isfinite(from_high) and from_high >= -HV_NEAR_HIGH * 100.0)
+        if not (spike or streaky or quiet):
+            continue
+        if change > 0:
+            direction = "BUYING"
+        elif change < 0:
+            direction = "SELLING"
+        else:
+            direction = "FLAT"
+        above50 = "" if not np.isfinite(sma50) else ("above" if last > sma50 else "below")
+        above200 = "" if not np.isfinite(sma200) else ("above" if last > sma200 else "below")
+        bits = []
+        if spike:
+            word = {"BUYING": "closed up", "SELLING": "closed down", "FLAT": "closed flat"}[direction]
+            bits.append("Traded %.1f times its usual volume today and %s %.1f%%." % (ratio, word, abs(change)))
+        if streaky:
+            bits.append("Volume has been above its 50-day average %d days in a row." % streak)
+        if quiet:
+            bits.append(
+                "Volume has dried up to %.0f%% of normal over 10 days while the price sits %.1f%% from its 3-month high "
+                "and above its 50-day average." % (dry * 100.0, abs(from_high)))
+        meta = _meta_row(universe, ticker)
+        rows.append({
+            "ticker": ticker,
+            "company": meta["company"],
+            "sector": meta["sector"],
+            "index_membership": meta["index_membership"],
+            "price": _round(last),
+            "change_pct": round(change, 2),
+            "direction": direction,
+            "volume": int(round(today)),
+            "avg_volume_50": int(round(avg50)),
+            "volume_ratio": round(ratio, 2),
+            "spike": "yes" if spike else "no",
+            "streak_days": streak,
+            "streak": "yes" if streaky else "no",
+            "avg_volume_10": int(round(avg10)),
+            "dryup_ratio": round(dry, 2) if np.isfinite(dry) else "",
+            "high_3m": _round(hi),
+            "pct_from_high": round(from_high, 1) if np.isfinite(from_high) else "",
+            "quiet": "yes" if quiet else "no",
+            "sma50": _round(sma50) if np.isfinite(sma50) else "",
+            "sma200": _round(sma200) if np.isfinite(sma200) else "",
+            "vs_sma50": above50,
+            "vs_sma200": above200,
+            "reason": " ".join(bits),
+            "freshness": _freshness(frame.index[-1], panel, n, 200),
+            "price_as_of": str(pd.Timestamp(frame.index[-1]).date()),
+            "data_status": "OK",
+            "note": HIGH_VOLUME_NOTE,
+        })
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return out
+    return out.sort_values(["volume_ratio"], ascending=False).reset_index(drop=True)
+
+
 def _flag_candidate(h, l, c, flag_len):
     n = len(c)
     # Flag occupies the bars after the pole and before today.
@@ -1900,11 +2035,13 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_l = features.get("scanner_leaders", True)
     want_w = features.get("scanner_52w", True)
     want_bd = features.get("scanner_breakdown", True)
+    want_hv = features.get("scanner_volume", True)
     vcp = scan_vcp(close, high, low, vol, universe) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()
+    volume = scan_volume(close, high, low, vol, universe) if want_hv else pd.DataFrame()
     leaders = combine_leaders(vcp, canslim) if want_l else pd.DataFrame()
     if want_w:
         week, week_hist = scan_52w(close, high, low, vol, universe, scores)
@@ -1920,6 +2057,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
         "scanner_box": box,
         "scanner_breakdown": breakdown,
         "scanner_flag": flag,
+        "scanner_volume": volume,
         "scanner_leaders": leaders,
         "scanner_52w": week,
         "highs_lows_history": week_hist,

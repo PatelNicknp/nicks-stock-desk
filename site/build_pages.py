@@ -18,6 +18,7 @@ PAGES = [
     ("box.html", "box", "Box breakout"),
     ("flag.html", "flag", "Flag breakout"),
     ("breakdowns.html", "breakdowns", "Breakdowns"),
+    ("volume.html", "volume", "High volume"),
     ("leaders.html", "leaders", "Leaders"),
     ("52-week.html", "week52", "52-week"),
     ("options.html", "options", "Debit spreads"),

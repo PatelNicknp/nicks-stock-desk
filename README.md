@@ -134,6 +134,10 @@ The trend is the close under the 50-day average, the 50-day under the 200-day, a
 
 Switch: `company_blurbs`, on by default. Every drop-down row chart, the scorecard, the earnings tracker, and company financials show one plain-English line under the stock's name, such as "Makes iPhones and Macs and runs the App Store." The lines live in `data/company_blurbs.csv` (ticker, blurb). It is a static file written by hand. The hourly job does not fetch, rewrite, or delete it, and the site loads it once per visit. A ticker with no line shows nothing. Add a row there when a new name joins the universe.
 
+### High volume
+
+Switch: `scanner_volume`, on by default. The page is `volume.html`, under Scanners. The file is `data/scanner_volume.csv`, built in `setups.scan_volume` from the cached daily close, high, low, and volume. It does not call Yahoo and adds no request. Volume ratio is today's volume divided by the average of the 50 sessions before today. Rows are written from 1.5 times so the page can filter 1.5x, 2x (default), 3x, and 5x, with an Up / Down / All direction filter. Tabs: Volume spike today; Up or down on volume (BUYING when the close is up on the spike, SELLING when down); Unusual volume streak (3 or more sessions in a row above the prior 50-day average, with the streak length); Quiet before a move (10-day average volume under 0.6 times the 50-day average while the close is within 5% of the 63-session high and above the 50-day average). A name whose last bar is older than SPY's is skipped. The row chart adds an amber 50-day average volume line on the volume bars.
+
 ### Options
 
 Switch: `options`, on by default. The page is `options.html`, under its own Options menu group, with Calls and Puts tabs. Education, not financial advice. The desk does not place a trade and it does not call a broker.

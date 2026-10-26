@@ -1780,6 +1780,125 @@
     draw();
   }
 
+  function renderVolume(ctx) {
+    const raw = ctx.files["scanner_volume.csv"];
+    const all = D.realRows(raw);
+    ctx.page.innerHTML =
+      '<p class="cap">Research only. Built from the saved daily prices and volume. No extra download. During market hours, today\'s volume is still adding up.</p>' +
+      '<div class="cards" id="cards"></div><div class="ctrls" id="ctrls"></div><div class="panel" id="tbl"></div><p class="cap" id="vcap"></p>';
+    const tabs = [
+      ["spike", "Volume spike today"],
+      ["updown", "Up or down on volume"],
+      ["streak", "Unusual volume streak"],
+      ["quiet", "Quiet before a move"],
+    ];
+    const titles = {
+      spike: "Volume spike today",
+      updown: "Up or down on that volume",
+      streak: "Busy several days in a row",
+      quiet: "Quiet before a move",
+    };
+    const subs = {
+      spike: "Today's volume compared with the average of the 50 days before.",
+      updown: "BUYING means the price closed up on the big volume. SELLING means it closed down.",
+      streak: "Volume above its 50-day average 3 or more trading days in a row.",
+      quiet: "10-day volume under 0.6 times normal while the price is within 5% of its 3-month high and above its 50-day average.",
+    };
+    const caps = {
+      spike: "A volume spike means many more shares changed hands than usual. Big news, earnings, or big funds buying or selling often cause it. Pick 1.5×, 2×, 3×, or 5× to set how big the spike must be.",
+      updown: "Heavy volume on an up day can mean big buyers stepping in. Heavy volume on a down day can mean big sellers getting out. It is a clue, not a promise.",
+      streak: "Several busy days in a row can mean big investors are slowly building or selling a position.",
+      quiet: "When trading gets very quiet near a high, it sometimes comes before a bigger move. The move can go either way.",
+    };
+    const box = document.getElementById("ctrls");
+    standardFilters(box, all, { index: true, sector: true, ticker: true, order: ["index", "sector", "ticker"], list: "hv" });
+    const seg = (id, items, on) => '<div class="w52tabs hvseg" id="' + id + '">' + items.map((t) =>
+      '<button type="button" data-v="' + t[0] + '"' + (t[0] === on ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") + "</div>";
+    box.insertAdjacentHTML("afterbegin",
+      seg("hvtabs", tabs, "spike") +
+      '<div class="hvrow" id="hvopts"><span class="hvlab">Spike size</span>' +
+      seg("hvmult", [["1.5", "1.5×"], ["2", "2×"], ["3", "3×"], ["5", "5×"]], "2") +
+      '<span class="hvlab">Direction</span>' +
+      seg("hvdir", [["up", "Up"], ["down", "Down"], ["all", "All"]], "all") + "</div>");
+    D.placeFeed(box, raw);
+    let tab = "spike";
+    let mult = 2;
+    let dir = "all";
+    const state = { sort: "volume_ratio", dir: "desc", page: 0 };
+    const WHY = T("reason", "Why", "text", { inDetail: true });
+    const RATIO = T("volume_ratio", "Volume ×", "volx", { dec: 2 });
+    const CHG = T("change_pct", "% change", "pct", { dec: 2, color: true });
+    const CLOSE = T("price", "Close", "num", { dec: 2 });
+    const S50 = T("vs_sma50", "vs SMA50", "abovebelow");
+    const S200 = T("vs_sma200", "vs SMA200", "abovebelow");
+    const VOL = T("volume", "Volume", "compact");
+    const AVG = T("avg_volume_50", "50-day avg vol", "compact");
+    const columns = {
+      spike: [TK, CO, SE, RATIO, CHG, CLOSE, S50, S200, T("direction", "Day", "updown"), VOL, AVG, WHY],
+      updown: [TK, CO, T("direction", "Label", "buysell"), CHG, RATIO, CLOSE, S50, VOL, AVG, WHY],
+      streak: [TK, CO, SE, T("streak_days", "Days in a row", "num", { dec: 0 }), RATIO, CHG, CLOSE, S50, S200, WHY],
+      quiet: [TK, CO, SE, T("dryup_ratio", "10d vs 50d vol", "num", { dec: 2 }), T("pct_from_high", "% from 3m high", "pct", { dec: 1, color: true }),
+        CLOSE, T("sma50", "SMA50", "num", { dec: 2 }), S50, T("avg_volume_10", "10-day avg vol", "compact"), AVG, WHY],
+    };
+    const sorts = {
+      spike: ["volume_ratio", "desc"],
+      updown: ["change_pct", "desc"],
+      streak: ["streak_days", "desc"],
+      quiet: ["dryup_ratio", "asc"],
+    };
+    const isSpike = (r) => (D.num(r.volume_ratio) || 0) >= mult;
+    const dirOk = (r) => dir === "all" || (dir === "up" && r.direction === "BUYING") || (dir === "down" && r.direction === "SELLING");
+    const inTab = (r) => {
+      if (tab === "spike") return isSpike(r) && dirOk(r);
+      if (tab === "updown") return isSpike(r) && (r.direction === "BUYING" || r.direction === "SELLING") && dirOk(r);
+      if (tab === "streak") return r.streak === "yes";
+      if (tab === "quiet") return r.quiet === "yes";
+      return true;
+    };
+    const paintCards = () => {
+      const spikes = all.filter(isSpike);
+      document.getElementById("cards").innerHTML =
+        card("Volume spikes (" + D.fmt(mult, mult % 1 ? 1 : 0) + "× or more)", String(spikes.length)) +
+        card("Closed up on the spike", '<span style="color:#22C55E">' + countWhere(spikes, (r) => r.direction === "BUYING") + "</span>", "BUYING") +
+        card("Closed down on the spike", '<span style="color:#EF4444">' + countWhere(spikes, (r) => r.direction === "SELLING") + "</span>", "SELLING") +
+        card("Busy 3+ days in a row", String(countWhere(all, (r) => r.streak === "yes"))) +
+        card("Quiet near a high", String(countWhere(all, (r) => r.quiet === "yes")));
+    };
+    const draw = () => {
+      document.getElementById("hvopts").style.display = (tab === "spike" || tab === "updown") ? "" : "none";
+      document.getElementById("vcap").textContent = caps[tab];
+      D.drawTable(document.getElementById("tbl"), {
+        title: titles[tab],
+        sub: subs[tab],
+        rows: all.filter((r) => inTab(r) && readCommon(box, r)),
+        columns: columns[tab],
+        state: state,
+        pageSize: 25,
+        expandable: true,
+        volAvg: 50,
+        priceSub: "Price with volume bars. The amber line is the 50-day average volume.",
+        empty: "No names in this group today.",
+      });
+    };
+    const wireSeg = (id, fn) => {
+      box.querySelectorAll("#" + id + " button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          box.querySelectorAll("#" + id + " button").forEach((b) => b.classList.toggle("on", b === btn));
+          fn(btn.getAttribute("data-v"));
+          state.page = 0;
+          paintCards();
+          draw();
+        });
+      });
+    };
+    wireSeg("hvtabs", (v) => { tab = v; state.sort = sorts[v][0]; state.dir = sorts[v][1]; });
+    wireSeg("hvmult", (v) => { mult = Number(v); });
+    wireSeg("hvdir", (v) => { dir = v; });
+    hook(box, state, draw);
+    paintCards();
+    draw();
+  }
+
   function buyDetailHtml(row) {
     const px = (key) => {
       const n = D.num(row[key]);
@@ -2668,6 +2787,7 @@
     box: box,
     flag: flag,
     breakdowns: breakdowns,
+    volume: { files: ["scanner_volume.csv"], render: renderVolume },
     leaders: leaders,
     week52: { files: ["scanner_52w.csv", "highs_lows_history.csv"], render: renderWeek52 },
     calendar: { files: ["earnings_calendar.csv"], render: renderCalendar },

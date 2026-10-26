@@ -27,6 +27,7 @@
       ["Box breakout", "box.html", "box"],
       ["Flag breakout", "flag.html", "flag"],
       ["Breakdowns", "breakdowns.html", "breakdowns"],
+      ["High volume", "volume.html", "volume"],
       ["Leaders", "leaders.html", "leaders"],
       ["52-week", "52-week.html", "week52"],
     ]],
@@ -519,6 +520,24 @@
         if (cn > 0 && col.up) return '<span style="color:' + col.up + ';font-weight:700">' + esc(text) + "</span>";
         return esc(text);
       }
+      case "buysell": {
+        const s = String(v || "").toUpperCase();
+        if (s === "BUYING") return '<span style="color:' + UP + ';font-weight:700">BUYING</span>';
+        if (s === "SELLING") return '<span style="color:' + DN + ';font-weight:700">SELLING</span>';
+        return isBlank(v) ? na() : '<span style="color:' + MU + '">' + esc(v) + "</span>";
+      }
+      case "updown": {
+        const s = String(v || "").toUpperCase();
+        if (s === "BUYING") return '<span style="color:' + UP + '">▲ Up</span>';
+        if (s === "SELLING") return '<span style="color:' + DN + '">▼ Down</span>';
+        return isBlank(v) ? na() : '<span style="color:' + MU + '">Flat</span>';
+      }
+      case "abovebelow": {
+        const s = String(v || "").toLowerCase();
+        if (s === "above") return '<span style="color:' + UP + '">Above</span>';
+        if (s === "below") return '<span style="color:' + DN + '">Below</span>';
+        return na();
+      }
       case "side": {
         const s = String(v || "").toLowerCase();
         if (s === "call") return '<span style="color:#22C55E;font-weight:700">Call</span>';
@@ -658,7 +677,7 @@
     requestAnimationFrame(() => {
       if (!panel.isConnected) return;
       fitOpenDrop(host);
-      drawPriceChart(panel, { ticker: row.ticker, lines: lines });
+      drawPriceChart(panel, { ticker: row.ticker, lines: lines, volAvg: opts.volAvg || 0 });
     });
   }
   function expandNotes(row, parked) {
@@ -1476,7 +1495,27 @@
     }
     return html;
   }
-  function paintPrice(panel, bars, lines, token) {
+  function priorAvgVolume(bars, n) {
+    const out = new Array(bars.length).fill(null);
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < bars.length; i++) {
+      if (i >= n) {
+        let ok = true;
+        sum = 0;
+        count = 0;
+        for (let j = i - n; j < i; j++) {
+          const v = bars[j].v;
+          if (v == null) { ok = false; break; }
+          sum += v;
+          count++;
+        }
+        if (ok && count === n) out[i] = sum / n;
+      }
+    }
+    return out;
+  }
+  function paintPrice(panel, bars, lines, token, volAvg) {
     if (panel._token !== token || !panel.isConnected) return;
     const cap = panel.querySelector("[data-px-cap]");
     const host = panel.querySelector("[data-px-host]");
@@ -1534,6 +1573,17 @@
       vol.setData(bars.filter((b) => b.v != null).map((b) => ({
         time: b.date, value: b.v, color: b.c >= b.o ? "rgba(34,197,94,.65)" : "rgba(239,68,68,.65)",
       })));
+      if (volAvg) {
+        const avgLine = chart.addSeries(LC.LineSeries, {
+          color: AM, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          priceFormat: { type: "volume" },
+        }, 1);
+        const avgData = [];
+        priorAvgVolume(bars, volAvg).forEach((value, i) => {
+          if (value != null) avgData.push({ time: bars[i].date, value: value });
+        });
+        avgLine.setData(avgData);
+      }
       const panes = chart.panes();
       if (panes[0]) panes[0].setStretchFactor(3);
       if (panes[1]) panes[1].setStretchFactor(1);
@@ -1587,6 +1637,7 @@
       if (bars.some((b) => b.prior)) {
         text += " Opens are not in the saved prices yet, so each candle starts at the prior close.";
       }
+      if (volAvg) text += " The amber line on the volume bars is the " + volAvg + "-day average volume.";
       text += " Averages are calculated in the browser from the saved daily bars.";
       cap.innerHTML = esc(text) + ' Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.';
     };
@@ -1649,7 +1700,7 @@
       if (panel._token !== token || !panel.isConnected) return;
       const bars = barsFromRows(rows);
       panel._bars = bars;
-      paintPrice(panel, bars, opts.lines || [], token);
+      paintPrice(panel, bars, opts.lines || [], token, opts.volAvg || 0);
     };
     if (panel._ticker === ticker && panel._rows) {
       show(panel._rows);
@@ -1949,6 +2000,7 @@
     box: "feature.scanner_box",
     flag: "feature.scanner_flag",
     breakdowns: "feature.scanner_breakdown",
+    volume: "feature.scanner_volume",
     leaders: "feature.scanner_leaders",
     options: "feature.options",
     week52: "feature.scanner_52w",
