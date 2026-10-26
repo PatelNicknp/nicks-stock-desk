@@ -1,5 +1,5 @@
 ticker,company,sector,price,dist_52w_high_pct,volume_ratio,score,verdict,data_status,note,disclaimer
-CTAS,Cintas,Industrials,224.1,-0.75,1.13,9,BUY,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+CTAS,Cintas,Industrials,224.1,-0.75,1.13,10,BUY,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CDW,CDW Corporation,Information Technology,165.11,-0.63,1.12,8,BUY,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ED,Consolidated Edison,Utilities,115.74,-0.65,1.09,7,HOLD,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 VEEV,Veeva Systems,Health Care,323.04,-0.9,0.94,7,HOLD,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

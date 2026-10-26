@@ -1,13 +1,13 @@
 {
- "universe_sp500": "2026-10-24",
- "universe_ndx100": "2026-10-24",
- "cik_map": "2026-10-24",
- "sec_facts": "2026-10-24",
- "yahoo_slow": "2026-10-24",
- "holders": "2026-10-24",
- "news": "2026-10-24",
- "option_walls": "2026-10-24",
- "pcr": "2026-10-24",
- "econ": "2026-10-24",
- "options_chains": "2026-10-25-full"
+ "universe_sp500": "2026-10-25",
+ "universe_ndx100": "2026-10-25",
+ "cik_map": "2026-10-25",
+ "sec_facts": "2026-10-25",
+ "yahoo_slow": "2026-10-25",
+ "holders": "2026-10-25",
+ "news": "2026-10-25",
+ "option_walls": "2026-10-25",
+ "pcr": "2026-10-25",
+ "econ": "2026-10-25",
+ "options_chains": "2026-10-26-full"
 }
