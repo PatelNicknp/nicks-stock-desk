@@ -328,6 +328,9 @@ tr.selrow .rowexp{color:#7C9CFF}
 .rulepill{font-size:12px;line-height:16px;background:#121826;border:1px solid #1E293B;border-radius:6px;padding:6px 8px;color:#C3CBDB}
 .buyid{font-size:15px;font-weight:700;margin-bottom:6px}
 .buyid .mut{font-weight:400}
+.blurb{margin:0 0 8px;font-size:12px;line-height:17px;font-weight:400;color:#8B96AD;max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.blurb:empty{display:none}
+.identity .blurb{margin:4px 0 2px}
 .whytext{font-size:14px;line-height:21px;color:#E6EBF5;margin:0 0 12px;white-space:normal}
 .tradeplan{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .tp{background:#121826;border:1px solid #1E293B;border-radius:8px;padding:8px 10px;min-width:0}

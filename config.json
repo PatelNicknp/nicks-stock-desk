@@ -52,7 +52,8 @@
     "sector_performance": true,
     "heatmaps": true,
     "updates_log": true,
-    "help": true
+    "help": true,
+    "company_blurbs": true
   },
   "buy_setups": {
     "market_filter": true

@@ -133,6 +133,36 @@
   function isBlank(v) {
     return v == null || String(v).trim() === "";
   }
+
+  // One-line plain-English company descriptions from data/company_blurbs.csv.
+  // Static file, loaded once per visit and kept in sessionStorage. Never fetched from a market API.
+  let BLURBS = {};
+  function blurbsOn() { return featureOn("feature.company_blurbs"); }
+  function loadBlurbs() {
+    if (!blurbsOn()) return Promise.resolve(BLURBS);
+    try {
+      const saved = sessionStorage.getItem("desk-blurbs-v1");
+      if (saved) { BLURBS = JSON.parse(saved) || {}; return Promise.resolve(BLURBS); }
+    } catch (e) { /* ignore */ }
+    return loadCsv("company_blurbs.csv").then((rows) => {
+      const map = {};
+      (rows || []).forEach((r) => {
+        const t = String(r.ticker || "").trim().toUpperCase();
+        if (t && !isBlank(r.blurb)) map[t] = String(r.blurb).trim();
+      });
+      BLURBS = map;
+      try { sessionStorage.setItem("desk-blurbs-v1", JSON.stringify(map)); } catch (e) { /* ignore */ }
+      return BLURBS;
+    }).catch(() => BLURBS);
+  }
+  function blurbOf(ticker) {
+    if (!blurbsOn()) return "";
+    return BLURBS[String(ticker || "").trim().toUpperCase()] || "";
+  }
+  function blurbHtml(ticker) {
+    const text = blurbOf(ticker);
+    return text ? '<p class="blurb">' + esc(text) + "</p>" : "";
+  }
   function num(v) {
     if (isBlank(v)) return null;
     const n = Number(String(v).replace(/,/g, ""));
@@ -651,7 +681,7 @@
     const custom = typeof opts.detail === "function" ? (opts.detail(row) || "") : "";
     const sub = typeof opts.priceSub === "function" ? opts.priceSub(row) : (opts.priceSub || "Daily bars from the saved prices.");
     const company = isBlank(row.company) ? "" : ' <span class="mut">' + esc(row.company) + "</span>";
-    return '<div class="buydrop"><div class="buyid">' + tickerHtml(row.ticker) + company + "</div>" +
+    return '<div class="buydrop"><div class="buyid">' + tickerHtml(row.ticker) + company + "</div>" + blurbHtml(row.ticker) +
       expandNotes(row, parked) + expandStory(row, opts, parked) + custom + pricePanel(sub) + "</div>";
   }
   if (typeof window !== "undefined" && !window.__rowDropFit) {
@@ -1976,6 +2006,7 @@
       const loaded = {};
       await Promise.all(unique.map(async (n) => { loaded[n] = await loadCsv(n); }));
       SETTINGS = loaded["settings.csv"] || [];
+      await loadBlurbs();
       renderShell(meta);
       const mt = loaded["market_today.csv"];
       const stamp = (mt && mt[0] && mt[0].updated_pt) || latestChecked(loaded["updates_log.csv"]);
@@ -2007,7 +2038,7 @@
     selectedMulti: selectedMulti, fieldVal: fieldVal,
     multiHtml: multiHtml, selectHtml: selectHtml, searchHtml: searchHtml, rangeHtml: rangeHtml,
     pairHtml: pairHtml, dateHtml: dateHtml, feedHtml: feedHtml, placeFeed: placeFeed,
-    featureOn: featureOn, monthLabel: monthLabel, ptsColor: ptsColor,
+    featureOn: featureOn, blurbOf: blurbOf, blurbHtml: blurbHtml, monthLabel: monthLabel, ptsColor: ptsColor,
     wireFilters: wireFilters, matchMulti: matchMulti, matchContains: matchContains,
     matchText: matchText, matchMin: matchMin,
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,

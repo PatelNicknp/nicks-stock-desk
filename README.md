@@ -130,6 +130,10 @@ Switch: `scanner_breakdown`, on by default. The page is `breakdowns.html`. It re
 
 The trend is the close under the 50-day average, the 50-day under the 200-day, and the 200-day not higher than it was 20 sessions ago. The base is the longest window of 20 to 60 sessions, ending yesterday, whose high-to-low range is at most 10% of the middle, whose first and last closes drift by at most 5%, and whose second half is tighter than its first half. BROKEN DOWN today is a close under that low on volume at least 1.4 times the 50-day average. WATCHING is a close within 3% above that low, or a close under it without that volume. The chart line is the base low. The stop is the base high. The target is the entry minus twice the dollar risk from the entry up to the base high. A broken-down name uses today's close as the entry. A name that is still above the low uses the base low.
 
+### Company one-liners
+
+Switch: `company_blurbs`, on by default. Every drop-down row chart, the scorecard, the earnings tracker, and company financials show one plain-English line under the stock's name, such as "Makes iPhones and Macs and runs the App Store." The lines live in `data/company_blurbs.csv` (ticker, blurb). It is a static file written by hand. The hourly job does not fetch, rewrite, or delete it, and the site loads it once per visit. A ticker with no line shows nothing. Add a row there when a new name joins the universe.
+
 ### Options
 
 Switch: `options`, on by default. The page is `options.html`, under its own Options menu group, with Calls and Puts tabs. Education, not financial advice. The desk does not place a trade and it does not call a broker.
