@@ -210,6 +210,20 @@ input::placeholder{color:#5B6680;opacity:1}
 .px-legend .up{color:#22C55E}
 .px-legend .dn{color:#EF4444}
 .linkish{font-size:13px;font-weight:400;color:#7C9CFF}
+/* "What this scanner does" box above each scanner page, like the India desk. Off with feature.scanner_descriptions. */
+.about{background:#121826;border:1px solid #1E293B;border-left:3px solid #7C9CFF;border-radius:8px;padding:12px 16px;margin:0 0 12px;max-width:920px}
+.about-title{font-size:13px;font-weight:700;color:#7C9CFF;letter-spacing:.02em;margin-bottom:4px}
+.about p{font-size:14px;line-height:21px;color:#C3CBDB;margin:4px 0 0}
+.about.about-sub{border-left-color:#8B96AD;padding:10px 16px}
+.about.about-sub .about-title{color:#8B96AD}
+.about.about-sub p{font-size:13px;line-height:19px}
+.about-wrap{margin-bottom:4px}
+.secnote{font-size:12.5px;line-height:18px;color:#8B96AD;margin:4px 0 10px;max-width:880px}
+@media (max-width:699px){
+  .about{padding:12px 14px}
+  .about p{font-size:15px;line-height:22px}
+  .about.about-sub p{font-size:14px;line-height:20px}
+}
 .note-strip{font-size:12px;color:#F59E0B;border:1px solid #F59E0B;border-radius:6px;padding:8px 12px;margin-bottom:12px;background:#121826}
 .warn{font-size:12px;color:#F59E0B;margin-bottom:12px}
 .subhead{font-size:14px;font-weight:700;margin:8px 0}
