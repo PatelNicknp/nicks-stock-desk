@@ -2770,7 +2770,137 @@
     draw();
   }
 
-  window.DESK_PAGES = {
+
+  // About this scanner: a short plain-English box at the top of each scanner page and tab.
+  // Wording follows the rules in setups.py, tables.py, and scoring.py. Numbers in {braces} come from settings.csv.
+  const DESC = {
+    top: "Every stock on the desk, ranked by its score. The score adds points for things like faster sales growth than usual, a cheaper price than usual, and a rising price trend. A score of {buy_at} or more is usually BUY; tap a row to see the entry zone, stop, and target on the chart.",
+    buysetups: "Stocks where VCP, Box, Flag, or CANSLIM is ready or broke out today, the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
+    growth: "Stocks whose sales grew at least {growth_min_pct}%, leaving out anything rated AVOID. Fast-growing sales often push a stock up over time. Compare the EPS growth and the vs S&P 500 columns to see if profits and the price are keeping up.",
+    quality: "Stocks whose return on equity is above their own past level and whose debt is less than {quality_max_de} times their equity, leaving out AVOID. That means the company earns more on its money than usual without borrowing a lot. These tend to be steadier businesses to hold.",
+    dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
+    wheel: "A stock screen only, not an options trade. It finds stocks above their 200-day average, with RSI under 70, at least {wheel_min_dollar_volume} of shares traded a day, not rated AVOID, and not stretched or in a downtrend. These are steady, busy stocks you would not mind owning.",
+    vcp: "Looks for stocks in a strong uptrend (Minervini's 8 trend checks) whose pullbacks keep getting smaller, like a spring tightening. Tighter swings often mean sellers are running out. READY means it is still under the buy point; BROKEN OUT today means it closed above it on big volume.",
+    canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, strength versus SPY, fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and beating at least 55% of the desk's stocks. Any letter we could not check says not verified.",
+    box: "Stocks that moved sideways in a tight range (10% or less) for 15 to 40 days. A tight range means buyers and sellers are in balance. BROKEN OUT today means it closed above the top of the box on at least 1.5 times normal volume; the stop is the bottom of the box.",
+    flag: "Stocks that jumped at least 15% in 3 to 12 days, then rested for 3 to 15 days without giving back half of that jump. A short rest after a big run often comes before another leg up. BROKEN OUT today means it closed above the rest area on at least 1.5 times normal volume.",
+    breakdowns: "The opposite of a breakout: stocks below a falling or flat 200-day average, with the 50-day under the 200-day, sitting in a tight range. BROKEN DOWN today means it closed under the bottom of the range on heavy volume. Use it to spot stocks to avoid or sell, not to buy.",
+    leaders: "Stocks that show up on both VCP (ready or broke out today) and a strict CANSLIM qualify. When two different methods agree, the setup is usually stronger. A name on only one list still shows here, so check which ones agree.",
+    week52: "Shows which stocks are at a new 52-week high or low today, using the closing price. Many new highs means the market is healthy; many new lows means it is weak. Pick a tab below to see each group.",
+    "week52:highs": "Stocks that closed above their highest price of the past year (252 trading days) today. New highs often keep going higher because there are no unhappy buyers above. A new high on big volume is stronger; see the On volume tab.",
+    "week52:lows": "Stocks that closed below their lowest price of the past year today. New lows often keep falling, so be careful. Use this to see what is weak, not to bargain hunt.",
+    "week52:near": "Stocks within 5% of their 52-week high. They are close to breaking out to a new high. Watch them for a close above that high on big volume.",
+    "week52:vol": "Stocks that made a new 52-week high today on at least 1.5 times their 50-day average volume. Big volume means big funds are likely buying. These are the strongest of the new highs.",
+    "week52:all": "Every stock on the desk with its 52-week high, low, and where today's price sits in between. Use the filters to narrow it down. A position near 100% means near the high.",
+    "week52:chart": "Green bars count new highs each day, red bars count new lows, and the line is highs minus lows. A line above zero means more stocks are making highs than lows. A falling line can warn that the market is getting weaker.",
+    volume: "Finds stocks trading far more or far fewer shares than usual, compared with the 50 trading days before today. Big volume often means big funds are buying or selling. Pick a tab below to see each kind.",
+    "volume:spike": "Stocks trading at least {spike}× their normal volume today (normal is the average of the 50 days before). Big volume often means big funds are buying or selling, or there was news. Green means it closed up, which is better.",
+    "volume:updown": "The same volume spikes, split by direction. BUYING means it closed up on the big volume, which can mean big buyers stepping in. SELLING means it closed down, which can mean big sellers getting out.",
+    "volume:streak": "Stocks trading above their 50-day average volume 3 or more days in a row. Several busy days can mean big investors are slowly building or selling a position. Check whether the price is rising or falling.",
+    "volume:quiet": "Stocks whose last 10 days of volume are under 0.6 times normal, while the price stays within 5% of its 3-month high and above its 50-day average. Quiet trading near a high sometimes comes before a bigger move. The move can go either way.",
+    options: "Learning examples of debit spreads built from the desk's setups. A debit spread caps both what you can lose and what you can make. Education only; this desk never places a trade.",
+    "options:call": "A call debit spread for each of the first 15 Buy setups, about 45 to 60 days out. It makes money if the stock rises past the breakeven; the most you can lose is the cost. Price check says if the cost looks CHEAP, FAIR, or OVERPAYING.",
+    "options:put": "A put debit spread for each of the first 15 Breakdowns, about 45 to 60 days out. It makes money if the stock falls past the breakeven; the most you can lose is the cost. Broken down today comes first.",
+    "options:skip": "Names that did not get a spread, with one reason each. Common reasons are earnings before expiry, options that are too pricey or too thin to trade, or a stock under $10. A skip protects you from a bad trade.",
+    rotation: "Shows which of the 11 sector groups (SPDR ETFs) are beating or lagging the S&P 500 (SPY). Money tends to rotate from one sector to another. Favor stocks in Leading or Improving sectors.",
+    "rotation:rrg": "Each dot is a sector compared with SPY. Right means it is stronger than SPY; up means that strength is growing. Sectors usually circle clockwise: Improving, then Leading, then Weakening, then Lagging.",
+    "rotation:macro": "The 10-year Treasury yield and the gap between 10-year and 2-year yields, versus about 3 months ago. Rates can help some sectors and hurt others. These are general tendencies, not a forecast.",
+    "rotation:changed": "Sectors that moved to a new quadrant since yesterday or last week. A move into Leading or Improving is a good sign; into Weakening or Lagging is a warning.",
+    "rotation:table": "Every sector ranked by a 0 to 100 score. The score blends strength versus SPY over 1, 3, and 6 months, how many of its stocks are in uptrends or near highs, buy setups, and desk scores. Tap a sector to see its top stocks.",
+    "rotation:names": "The best-scored desk stocks inside the sector you picked. Use it to find strong stocks in a strong sector.",
+    breakouts: "Stocks within 1% of their 52-week closing high. A stock at a new high has no unhappy buyers above it, so it often keeps rising. Look for volume above average, which shows real buying.",
+    trends: "Sorts stocks by their 20, 50, 100, and 200-day averages. Uptrend means the price is above all four; Downtrend means below all four; anything else is Mixed. Stocks in an uptrend are usually easier to own.",
+    pullbacks: "Stocks in an uptrend (above the 50-day and 200-day averages) that dipped back toward their 20-day average or into their entry zone, with RSI under 70 and not rated AVOID. A dip in a strong stock can be a better price to buy. Use the entry low and high as the price range to watch.",
+    gainers: "The 15 biggest gainers and 15 biggest losers on the desk in the latest session. Big moves often come from news or earnings. Check the score and verdict before chasing a move.",
+    breadth: "The share of desk stocks trading above their 20, 50, 100, and 200-day averages. When most stocks are above their averages, the market is healthy. A falling line warns that fewer stocks are holding up.",
+    secperf: "How each sector's stocks did over a day, week, month, 3 months, and the year so far, as an equal-weight average of the desk's stocks. It shows where money is flowing. Strong sectors make it easier for their stocks to rise.",
+    heatmaps: "Each stock's return over 1 day, 1 week, 1 month, and the year so far, colored green for up and red for down. The table on the right is each sector's average 1-day move. Use it to spot what is hot or cold at a glance.",
+  };
+  // Where a tab's or section's box goes. tabs: the active button decides the text. secs: extra boxes inside the page.
+  const DESC_TABS = {
+    week52: { sel: "#w52tabs button.on", attr: "data-tab", labels: { highs: "New highs", lows: "New lows", near: "Near high", vol: "On volume", all: "All" } },
+    volume: { sel: "#hvtabs button.on", attr: "data-v", labels: { spike: "Volume spike today", updown: "Up or down on volume", streak: "Unusual volume streak", quiet: "Quiet before a move" } },
+    options: { sel: "#opttabs button.on", attr: "data-side", labels: { call: "Calls", put: "Puts" } },
+  };
+  const DESC_SECS = {
+    week52: [["#hl", "week52:chart", "chartpanel"]],
+    options: [["#skip", "options:skip", "before"]],
+    rotation: [["#rrg", "rotation:rrg", "chartpanel"], ["#macro .ptitle", "rotation:macro", "after"], ["#changed .ptitle", "rotation:changed", "after"],
+      ["#tbl", "rotation:table", "before"], ["#names", "rotation:names", "before"]],
+  };
+  function descFill(text, ctx, extra) {
+    const rows = (ctx && ctx.settings) || [];
+    const val = (key) => { const r = rows.find((x) => x.setting === "scoring." + key); return r ? r.value : null; };
+    const defaults = { buy_at: "8", growth_min_pct: "15", quality_max_de: "1.5", dividend_min_pct: "1.5", wheel_min_dollar_volume: "20000000" };
+    return text.replace(/\{(\w+)\}/g, (m, k) => {
+      if (extra && extra[k] != null) return extra[k];
+      let v = val(k);
+      if (v == null || v === "" || isNaN(Number(v))) v = defaults[k];
+      if (v == null) return m;
+      const n = Number(v);
+      if (k === "wheel_min_dollar_volume") return n >= 1e6 ? "$" + D.fmt(n / 1e6, 0) + " million" : "$" + D.fmt(n, 0);
+      return String(n);
+    });
+  }
+  const DESC_PAGE_KIND = { top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page" };
+  function descBox(title, text, extraClass) {
+    return '<section class="about' + (extraClass ? " " + extraClass : "") + '" aria-label="' + D.esc(title) + '"><div class="about-title">' + D.esc(title) +
+      '</div><p>' + D.esc(text) + "</p></section>";
+  }
+  function descNote(text) {
+    return '<p class="secnote">' + D.esc(text) + "</p>";
+  }
+  // The box sits above #page (outside it), like the India desk, so a filter redraw never wipes it.
+  function addDescriptions(pages) {
+    Object.keys(pages).forEach((id) => {
+      const spec = pages[id];
+      if (!spec || !DESC[id] || typeof spec.render !== "function") return;
+      const render = spec.render;
+      spec.render = (ctx) => {
+        render(ctx);
+        try {
+          if (!D.featureOn("feature.scanner_descriptions") || !ctx.page) return;
+          const old = document.getElementById("about");
+          if (old) old.remove();
+          const title = DESC_PAGE_KIND[id] === "page" ? "What this page does" : "What this scanner does";
+          ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, descFill(DESC[id], ctx)) + "</div>");
+          const wrap = document.getElementById("about");
+          const tabs = DESC_TABS[id];
+          if (tabs) {
+            wrap.insertAdjacentHTML("beforeend", '<div class="about-tab" id="abouttab"></div>');
+            const host = document.getElementById("abouttab");
+            let last = "";
+            const sync = () => {
+              const btn = ctx.page.querySelector(tabs.sel);
+              const key = btn ? btn.getAttribute(tabs.attr) : "";
+              const spikeBtn = id === "volume" ? ctx.page.querySelector("#hvmult button.on") : null;
+              const spike = spikeBtn ? String(spikeBtn.getAttribute("data-v") || "2") : "2";
+              const sig = key + "|" + spike;
+              if (sig === last) return;
+              last = sig;
+              const text = DESC[id + ":" + key];
+              host.innerHTML = text ? descBox("This tab: " + (tabs.labels[key] || key), descFill(text, ctx, { spike: spike }), "about-sub") : "";
+            };
+            sync();
+            ctx.page.addEventListener("click", () => setTimeout(sync, 0));
+          }
+          (DESC_SECS[id] || []).forEach((s) => {
+            const el = ctx.page.querySelector(s[0]);
+            if (!el || !DESC[s[1]]) return;
+            const html = descNote(descFill(DESC[s[1]], ctx));
+            if (s[2] === "after") el.insertAdjacentHTML("afterend", html);
+            else if (s[2] === "before") el.insertAdjacentHTML("beforebegin", html);
+            else if (s[2] === "chartpanel") (el.closest(".chart-box") || el).insertAdjacentHTML("beforebegin", html);
+          });
+        } catch (err) {
+          if (window.console) console.warn("scanner description skipped", err);
+        }
+      };
+    });
+    return pages;
+  }
+
+  window.DESK_PAGES = addDescriptions({
     today: { files: ["market_today.csv", "breadth_history.csv", "sectors.csv", "alerts.csv"], render: renderToday },
     top: { files: ["scores.csv"], render: renderTop },
     buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
@@ -2819,7 +2949,7 @@
     updates: { files: ["updates_log.csv", "freshness.csv"], render: renderUpdates },
     help: { files: ["help.csv", "settings.csv"], render: renderHelp },
     options: { files: ["options_ideas.csv", "options_skipped.csv"], render: renderOptions },
-  };
+  });
 
   D.boot();
 })();
