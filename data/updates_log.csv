@@ -1,21 +1,21 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,reused cache (refreshes once a day),2026-10-29 12:30 PT
-Universe (Wikipedia Nasdaq-100),OK,101,reused cache (refreshes once a day),2026-10-29 12:30 PT
-Prices (Yahoo Finance),OK,2026-10-29,"671746 rows, batched",2026-10-29 12:31 PT
-SEC company tickers,OK,2026-10-28,reused cache,2026-10-29 12:31 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-10-28,reused cache (slow sources refresh at most once a day),2026-10-29 12:31 PT
-Analyst and profile (Yahoo Finance),OK,2026-10-28,reused cache (slow sources refresh at most once a day),2026-10-29 12:31 PT
-Earnings dates (Yahoo Finance),OK,2026-10-28,reused cache,2026-10-29 12:31 PT
-Institutional 13F and insider (Nasdaq),OK,2026-10-28,reused cache (slow sources refresh at most once a day),2026-10-29 12:31 PT
-News headlines (Yahoo Finance),OK,2026-10-28,reused cache,2026-10-29 12:32 PT
-Option walls (Yahoo option chain),OK,2026-10-28,reused cache (option chains refresh at most once a day),2026-10-29 12:32 PT
-Put/call (CBOE),OK,2026-10-28,reused cache,2026-10-29 12:32 PT
-FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-10-29 12:33 PT
-Economic calendar (Nasdaq),OK,2026-10-28,reused cache,2026-10-29 12:33 PT
-Backtest,OK,,reused the last test (it rebuilds on the after-close run),2026-10-29 12:33 PT
-Price candles,OK,2026-10-29,"522 tickers, up to 1255 cached sessions. No new download.",2026-10-29 12:33 PT
-Pattern scanners,OK,2026-10-29,"VCP 281, CANSLIM 258, box 131, breakdown 0, flag 39, high volume 56, leaders 179, 52-week 523 names over 1004 sessions. No new downloads.",2026-10-29 12:34 PT
-Buy setups,OK,2026-10-29,Buy setups 26. Research list only. Built from the scanners already on the desk. No new downloads.,2026-10-29 12:34 PT
-Options chains,OK,,"calls 0, puts 0, skipped 15. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 10/28/2026. Education, not financial advice. No broker.",2026-10-29 12:34 PT
-Sector rotation,OK,2026-10-29,"11 sectors, 2 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-10-29 12:34 PT
-Column check,PARTIAL,,"A column is blank on every row: portfolio, scanner_canslim, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-10-29 12:34 PT
+Universe (Wikipedia S&P 500),OK,503,503 names,2026-10-29 16:32 PT
+Universe (Wikipedia Nasdaq-100),OK,101,101 names,2026-10-29 16:32 PT
+Prices (Yahoo Finance),OK,2026-10-29,"672474 rows, batched",2026-10-29 16:33 PT
+SEC company tickers,OK,2026-10-29,10430 companies,2026-10-29 16:33 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-10-29,520 names,2026-10-29 16:35 PT
+Analyst and profile (Yahoo Finance),OK,2026-10-29,"524 names, 0 failed",2026-10-29 16:41 PT
+Earnings dates (Yahoo Finance),OK,2026-10-29,12722 rows,2026-10-29 16:41 PT
+Institutional 13F and insider (Nasdaq),OK,2026-10-29,"524 names, 0 failed",2026-10-29 16:49 PT
+News headlines (Yahoo Finance),OK,2026-10-29,"120 headlines, 0 names failed",2026-10-29 16:50 PT
+Option walls (Yahoo option chain),OK,2026-10-29,"7178 rows, 0 names failed",2026-10-29 16:52 PT
+Put/call (CBOE),OK,2026-10-28,3 days refreshed,2026-10-29 16:52 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-10-29 16:53 PT
+Economic calendar (Nasdaq),OK,2026-10-29,35 matched releases,2026-10-29 16:53 PT
+Backtest,OK,2026-10-29,monthly point-in-time test,2026-10-29 16:56 PT
+Price candles,OK,2026-10-29,"523 tickers, up to 1254 cached sessions. No new download.",2026-10-29 16:56 PT
+Pattern scanners,OK,2026-10-29,"VCP 281, CANSLIM 256, box 131, breakdown 0, flag 39, high volume 153, leaders 181, 52-week 524 names over 1003 sessions. No new downloads.",2026-10-29 16:57 PT
+Buy setups,OK,2026-10-29,Buy setups 23. Research list only. Built from the scanners already on the desk. No new downloads.,2026-10-29 16:57 PT
+Options chains,OK,,"calls 0, puts 0, skipped 15. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 10/29/2026. Education, not financial advice. No broker.",2026-10-29 16:57 PT
+Sector rotation,OK,2026-10-29,"11 sectors, 2 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-10-29 16:57 PT
+Column check,PARTIAL,,"A column is blank on every row: portfolio, scanner_canslim, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-10-29 16:57 PT
