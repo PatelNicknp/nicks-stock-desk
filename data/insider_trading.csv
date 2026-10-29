@@ -35,7 +35,7 @@ AMT,3.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This de
 AMZN,0.0,15.0,-1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ANET,3.0,34.0,-1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 AON,1.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-AOS,0.0,0.0,0.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AOS,0.0,0.0,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 APA,9.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 APD,0.0,1.0,0.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 APH,0.0,7.0,-1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
