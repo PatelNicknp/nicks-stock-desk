@@ -271,7 +271,7 @@ There is no strike, no expiry, no premium, and no contract symbol. Do not add on
 
 Source: `scanner_vcp`. These rows follow Nick's TradingView indicator in `reference/nicks_minervini_with_exit_strategy.pine`. They are computed from the prices already on file. This page does not download anything.
 
-Every row has the trend template at 8 of 8 and at least two tightening pullbacks (the indicator's green VCP tag). Default filter: `status` is `READY` or `BROKEN OUT today`. A second control can show `WATCHING`. When `vcp.show_weaker_trend` is on, rows that are not a VCP yet are labeled `WATCHING (trend not 8/8)` or `WATCHING (one pullback)`.
+Every row has the trend template at 8 of 8 (an open trade counts when its buy printed at 8 of 8). READY and BROKEN OUT today also need at least two tightening pullbacks (the indicator's green VCP tag). Default filter: `status` is `READY` or `BROKEN OUT today`. A second control can show `WATCHING`. When `vcp.show_weaker_trend` is on, rows under 8 of 8 are labeled `WATCHING (trend not 8/8)` and sorted last.
 
 Columns: ticker, index_membership, status, pivot, stop, target, trail, strength, trend_score, contractions, depths, reason, freshness.
 

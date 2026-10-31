@@ -848,13 +848,13 @@
     price: setupLines,
     priceSub: "Buy point, stop, and target when the scan has them",
     cards(all) {
-      // WATCHING (trend not 8/8) and WATCHING (one pullback) only exist when vcp.show_weaker_trend is on.
-      const weaker = countWhere(all, (r) => /^WATCHING \(/.test(String(r.status || "")));
+      // WATCHING (trend not 8/8) only exists when vcp.show_weaker_trend is on.
+      const weaker = countWhere(all, (r) => r.status === "WATCHING (trend not 8/8)");
       return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
         card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
         card("Watching", String(countWhere(all, (r) => r.status === "WATCHING"))) +
         card("In a trade (buy printed)", String(countWhere(all, (r) => r.in_trade === "yes"))) +
-        (weaker ? card("Not a VCP yet (setting on)", String(weaker)) : "");
+        (weaker ? card("Trend not 8/8 (setting on)", String(weaker)) : "");
     },
     detail(row) {
       const pills = vcpRuleLabels.map((label, i) => '<span class="rulepill">' + passCell(row["r" + (i + 1)]) + " " + D.esc(label) + "</span>").join("");
@@ -2917,7 +2917,7 @@
     quality: "Stocks whose return on equity is above their own past level and whose debt is less than {quality_max_de} times their equity, leaving out AVOID. That means the company earns more on its money than usual without borrowing a lot. These tend to be steadier businesses to hold.",
     dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
     wheel: "A stock screen only, not an options trade. It finds stocks above their 200-day average, with RSI under 70, at least {wheel_min_dollar_volume} of shares traded a day, not rated AVOID, and not stretched or in a downtrend. These are steady, busy stocks you would not mind owning.",
-    vcp: "Looks for stocks in a strong uptrend (all 8 of Minervini's trend checks) whose pullbacks keep getting smaller, like a spring tightening. A stock is listed only when it has 8 of 8 and at least two tightening pullbacks, the same as the green VCP tag on Nick's chart. READY means it is still under the buy point; BROKEN OUT today means it closed above it on big volume; WATCHING means it is above the buy point without that big-volume close today.",
+    vcp: "Looks for stocks in a strong uptrend (all 8 of Minervini's trend checks) whose pullbacks keep getting smaller, like a spring tightening. A stock is listed only when all 8 trend checks pass. READY means it has at least two tightening pullbacks (the green VCP tag on Nick's chart) and is still under the buy point; BROKEN OUT today means it closed above it on big volume. WATCHING means it is 8 of 8 but not ready yet: only one pullback so far, or above the buy point without that big-volume close today, or a trade still open from a buy made at 8 of 8.",
     canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, strength versus SPY, fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and beating at least 55% of the desk's stocks. Any letter we could not check says not verified.",
     box: "Stocks that moved sideways in a tight range (10% or less) for 15 to 40 days. A tight range means buyers and sellers are in balance. BROKEN OUT today means it closed above the top of the box on at least 1.5 times normal volume; the stop is the bottom of the box.",
     flag: "Stocks that jumped at least 15% in 3 to 12 days, then rested for 3 to 15 days without giving back half of that jump. A short rest after a big run often comes before another leg up. BROKEN OUT today means it closed above the rest area on at least 1.5 times normal volume.",

@@ -281,6 +281,7 @@ def vcp_last(high, low, close, volume, spy):
     part_done = False
     climax_done = False
     entry_bar = -1
+    entry_score = -1
     prev_pivot = np.nan
     c_depth, c_high = [], []
     cnt = 0
@@ -370,6 +371,7 @@ def vcp_last(high, low, close, volume, spy):
             part_done = False
             climax_done = False
             entry_bar = i
+            entry_score = score_i  # trend template on the buy bar, kept for the open trade
         prev_pivot = pivot
 
     rules_now = [bool(r[-1]) for r in trend["rules"]]
@@ -386,6 +388,7 @@ def vcp_last(high, low, close, volume, spy):
         "in_trade": bool(in_trade),
         "entry": float(entry) if np.isfinite(entry) else None,
         "entry_bar": int(entry_bar),
+        "entry_score": int(entry_score),
         "stop": float(stop_lvl) if np.isfinite(stop_lvl) else None,
         "be_done": bool(be_done),
         "part_done": bool(part_done),
@@ -398,8 +401,8 @@ def vcp_last(high, low, close, volume, spy):
 
 
 VCP_WEAK_TREND = "WATCHING (trend not 8/8)"
-VCP_WEAK_ONE = "WATCHING (one pullback)"
-VCP_STATUS_RANK = {"BROKEN OUT today": 0, "READY": 1, "WATCHING": 2, VCP_WEAK_ONE: 3, VCP_WEAK_TREND: 4}
+# The weaker label is listed last, after every 8 of 8 row.
+VCP_STATUS_RANK = {"BROKEN OUT today": 0, "READY": 1, "WATCHING": 2, VCP_WEAK_TREND: 3}
 
 
 def vcp_show_weaker(cfg):
@@ -408,28 +411,36 @@ def vcp_show_weaker(cfg):
     return bool(isinstance(block, dict) and block.get("show_weaker_trend") is True)
 
 
-def _vcp_status(state, show_weaker=False):
-    """A row is listed only when the indicator would draw its green VCP tag:
-    trend template 8 of 8 and at least two tightening pullbacks (is_vcp).
+def _open_trade_ok(state):
+    """An open trade stays listed when its buy printed with the template at 8 of 8."""
+    return bool(state["in_trade"] and state.get("entry_score", -1) == 8)
 
-    BROKEN OUT today: today's close crossed the buy point on 1.5x volume.
-    READY: at or under the buy point. WATCHING: over the buy point without
-    that breakout today. With show_weaker on, names that are not a VCP yet
-    come back with a label that says why, so they never read as plain WATCHING.
+
+def _vcp_status(state, show_weaker=False):
+    """Nick's rule: a stock is listed only at 8 of 8 on the trend template.
+
+    BROKEN OUT today: the indicator printed a buy today (8 of 8 and two
+    tightening pullbacks, close over the buy point on 1.5x volume).
+    READY: 8 of 8 and two tightening pullbacks (the green VCP tag), close at or
+    under the buy point. A one-pullback stock is never READY.
+    WATCHING: 8 of 8 and either over the buy point without that breakout today,
+    or only one pullback so far, or an open trade whose buy printed at 8 of 8
+    (it stays listed even if today's score has dropped).
+    With show_weaker on, stocks under 8 of 8 come back as VCP_WEAK_TREND.
     """
     if state["breakout"] and state["is_vcp"]:
         return "BROKEN OUT today"
     if state["is_vcp"] and state["pivot"] is not None:
         return "READY" if state["close"] <= state["pivot"] else "WATCHING"
-    if not show_weaker:
+    if _open_trade_ok(state):
+        return "WATCHING"
+    if state["score"] == 8 and state["cnt"] == 1:
+        return "WATCHING"
+    if not show_weaker or state["score"] >= 8:
         return None
-    if state["cnt"] <= 0 and not state["in_trade"]:
-        return None
-    if not (state["cnt"] >= 2 or state["in_trade"] or (state["cnt"] == 1 and state["score"] >= 6)):
-        return None
-    if state["score"] < 8:
+    if state["cnt"] >= 2 or state["in_trade"] or (state["cnt"] == 1 and state["score"] >= 6):
         return VCP_WEAK_TREND
-    return VCP_WEAK_ONE
+    return None
 
 
 def _vcp_levels(state):
@@ -455,16 +466,21 @@ def _vcp_reason(state, status, dates):
     elif status == "READY":
         bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price has not closed through the buy point yet.")
     elif status == "WATCHING":
-        if not state["big_vol"]:
-            bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
-        else:
-            bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is already above the buy point. It did not cross it today, so it is not BROKEN OUT today.")
+        if state["is_vcp"] and state["pivot"] is not None and state["close"] > state["pivot"]:
+            if not state["big_vol"]:
+                bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
+            else:
+                bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is already above the buy point. It did not cross it today, so it is not BROKEN OUT today.")
+        elif _open_trade_ok(state):
+            bits.append("A trade is still open from a buy that printed with the trend template at 8 of 8. The row stays while the trade is open, until the stop or the trail sell closes it.")
+        elif state["cnt"] == 1:
+            bits.append("The trend template is 8 of 8, with one pullback so far. The indicator needs a second, tighter pullback before it will call this a VCP, so it cannot be READY or BROKEN OUT today yet.")
     elif status == VCP_WEAK_TREND:
         failed = [str(i + 1) for i, ok in enumerate(state["rules"]) if not ok]
         lead = "Pullbacks are tightening" if state["cnt"] >= 2 else ("One pullback so far" if state["cnt"] == 1 else "No live pullback")
         bits.append("%s, but the trend template is %d of 8, not 8 of 8. Still open: rule %s. This is not a VCP yet. It shows only because vcp.show_weaker_trend is on, and it never feeds Buy setups." % (lead, score, ", ".join(failed)))
-    elif status == VCP_WEAK_ONE:
-        bits.append("The trend template is 8 of 8, but there is only %s so far. The indicator needs at least two tightening pullbacks before it will call this a VCP. It shows only because vcp.show_weaker_trend is on, and it never feeds Buy setups." % ("one pullback" if state["cnt"] == 1 else "no live pullback"))
+    if _open_trade_ok(state) and score < 8:
+        bits.append("The trend template was 8 of 8 on the buy day. It is %d of 8 today." % score)
     if state["in_trade"] and state["entry"] is not None:
         when = ""
         if dates is not None and 0 <= state["entry_bar"] < len(dates):
