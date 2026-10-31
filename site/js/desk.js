@@ -17,6 +17,9 @@
       ["Alerts", "alerts.html", "alerts"],
       ["Backtest", "backtest.html", "backtest"],
     ]],
+    ["Chart Viewer", [
+      ["Chart Viewer", "chart-viewer.html", "chartviewer"],
+    ]],
     ["Scanners", [
       ["Growth", "growth.html", "growth"],
       ["Quality", "quality.html", "quality"],
@@ -706,7 +709,7 @@
     const sub = typeof opts.priceSub === "function" ? opts.priceSub(row) : (opts.priceSub || "Daily bars from the saved prices.");
     const company = isBlank(row.company) ? "" : ' <span class="mut">' + esc(row.company) + "</span>";
     return '<div class="buydrop"><div class="buyid">' + tickerHtml(row.ticker) + company + "</div>" + blurbHtml(row.ticker) +
-      expandNotes(row, parked) + expandStory(row, opts, parked) + custom + pricePanel(sub) + "</div>";
+      viewerLinkHtml(row.ticker) + expandNotes(row, parked) + expandStory(row, opts, parked) + custom + pricePanel(sub) + "</div>";
   }
   if (typeof window !== "undefined" && !window.__rowDropFit) {
     window.__rowDropFit = true;
@@ -2040,7 +2043,31 @@
     heatmaps: "feature.heatmaps",
     updates: "feature.updates_log",
     help: "feature.help",
+    chartviewer: "feature.chart_viewer",
   };
+  // Lists the Chart Viewer can open. The key is the page id, so a scanner page links to its own list.
+  const VIEWER_LISTS = ["buysetups", "watchlist", "growth", "quality", "dividend", "wheel", "vcp", "canslim", "box", "flag",
+    "qullamaggie", "marios", "ep", "breakdowns", "volume", "leaders", "week52"];
+  function settingVal(key) {
+    const row = SETTINGS.find((r) => r.setting === key);
+    return row ? row.value : null;
+  }
+  function viewerOn(key) {
+    if (!featureOn("feature.chart_viewer")) return false;
+    if (!key) return true;
+    const v = settingVal("chart_viewer." + key);
+    return v == null || String(v).toLowerCase() !== "false";
+  }
+  function viewerHref(list, ticker) {
+    let href = "chart-viewer.html?list=" + encodeURIComponent(list || "all");
+    if (ticker) href += "&t=" + encodeURIComponent(String(ticker).trim().toUpperCase());
+    return href;
+  }
+  function viewerLinkHtml(ticker) {
+    const page = typeof document !== "undefined" && document.body ? document.body.dataset.page : "";
+    if (!ticker || VIEWER_LISTS.indexOf(page) < 0 || !viewerOn("scanner_links")) return "";
+    return '<p class="cvrow"><a class="cvlink" href="' + esc(viewerHref(page, ticker)) + '">Open in Chart Viewer</a></p>';
+  }
   let SETTINGS = [];
   function featureOn(key) {
     if (!key) return true;
@@ -2103,6 +2130,8 @@
     matchText: matchText, matchMin: matchMin,
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
+    loadCsv: loadCsv, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
+    settingVal: settingVal, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
   };
 })();

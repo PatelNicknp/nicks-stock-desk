@@ -9,6 +9,7 @@ PAGES = [
     ("watchlist.html", "watchlist", "Watchlist and portfolio"),
     ("alerts.html", "alerts", "Alerts"),
     ("backtest.html", "backtest", "Backtest"),
+    ("chart-viewer.html", "chartviewer", "Chart Viewer"),
     ("growth.html", "growth", "Growth"),
     ("quality.html", "quality", "Quality"),
     ("dividend.html", "dividend", "Dividend"),
@@ -76,17 +77,23 @@ TEMPLATE = """<!doctype html>
 <script src="vendor/papaparse.min.js"></script>
 <script src="vendor/chart.umd.min.js"></script>
 <script src="js/desk.js"></script>
-<script src="js/pages.js"></script>
+{extra}<script src="js/pages.js"></script>
 </body>
 </html>
 """
+
+# Page-only scripts, loaded before pages.js so the page is registered when the desk boots.
+EXTRA = {
+    "chartviewer": '<script src="js/viewer.js"></script>\n',
+}
+
 
 def main():
     root = os.path.dirname(os.path.abspath(__file__))
     for filename, pid, title in PAGES:
         path = os.path.join(root, filename)
         with open(path, "w", encoding="utf-8") as f:
-            f.write(TEMPLATE.format(title=title, pid=pid))
+            f.write(TEMPLATE.format(title=title, pid=pid, extra=EXTRA.get(pid, "")))
     print(len(PAGES), "pages")
 
 if __name__ == "__main__":

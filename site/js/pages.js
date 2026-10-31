@@ -2951,6 +2951,7 @@
     gainers: "The 15 biggest gainers and 15 biggest losers on the desk in the latest session. Big moves often come from news or earnings. Check the score and verdict before chasing a move.",
     breadth: "The share of desk stocks trading above their 20, 50, 100, and 200-day averages. When most stocks are above their averages, the market is healthy. A falling line warns that fewer stocks are holding up.",
     secperf: "How each sector's stocks did over a day, week, month, 3 months, and the year so far, as an equal-weight average of the desk's stocks. It shows where money is flowing. Strong sectors make it easier for their stocks to rise.",
+    chartviewer: "Shows one big chart at a time so you can flip through stocks fast. Pick a list: All scanner stocks puts every stock from every scanner in one list, once, with the stocks on the most scanners first. Tap Full screen, then swipe right for the next chart (the Swipe button swaps that). The MA buttons turn the average lines on and off, and the box in the lower right says which scanners picked the stock and why. Tap that box to read more.",
     heatmaps: "Each stock's return over 1 day, 1 week, 1 month, and the year so far, colored green for up and red for down. The table on the right is each sector's average 1-day move. Use it to spot what is hot or cold at a glance.",
   };
   // Where a tab's or section's box goes. tabs: the active button decides the text. secs: extra boxes inside the page.
@@ -2979,7 +2980,7 @@
       return String(n);
     });
   }
-  const DESC_PAGE_KIND = { top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page" };
+  const DESC_PAGE_KIND = { top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page", chartviewer: "page" };
   function descBox(title, text, extraClass) {
     return '<section class="about' + (extraClass ? " " + extraClass : "") + '" aria-label="' + D.esc(title) + '"><div class="about-title">' + D.esc(title) +
       '</div><p>' + D.esc(text) + "</p></section>";
@@ -3037,7 +3038,29 @@
     return pages;
   }
 
-  window.DESK_PAGES = addDescriptions({
+  // "Open in Chart Viewer" at the top of each scanner page. A tapped row has its own link with that stock.
+  function addViewerLinks(pages) {
+    (D.VIEWER_LISTS || []).forEach((id) => {
+      const spec = pages[id];
+      if (!spec || typeof spec.render !== "function") return;
+      const render = spec.render;
+      spec.render = (ctx) => {
+        render(ctx);
+        try {
+          const old = document.getElementById("cvbar");
+          if (old) old.remove();
+          if (!ctx.page || !D.viewerOn("scanner_links")) return;
+          ctx.page.insertAdjacentHTML("beforebegin", '<div class="cvbar" id="cvbar"><a class="cvlink" href="' + D.esc(D.viewerHref(id)) +
+            '">Open in Chart Viewer</a><span class="m2">Swipe through these charts full screen. Tap a row to open that stock.</span></div>');
+        } catch (err) {
+          if (window.console) console.warn("chart viewer link skipped", err);
+        }
+      };
+    });
+    return pages;
+  }
+
+  window.DESK_PAGES = addViewerLinks(addDescriptions(Object.assign({
     today: { files: ["market_today.csv", "breadth_history.csv", "sectors.csv", "alerts.csv"], render: renderToday },
     top: { files: ["scores.csv"], render: renderTop },
     buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
@@ -3089,7 +3112,7 @@
     updates: { files: ["updates_log.csv", "freshness.csv"], render: renderUpdates },
     help: { files: ["help.csv", "settings.csv"], render: renderHelp },
     options: { files: ["options_ideas.csv", "options_skipped.csv"], render: renderOptions },
-  });
+  }, window.DESK_EXTRA_PAGES || {})));
 
   D.boot();
 })();

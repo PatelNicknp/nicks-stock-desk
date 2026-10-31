@@ -20,7 +20,7 @@ async function loadChromium() {
 const base = process.argv[2] || "http://127.0.0.1:8765/site/";
 const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v3";
 const pages = [
-  "index.html", "top-stocks.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
+  "index.html", "top-stocks.html", "chart-viewer.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
   "growth.html", "quality.html", "dividend.html", "wheel.html", "vcp.html", "canslim.html",
   "box.html", "flag.html", "qullamaggie.html", "marios.html", "episodic-pivot.html", "breakdowns.html", "volume.html", "leaders.html", "earnings-calendar.html", "earnings-heatmap.html",
   "earnings-cards.html", "put-call.html", "walls.html", "analysts.html", "thirteen-f.html", "aaii.html",
@@ -29,7 +29,7 @@ const pages = [
   "historical-pe.html", "breakouts.html", "trends.html", "pullbacks.html", "gainers.html",
   "breadth.html", "sector-performance.html", "heatmaps.html", "updates.html", "help.html",
 ];
-const ipad = new Set(["index.html", "top-stocks.html", "scorecard.html", "watchlist.html", "backtest.html", "vcp.html"]);
+const ipad = new Set(["chart-viewer.html", "index.html", "top-stocks.html", "scorecard.html", "watchlist.html", "backtest.html", "vcp.html"]);
 
 function ignore(text) {
   const t = String(text || "");
@@ -181,6 +181,19 @@ for (const file of pages) {
           else if (Math.abs(Number(chip[1]) - row.value) > 0.05) errors.push(row.label + " chip " + chip[1] + " != chart " + row.value);
         }
       }
+    }
+    if (file === "chart-viewer.html") {
+      await page.waitForFunction(() => document.querySelectorAll("#cvchart canvas").length > 0 || !document.getElementById("cvmsg").hidden, null, { timeout: 30000 });
+      const cv = await page.evaluate(() => ({
+        count: (document.getElementById("cvcount") || {}).textContent || "",
+        lists: document.querySelectorAll("#cvlist option").length,
+        why: (document.getElementById("cvwhy") || {}).textContent || "",
+        chips: document.querySelectorAll("#cvtools [data-ma]").length,
+      }));
+      if (!/^\d+ of \d+$/.test(cv.count)) errors.push("chart viewer counter reads " + cv.count);
+      if (cv.lists < 2) errors.push("chart viewer list picker has " + cv.lists + " lists");
+      if (cv.chips !== 5) errors.push("chart viewer has " + cv.chips + " average buttons");
+      if (!/Why it is here/.test(cv.why)) errors.push("chart viewer reason box is empty");
     }
     const shot = path.join(outDir, file.replace(".html", "") + "-1600.png");
     await page.screenshot({ path: shot });
