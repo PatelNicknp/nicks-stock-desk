@@ -35,6 +35,7 @@ jobs:
           python tests/test_universe.py
           python tests/test_job.py
           python tests/test_setups.py
+          python tests/test_qullamaggie_marios.py
       - name: Update the desk
         run: |
           set -e

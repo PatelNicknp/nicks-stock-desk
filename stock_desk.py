@@ -2168,20 +2168,22 @@ def main(argv=None):
             })
     inst = pd.DataFrame(inst_rows)
     if len(close) and len(universe):
-        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores)
+        # Open is already in the saved daily bars (same Yahoo download). No new request.
+        opn = wide_from_long(long, "open") if long is not None and len(long) and "open" in long.columns else None
+        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores, cfg=cfg, opn=opn)
     else:
         setup_frames = {k: pd.DataFrame() for k in (
             "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_breakdown", "scanner_flag", "scanner_leaders",
-            "scanner_52w", "highs_lows_history", "scanner_volume",
+            "scanner_qullamaggie", "scanner_marios", "scanner_52w", "highs_lows_history", "scanner_volume",
         )}
     def _n(frame):
         if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []):
             return 0
         return int((frame["ticker"].astype(str) != "").sum())
-    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, breakdown %d, flag %d, high volume %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
+    log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, breakdown %d, flag %d, Qullamaggie %d, Marios %d, high volume %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
         _n(setup_frames["scanner_box"]), _n(setup_frames.get("scanner_breakdown")),
-        _n(setup_frames["scanner_flag"]), _n(setup_frames.get("scanner_volume")), _n(setup_frames["scanner_leaders"]),
+        _n(setup_frames["scanner_flag"]), _n(setup_frames.get("scanner_qullamaggie")), _n(setup_frames.get("scanner_marios")), _n(setup_frames.get("scanner_volume")), _n(setup_frames["scanner_leaders"]),
         _n(setup_frames.get("scanner_52w")),
         0 if setup_frames.get("highs_lows_history") is None else len(setup_frames.get("highs_lows_history")),
     ))
@@ -2191,6 +2193,7 @@ def main(argv=None):
             setup_frames.get("scanner_vcp"), setup_frames.get("scanner_box"),
             setup_frames.get("scanner_flag"), setup_frames.get("scanner_canslim"),
             scores, close, setup_frames.get("scanner_52w"),
+            qullamaggie=setup_frames.get("scanner_qullamaggie"), marios=setup_frames.get("scanner_marios"),
         )
     else:
         buy = pd.DataFrame()
@@ -2269,6 +2272,8 @@ def main(argv=None):
         "scanner_breakdown": gated(setup_frames.get("scanner_breakdown"), "scanner_breakdown", features.get("scanner_breakdown", True), "No breakdowns in the cached prices."),
         "scanner_volume": gated(setup_frames.get("scanner_volume"), "scanner_volume", features.get("scanner_volume", True), "No high-volume names in the cached prices."),
         "scanner_flag": gated(setup_frames["scanner_flag"], "scanner_flag", features.get("scanner_flag", True), "No flag setups in the cached prices."),
+        "scanner_qullamaggie": gated(setup_frames.get("scanner_qullamaggie"), "scanner_qullamaggie", features.get("scanner_qullamaggie", True), "No Qullamaggie setups in the cached prices."),
+        "scanner_marios": gated(setup_frames.get("scanner_marios"), "scanner_marios", features.get("scanner_marios", True), "No Marios setups in the cached prices."),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
