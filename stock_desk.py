@@ -21,6 +21,7 @@ import scoring
 import tables
 import setups
 import episodic_pivot
+import gap_up
 import sector_rotation
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
@@ -2193,6 +2194,12 @@ def main(argv=None):
     else:
         setup_frames["scanner_ep"] = pd.DataFrame()
     log("Episodic pivot", "OK", asof if ep_on else "", ("EP rows %d. Cached prices, earnings dates, and profiles only. No new downloads." % _n(setup_frames["scanner_ep"])) if ep_on else "feature off")
+    gap_on = features.get("scanner_gap_up", True)
+    if gap_on and len(close) and len(universe) and long is not None and len(long) and "open" in long.columns:
+        # Same saved daily bars (cache/ohlcv.csv.gz). No new request.
+        setup_frames["scanner_gap_up"] = gap_up.scan_gap_up(close, high, low, vol, wide_from_long(long, "open"), universe, cfg)
+    else:
+        setup_frames["scanner_gap_up"] = pd.DataFrame()
     log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, breakdown %d, flag %d, Qullamaggie %d, Marios %d, high volume %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
         _n(setup_frames["scanner_box"]), _n(setup_frames.get("scanner_breakdown")),
@@ -2211,6 +2218,11 @@ def main(argv=None):
         )
     else:
         buy = pd.DataFrame()
+    if gap_on:
+        # Gap Up does not feed Buy setups. It only names the other scanners each stock is on.
+        setup_frames["scanner_gap_up"] = gap_up.attach_other_scanners(setup_frames.get("scanner_gap_up"), dict(
+            setup_frames, scanner_growth=g, scanner_quality=q, scanner_dividend=d, scanner_wheel=w), cfg)
+    log("Gap up", "OK", asof if gap_on else "", ("Gap up rows %d. Cached daily bars only. No new downloads." % _n(setup_frames["scanner_gap_up"])) if gap_on else "feature off")
     log("Buy setups", "OK", asof, "Buy setups %d. Research list only. Built from the scanners already on the desk. No new downloads." % _n(buy))
     opt_on = features.get("options", True)
     ideas = pd.DataFrame()
@@ -2289,6 +2301,7 @@ def main(argv=None):
         "scanner_qullamaggie": gated(setup_frames.get("scanner_qullamaggie"), "scanner_qullamaggie", features.get("scanner_qullamaggie", True), "No Qullamaggie setups in the cached prices."),
         "scanner_marios": gated(setup_frames.get("scanner_marios"), "scanner_marios", features.get("scanner_marios", True), "No Marios setups in the cached prices."),
         "scanner_ep": gated(setup_frames.get("scanner_ep"), "scanner_ep", features.get("scanner_ep", True), "No episodic pivots in the cached prices. An EP needs a gap of 10% or more on at least 3 times normal volume."),
+        "scanner_gap_up": gated(setup_frames.get("scanner_gap_up"), "scanner_gap_up", features.get("scanner_gap_up", True), "No holding gap ups in the last 21 trading days of cached prices."),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),

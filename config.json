@@ -60,6 +60,7 @@
     "scanner_qullamaggie": true,
     "scanner_marios": true,
     "scanner_ep": true,
+    "scanner_gap_up": true,
     "chart_viewer": true,
     "light_mode": true
   },
@@ -79,6 +80,7 @@
     "include_closed": false,
     "include_buy_setups": true,
     "include_watchlist": true,
+    "include_gap_up": true,
     "scanner_links": true,
     "fullscreen": true,
     "native_fullscreen_ios": false,
@@ -176,6 +178,25 @@
     "nick_min_catalyst_score": 2,
     "nick_require_flat_base": false,
     "nick_flat_base_grade": "A"
+  },
+  "gap_up": {
+    "_note": "Gap Up scanner (gap-up.html). A true gap: the open is above the previous day's high, any size (true_gap_only off measures from the previous close instead). Gap % is open divided by the previous high, minus 1; the gap over the previous close is shown too. Gap-day volume must be at least vol_mult times the average of the vol_avg_days sessions before the gap day. The last close must be at least min_price dollars, and the average daily traded value (close times volume) over the last liquidity_days sessions at least min_dollar_volume, the same $3 million 50-day floor the Episodic Pivot scan uses. Hold rule: no close since the gap day below the gap day's low; a close equal to the low still holds. Gap days come from the last lookback_days trading days, today included, and the newest holding gap is the row. skip_stale leaves out a stock whose last bar is older than SPY's. Gap Up does not feed Buy setups. Every rule has an on/off switch. Cached daily bars only. No new downloads. Turn the whole page off with features.scanner_gap_up.",
+    "lookback_days": 21,
+    "true_gap_only": true,
+    "min_gap_pct": 0.0,
+    "volume_filter": true,
+    "vol_mult": 1.5,
+    "vol_avg_days": 50,
+    "price_floor": true,
+    "min_price": 5.0,
+    "liquidity_floor": true,
+    "liquidity_days": 50,
+    "min_dollar_volume": 3000000.0,
+    "hold_rule": true,
+    "skip_stale": true,
+    "sma_fast": 50,
+    "sma_slow": 200,
+    "show_other_scanners": true
   },
   "qullamaggie": {
     "_note": "Qullamaggie breakout scan on cached daily bars. Every rule has an on/off switch and its numbers here. Percents are whole numbers (3.5 means 3.5%). Prices and money are in US dollars. Marios uses these for the shared rules unless the marios block sets its own.",

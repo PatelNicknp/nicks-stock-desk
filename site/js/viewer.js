@@ -11,6 +11,7 @@
     { id: "qullamaggie", label: "Qullamaggie breakout", short: "Qullamaggie", file: "scanner_qullamaggie.csv", kind: "pattern", feature: "feature.scanner_qullamaggie", scanner: true },
     { id: "marios", label: "Marios breakout", short: "Marios", file: "scanner_marios.csv", kind: "pattern", feature: "feature.scanner_marios", scanner: true },
     { id: "ep", label: "Episodic pivot", short: "EP", file: "scanner_ep.csv", kind: "pattern", feature: "feature.scanner_ep", scanner: true },
+    { id: "gapup", label: "Gap Up", short: "Gap Up", file: "scanner_gap_up.csv", kind: "gap", feature: "feature.scanner_gap_up", scanner: true },
     { id: "leaders", label: "Leaders", short: "Leaders", file: "scanner_leaders.csv", kind: "pattern", feature: "feature.scanner_leaders", scanner: true },
     { id: "breakdowns", label: "Breakdowns", short: "Breakdown", file: "scanner_breakdown.csv", kind: "pattern", feature: "feature.scanner_breakdown", scanner: true },
     { id: "volume", label: "High volume", short: "High volume", file: "scanner_volume.csv", kind: "volume", feature: "feature.scanner_volume", scanner: true },
@@ -22,7 +23,7 @@
   ];
   const STATUS_RANK = {
     "BROKEN OUT today": 0, "BROKEN DOWN today": 0, "EP TODAY - CONFIRMED": 0, "NEW HIGH ON VOLUME": 0,
-    "READY": 1, "EP TODAY - FORMING": 1, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "BUYING": 1,
+    "READY": 1, "EP TODAY - FORMING": 1, "GAP UP today": 1, "GAP HOLDING": 2, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "BUYING": 1,
     "IN TRADE": 2, "NEAR HIGH": 2, "SELLING": 2, "ON WATCHLIST": 2,
     "DELAYED EP WATCH": 3, "NEW LOW": 3, "WATCHING": 4, "EP FADED": 5, "CLOSED": 6,
     // VCP rows under 8 of 8 (vcp.show_weaker_trend on). They rank under plain WATCHING.
@@ -76,6 +77,14 @@
       // WATCHING and its labeled kinds, such as WATCHING (trend not 8/8), follow include_watching.
       if (isWatching(status) && !opts.includeWatching) return null;
       return { status: status, reason: txt(row.reason) };
+    }
+    if (list.kind === "gap") {
+      // Every Gap Up row is a gap that still holds (no close under the gap-day low).
+      const status = txt(row.status) || "GAP HOLDING";
+      const pct = numOf(row.gap_pct);
+      const reason = txt(row.reason) || ("Gapped up" + (pct == null ? "" : " " + fmt2(pct) + "%") + " over the prior day's high" +
+        (txt(row.gap_date) ? " on " + txt(row.gap_date) : "") + " and has not closed under the gap-day low.");
+      return { status: status, reason: reason };
     }
     if (list.kind === "pass") {
       if (!yes(row.passes)) return null;
@@ -133,6 +142,7 @@
       if (!on(list.feature)) return;
       if (list.kind === "buy" && opts.includeBuySetups === false) return;
       if (list.kind === "watch" && opts.includeWatchlist === false) return;
+      if (list.kind === "gap" && opts.includeGapUp === false) return;
       const rows = files[list.file] || [];
       const items = [];
       const seen = {};
@@ -147,10 +157,12 @@
         if (list.scanner) it.count += 1;
         const st = numOf(row.strength);
         if (list.kind === "pattern" && st != null && (it.strength == null || st > it.strength)) it.strength = st;
-        items.push({ t: t, rank: rankOf(e.status), strength: numOf(row.strength), vol: numOf(row.volume_ratio) });
+        items.push({ t: t, rank: rankOf(e.status), strength: numOf(row.strength), vol: numOf(row.volume_ratio), pos: items.length });
       });
       if (list.kind === "watch" && !items.length) return;
       items.sort((a, b) => {
+        // Gap Up keeps its file order: newest gap first, then the bigger gap.
+        if (list.kind === "gap") return a.pos - b.pos;
         if (a.rank !== b.rank) return a.rank - b.rank;
         const sa = list.kind === "volume" ? a.vol : a.strength;
         const sb = list.kind === "volume" ? b.vol : b.strength;
@@ -265,7 +277,7 @@
     { n: 150, color: "#F59E0B" },
     { n: 200, color: "#E879F9" },
   ];
-  const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING/;
+  const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING|GAP UP|GAP HOLDING/;
   const WARN = /WATCH|NEAR HIGH|QUIET|ON WATCHLIST|DAY 2-5/;
   const BAD = /BROKEN DOWN|SELLING|NEW LOW|FADED/;
   function statusColor(s) {
@@ -318,6 +330,7 @@
       includeClosed: on("include_closed"),
       includeBuySetups: on("include_buy_setups"),
       includeWatchlist: on("include_watchlist"),
+      includeGapUp: on("include_gap_up"),
     });
     const params = new URLSearchParams(location.search);
     let list = built.lists.find((l) => l.id === params.get("list")) || built.lists[0];

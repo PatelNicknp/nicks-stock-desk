@@ -182,6 +182,27 @@ eq(V.useNativeFullscreen(false, true), true, "computers keep native full screen 
 eq(V.useNativeFullscreen(true, false), false, "iPhone and iPad use the overlay by default");
 eq(V.useNativeFullscreen(true, true), true, "native_fullscreen_ios true brings back Safari's full screen");
 
+// Gap Up list: in the picker and in All scanner stocks, file order kept, chart_viewer.include_gap_up switch.
+const gapFiles = {
+  "scanner_vcp.csv": [{ ticker: "AAA", status: "READY", strength: "80", reason: "Tight." }],
+  "scanner_gap_up.csv": [
+    { ticker: "ZZZ", status: "GAP UP today", gap_date: "2026-10-29", gap_pct: "1.2", reason: "Gapped up 1.20% over the prior day's high on 2026-10-29, today." },
+    { ticker: "AAA", status: "GAP HOLDING", gap_date: "2026-10-20", gap_pct: "6.5", reason: "" },
+  ],
+};
+eq(V.LISTS.some((l) => l.id === "gapup" && l.label === "Gap Up" && l.file === "scanner_gap_up.csv" && l.scanner), true, "Gap Up is a scanner list");
+built = V.buildLists(gapFiles, { featureOn: allOn, includeWatching: true });
+eq(built.lists.find((l) => l.id === "gapup").items, ["ZZZ", "AAA"], "Gap Up keeps its newest-first file order");
+eq(built.lists[0].items, ["AAA", "ZZZ"], "All scanner stocks counts Gap Up as a scanner");
+eq(built.info.AAA.count, 2, "AAA is on VCP and Gap Up");
+eq(built.info.ZZZ.entries[0].label + " " + built.info.ZZZ.entries[0].status, "Gap Up GAP UP today", "Gap Up reason box label and status");
+eq(built.info.AAA.entries.find((e) => e.list === "gapup").reason, "Gapped up 6.50% over the prior day's high on 2026-10-20 and has not closed under the gap-day low.", "Gap Up reason falls back to plain words");
+built = V.buildLists(gapFiles, { featureOn: allOn, includeWatching: true, includeGapUp: false });
+eq(built.lists.some((l) => l.id === "gapup"), false, "include_gap_up false drops the list");
+eq(built.lists[0].items, ["AAA"], "include_gap_up false drops Gap Up stocks from All");
+built = V.buildLists(gapFiles, { featureOn: (k) => k !== "feature.scanner_gap_up", includeWatching: true });
+eq(built.lists.some((l) => l.id === "gapup"), false, "features.scanner_gap_up off drops the list");
+
 if (fails.length) {
   console.log(fails.join("\n"));
   process.exit(1);

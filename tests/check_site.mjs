@@ -22,7 +22,7 @@ const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v3";
 const pages = [
   "index.html", "top-stocks.html", "chart-viewer.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
   "growth.html", "quality.html", "dividend.html", "wheel.html", "vcp.html", "canslim.html",
-  "box.html", "flag.html", "qullamaggie.html", "marios.html", "episodic-pivot.html", "breakdowns.html", "volume.html", "leaders.html", "earnings-calendar.html", "earnings-heatmap.html",
+  "box.html", "flag.html", "qullamaggie.html", "marios.html", "episodic-pivot.html", "gap-up.html", "breakdowns.html", "volume.html", "leaders.html", "earnings-calendar.html", "earnings-heatmap.html",
   "earnings-cards.html", "put-call.html", "walls.html", "analysts.html", "thirteen-f.html", "aaii.html",
   "insiders.html", "headlines.html", "xly-xlp.html", "financials.html", "earnings-tracker.html",
   "company-financials.html", "dividend-fundamentals.html", "macro.html", "sector-macro.html",

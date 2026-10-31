@@ -37,6 +37,7 @@ jobs:
           python tests/test_setups.py
           python tests/test_qullamaggie_marios.py
           python tests/test_episodic_pivot.py
+          python tests/test_gap_up.py
       - name: Update the desk
         run: |
           set -e
