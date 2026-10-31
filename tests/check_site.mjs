@@ -210,6 +210,33 @@ for (const file of pages) {
   process.stdout.write((errors.length ? "FAIL " : "ok   ") + file + "\n");
 }
 
+// Light mode: the saved pick turns the page light, and the page still renders with no errors.
+for (const file of ["index.html", "chart-viewer.html", "vcp.html"]) {
+  const ctx = await browser.newContext({ viewport: { width: 1180, height: 820 } });
+  await ctx.addInitScript(() => { try { localStorage.setItem("desk-theme", "light"); } catch (e) { /* ignore */ } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (err) => errors.push(String(err)));
+  try {
+    await page.goto(new URL(file, base).href, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.waitForSelector("body[data-ready='1']", { timeout: 90000 });
+    const look = await page.evaluate(() => ({
+      theme: document.documentElement.getAttribute("data-theme"),
+      bg: getComputedStyle(document.body).backgroundColor,
+      picks: document.querySelectorAll("[data-theme-pick]").length,
+    }));
+    if (look.theme !== "light") errors.push("light pick did not apply: " + look.theme);
+    if (!/rgb\(244, 246, 250\)/.test(look.bg)) errors.push("light background is " + look.bg);
+    if (look.picks !== 3) errors.push("theme switch has " + look.picks + " choices");
+    await page.screenshot({ path: path.join(outDir, file.replace(".html", "") + "-light.png") });
+  } catch (err) {
+    errors.push(String(err));
+  }
+  if (errors.length) failures.push({ file: file + " (light)", errors });
+  process.stdout.write((errors.length ? "FAIL " : "ok   ") + file + " (light)\n");
+  await ctx.close();
+}
+
 await browser.close();
 fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify({ failures }, null, 2));
 if (failures.length) {

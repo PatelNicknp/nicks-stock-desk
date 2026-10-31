@@ -6,6 +6,111 @@
   const AC = "#7C9CFF";
   const MU = "#8B96AD";
   const TX = "#E6EBF5";
+  // ---------- Light mode ----------
+  // The CSS swaps its color variables on html[data-theme=light]. Colors written by the page scripts (inline styles,
+  // Chart.js and price-chart canvases) are swapped through LIGHT_MAP, so every page and chart reads on white.
+  const LIGHT_MAP = {
+    "#0b0f17": "#FFFFFF", "#121826": "#FFFFFF", "#0f1420": "#F8FAFC", "#1a2236": "#EAF0FB", "#1e293b": "#E2E8F0", "#161e2e": "#EEF1F6",
+    "#2a3550": "#CBD5E1", "#334155": "#CBD5E1", "#3a4560": "#A0AEC0", "#3a4a6b": "#94A3B8",
+    "#e6ebf5": "#111827", "#c3cbdb": "#475569", "#8b96ad": "#566176", "#5b6680": "#6B7280", "#94a3b8": "#64748B",
+    "#7c9cff": "#3355D1", "#f59e0b": "#A44A06", "#22c55e": "#137336", "#ef4444": "#C81E1E", "#d6a64a": "#8A5A06",
+    "#1f9d55": "#16A34A", "#d14343": "#C81E1E",
+    "#166534": "#86EFAC", "#14532d": "#BBF7D0", "#283146": "#E5E7EB", "#7f1d1d": "#FECACA", "#b91c1c": "#FCA5A5",
+    "#e879f9": "#C026D3", "#38bdf8": "#0284C7", "#f472b6": "#DB2777", "#34d399": "#059669", "#fb923c": "#EA580C",
+    "#a78bfa": "#7C3AED", "#fb7185": "#E11D48", "#fbbf24": "#CA8A04", "#2dd4bf": "#0D9488", "#c084fc": "#9333EA",
+  };
+  const THEME_KEY = "desk-theme";
+  let LIGHT = false;
+  function lightColor(v) {
+    if (!LIGHT || typeof v !== "string" || v.indexOf("#") < 0) return v;
+    return v.replace(/#[0-9a-fA-F]{6}(?![0-9a-fA-F])/g, (m) => LIGHT_MAP[m.toLowerCase()] || m);
+  }
+  function themed(obj) {
+    if (!LIGHT) return obj;
+    if (typeof obj === "string") return lightColor(obj);
+    if (typeof obj === "function") {
+      const fn = obj;
+      return function () { return themed(fn.apply(this, arguments)); };
+    }
+    if (Array.isArray(obj)) return obj.map(themed);
+    if (obj && typeof obj === "object" && Object.getPrototypeOf(obj) === Object.prototype) {
+      const out = {};
+      Object.keys(obj).forEach((k) => { out[k] = themed(obj[k]); });
+      return out;
+    }
+    return obj;
+  }
+  // A price chart whose series and price lines take light colors too.
+  function themedChart(chart) {
+    if (!LIGHT || !chart || chart._themed) return chart;
+    chart._themed = true;
+    const add = chart.addSeries.bind(chart);
+    chart.addSeries = function (type, opts, pane) {
+      const series = pane == null ? add(type, themed(opts || {})) : add(type, themed(opts || {}), pane);
+      const line = series.createPriceLine && series.createPriceLine.bind(series);
+      if (line) series.createPriceLine = (o) => line(themed(o));
+      const apply = series.applyOptions.bind(series);
+      series.applyOptions = (o) => apply(themed(o));
+      return series;
+    };
+    return chart;
+  }
+  function storedTheme() {
+    try {
+      const v = localStorage.getItem(THEME_KEY);
+      if (v === "dark" || v === "light" || v === "auto") return v;
+    } catch (e) { /* storage can be blocked */ }
+    return "";
+  }
+  const deviceLight = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-color-scheme: light)") : null;
+  function resolveTheme(choice) {
+    if (choice === "light") return "light";
+    if (choice === "auto") return deviceLight && deviceLight.matches ? "light" : "dark";
+    return "dark";
+  }
+  function applyTheme(choice) {
+    LIGHT = resolveTheme(choice) === "light";
+    document.documentElement.setAttribute("data-theme", LIGHT ? "light" : "dark");
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", LIGHT ? "#F4F6FA" : "#0B0F17");
+    if (LIGHT) recolor(document.body);
+  }
+  function recolorEl(el) {
+    const st = el.getAttribute && el.getAttribute("style");
+    if (!st || st.indexOf("#") < 0) return;
+    const next = lightColor(st);
+    if (next !== st) el.setAttribute("style", next);
+  }
+  function recolor(root) {
+    if (!LIGHT || !root || root.nodeType !== 1) return;
+    recolorEl(root);
+    root.querySelectorAll("[style]").forEach(recolorEl);
+  }
+  // Canvas drawing (Chart.js, the price charts, custom plugins) goes through these setters.
+  (function patchCanvas() {
+    if (typeof CanvasRenderingContext2D === "undefined") return;
+    ["fillStyle", "strokeStyle", "shadowColor"].forEach((prop) => {
+      const d = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, prop);
+      if (!d || !d.set || !d.configurable) return;
+      Object.defineProperty(CanvasRenderingContext2D.prototype, prop, {
+        configurable: true,
+        enumerable: d.enumerable,
+        get: d.get,
+        set: function (v) { d.set.call(this, lightColor(v)); },
+      });
+    });
+  })();
+  if (typeof MutationObserver !== "undefined") {
+    new MutationObserver((list) => {
+      if (!LIGHT) return;
+      list.forEach((m) => {
+        if (m.type === "attributes") recolorEl(m.target);
+        else m.addedNodes.forEach((n) => recolor(n));
+      });
+    }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["style"] });
+  }
+  applyTheme(storedTheme() || "dark");
+
   const RESEARCH = "Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts.";
   const NAV = [
     ["Overview", [
@@ -1544,7 +1649,7 @@
       MA_DEFS.forEach((def) => { averages[def.id] = maSeries(closes, def); });
       const byDate = new Map();
       bars.forEach((b, i) => byDate.set(b.date, i));
-      const chart = LC.createChart(host, {
+      const chart = themedChart(LC.createChart(host, themed({
         autoSize: true,
         layout: {
           background: { type: "solid", color: "#121826" },
@@ -1561,7 +1666,7 @@
         handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
         handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: true, mouse: false },
-      });
+      })));
       panel._tv = chart;
       tvCharts.push(chart);
       const priceOpts = { priceLineVisible: false, lastValueVisible: true };
@@ -1579,7 +1684,7 @@
         priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false,
       }, 1);
       vol.setData(bars.filter((b) => b.v != null).map((b) => ({
-        time: b.date, value: b.v, color: b.c >= b.o ? "rgba(34,197,94,.65)" : "rgba(239,68,68,.65)",
+        time: b.date, value: b.v, color: b.c >= b.o ? (LIGHT ? "rgba(21,128,61,.6)" : "rgba(34,197,94,.65)") : (LIGHT ? "rgba(220,38,38,.6)" : "rgba(239,68,68,.65)"),
       })));
       if (volAvg) {
         const avgLine = chart.addSeries(LC.LineSeries, {
@@ -1915,6 +2020,49 @@
     window.addEventListener("resize", position);
     deskList().catch(() => {});
   }
+  function themeChoice() {
+    if (!featureOn("feature.light_mode")) return "dark";
+    const saved = storedTheme();
+    const def = String(settingVal("light_mode.default_theme") || "dark").toLowerCase();
+    let choice = saved || (def === "light" ? "light" : def === "device" || def === "auto" ? "auto" : "dark");
+    if (choice === "auto" && !themeDeviceOn()) choice = "dark";
+    return choice;
+  }
+  function themeDeviceOn() {
+    const v = settingVal("light_mode.match_device_option");
+    return v == null || String(v).toLowerCase() !== "false";
+  }
+  function themeHtml() {
+    if (!featureOn("feature.light_mode")) return "";
+    const choice = themeChoice();
+    const btn = (v, label) => '<button type="button" data-theme-pick="' + v + '" aria-pressed="' + (choice === v ? "true" : "false") + '"' +
+      (choice === v ? ' class="on"' : "") + ">" + esc(label) + "</button>";
+    return '<div class="themebox"><span class="themelab">Theme</span><div class="themeseg" role="group" aria-label="Theme">' +
+      btn("dark", "Dark") + btn("light", "Light") + (themeDeviceOn() ? btn("auto", "Match device") : "") + "</div></div>";
+  }
+  function wireTheme() {
+    const box = document.querySelector(".themeseg");
+    if (box) box.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-theme-pick]");
+      if (!b) return;
+      const v = b.getAttribute("data-theme-pick");
+      try { localStorage.setItem(THEME_KEY, v); } catch (err) { /* ignore */ }
+      // Charts are already drawn in the old colors, so redraw the page. The data files come back from the browser cache.
+      if (resolveTheme(v) !== (LIGHT ? "light" : "dark")) location.reload();
+      else {
+        box.querySelectorAll("[data-theme-pick]").forEach((x) => {
+          const onNow = x === b;
+          x.classList.toggle("on", onNow);
+          x.setAttribute("aria-pressed", onNow ? "true" : "false");
+        });
+      }
+    });
+    if (deviceLight && deviceLight.addEventListener) {
+      deviceLight.addEventListener("change", () => {
+        if (themeChoice() === "auto" && resolveTheme("auto") !== (LIGHT ? "light" : "dark")) location.reload();
+      });
+    }
+  }
   function renderShell(page) {
     const groups = NAV.map(([name, items]) => {
       const shown = navOn(items);
@@ -1933,7 +2081,7 @@
       '<div class="app"><nav class="nav" id="nav"><a class="brand" href="index.html"><span class="logo">N</span>Nick\'s Stock Desk</a>' +
       '<div id="qslot"><div class="qwrap" id="search"><input id="q" type="search" placeholder="Search stocks" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="Search stocks" role="combobox" aria-autocomplete="list" aria-controls="qlist" aria-expanded="false" title="Search stocks. Press / or Ctrl+K">' +
       '<div class="qpop" id="qlist" role="listbox" hidden></div></div></div>' +
-      groups + "</nav><div class=\"main\"><div class=\"hdr\">" +
+      themeHtml() + groups + "</nav><div class=\"main\"><div class=\"hdr\">" +
       '<button type="button" class="menu-btn" id="menu" aria-label="Open menu" aria-controls="nav" aria-expanded="false">☰</button>' +
       '<button type="button" class="search-btn" id="qbtn" aria-label="Search stocks" aria-expanded="false" aria-controls="q">' + SEARCH_ICON + "</button>" +
       "<div class=\"titles\"><h1>" + esc(page.title) + "</h1><div class=\"rl\">" + esc(RESEARCH) + "</div></div>" +
@@ -1981,6 +2129,7 @@
       if (e.target.closest("a.item")) setNav(false);
     });
     wireSearch(setNav);
+    wireTheme();
   }
 
   function findPage(id) {
@@ -2093,6 +2242,7 @@
       const loaded = {};
       await Promise.all(unique.map(async (n) => { loaded[n] = await loadCsv(n); }));
       SETTINGS = loaded["settings.csv"] || [];
+      applyTheme(themeChoice());
       await loadBlurbs();
       renderShell(meta);
       const mt = loaded["market_today.csv"];
@@ -2131,6 +2281,7 @@
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
     loadCsv: loadCsv, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
+    themed: themed, themedChart: themedChart, isLight: () => LIGHT,
     settingVal: settingVal, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
   };
