@@ -934,6 +934,91 @@
     },
   });
 
+  const qmStatus = ["READY", "BROKEN OUT today", "IN TRADE"];
+  const qmHead = [TK, CO, T("index_membership", "Index"), T("status", "Status", "setup"), PR,
+    T("pivot", "Buy point (base high)", "num", { dec: 2 }), T("entry", "Entry (fill)", "num", { dec: 2 }),
+    T("stop", "Stop", "num", { dec: 2, tone: "stop" }), T("stop_basis", "Stop from"),
+    T("stop_check", "Stop check"), T("stop_adr", "Stop in ADRs", "num", { dec: 2 }),
+    T("risk_pct", "Risk %", "pct", { dec: 1, color: false }), T("shares", "Shares (0.5% risk)", "num", { dec: 0 }),
+    T("strength", "Strength", "strengthbar"),
+    T("adr_pct", "ADR %", "pct", { dec: 2, color: false }), T("adr_tag", "ADR tag"),
+    T("leader_top_pct", "Return rank, top %", "num", { dec: 1 }), T("leader_window", "Rank on days", "num", { dec: 0 }),
+    T("run_pct", "Run before base %", "pct", { dec: 1, color: false }), T("run_days", "Run days", "num", { dec: 0 }),
+    T("base_days", "Base days", "num", { dec: 0 }), T("base_range_pct", "Base range %", "pct", { dec: 1, color: false }),
+    T("higher_lows", "Higher lows", "flag"), T("dry_up", "Volume dried up", "flag"),
+    T("confirmed_close", "Closed above buy point", "flag"), T("volume_ratio", "Volume vs prior 50-day", "volx", { dec: 2 }),
+    T("volume_flag", "Big volume", "flag")];
+  const qmTail = [T("breakout_date", "Breakout day"), T("days_in_trade", "Days in trade", "num", { dec: 0 }),
+    T("exit_reason", "Closed because"), T("exit_date", "Closed on"),
+    T("market_light", "Market light"), T("earnings_soon", "Earnings within 5 days", "flag", { yes: "#F59E0B" }),
+    T("traded_value_usd_m", "20-day $ volume ($M)", "num", { dec: 1 }),
+    T("freshness", "Data", "fresh")];
+  function qmCards(all) {
+    return card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
+      card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
+      card("In a trade", String(countWhere(all, (r) => r.status === "IN TRADE"))) +
+      card("Closed", String(countWhere(all, (r) => r.status === "CLOSED"))) +
+      card("Watching", String(countWhere(all, (r) => r.status === "WATCHING")));
+  }
+  function qmBaseLines(row) {
+    const lines = setupLines(row).filter((l) => l.label.indexOf("Target") !== 0);
+    if (!row) return lines;
+    if (D.num(row.entry) != null && D.num(row.entry) !== D.num(row.pivot)) lines.push({ value: D.num(row.entry), color: "#E6EBF5", label: "Entry (fill) " + D.fmt(row.entry, 2) });
+    return lines;
+  }
+  function qmLines(row) {
+    const lines = qmBaseLines(row);
+    if (!row) return lines;
+    const trail20 = String(row.trail_with || "").indexOf("20") === 0;
+    if (D.num(row.trail10) != null) lines.push({ value: D.num(row.trail10), color: "#7C9CFF", label: (trail20 ? "10-day " : "Trail 10-day ") + D.fmt(row.trail10, 2) });
+    if (D.num(row.trail20) != null) lines.push({ value: D.num(row.trail20), color: "#A78BFA", label: (trail20 ? "Trail 20-day " : "20-day ") + D.fmt(row.trail20, 2) });
+    return lines;
+  }
+  const qullamaggie = patternPage({
+    file: "scanner_qullamaggie.csv",
+    caption: "",
+    filters: { status: true, statusDefault: qmStatus, index: true, sector: true, ticker: true,
+      single: [{ key: "stop_check", label: "Stop check" }, { key: "trail_signal", label: "Trail signal" }] },
+    columns: qmHead.concat([T("partial_flag", "Sell 1/3 to 1/2"), T("trail_with", "Trail with"),
+      T("trail", "Trail line", "num", { dec: 2 }), T("trail_signal", "Trail signal", "setup")], qmTail),
+    price: qmLines,
+    priceSub: "Buy point, entry, stop, and today's 10 and 20-day average lines",
+    cards: qmCards,
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name and the plan</div>' + whyLines(row ? [row] : []) + "</div>";
+    },
+  });
+
+  function mariosLines(row) {
+    const lines = qmBaseLines(row);
+    if (!row) return lines;
+    if (D.num(row.target_low) != null) lines.push({ value: D.num(row.target_low), color: "#22C55E", label: "Sell part at " + D.fmt(row.target_low, 2) + " (2.5 ADR)" });
+    if (D.num(row.target_high) != null) lines.push({ value: D.num(row.target_high), color: "#22C55E", label: "3 ADR " + D.fmt(row.target_high, 2) });
+    if (D.num(row.trail10) != null) lines.push({ value: D.num(row.trail10), color: "#7C9CFF", label: "10-day " + D.fmt(row.trail10, 2) });
+    if (D.num(row.trail20) != null) lines.push({ value: D.num(row.trail20), color: "#A78BFA", label: "20-day " + D.fmt(row.trail20, 2) });
+    return lines;
+  }
+  const marios = patternPage({
+    file: "scanner_marios.csv",
+    caption: "",
+    filters: { status: true, statusDefault: qmStatus, index: true, sector: true, ticker: true,
+      single: [{ key: "stop_check", label: "Stop check" }, { key: "trail_signal", label: "Trail signal" }] },
+    columns: qmHead.concat([T("weak_close", "Weak day-1 close", "flag", { yes: "#EF4444" }),
+      T("target_low", "Sell 1/4 to 1/3 at (2.5 ADR)", "num", { dec: 2, tone: "target" }),
+      T("target_high", "3 ADR level", "num", { dec: 2, tone: "target" }),
+      T("partial_hit", "Partial hit", "flag"), T("partial_date", "Partial day"),
+      T("trail10", "10-day line", "num", { dec: 2 }), T("trail20", "20-day line", "num", { dec: 2 }),
+      T("trail_signal", "Trail signal", "setup"), T("sold_third_date", "Sold 1/3 of rest on")], qmTail),
+    price: mariosLines,
+    priceSub: "Buy point, entry, stop, sell-part levels, and the 10 and 20-day lines",
+    cards(all) {
+      return qmCards(all) + card("Sell 1/3 today", String(countWhere(all, (r) => r.trail_signal === "SELL 1/3")));
+    },
+    detail(row) {
+      return '<div class="panel pad"><div class="ptitle">Why this name and the plan</div>' + whyLines(row ? [row] : []) + "</div>";
+    },
+  });
+
   const breakdowns = patternPage({
     file: "scanner_breakdown.csv",
     caption: "Desk rule: close under the 50-day and the 50-day under the 200-day, with the 200-day not rising. A 20 to 60 day base that tightens, then a close under the base low on volume at least 1.4 times the 50-day average. The stop on the chart is the base high.",
@@ -1993,12 +2078,12 @@
       '<div class="cards" id="cards"></div>' +
       '<div class="ctrls" id="ctrls"></div>' +
       '<div class="panel" id="tbl"></div>' +
-      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Tap a row for the reason, the trade plan, and the price chart. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
+      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, Qullamaggie, Marios, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Qullamaggie and Marios rows marked Too wide, skip are left out. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Tap a row for the reason, the trade plan, and the price chart. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
     const box = document.getElementById("ctrls");
     box.innerHTML =
       D.multiHtml("index", "Index", D.indexTokens(named)) +
       D.multiHtml("sector", "Sector", D.uniq(named, "sector")) +
-      D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "CANSLIM"]) +
+      D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "CANSLIM"]) +
       D.multiHtml("status", "Status", D.uniq(named, "status")) +
       D.searchHtml("ticker", "Ticker", "tick-list-buy", D.uniq(named, "ticker"));
     D.placeFeed(box, raw);
@@ -2775,7 +2860,7 @@
   // Wording follows the rules in setups.py, tables.py, and scoring.py. Numbers in {braces} come from settings.csv.
   const DESC = {
     top: "Every stock on the desk, ranked by its score. The score adds points for things like faster sales growth than usual, a cheaper price than usual, and a rising price trend. A score of {buy_at} or more is usually BUY; tap a row to see the entry zone, stop, and target on the chart.",
-    buysetups: "Stocks where VCP, Box, Flag, or CANSLIM is ready or broke out today, the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
+    buysetups: "Stocks where VCP, Box, Flag, Qullamaggie, Marios, or CANSLIM is ready or broke out today (Qullamaggie and Marios only when the stop is not too wide), the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
     growth: "Stocks whose sales grew at least {growth_min_pct}%, leaving out anything rated AVOID. Fast-growing sales often push a stock up over time. Compare the EPS growth and the vs S&P 500 columns to see if profits and the price are keeping up.",
     quality: "Stocks whose return on equity is above their own past level and whose debt is less than {quality_max_de} times their equity, leaving out AVOID. That means the company earns more on its money than usual without borrowing a lot. These tend to be steadier businesses to hold.",
     dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
@@ -2784,6 +2869,8 @@
     canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, strength versus SPY, fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and beating at least 55% of the desk's stocks. Any letter we could not check says not verified.",
     box: "Stocks that moved sideways in a tight range (10% or less) for 15 to 40 days. A tight range means buyers and sellers are in balance. BROKEN OUT today means it closed above the top of the box on at least 1.5 times normal volume; the stop is the bottom of the box.",
     flag: "Stocks that jumped at least 15% in 3 to 12 days, then rested for 3 to 15 days without giving back half of that jump. A short rest after a big run often comes before another leg up. BROKEN OUT today means it closed above the rest area on at least 1.5 times normal volume.",
+    qullamaggie: "Finds fast-moving leader stocks the way trader Kristjan Kullamagi (Qullamaggie) does. The stock must be in the top 3% of gainers over 1, 3, or 6 months, move at least 3.5% a day on average, have run up at least 30%, and then rest for 2 to 8 weeks in a tight range with higher lows. READY means the price is just under the top of that rest area. BROKEN OUT today means today's high went above it; the stop is today's low. If that stop is more than one normal day's move away, it says Too wide, skip. IN TRADE and CLOSED follow each breakout: sell 1/3 to 1/2 after 3 to 5 days, move the stop to the buy price, then sell the rest on the first close under the 10-day average.",
+    marios: "Same idea as the Qullamaggie page, using trader Marios Stamatoudis's rules. The stock must move at least 2.5% a day on average, have run up before, and then rest quietly with lower volume. BROKEN OUT today means today's high went above the top of the rest area; the stop is today's low, and a stop that is too far away says Too wide, skip. Plan: sell 1/4 to 1/3 once the price is 2.5 normal days' moves above the entry and move the stop to the buy price. A close under the 10-day average sells 1/3 of the rest; a close under the 20-day average sells the rest.",
     breakdowns: "The opposite of a breakout: stocks below a falling or flat 200-day average, with the 50-day under the 200-day, sitting in a tight range. BROKEN DOWN today means it closed under the bottom of the range on heavy volume. Use it to spot stocks to avoid or sell, not to buy.",
     leaders: "Stocks that show up on both VCP (ready or broke out today) and a strict CANSLIM qualify. When two different methods agree, the setup is usually stronger. A name on only one list still shows here, so check which ones agree.",
     week52: "Shows which stocks are at a new 52-week high or low today, using the closing price. Many new highs means the market is healthy; many new lows means it is weak. Pick a tab below to see each group.",
@@ -2916,6 +3003,8 @@
     canslim: canslim,
     box: box,
     flag: flag,
+    qullamaggie: qullamaggie,
+    marios: marios,
     breakdowns: breakdowns,
     volume: { files: ["scanner_volume.csv"], render: renderVolume },
     leaders: leaders,

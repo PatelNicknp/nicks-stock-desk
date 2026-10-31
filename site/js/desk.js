@@ -26,6 +26,8 @@
       ["CANSLIM", "canslim.html", "canslim"],
       ["Box breakout", "box.html", "box"],
       ["Flag breakout", "flag.html", "flag"],
+      ["Qullamaggie breakout", "qullamaggie.html", "qullamaggie"],
+      ["Marios breakout", "marios.html", "marios"],
       ["Breakdowns", "breakdowns.html", "breakdowns"],
       ["High volume", "volume.html", "volume"],
       ["Leaders", "leaders.html", "leaders"],
@@ -288,7 +290,7 @@
     return colored(v, map[v] || TX, true);
   }
   function setupHtml(v) {
-    const map = { "BROKEN OUT today": UP, READY: AM, WATCHING: MU };
+    const map = { "BROKEN OUT today": UP, READY: AM, WATCHING: MU, "IN TRADE": AC, CLOSED: MU, SELL: DN, "SELL 1/3": AM, EXIT: DN, STOPPED: DN, HOLD: MU };
     return colored(v, map[v] || TX);
   }
   function freshHtml(v) {
@@ -1999,6 +2001,8 @@
     canslim: "feature.scanner_canslim",
     box: "feature.scanner_box",
     flag: "feature.scanner_flag",
+    qullamaggie: "feature.scanner_qullamaggie",
+    marios: "feature.scanner_marios",
     breakdowns: "feature.scanner_breakdown",
     volume: "feature.scanner_volume",
     leaders: "feature.scanner_leaders",
