@@ -416,13 +416,20 @@ def _open_trade_ok(state):
     return bool(state["in_trade"] and state.get("entry_score", -1) == 8)
 
 
+def _open_trade_dipped(state):
+    """An open trade whose close is back at or under the buy point."""
+    return bool(state["in_trade"] and state["pivot"] is not None and state["close"] <= state["pivot"])
+
+
 def _vcp_status(state, show_weaker=False):
     """Nick's rule: a stock is listed only at 8 of 8 on the trend template.
 
     BROKEN OUT today: the indicator printed a buy today (8 of 8 and two
     tightening pullbacks, close over the buy point on 1.5x volume).
     READY: 8 of 8 and two tightening pullbacks (the green VCP tag), close at or
-    under the buy point. A one-pullback stock is never READY.
+    under the buy point, and not bought yet. A one-pullback stock is never READY.
+    An open trade is never READY: if it dips back under the buy point it stays
+    WATCHING, keeps in_trade, and the reason says it dipped.
     WATCHING: 8 of 8 and either over the buy point without that breakout today,
     or only one pullback so far, or an open trade whose buy printed at 8 of 8
     (it stays listed even if today's score has dropped).
@@ -431,6 +438,8 @@ def _vcp_status(state, show_weaker=False):
     if state["breakout"] and state["is_vcp"]:
         return "BROKEN OUT today"
     if state["is_vcp"] and state["pivot"] is not None:
+        if state["in_trade"]:
+            return "WATCHING"  # bought already: an open trade under the line is not READY
         return "READY" if state["close"] <= state["pivot"] else "WATCHING"
     if _open_trade_ok(state):
         return "WATCHING"
@@ -466,7 +475,9 @@ def _vcp_reason(state, status, dates):
     elif status == "READY":
         bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price has not closed through the buy point yet.")
     elif status == "WATCHING":
-        if state["is_vcp"] and state["pivot"] is not None and state["close"] > state["pivot"]:
+        if _open_trade_dipped(state):
+            bits.append("This is an open trade that has dipped back under the buy point. It is not READY, because the buy already printed. The trade stays open until the stop or the trail sell closes it.")
+        elif state["is_vcp"] and state["pivot"] is not None and state["close"] > state["pivot"]:
             if not state["big_vol"]:
                 bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
             else:

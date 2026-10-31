@@ -51,7 +51,8 @@ STATES = {
     "ONE": _state(score=8, cnt=1, close=99.0),  # one pullback at 8 of 8: plain WATCHING
     "ONEUP": _state(score=8, cnt=1, close=103.0, big_vol=True),  # over the line, still only one pullback
     "HELD": _state(score=6, cnt=0, close=110.0, in_trade=True, entry_score=8),  # bought at 8 of 8, 6 of 8 now
-    "HELDV": _state(score=8, cnt=2, close=99.0, in_trade=True, entry_score=8),  # open trade back under the line
+    "HELDV": _state(score=8, cnt=2, close=99.0, in_trade=True, entry_score=8),  # open trade back under the line: WATCHING, not READY
+    "HELDO": _state(score=8, cnt=1, close=99.0, in_trade=True, entry_score=8),  # open trade, one pullback now, under the line
     "HELDX": _state(score=7, cnt=0, close=110.0, in_trade=True, entry_score=7),  # buy not at 8 of 8
     "HONA": _state(score=0, cnt=3, close=90.0),
     "SEV": _state(score=7, cnt=2, close=99.0),
@@ -59,7 +60,7 @@ STATES = {
     "ONE5": _state(score=5, cnt=1, close=99.0),  # under the 6/8 floor, never listed
     "NONE": _state(score=8, cnt=0, close=99.0),
 }
-DEFAULT_LISTED = {"ATP": "READY", "BRK": "BROKEN OUT today", "HELD": "WATCHING", "HELDV": "READY", "LOW": "WATCHING",
+DEFAULT_LISTED = {"ATP": "READY", "BRK": "BROKEN OUT today", "HELD": "WATCHING", "HELDV": "WATCHING", "HELDO": "WATCHING", "LOW": "WATCHING",
                   "OLD": "WATCHING", "ONE": "WATCHING", "ONEUP": "WATCHING", "RDY": "READY"}
 WEAK_LISTED = {"HELDX", "HONA", "SEV", "ONE7"}
 
@@ -103,6 +104,18 @@ def test_one_pullback_is_never_ready_or_broken_out():
     assert setups._vcp_status(odd) == "WATCHING"
 
 
+def test_open_trade_is_never_ready():
+    """READY means not bought yet. Any open trade at or under the line is WATCHING."""
+    for score, cnt in ((8, 2), (8, 3), (8, 1)):
+        for close in (90.0, 99.0, 100.0):
+            st = _state(score=score, cnt=cnt, close=close, in_trade=True, entry_score=8)
+            assert setups._vcp_status(st) == "WATCHING", (score, cnt, close)
+            assert setups._vcp_status(st, True) == "WATCHING", (score, cnt, close)
+            assert "dipped back under the buy point" in setups._vcp_reason(st, "WATCHING", DATES)
+    # Same setup without a trade is READY.
+    assert setups._vcp_status(_state(score=8, cnt=2, close=99.0)) == "READY"
+
+
 def test_entry_score_is_saved_on_the_buy_day():
     from test_setups import _vcp_tape
     frame, spy, _ = _vcp_tape(True)
@@ -126,6 +139,11 @@ def test_default_scan_lists_only_8_of_8():
     assert "was 8 of 8 on the buy day. It is 6 of 8 today." in out.loc["HELD", "reason"]
     assert "A trade is still open" in out.loc["HELD", "reason"]
     assert "was 8 of 8 on the buy day" not in out.loc["HELDV", "reason"]
+    for t in ("HELDV", "HELDO"):
+        assert out.loc[t, "status"] == "WATCHING" and out.loc[t, "in_trade"] == "yes"
+        assert "open trade that has dipped back under the buy point" in out.loc[t, "reason"]
+    for t in ("HELD", "LOW", "OLD", "ONE"):
+        assert "dipped back under" not in out.loc[t, "reason"]
     assert list(out.index)[0] == "BRK"
     assert "one pullback so far" in out.loc["ONE", "reason"]
     assert "cannot be READY or BROKEN OUT" in out.loc["ONE", "reason"]
@@ -159,7 +177,9 @@ def test_weaker_and_one_pullback_rows_never_feed_buy_setups_leaders_or_rotation(
                             "score": 9, "verdict": "BUY", "above_sma50": "yes", "above_sma200": "yes"} for t in names])
     sma = {t: True for t in names}
     buy = setups.build_buy_setups(vcp, None, None, None, scores, sma_ok=sma, market={"spy": True, "qqq": True})
-    live = {"RDY", "ATP", "BRK", "HELDV"}
+    live = {"RDY", "ATP", "BRK"}
+    # An open trade that dipped under its buy line is WATCHING, so it is not a READY buy setup.
+    assert "HELDV" not in set(buy["ticker"]) and "HELDO" not in set(buy["ticker"])
     assert set(buy["ticker"]) == live, set(buy["ticker"])
     leaders = setups.combine_leaders(vcp, pd.DataFrame())
     assert set(leaders["ticker"]) == live
@@ -194,11 +214,13 @@ def test_saved_vcp_file_matches_the_switch():
     live = df["status"].isin(["READY", "BROKEN OUT today"])
     assert (df.loc[live, "contractions"].astype(int) >= 2).all()
     assert (df.loc[live, "trend_score"] == "8 of 8").all()
+    assert not ((df["status"] == "READY") & held).any()
 
 
 if __name__ == "__main__":
     test_status_rules_on_fixed_states()
     test_one_pullback_is_never_ready_or_broken_out()
+    test_open_trade_is_never_ready()
     test_entry_score_is_saved_on_the_buy_day()
     test_default_scan_lists_only_8_of_8()
     test_switch_brings_back_only_rows_under_8_of_8_last()
