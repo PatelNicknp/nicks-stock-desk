@@ -180,10 +180,11 @@
     "nick_flat_base_grade": "A"
   },
   "gap_up": {
-    "_note": "Gap Up scanner (gap-up.html). A true gap: the open is above the previous day's high, any size (true_gap_only off measures from the previous close instead). Gap % is open divided by the previous high, minus 1; the gap over the previous close is shown too. Gap-day volume must be at least vol_mult times the average of the vol_avg_days sessions before the gap day. The last close must be at least min_price dollars, and the average daily traded value (close times volume) over the last liquidity_days sessions at least min_dollar_volume, the same $3 million 50-day floor the Episodic Pivot scan uses. Hold rule: no close since the gap day below the gap day's low; a close equal to the low still holds. Gap days come from the last lookback_days trading days, today included, and the newest holding gap is the row. skip_stale leaves out a stock whose last bar is older than SPY's. Gap Up does not feed Buy setups. Every rule has an on/off switch. Cached daily bars only. No new downloads. Turn the whole page off with features.scanner_gap_up.",
+    "_note": "Gap Up scanner (gap-up.html). A true gap: the open is above the previous day's high (true_gap_only off measures from the previous close instead). Gap % is open divided by the previous high, minus 1; the gap over the previous close is shown too. min_gap_filter on keeps only gaps of at least min_gap_pct, a whole percent (3.0 means 3%); off, any size of true gap counts. Gap-day volume must be at least vol_mult times the average of the vol_avg_days sessions before the gap day. The last close must be at least min_price dollars, and the average daily traded value (close times volume) over the last liquidity_days sessions at least min_dollar_volume, the same $3 million 50-day floor the Episodic Pivot scan uses. Hold rule: no close since the gap day below the gap day's low; a close equal to the low still holds. Gap days come from the last lookback_days trading days, today included, and the newest holding gap is the row. skip_stale leaves out a stock whose last bar is older than SPY's. Gap Up does not feed Buy setups. Every rule has an on/off switch. Cached daily bars only. No new downloads. Turn the whole page off with features.scanner_gap_up.",
     "lookback_days": 21,
     "true_gap_only": true,
-    "min_gap_pct": 0.0,
+    "min_gap_filter": true,
+    "min_gap_pct": 3.0,
     "volume_filter": true,
     "vol_mult": 1.5,
     "vol_avg_days": 50,
