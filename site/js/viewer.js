@@ -182,17 +182,42 @@
     return { lists: lists, info: info };
   }
   // Which way a finished touch went: "next", "prev", or "" (not a swipe).
+  // touchPan: the chart moves with one finger ("Drag: move chart"), so a touch that starts on the chart
+  // changes the chart only when it is a quick flick (maxMs or less). onBar: the touch started on the
+  // header or the chip bar, where nothing pans, so any long enough sideways swipe changes the chart.
   function swipeDirection(dx, dy, ms, opts) {
     opts = opts || {};
-    const minPx = opts.minPx > 0 ? opts.minPx : 50;
+    const minPx = opts.minPx > 0 ? opts.minPx : 80;
     const ratio = opts.ratio > 0 ? opts.ratio : 1.5;
-    const maxMs = opts.maxMs > 0 ? opts.maxMs : 700;
+    const maxMs = opts.maxMs > 0 ? opts.maxMs : 300;
     if (Math.abs(dx) < minPx) return "";
     if (Math.abs(dx) < ratio * Math.abs(dy)) return "";
-    if (opts.touchPan && ms > maxMs) return "";
+    if (opts.touchPan && !opts.onBar && !(ms <= maxMs)) return "";
     const right = dx > 0;
     const rightIsNext = opts.rightIsNext !== false;
     return right === rightIsNext ? "next" : "prev";
+  }
+  // First logical bar to show for the last `months` months of bars (dates "YYYY-MM-DD", oldest first).
+  // months 0 or "all" shows every saved bar.
+  function rangeFrom(dates, months) {
+    const n = (dates || []).length;
+    if (!n || months === "all" || !(months > 0)) return 0;
+    const end = new Date(dates[n - 1] + "T00:00:00Z");
+    end.setUTCMonth(end.getUTCMonth() - months);
+    const cut = end.toISOString().slice(0, 10);
+    for (let i = 0; i < n; i++) { if (dates[i] >= cut) return i; }
+    return 0;
+  }
+  // Range chips: label and months (0 is All).
+  const RANGES = [{ id: "3m", label: "3M", months: 3 }, { id: "6m", label: "6M", months: 6 }, { id: "1y", label: "1Y", months: 12 }, { id: "all", label: "All", months: 0 }];
+  // Keep only the last few loaded charts in memory, so swiping through a long list stays light on an iPad.
+  // Returns [new recent list, names to forget].
+  function keepRecent(recent, name, max) {
+    const out = (recent || []).filter((n) => n !== name);
+    out.push(name);
+    const drop = [];
+    while (out.length > Math.max(1, max || 1)) drop.push(out.shift());
+    return [out, drop];
   }
   // How many empty bars to leave on the right so a box of boxPx does not cover the last candles.
   function padBars(visibleBars, plotPx, boxPx) {
@@ -211,7 +236,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, padBars: padBars, rankOf: rankOf };
+  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -234,7 +259,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { include_closed: true, chart_touch_pan: true, ma_10: true, ma_20: true, native_fullscreen_ios: true };
+  const OFF_BY_DEFAULT = { include_closed: true, ma_10: true, ma_20: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -284,11 +309,13 @@
     const startTicker = String(params.get("t") || "").trim().toUpperCase();
     if (startTicker && items.indexOf(startTicker) < 0) items.unshift(startTicker);
     let index = Math.max(0, items.indexOf(startTicker));
-    const touchPan = on("chart_touch_pan");
     const state = {
       ma: maState(),
       vol: on("volume_toggle") ? stored("desk-cv-vol", on("volume")) : on("volume"),
       why: on("reason_box") && (on("reason_box_toggle") ? stored("desk-cv-why", true) : true),
+      // Drag: move chart (true) or Drag: next chart (false). chart_touch_pan is the default; the chip saves a pick.
+      pan: on("drag_mode_toggle") ? stored("desk-cv-drag-pan", on("chart_touch_pan")) : on("chart_touch_pan"),
+      range: null, // a range chip pick for this visit; null uses range_months / range_months_phone
       rightIsNext: on("flip_toggle") ? stored("desk-cv-right-next", on("swipe_right_is_next")) : on("swipe_right_is_next"),
       open: false,
     };
@@ -304,7 +331,9 @@
       '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + m.color + '"></i>MA ' + m.n + "</button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("reason_box") && on("reason_box_toggle") ? '<button type="button" class="cvchip" data-tool="why" aria-pressed="false">Why</button>' : "") +
-      (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "");
+      (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "") +
+      (on("drag_mode_toggle") ? '<button type="button" class="cvchip" data-tool="drag" title="Pick what a one-finger drag on the chart does"></button>' : "") +
+      (on("range_chips") ? RANGES.map((r) => '<button type="button" class="cvchip cvrange" data-range="' + r.id + '" aria-pressed="false">' + r.label + "</button>").join("") : "");
     ctx.page.innerHTML =
       '<div class="ctrls cvctrls">' + picker + fsBtn + "</div>" +
       '<p class="cap" id="cvsum"></p>' +
@@ -349,6 +378,13 @@
       if (w) { w.classList.toggle("on", state.why); w.setAttribute("aria-pressed", state.why ? "true" : "false"); }
       const flip = document.querySelector('#cvtools [data-tool="flip"]');
       if (flip) flip.textContent = state.rightIsNext ? "Swipe right: next" : "Swipe left: next";
+      const drag = document.querySelector('#cvtools [data-tool="drag"]');
+      if (drag) drag.textContent = state.pan ? "Drag: move chart" : "Drag: next chart";
+      document.querySelectorAll("#cvtools [data-range]").forEach((b) => {
+        const v = state.range === b.getAttribute("data-range");
+        b.classList.toggle("on", v);
+        b.setAttribute("aria-pressed", v ? "true" : "false");
+      });
       if (why) why.hidden = !state.why;
     }
     function summary() {
@@ -384,18 +420,18 @@
       why.style.right = (psw + 6) + "px";
       why.style.bottom = (tsh + 6) + "px";
     }
-    function fitView() {
+    // The chart holds every saved bar (about five years), so a drag can go back in time.
+    // range_months / range_months_phone, or a range chip, only pick the first view.
+    function fitView(keep) {
       if (!chart || !bars.length) return;
       placeBox();
+      if (keep) return;
       const n = bars.length;
       let plot = 0;
       try { plot = chart.timeScale().width(); } catch (e) { plot = host.clientWidth - 60; }
-      const months = plot && plot < 520 ? cfgNum("range_months_phone", 3) : cfgNum("range_months", 6);
-      const end = new Date(bars[n - 1].date + "T00:00:00Z");
-      end.setUTCMonth(end.getUTCMonth() - months);
-      const cut = end.toISOString().slice(0, 10);
-      let from = 0;
-      for (let i = 0; i < n; i++) { if (bars[i].date >= cut) { from = i; break; } }
+      const pick = RANGES.find((r) => r.id === state.range);
+      const months = pick ? pick.months : (plot && plot < 520 ? cfgNum("range_months_phone", 3) : cfgNum("range_months", 6));
+      const from = rangeFrom(bars.map((b) => b.date), months);
       const visible = n - from;
       const pad = padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad());
       try {
@@ -454,8 +490,8 @@
         crosshair: { mode: LC.CrosshairMode.Magnet },
         rightPriceScale: { borderColor: "#1E293B", scaleMargins: { top: 0.08, bottom: 0.06 } },
         timeScale: { borderColor: "#1E293B", rightOffset: 4 },
-        handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: touchPan, vertTouchDrag: false },
-        handleScale: { mouseWheel: true, pinch: touchPan, axisPressedMouseMove: true, axisDoubleClickReset: true },
+        handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: state.pan, vertTouchDrag: false },
+        handleScale: { mouseWheel: true, pinch: state.pan, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: false, mouse: false },
       })));
       const price = chart.addSeries(LC.CandlestickSeries, {
@@ -498,6 +534,7 @@
       url.searchParams.set("t", t);
       history.replaceState(null, "", url);
       header(t, null);
+      remember("ohlc/" + t + ".csv");
       Promise.all([D.ensureTv(), D.loadCsv("ohlc/" + t + ".csv").catch(() => [])])
         .then((res) => draw(t, res[1], my))
         .catch(() => {
@@ -508,8 +545,16 @@
         });
       if (on("preload_next") && items.length > 1) {
         const nxt = items[(index + 1) % items.length];
+        remember("ohlc/" + nxt + ".csv");
         D.loadCsv("ohlc/" + nxt + ".csv").catch(() => {});
       }
+    }
+    // Parsed bar files kept in memory: this chart, the next one, and a few just seen.
+    let recent = [];
+    function remember(name) {
+      const r = keepRecent(recent, name, 6);
+      recent = r[0];
+      if (D.forgetCsv) r[1].forEach((n) => D.forgetCsv(n));
     }
     function go(step) {
       if (!items.length) return;
@@ -576,6 +621,13 @@
       if (!b) return;
       const ma = b.getAttribute("data-ma");
       const tool = b.getAttribute("data-tool");
+      const range = b.getAttribute("data-range");
+      if (range) {
+        state.range = range;
+        syncTools();
+        fitView();
+        return;
+      }
       if (ma) {
         state.ma[ma] = !state.ma[ma];
         saveMa(state.ma);
@@ -588,10 +640,15 @@
         state.why = !state.why;
         store("desk-cv-why", state.why);
         syncTools();
-        fitView();
+        fitView(true);
       } else if (tool === "flip") {
         state.rightIsNext = !state.rightIsNext;
         store("desk-cv-right-next", state.rightIsNext);
+      } else if (tool === "drag") {
+        state.pan = !state.pan;
+        store("desk-cv-drag-pan", state.pan);
+        if (chart) chart.applyOptions({ handleScroll: { horzTouchDrag: state.pan }, handleScale: { pinch: state.pan } });
+        cv.classList.toggle("pan", state.pan);
       }
       syncTools();
     });
@@ -602,7 +659,7 @@
         why.classList.toggle("open", state.open);
         why.setAttribute("aria-expanded", state.open ? "true" : "false");
         why.innerHTML = reasonHtml(items[index]);
-        fitView();
+        fitView(true);
       };
       why.addEventListener("click", toggle);
       why.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(e); } });
@@ -612,28 +669,30 @@
     if (prev) prev.addEventListener("click", () => go(-1));
     if (next) next.addEventListener("click", () => go(1));
 
-    // Swipes. With chart_touch_pan off the chart ignores one-finger drags, so a sideways swipe always changes the chart.
-    // With it on, only a quick, mostly sideways flick counts, so a slow drag still pans the chart.
+    // Swipes. "Drag: move chart" (chart_touch_pan on): a one-finger drag on the chart moves it back and
+    // forward and pinch zooms, so only a quick flick (swipe_max_ms or less) changes the chart there.
+    // "Drag: next chart": the chart ignores one-finger drags and a sideways swipe always changes the chart.
+    // A swipe that starts on the header or the chip bar always changes the chart.
     if (on("swipe")) {
       let start = null;
-      body.addEventListener("touchstart", (e) => {
-        if (e.touches.length !== 1 || e.target.closest(".cv-why, .cv-arrow")) { start = null; return; }
+      cv.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1 || e.target.closest(".cv-why, .cv-arrow, select")) { start = null; return; }
         const p = e.touches[0];
-        start = { x: p.clientX, y: p.clientY, t: Date.now() };
+        start = { x: p.clientX, y: p.clientY, t: Date.now(), onBar: !body.contains(e.target) };
       }, { passive: true });
-      body.addEventListener("touchmove", (e) => { if (e.touches.length > 1) start = null; }, { passive: true });
-      body.addEventListener("touchend", (e) => {
+      cv.addEventListener("touchmove", (e) => { if (e.touches.length > 1) start = null; }, { passive: true });
+      cv.addEventListener("touchend", (e) => {
         if (!start || !e.changedTouches.length) return;
         const p = e.changedTouches[0];
         const dir = swipeDirection(p.clientX - start.x, p.clientY - start.y, Date.now() - start.t, {
-          minPx: cfgNum("swipe_min_px", 50), maxMs: cfgNum("swipe_max_ms", 700), ratio: cfgNum("swipe_ratio", 1.5),
-          touchPan: touchPan, rightIsNext: state.rightIsNext,
+          minPx: cfgNum("swipe_min_px", 80), maxMs: cfgNum("swipe_max_ms", 300), ratio: cfgNum("swipe_ratio", 1.5),
+          touchPan: state.pan, onBar: start.onBar, rightIsNext: state.rightIsNext,
         });
         start = null;
         if (dir === "next") go(1);
         else if (dir === "prev") go(-1);
       }, { passive: true });
-      body.addEventListener("touchcancel", () => { start = null; }, { passive: true });
+      cv.addEventListener("touchcancel", () => { start = null; }, { passive: true });
     }
     if (on("keyboard")) {
       document.addEventListener("keydown", (e) => {
@@ -651,6 +710,7 @@
         raf = requestAnimationFrame(() => fitView());
       }).observe(host);
     }
+    cv.classList.toggle("pan", state.pan);
     syncTools();
     summary();
     show();

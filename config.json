@@ -73,7 +73,7 @@
     "show_weaker_trend": false
   },
   "chart_viewer": {
-    "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. native_fullscreen_ios is off, so on an iPhone or iPad Full screen fills the page without Safari's own full screen and its grey X over the stock name; turn it on to use Safari's full screen again. Computers always use the browser's full screen. Turn the whole page off with features.chart_viewer.",
+    "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. chart_touch_pan is on, so a one-finger drag moves the chart back and forward through the saved history (about five years) and a pinch zooms; only a quick flick (swipe_max_ms or less, at least swipe_min_px wide) changes the chart, and a swipe on the header or the chip bar always does. drag_mode_toggle shows the Drag chip that switches between Drag: move chart and Drag: next chart on each device. range_months and range_months_phone set only the first view; range_chips shows 3M, 6M, 1Y, and All. native_fullscreen_ios is off, so on an iPhone or iPad Full screen fills the page without Safari's own full screen and its grey X over the stock name; turn it on to use Safari's full screen again. Computers always use the browser's full screen. Turn the whole page off with features.chart_viewer.",
     "list_picker": true,
     "include_watching": true,
     "include_closed": false,
@@ -85,9 +85,10 @@
     "swipe": true,
     "swipe_right_is_next": true,
     "flip_toggle": true,
-    "chart_touch_pan": false,
-    "swipe_min_px": 50,
-    "swipe_max_ms": 700,
+    "chart_touch_pan": true,
+    "drag_mode_toggle": true,
+    "swipe_min_px": 80,
+    "swipe_max_ms": 300,
     "swipe_ratio": 1.5,
     "arrows": true,
     "keyboard": true,
@@ -108,7 +109,8 @@
     "company_line": true,
     "day_change": true,
     "range_months": 6,
-    "range_months_phone": 3
+    "range_months_phone": 3,
+    "range_chips": true
   },
   "episodic_pivot": {
     "_note": "Episodic Pivot scan. Original Qullamaggie and Stockbee rules on cached daily bars, earnings dates, and Yahoo profiles. No new downloads. Every rule has an on/off switch and its number here. Percents are whole numbers (10 means 10%). Money is US dollars. The nick_ switches are Nick's own extra filters and are off by default. The time stop only flags NO FOLLOW-THROUGH; it never closes a trade. Turn the whole page off with features.scanner_ep.",
