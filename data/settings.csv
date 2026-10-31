@@ -252,6 +252,7 @@ chart_viewer.include_buy_setups,True
 chart_viewer.include_watchlist,True
 chart_viewer.scanner_links,True
 chart_viewer.fullscreen,True
+chart_viewer.native_fullscreen_ios,False
 chart_viewer.swipe,True
 chart_viewer.swipe_right_is_next,True
 chart_viewer.flip_toggle,True

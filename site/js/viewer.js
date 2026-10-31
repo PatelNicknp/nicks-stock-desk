@@ -200,7 +200,18 @@
     if (plotPx - boxPx < plotPx * 0.35) boxPx = plotPx * 0.65;
     return Math.max(3, (boxPx * visibleBars) / (plotPx - boxPx));
   }
-  const api = { LISTS: LISTS, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, padBars: padBars, rankOf: rankOf };
+  // iPhone and iPad. iPadOS Safari reports as a Mac, so a Mac with a touch screen counts too.
+  function isAppleTouch(ua, platform, maxTouchPoints) {
+    ua = String(ua || "");
+    if (/iPhone|iPad|iPod/.test(ua)) return true;
+    const touch = Number(maxTouchPoints) > 1;
+    return touch && (String(platform || "") === "MacIntel" || /Macintosh/.test(ua));
+  }
+  // Native full screen (requestFullscreen) everywhere except iPhone and iPad, where Safari draws its own
+  // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
+  // unless chart_viewer.native_fullscreen_ios is on.
+  function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
+  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, padBars: padBars, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -223,7 +234,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { include_closed: true, chart_touch_pan: true, ma_10: true, ma_20: true };
+  const OFF_BY_DEFAULT = { include_closed: true, chart_touch_pan: true, ma_10: true, ma_20: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -507,7 +518,13 @@
       show();
     }
 
-    // Full screen: the real Fullscreen API when there is one, else a fixed overlay (iPhone Safari).
+    // Full screen: the real Fullscreen API on a computer, else a fixed overlay that fills the screen.
+    // iPhone and iPad always get the overlay (unless chart_viewer.native_fullscreen_ios is on), because
+    // Safari's own full screen puts a grey X over the stock name in the top left.
+    const nav = window.navigator || {};
+    const appleTouch = isAppleTouch(nav.userAgent, nav.platform, nav.maxTouchPoints);
+    const nativeFs = useNativeFullscreen(appleTouch, on("native_fullscreen_ios"));
+    if (appleTouch) cv.classList.add("ios");
     function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
     function setFull(v) {
       cv.classList.toggle("full", v);
@@ -517,7 +534,7 @@
     function enterFull() {
       const req = cv.requestFullscreen || cv.webkitRequestFullscreen;
       const can = document.fullscreenEnabled || document.webkitFullscreenEnabled;
-      if (req && can) {
+      if (nativeFs && req && can) {
         try {
           const p = req.call(cv);
           if (p && p.catch) p.catch(() => { cv.classList.add("fake"); setFull(true); });

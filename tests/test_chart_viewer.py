@@ -42,9 +42,10 @@ def test_switch_and_config_block():
     cv = cfg["chart_viewer"]
     assert cv["swipe_right_is_next"] is True
     assert cv["chart_touch_pan"] is False
+    assert cv["native_fullscreen_ios"] is False
     assert (cv["ma_10"], cv["ma_20"], cv["ma_50"], cv["ma_150"], cv["ma_200"]) == (False, False, True, True, True)
     assert cv["volume"] is True and cv["reason_box"] is True and cv["reason_box_toggle"] is True
-    for key in ("list_picker", "fullscreen", "swipe", "flip_toggle", "arrows", "keyboard", "counter", "preload_next",
+    for key in ("list_picker", "fullscreen", "native_fullscreen_ios", "swipe", "flip_toggle", "arrows", "keyboard", "counter", "preload_next",
                 "ma_chips", "volume_toggle", "company_line", "day_change", "scanner_links"):
         assert isinstance(cv[key], bool), key
 
@@ -68,7 +69,8 @@ def test_published_settings_and_help_match_the_code():
         if not key.startswith("_"):
             assert "\nchart_viewer." + key + "," in settings, key
     topics = [t for t, _ in tables.help_rows()]
-    for topic in ("Chart Viewer", "Chart Viewer swipes", "Chart Viewer lines and reason box", "Chart Viewer settings"):
+    for topic in ("Chart Viewer", "Chart Viewer swipes", "Chart Viewer lines and reason box", "Chart Viewer settings",
+                  "Chart Viewer on iPhone and iPad"):
         assert topic in topics
         assert "\n" + topic + "," in _read("data", "help.csv"), topic
 
@@ -106,6 +108,27 @@ def test_no_new_market_requests():
     assert re.findall(r'loadCsv\("([^"+]+)', js) == ["ohlc/", "ohlc/"]
 
 
+def test_ios_full_screen_uses_the_overlay():
+    """iPhone and iPad skip requestFullscreen (Safari's grey X covers the stock name) unless the switch is on."""
+    js = _read("site", "js", "viewer.js")
+    assert 'on("native_fullscreen_ios")' in js
+    assert "native_fullscreen_ios: true" in js  # off when a settings file has no row for it
+    assert "nativeFs && req && can" in js
+    # The overlay path still sets up the site's own close button and the Esc key.
+    assert 'getElementById("cvx").addEventListener("click", exitFull)' in js
+    assert 'e.key === "Escape"' in js
+    css = _read("site", "css", "desk.css")
+    assert ".cv.full.ios{" in css
+    for side in ("top", "right", "bottom", "left"):
+        assert "padding-" + side + ":env(safe-area-inset-" + side in css, side
+    assert "height:100dvh" in css.split(".cv.full{", 1)[1].split("}", 1)[0]
+    assert ".cv.full .cv-x{display:block}" in css
+    assert "viewport-fit=cover" in _read("site", "chart-viewer.html")
+    topics = dict(tables.help_rows())
+    assert "native_fullscreen_ios" in topics["Chart Viewer on iPhone and iPad"]
+    assert "native_fullscreen_ios" in topics["Chart Viewer settings"]
+
+
 def _node(*args):
     try:
         return subprocess.run(["node", *args], cwd=ROOT, capture_output=True, text=True, timeout=60)
@@ -132,6 +155,7 @@ if __name__ == "__main__":
     test_page_menu_and_scripts()
     test_plain_words_no_alerts_no_tradingview_buttons()
     test_no_new_market_requests()
+    test_ios_full_screen_uses_the_overlay()
     try:
         test_scripts_parse()
         test_list_and_swipe_rules()

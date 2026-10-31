@@ -110,6 +110,25 @@ eq(Math.round(V.padBars(120, 600, 200) * 10) / 10, 60, "pad bars keep the last c
 eq(V.padBars(120, 600, 0), 3, "no box, the normal small gap");
 eq(V.padBars(120, 300, 290) <= (0.65 * 300 * 120) / (0.35 * 300) + 1e-9, true, "a very wide box never squeezes the candles under a third");
 
+// iPhone and iPad skip Safari's own full screen (its grey X covers the stock name) unless native_fullscreen_ios is on.
+const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+const IPAD_OLD = "Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1";
+const MAC_SAFARI = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+const WIN_CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
+eq(V.isAppleTouch(IPHONE, "iPhone", 5), true, "iPhone user agent is iOS");
+eq(V.isAppleTouch(IPAD_OLD, "iPad", 5), true, "iPad user agent is iPadOS");
+eq(V.isAppleTouch(MAC_SAFARI, "MacIntel", 5), true, "iPad reporting as a Mac with touch is iPadOS");
+eq(V.isAppleTouch("", "MacIntel", 5), true, "MacIntel platform with touch is iPadOS");
+eq(V.isAppleTouch(MAC_SAFARI, "", 2), true, "Mac user agent with touch is iPadOS");
+eq(V.isAppleTouch(MAC_SAFARI, "MacIntel", 0), false, "a real Mac has no touch points");
+eq(V.isAppleTouch(MAC_SAFARI, "MacIntel", 1), false, "one touch point is not an iPad");
+eq(V.isAppleTouch(WIN_CHROME, "Win32", 10), false, "a Windows touch screen is not iOS");
+eq(V.isAppleTouch(undefined, undefined, undefined), false, "no navigator details is not iOS");
+eq(V.useNativeFullscreen(false, false), true, "computers keep native full screen");
+eq(V.useNativeFullscreen(false, true), true, "computers keep native full screen with the switch on");
+eq(V.useNativeFullscreen(true, false), false, "iPhone and iPad use the overlay by default");
+eq(V.useNativeFullscreen(true, true), true, "native_fullscreen_ios true brings back Safari's full screen");
+
 if (fails.length) {
   console.log(fails.join("\n"));
   process.exit(1);
