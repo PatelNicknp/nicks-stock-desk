@@ -146,8 +146,9 @@ def test_drag_moves_chart_and_full_history():
     off = re.search(r"OFF_BY_DEFAULT = \{([^}]*)\}", js).group(1)
     assert "chart_touch_pan" not in off and "drag_mode_toggle" not in off and "range_chips" not in off
     assert 'cfgNum("swipe_min_px", 80)' in js and 'cfgNum("swipe_max_ms", 300)' in js
-    # Swipes are read on the whole viewer, and a start outside the chart body counts as the header or chip bar.
-    assert 'cv.addEventListener("touchstart"' in js and "onBar: !body.contains(e.target)" in js
+    # Swipes are read on the whole viewer. The header row always counts as a bar swipe; the chip bar only when it fits.
+    assert 'cv.addEventListener("touchstart"' in js and 'onBar: zone === "bar"' in js
+    assert 'e.target.closest(".cv-top")' in js and 'if (zone === "scroll") { start = null; return; }' in js
     # The whole saved file goes on the chart: no slicing of bars before setData.
     assert "price.setData(bars.map(" in js
     assert "bars.slice(" not in js and "rows.slice(" not in js
@@ -175,6 +176,44 @@ def test_saved_history_is_about_five_years():
     years = (int(last[:4]) - int(first[:4])) + (int(last[5:7]) - int(first[5:7])) / 12.0
     assert years >= 4.5, (first, last)
     assert 'period="5y"' in _read("stock_desk.py")
+
+
+def test_overflowing_chip_bar_scrolls_instead_of_changing_chart():
+    """iPhone: the chip bar is wider than the screen, so a swipe there scrolls it; only the header row always changes the chart."""
+    css = _read("site", "css", "desk.css")
+    phone = [b.split("\n}", 1)[0] for b in css.split("@media (max-width:699px){")[1:] if ".cv-tools{" in b.split("\n}", 1)[0]][0]
+    assert ".cv-tools{" in phone and "flex-wrap:nowrap" in phone and "overflow-x:auto" in phone
+    assert ".cv.full .cv-tools{touch-action:pan-x}" in css
+    assert ".cv.full .cv-top{touch-action:none}" in css
+    note = _cfg()["chart_viewer"]["_note"]
+    assert "header row (ticker, price, counter) always does" in note and "scrolls the chips" in note
+    swipes = dict(tables.help_rows())["Chart Viewer swipes"]
+    assert "top row (the stock name, price, and counter) always changes the chart" in swipes
+    assert "scrolls the buttons" in swipes and "only when all the buttons fit" in swipes
+
+
+def _playwright_env():
+    env = dict(os.environ)
+    if env.get("PLAYWRIGHT_ROOT") and os.path.exists(os.path.join(env["PLAYWRIGHT_ROOT"], "index.mjs")):
+        return env
+    try:
+        proc = subprocess.run(["node", "-e", "require.resolve('playwright')"], cwd=ROOT, capture_output=True, text=True, timeout=30)
+    except FileNotFoundError as exc:
+        _skip("node is not installed: " + str(exc))
+    if proc.returncode != 0:
+        _skip("playwright is not installed (set PLAYWRIGHT_ROOT to run the iPhone touch check)")
+    return env
+
+
+def test_iphone_portrait_chip_bar_and_header_swipes():
+    """Real touches at 390x844: chip bar overflows, a chip bar swipe scrolls and keeps the chart, a header swipe changes it."""
+    env = _playwright_env()
+    proc = subprocess.run(["node", os.path.join("tests", "chart_viewer_touch.mjs")], cwd=ROOT, env=env,
+                          capture_output=True, text=True, timeout=180)
+    if proc.returncode != 0 and "Executable doesn't exist" in proc.stdout + proc.stderr:
+        _skip("playwright browser is not installed")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "chart viewer touch ok" in proc.stdout
 
 
 def _node(*args):
@@ -209,6 +248,11 @@ if __name__ == "__main__":
         test_saved_history_is_about_five_years()
     except _Skip:
         print("history check skipped")
+    test_overflowing_chip_bar_scrolls_instead_of_changing_chart()
+    try:
+        test_iphone_portrait_chip_bar_and_header_swipes()
+    except _Skip as exc:
+        print("iphone touch check skipped: " + str(exc))
     try:
         test_scripts_parse()
         test_list_and_swipe_rules()

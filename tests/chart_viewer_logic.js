@@ -107,6 +107,12 @@ eq(sw2(400, 5, 1500), "", "a long slow drag back through history never changes t
 eq(sw2(70, 0, 100), "", "a flick under 80 px is not a swipe");
 eq(sw2(120, 90, 100), "", "ratio 1.5 still rules out a mostly up-down flick");
 eq(sw2(120, 10, 2000, { onBar: true }), "next", "a slow swipe on the header or chip bar always changes the chart");
+// Where a touch starts: the header row always swipes; the chip bar only when it fits; else it scrolls.
+eq(V.swipeZone(true, false, 0, 0), "bar", "header row is a swipe bar");
+eq(V.swipeZone(false, true, 370, 370), "bar", "a chip bar that fits is a swipe bar");
+eq(V.swipeZone(false, true, 371, 370), "bar", "one pixel of rounding still fits");
+eq(V.swipeZone(false, true, 640, 370), "scroll", "an overflowing chip bar scrolls and never changes the chart");
+eq(V.swipeZone(false, false, 0, 0), "chart", "the chart area needs a quick flick");
 eq(sw2(-120, 10, 2000, { onBar: true }), "prev", "header swipe left is the one before");
 eq(sw2(60, 0, 100, { onBar: true }), "", "header swipes still need swipe_min_px");
 eq(sw2(120, 10, 2000, { touchPan: false }), "next", "drag mode next chart: any sideways swipe changes it");
