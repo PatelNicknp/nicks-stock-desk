@@ -205,6 +205,36 @@ def _playwright_env():
     return env
 
 
+def test_first_view_refits_and_keeps_a_dragged_range():
+    """The first view waits for a 120 px wide chart and is put back on resize, unless the user dragged the chart."""
+    js = _read("site", "js", "viewer.js")
+    assert "minBarSpacing: 0.3" in js
+    assert "viewAfterResize(userRange, plotWidth(), 120)" in js
+    assert js.count("requestAnimationFrame(() => refit())") == 2  # full screen and resize
+    assert "requestAnimationFrame(() => { if (my === token) refit(); })" in js  # after the data loads
+    assert 'window.addEventListener("orientationchange"' in js
+    # A range chip drops the dragged range; the Vol chip redraw keeps it.
+    chip = js.split("if (range) {", 1)[1].split("return;", 1)[0]
+    assert "userRange = null;" in chip and "fitView();" in chip
+    assert "carryRange = userRange;" in js
+    # Only the release of a finger, the mouse, or the wheel on the chart reads a dragged range.
+    assert "setTimeout(readUserRange, 120)" in js
+    note = _cfg()["chart_viewer"]["_note"]
+    assert "kept when the screen turns" in note
+    assert "kept when you turn" in dict(tables.help_rows())["Chart Viewer history and range"]
+
+
+def test_first_view_on_iphone_and_ipad():
+    """Real chart, iPhone and iPad portrait and landscape: first view, full screen, turns, narrow-then-wide, drag kept."""
+    env = _playwright_env()
+    proc = subprocess.run(["node", os.path.join("tests", "chart_viewer_fit.mjs")], cwd=ROOT, env=env,
+                          capture_output=True, text=True, timeout=300)
+    if proc.returncode != 0 and "Executable doesn't exist" in proc.stdout + proc.stderr:
+        _skip("playwright browser is not installed")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "chart viewer fit ok" in proc.stdout
+
+
 def test_iphone_portrait_chip_bar_and_header_swipes():
     """Real touches at 390x844: chip bar overflows, a chip bar swipe scrolls and keeps the chart, a header swipe changes it."""
     env = _playwright_env()
@@ -249,6 +279,11 @@ if __name__ == "__main__":
     except _Skip:
         print("history check skipped")
     test_overflowing_chip_bar_scrolls_instead_of_changing_chart()
+    test_first_view_refits_and_keeps_a_dragged_range()
+    try:
+        test_first_view_on_iphone_and_ipad()
+    except _Skip as exc:
+        print("first view check skipped: " + str(exc))
     try:
         test_iphone_portrait_chip_bar_and_header_swipes()
     except _Skip as exc:

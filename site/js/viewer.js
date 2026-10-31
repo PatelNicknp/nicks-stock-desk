@@ -228,6 +228,13 @@
     while (out.length > Math.max(1, max || 1)) drop.push(out.shift());
     return [out, drop];
   }
+  // After a resize, a turn of the device, or opening or closing full screen: keep a range the user dragged
+  // or zoomed to ("keep"); else put the first view back ("fit") once the chart is at least minPx wide
+  // (a first view set on a chart only a few px wide packs the bars against the right edge); else "wait".
+  function viewAfterResize(userRange, plotPx, minPx) {
+    if (userRange && Number.isFinite(userRange.from) && Number.isFinite(userRange.to) && userRange.to > userRange.from) return "keep";
+    return plotPx >= (minPx > 0 ? minPx : 120) ? "fit" : "wait";
+  }
   // How many empty bars to leave on the right so a box of boxPx does not cover the last candles.
   function padBars(visibleBars, plotPx, boxPx) {
     if (!(visibleBars > 0) || !(plotPx > 0) || !(boxPx > 0)) return 3;
@@ -245,7 +252,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
+  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -443,9 +450,42 @@
       const from = rangeFrom(bars.map((b) => b.date), months);
       const visible = n - from;
       const pad = padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad());
-      try {
-        chart.timeScale().setVisibleLogicalRange({ from: from - 0.5, to: n - 1 + pad });
-      } catch (e) { /* chart is gone */ }
+      setRange({ from: from - 0.5, to: n - 1 + pad });
+    }
+    // A range the user dragged or pinched to on this chart. It is read when a finger, the mouse, or the
+    // wheel lets go of the chart, and only counts when it differs from the view set last (lastSet).
+    // Our own first views and refits never count. A range chip or a new chart clears it.
+    let userRange = null;
+    let carryRange = null;
+    let lastSet = null;
+    let pressTimer = 0;
+    function setRange(r) {
+      lastSet = { from: r.from, to: r.to };
+      try { chart.timeScale().setVisibleLogicalRange(lastSet); } catch (e) { /* chart is gone */ }
+    }
+    function readUserRange() {
+      if (!chart || !lastSet) return;
+      let lr = null;
+      try { lr = chart.timeScale().getVisibleLogicalRange(); } catch (e) { return; }
+      if (lr && (Math.abs(lr.from - lastSet.from) > 0.5 || Math.abs(lr.to - lastSet.to) > 0.5)) {
+        userRange = { from: lr.from, to: lr.to };
+        lastSet = { from: lr.from, to: lr.to };
+      }
+    }
+    function plotWidth() {
+      try { return chart.timeScale().width() || 0; } catch (e) { return 0; }
+    }
+    // Put the right view back: the user's dragged range if there is one, else the first view, but only once
+    // the chart is at least 120 px wide. A chart still being laid out waits for the next resize.
+    function refit() {
+      if (!chart || !bars.length) return;
+      const plan = viewAfterResize(userRange, plotWidth(), 120);
+      if (plan === "keep") {
+        placeBox();
+        setRange(userRange);
+      } else if (plan === "fit") {
+        fitView();
+      }
     }
     function dropChart() {
       if (chart) { try { chart.remove(); } catch (e) { /* already gone */ } }
@@ -498,11 +538,14 @@
         grid: { vertLines: { color: "#161E2E" }, horzLines: { color: "#161E2E" } },
         crosshair: { mode: LC.CrosshairMode.Magnet },
         rightPriceScale: { borderColor: "#1E293B", scaleMargins: { top: 0.08, bottom: 0.06 } },
-        timeScale: { borderColor: "#1E293B", rightOffset: 4 },
+        timeScale: { borderColor: "#1E293B", rightOffset: 4, minBarSpacing: 0.3 },
         handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: state.pan, vertTouchDrag: false },
         handleScale: { mouseWheel: true, pinch: state.pan, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: false, mouse: false },
       })));
+      userRange = carryRange;
+      carryRange = null;
+      lastSet = null;
       const price = chart.addSeries(LC.CandlestickSeries, {
         upColor: D.UP, downColor: D.DN, borderUpColor: D.UP, borderDownColor: D.DN, wickUpColor: D.UP, wickDownColor: D.DN,
         priceLineVisible: false, lastValueVisible: true,
@@ -525,7 +568,7 @@
         if (panes[0]) panes[0].setStretchFactor(4);
         if (panes[1]) panes[1].setStretchFactor(1);
       }
-      requestAnimationFrame(() => { if (my === token) fitView(); });
+      requestAnimationFrame(() => { if (my === token) refit(); });
     }
     function show() {
       const my = ++token;
@@ -583,7 +626,7 @@
     function setFull(v) {
       cv.classList.toggle("full", v);
       document.body.classList.toggle("cv-lock", v);
-      requestAnimationFrame(() => fitView());
+      requestAnimationFrame(() => refit());
     }
     function enterFull() {
       const req = cv.requestFullscreen || cv.webkitRequestFullscreen;
@@ -633,6 +676,7 @@
       const range = b.getAttribute("data-range");
       if (range) {
         state.range = range;
+        userRange = null;
         syncTools();
         fitView();
         return;
@@ -644,6 +688,7 @@
       } else if (tool === "vol") {
         state.vol = !state.vol;
         store("desk-cv-vol", state.vol);
+        carryRange = userRange;
         show();
       } else if (tool === "why") {
         state.why = !state.why;
@@ -718,11 +763,18 @@
         else if (e.key === "Escape" && cv.classList.contains("full")) exitFull();
       });
     }
+    const pressOn = () => { clearTimeout(pressTimer); };
+    const pressOff = () => { clearTimeout(pressTimer); pressTimer = setTimeout(readUserRange, 120); };
+    ["pointerdown", "touchstart"].forEach((ev) => host.addEventListener(ev, pressOn, { passive: true, capture: true }));
+    ["pointerup", "pointercancel", "touchend", "touchcancel"].forEach((ev) => host.addEventListener(ev, pressOff, { passive: true, capture: true }));
+    host.addEventListener("wheel", pressOff, { passive: true, capture: true });
+    // Resize, a turn of the device, or full screen: refit the first view unless the user moved the chart.
+    window.addEventListener("orientationchange", () => setTimeout(refit, 250));
     if (typeof ResizeObserver !== "undefined") {
       let raf = 0;
       new ResizeObserver(() => {
         cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => fitView());
+        raf = requestAnimationFrame(() => refit());
       }).observe(host);
     }
     cv.classList.toggle("pan", state.pan);
