@@ -11,7 +11,7 @@ SITE = os.path.join(ROOT, "site")
 
 def test_pages_advertise_a_home_screen_app():
     htmls = [n for n in os.listdir(SITE) if n.endswith(".html")]
-    assert len(htmls) == 50
+    assert len(htmls) == 51
     for name in htmls:
         text = open(os.path.join(SITE, name), encoding="utf-8").read()
         assert "viewport-fit=cover" in text, name

@@ -1019,6 +1019,55 @@
     },
   });
 
+  const epStatus = ["EP TODAY - FORMING", "EP TODAY - CONFIRMED", "DAY 2-5 WATCH", "DELAYED EP WATCH", "IN TRADE"];
+  function epLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.entry) != null) lines.push({ value: D.num(row.entry), color: "#F59E0B", label: "Entry (" + (row.entry_basis || "level") + ") " + D.fmt(row.entry, 2) });
+    if (D.num(row.fill) != null && D.num(row.fill) !== D.num(row.entry)) lines.push({ value: D.num(row.fill), color: "#E6EBF5", label: "Fill " + D.fmt(row.fill, 2) });
+    if (D.num(row.stop) != null) lines.push({ value: D.num(row.stop), color: "#EF4444", label: "Stop " + D.fmt(row.stop, 2) });
+    if (D.num(row.trail10) != null) lines.push({ value: D.num(row.trail10), color: "#7C9CFF", label: "10-day " + D.fmt(row.trail10, 2) });
+    if (D.num(row.trail20) != null) lines.push({ value: D.num(row.trail20), color: "#A78BFA", label: "20-day " + D.fmt(row.trail20, 2) });
+    return lines;
+  }
+  const episodic = patternPage({
+    file: "scanner_ep.csv",
+    caption: "Research only. The desk has no pre-market data and no intraday bars, so it cannot see the opening range high: read that on your own chart. Guidance, revenue beats, and non-earnings news must be checked by hand.",
+    filters: { status: true, statusDefault: epStatus, index: true, sector: true, ticker: true,
+      single: [{ key: "catalyst_tag", label: "Catalyst" }, { key: "neglect_grade", label: "Neglect grade" }, { key: "stop_check", label: "Stop check" }] },
+    columns: [TK, CO, T("index_membership", "Index"), T("status", "Status", "setup"), PR,
+      T("ep_date", "EP day"), T("days_since_ep", "Days since EP", "num", { dec: 0 }),
+      T("gap_pct", "Gap %", "pct", { dec: 1 }), T("change_pct", "Close vs prior close %", "pct", { dec: 1 }),
+      T("rvol", "Volume vs normal", "volx", { dec: 2 }), T("dcr_pct", "Close in day range %", "num", { dec: 0 }),
+      T("catalyst_tag", "Catalyst"), T("report_timing", "Report timing"), T("surprise_pct", "EPS surprise %"),
+      T("catalyst_score", "Catalyst score (0-4)", "num", { dec: 0 }), T("neglect_grade", "Neglect grade"),
+      T("ret_63d_prior", "3-month run before %", "pct", { dec: 1 }), T("first_ep_6m", "First EP in 6 months", "flag"),
+      T("market_cap", "Market cap", "dollars"), T("small_young_tag", "Small cap tag"),
+      T("entry", "Entry", "num", { dec: 2 }), T("stop", "Stop", "num", { dec: 2, tone: "stop" }),
+      T("risk_pct", "Risk %", "pct", { dec: 1, color: false }), T("risk_vs_adr", "Risk in ADRs", "num", { dec: 2 }),
+      T("stop_check", "Stop check"), T("strength", "Strength", "strengthbar"),
+      T("days_in_trade", "Days in trade", "num", { dec: 0 }), T("partial_window", "Sell part"),
+      T("trail_with", "Trail with"), T("signal", "Signal", "setup"), T("result_pct", "Result %", "pct", { dec: 1 }),
+      T("exit_reason", "Closed because"), T("exit_date", "Closed on"), T("freshness", "Data", "fresh")],
+    price: epLines,
+    priceSub: (row) => "EP day " + ((row && row.ep_date) || "") + ": entry, stop, and today's 10 and 20-day average lines",
+    cards(all) {
+      return card("Forming today", String(countWhere(all, (r) => r.status === "EP TODAY - FORMING"))) +
+        card("Confirmed today", String(countWhere(all, (r) => r.status === "EP TODAY - CONFIRMED"))) +
+        card("Day 2-5 watch", String(countWhere(all, (r) => r.status === "DAY 2-5 WATCH"))) +
+        card("In a trade", String(countWhere(all, (r) => r.status === "IN TRADE"))) +
+        card("Delayed watch", String(countWhere(all, (r) => r.status === "DELAYED EP WATCH"))) +
+        card("Faded", String(countWhere(all, (r) => r.status === "EP FADED"))) +
+        card("Closed", String(countWhere(all, (r) => r.status === "CLOSED")));
+    },
+    detail(row) {
+      if (!row) return "";
+      const link = row.news_link && /^https:\/\//.test(String(row.news_link))
+        ? '<p class="cap"><a href="' + D.esc(row.news_link) + '" target="_blank" rel="noopener">Check the news for ' + D.esc(row.ticker) + "</a></p>" : "";
+      return '<div class="panel pad"><div class="ptitle">Why this name and the plan</div>' + whyLines([row]) + link + "</div>";
+    },
+  });
+
   const breakdowns = patternPage({
     file: "scanner_breakdown.csv",
     caption: "Desk rule: close under the 50-day and the 50-day under the 200-day, with the 200-day not rising. A 20 to 60 day base that tightens, then a close under the base low on volume at least 1.4 times the 50-day average. The stop on the chart is the base high.",
@@ -2078,12 +2127,12 @@
       '<div class="cards" id="cards"></div>' +
       '<div class="ctrls" id="ctrls"></div>' +
       '<div class="panel" id="tbl"></div>' +
-      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, Qullamaggie, Marios, and CANSLIM is ready or broke out today, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Qullamaggie and Marios rows marked Too wide, skip are left out. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Tap a row for the reason, the trade plan, and the price chart. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
+      '<p class="cap">A name is listed when at least one of VCP, Box, Flag, Qullamaggie, Marios, and CANSLIM is ready or broke out today, or an Episodic Pivot is confirmed today or on day 2 to 5, the desk verdict is BUY, the close is above the 50-day and 200-day averages, and the risk from the entry to the stop is 8% or less. Qullamaggie, Marios, and EP rows marked Too wide, skip are left out. Setup is which of those scanners agree. Count is how many agree. Status is the strongest one. Entry is that scanner\'s buy point. VCP uses the Minervini pivot. Stop is the tighter of 7% under the entry or the setup\'s own stop, and it is never above the entry. Target 1 is 20% above the entry, or 20% above today\'s close after a breakout. Target 2 is the entry plus three times the dollar risk. Reward/risk compares target 1 with that risk. Distance is how far the price is from the entry. The 52-week columns match the 52-week page. Tap a row for the reason, the trade plan, and the price chart. Many breakouts fail, which is why the stop is always shown. Nothing here is an alert.</p>';
     const box = document.getElementById("ctrls");
     box.innerHTML =
       D.multiHtml("index", "Index", D.indexTokens(named)) +
       D.multiHtml("sector", "Sector", D.uniq(named, "sector")) +
-      D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "CANSLIM"]) +
+      D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "CANSLIM"]) +
       D.multiHtml("status", "Status", D.uniq(named, "status")) +
       D.searchHtml("ticker", "Ticker", "tick-list-buy", D.uniq(named, "ticker"));
     D.placeFeed(box, raw);
@@ -2860,7 +2909,7 @@
   // Wording follows the rules in setups.py, tables.py, and scoring.py. Numbers in {braces} come from settings.csv.
   const DESC = {
     top: "Every stock on the desk, ranked by its score. The score adds points for things like faster sales growth than usual, a cheaper price than usual, and a rising price trend. A score of {buy_at} or more is usually BUY; tap a row to see the entry zone, stop, and target on the chart.",
-    buysetups: "Stocks where VCP, Box, Flag, Qullamaggie, Marios, or CANSLIM is ready or broke out today (Qullamaggie and Marios only when the stop is not too wide), the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
+    buysetups: "Stocks where VCP, Box, Flag, Qullamaggie, Marios, or CANSLIM is ready or broke out today, or an Episodic Pivot is confirmed today or on day 2 to 5 (Qullamaggie, Marios, and EP only when the stop is not too wide), the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
     growth: "Stocks whose sales grew at least {growth_min_pct}%, leaving out anything rated AVOID. Fast-growing sales often push a stock up over time. Compare the EPS growth and the vs S&P 500 columns to see if profits and the price are keeping up.",
     quality: "Stocks whose return on equity is above their own past level and whose debt is less than {quality_max_de} times their equity, leaving out AVOID. That means the company earns more on its money than usual without borrowing a lot. These tend to be steadier businesses to hold.",
     dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
@@ -2871,6 +2920,7 @@
     flag: "Stocks that jumped at least 15% in 3 to 12 days, then rested for 3 to 15 days without giving back half of that jump. A short rest after a big run often comes before another leg up. BROKEN OUT today means it closed above the rest area on at least 1.5 times normal volume.",
     qullamaggie: "Finds fast-moving leader stocks the way trader Kristjan Kullamagi (Qullamaggie) does. The stock must be in the top 3% of gainers over 1, 3, or 6 months, move at least 3.5% a day on average, have run up at least 30%, and then rest for 2 to 8 weeks in a tight range with higher lows. READY means the price is just under the top of that rest area. BROKEN OUT today means today's high went above it; the stop is today's low. If that stop is more than one normal day's move away, it says Too wide, skip. IN TRADE and CLOSED follow each breakout: sell 1/3 to 1/2 after 3 to 5 days, move the stop to the buy price, then sell the rest on the first close under the 10-day average.",
     marios: "Same idea as the Qullamaggie page, using trader Marios Stamatoudis's rules. The stock must move at least 2.5% a day on average, have run up before, and then rest quietly with lower volume. BROKEN OUT today means today's high went above the top of the rest area; the stop is today's low, and a stop that is too far away says Too wide, skip. Plan: sell 1/4 to 1/3 once the price is 2.5 normal days' moves above the entry and move the stop to the buy price. A close under the 10-day average sells 1/3 of the rest; a close under the 20-day average sells the rest.",
+    ep: "Finds stocks that jumped at the open by 10% or more on news, usually earnings, with at least 3 times their normal volume. Traders Qullamaggie and Stockbee call this an Episodic Pivot: big news makes the market re-price the stock, and the move can last for weeks. CONFIRMED means it closed strong; FADED means it gave back the jump. On day 2 to 5 a move above the EP-day high is the entry, with the stop at the EP-day low. Plan: sell 1/3 to 1/2 on day 3 to 5, then sell the rest on a close under the 10 or 20-day average. Check the news yourself: the desk cannot read guidance or non-earnings news.",
     breakdowns: "The opposite of a breakout: stocks below a falling or flat 200-day average, with the 50-day under the 200-day, sitting in a tight range. BROKEN DOWN today means it closed under the bottom of the range on heavy volume. Use it to spot stocks to avoid or sell, not to buy.",
     leaders: "Stocks that show up on both VCP (ready or broke out today) and a strict CANSLIM qualify. When two different methods agree, the setup is usually stronger. A name on only one list still shows here, so check which ones agree.",
     week52: "Shows which stocks are at a new 52-week high or low today, using the closing price. Many new highs means the market is healthy; many new lows means it is weak. Pick a tab below to see each group.",
@@ -3005,6 +3055,7 @@
     flag: flag,
     qullamaggie: qullamaggie,
     marios: marios,
+    ep: episodic,
     breakdowns: breakdowns,
     volume: { files: ["scanner_volume.csv"], render: renderVolume },
     leaders: leaders,
