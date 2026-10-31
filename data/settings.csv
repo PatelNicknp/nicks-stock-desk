@@ -248,7 +248,8 @@ episodic_pivot.nick_require_flat_base,False
 episodic_pivot.nick_flat_base_grade,A
 gap_up.lookback_days,21
 gap_up.true_gap_only,True
-gap_up.min_gap_pct,0.0
+gap_up.min_gap_filter,True
+gap_up.min_gap_pct,3.0
 gap_up.volume_filter,True
 gap_up.vol_mult,1.5
 gap_up.vol_avg_days,50

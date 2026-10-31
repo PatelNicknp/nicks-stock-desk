@@ -1,6 +1,6 @@
 """Gap Up scanner for the US desk. Research only: it never places a trade.
 
-A true gap: the open is above the previous day's high, any size. Gap-day volume is at least 1.5 times the
+A true gap: the open is at least 3% above the previous day's high (min_gap_filter; off, any size). Gap-day volume is at least 1.5 times the
 average of the 50 sessions before the gap day. The stock must hold: no close since the gap day below the
 gap day's low (a close equal to the low still holds). Gap days from the last 21 trading days, today included.
 The newest holding gap decides the row. Cached daily bars only (cache/ohlcv.csv.gz). No new downloads.
@@ -14,7 +14,8 @@ from setups import _num, _round
 GAP_UP_DEFAULTS = {
     "lookback_days": 21,
     "true_gap_only": True,
-    "min_gap_pct": 0.0,
+    "min_gap_filter": True,
+    "min_gap_pct": 3.0,
     "volume_filter": True,
     "vol_mult": 1.5,
     "vol_avg_days": 50,
@@ -33,7 +34,7 @@ GAP_UP_DEFAULTS = {
 GAP_TODAY = "GAP UP today"
 GAP_HOLDING = "GAP HOLDING"
 GAP_NOTE = (
-    "Gap Up: the open is above the previous day's high (a true gap, any size), on at least 1.5 times the "
+    "Gap Up: the open is at least 3% above the previous day's high (a true gap), on at least 1.5 times the "
     "50-day average volume, and no close since then below the gap day's low. Gap days from the last 21 trading days. "
     "Cached daily bars only. No new downloads. Research only. This desk never places trades."
 )
@@ -84,7 +85,8 @@ def find_gap(o, h, l, c, v, p):
         base = prev_h if p["true_gap_only"] else prev_c
         if not op > base:
             continue
-        if (op / base - 1.0) * 100.0 < float(p["min_gap_pct"]):
+        # min_gap_pct is a whole percent (3.0 means 3%). A tiny tolerance keeps an exact 3% gap in despite float rounding.
+        if p["min_gap_filter"] and (op / base - 1.0) * 100.0 + 1e-9 < float(p["min_gap_pct"]):
             continue
         avg = _prior_mean(v, i, avg_n)
         if p["volume_filter"]:

@@ -2967,7 +2967,7 @@
     breakdowns: "The opposite of a breakout: stocks below a falling or flat 200-day average, with the 50-day under the 200-day, sitting in a tight range. BROKEN DOWN today means it closed under the bottom of the range on heavy volume. Use it to spot stocks to avoid or sell, not to buy.",
     leaders: "Stocks that show up on both VCP (ready or broke out today) and a strict CANSLIM qualify. When two different methods agree, the setup is usually stronger. A name on only one list still shows here, so check which ones agree.",
     week52: "Shows which stocks are at a new 52-week high or low today, using the closing price. Many new highs means the market is healthy; many new lows means it is weak. Pick a tab below to see each group.",
-    gapup: "Finds stocks that opened above the high of the day before, so there is an empty space on the chart (a true gap, not just a higher open inside yesterday's range). Any size of gap counts. On the gap day the stock had to trade at least {gap_vol_mult} times its normal volume, and it must cost at least ${gap_min_price} and trade enough each day to skip thin stocks. It stays on the list only while it holds: no close below the low of the gap day. Gaps from the last {gap_days} trading days are shown, newest first. Tap a row to see the chart with the hold level.",
+    gapup: "Finds stocks that opened above the high of the day before, so there is an empty space on the chart (a true gap, not just a higher open inside yesterday's range). The open must be at least {gap_min_pct}% above that high. On the gap day the stock had to trade at least {gap_vol_mult} times its normal volume, and it must cost at least ${gap_min_price} and trade enough each day to skip thin stocks. It stays on the list only while it holds: no close below the low of the gap day. Gaps from the last {gap_days} trading days are shown, newest first. Tap a row to see the chart with the hold level.",
     "week52:highs": "Stocks that closed above their highest price of the past year (252 trading days) today. New highs often keep going higher because there are no unhappy buyers above. A new high on big volume is stronger; see the On volume tab.",
     "week52:lows": "Stocks that closed below their lowest price of the past year today. New lows often keep falling, so be careful. Use this to see what is weak, not to bargain hunt.",
     "week52:near": "Stocks within 5% of their 52-week high. They are close to breaking out to a new high. Watch them for a close above that high on big volume.",
@@ -3013,14 +3013,19 @@
   function descFill(text, ctx, extra) {
     const rows = (ctx && ctx.settings) || [];
     // gap_ placeholders read the gap_up block; the rest read scoring.
-    const GAP_KEYS = { gap_vol_mult: "vol_mult", gap_min_price: "min_price", gap_days: "lookback_days" };
+    const GAP_KEYS = { gap_vol_mult: "vol_mult", gap_min_price: "min_price", gap_days: "lookback_days", gap_min_pct: "min_gap_pct" };
     const val = (key) => {
+      if (key === "gap_min_pct") {
+        // With gap_up.min_gap_filter off any size of true gap counts.
+        const sw = rows.find((x) => x.setting === "gap_up.min_gap_filter");
+        if (sw && String(sw.value).toLowerCase() === "false") return "0";
+      }
       const name = GAP_KEYS[key] ? "gap_up." + GAP_KEYS[key] : "scoring." + key;
       const r = rows.find((x) => x.setting === name);
       return r ? r.value : null;
     };
     const defaults = { buy_at: "8", growth_min_pct: "15", quality_max_de: "1.5", dividend_min_pct: "1.5", wheel_min_dollar_volume: "20000000",
-      gap_vol_mult: "1.5", gap_min_price: "5", gap_days: "21" };
+      gap_vol_mult: "1.5", gap_min_price: "5", gap_days: "21", gap_min_pct: "3" };
     return text.replace(/\{(\w+)\}/g, (m, k) => {
       if (extra && extra[k] != null) return extra[k];
       let v = val(k);

@@ -14,7 +14,7 @@ import tables  # noqa: E402
 START = "2026-01-02"
 
 
-def _tape(gap_at=-5, gap_bar=(52.0, 54.0, 51.5, 53.5, 2_000_000.0), after_close=53.0, quiet=120, extra=None):
+def _tape(gap_at=-5, gap_bar=(53.0, 54.0, 51.5, 53.5, 2_000_000.0), after_close=53.0, quiet=120, extra=None):
     """Quiet bars near 50 (high 50.5, low 49.5, 1M shares), then one gap bar `gap_at` bars from the end, then
     flat bars closing at after_close. extra: {index from the end: (open, high, low, close, volume)}."""
     n = quiet
@@ -59,6 +59,9 @@ def test_config_block_and_feature():
     for k, v in gap_up.GAP_UP_DEFAULTS.items():
         assert block[k] == v, k
     assert (block["lookback_days"], block["vol_mult"], block["vol_avg_days"], block["min_price"]) == (21, 1.5, 50, 5.0)
+    # min_gap_pct is a whole percent, like the other _pct keys: 3.0 means 3%.
+    assert block["min_gap_filter"] is True and block["min_gap_pct"] == 3.0
+    assert "3%" in block["_note"] and "3%" in topics_text()
     # Same traded-value floor as the Episodic Pivot scan.
     assert block["min_dollar_volume"] == cfg["episodic_pivot"]["min_dollar_volume_50d"]
     got = dict(zip(tables.settings_rows(cfg)["setting"], tables.settings_rows(cfg)["value"]))
@@ -71,13 +74,39 @@ def test_config_block_and_feature():
     assert "\u2014" not in topics["Gap Up"] and "\u2014" not in block["_note"]
 
 
+def topics_text():
+    return dict(tables.help_rows())["Gap Up"] + " " + dict(tables.help_rows())["Gap Up settings"]
+
+
+def _gap_of(pct):
+    """A tape whose gap-day open is pct% over the prior high of 50.5."""
+    op = 50.5 * (1 + pct / 100.0)
+    return _tape(gap_bar=(op, op + 1.0, op - 0.2, op + 0.5, 2_000_000.0), after_close=op + 0.5)
+
+
+def test_min_gap_3_pct():
+    assert len(_scan({"AAA": _gap_of(2.9)})) == 0, "2.9% is under the 3% minimum"
+    row = _one(_gap_of(3.0))
+    assert float(row["gap_pct"]) == 3.0, "exactly 3% is in"
+    assert len(_scan({"AAA": _gap_of(3.1)})) == 1
+    # Switch off: any true gap counts, as before.
+    off = {"gap_up": {"min_gap_filter": False}}
+    assert float(_one(_gap_of(1.0), off)["gap_pct"]) == 1.0, "a 1% gap is in with the switch off"
+    assert len(_scan({"AAA": _gap_of(2.9)}, off)) == 1
+    # The minimum is measured from the prior high, not the prior close: 3.5% over the close but 2.5% over the high is out.
+    assert len(_scan({"AAA": _gap_of(2.5)})) == 0 and float(_one(_gap_of(2.5), off)["gap_vs_close_pct"]) > 3.0
+    # A high open inside the range never counts, with the switch on or off.
+    inside = _tape(gap_bar=(50.4, 53.0, 50.2, 52.5, 3_000_000.0), after_close=52.5)
+    assert len(_scan({"AAA": inside})) == 0 and len(_scan({"AAA": inside}, off)) == 0
+
+
 def test_true_gap_and_gap_pct():
     row = _one(_tape())
-    # Prior high 50.5, prior close 50.0, open 52.0.
+    # Prior high 50.5, prior close 50.0, open 53.0.
     assert row["gap_date"] == str(_tape().index[-5].date()) and row["days_ago"] == 4
-    assert abs(float(row["gap_pct"]) - round((52.0 / 50.5 - 1) * 100, 2)) < 1e-9
-    assert abs(float(row["gap_vs_close_pct"]) - 4.0) < 1e-9
-    assert float(row["hold_level"]) == 51.5 and float(row["gap_high"]) == 54.0 and float(row["gap_open"]) == 52.0
+    assert abs(float(row["gap_pct"]) - round((53.0 / 50.5 - 1) * 100, 2)) < 1e-9
+    assert abs(float(row["gap_vs_close_pct"]) - 6.0) < 1e-9
+    assert float(row["hold_level"]) == 51.5 and float(row["gap_high"]) == 54.0 and float(row["gap_open"]) == 53.0
     assert row["status"] == gap_up.GAP_HOLDING
 
 
@@ -89,26 +118,27 @@ def test_open_inside_range_is_not_a_gap():
     at_high = _tape(gap_bar=(50.5, 53.0, 50.4, 52.5, 3_000_000.0), after_close=52.5)
     assert len(_scan({"AAA": at_high})) == 0
     # The switch off measures from the prior close instead, so the inside open counts.
-    out = _scan({"AAA": inside}, {"gap_up": {"true_gap_only": False}})
+    out = _scan({"AAA": inside}, {"gap_up": {"true_gap_only": False, "min_gap_filter": False}})
     assert len(out) == 1
 
 
 def test_any_gap_size_counts():
     tiny = _tape(gap_bar=(50.51, 51.0, 50.51, 50.9, 2_000_000.0), after_close=50.8)
-    row = _one(tiny)
+    assert len(_scan({"AAA": tiny})) == 0
+    row = _one(tiny, {"gap_up": {"min_gap_filter": False}})
     assert 0 < float(row["gap_pct"]) < 0.1
 
 
 def test_volume_threshold():
     # The 50 sessions before the gap day average 1M shares. 1.5M passes, 1.49M does not.
-    assert len(_scan({"AAA": _tape(gap_bar=(52.0, 54.0, 51.5, 53.5, 1_500_000.0))})) == 1
-    assert len(_scan({"AAA": _tape(gap_bar=(52.0, 54.0, 51.5, 53.5, 1_490_000.0))})) == 0
-    row = _one(_tape(gap_bar=(52.0, 54.0, 51.5, 53.5, 1_500_000.0)))
+    assert len(_scan({"AAA": _tape(gap_bar=(53.0, 54.0, 51.5, 53.5, 1_500_000.0))})) == 1
+    assert len(_scan({"AAA": _tape(gap_bar=(53.0, 54.0, 51.5, 53.5, 1_490_000.0))})) == 0
+    row = _one(_tape(gap_bar=(53.0, 54.0, 51.5, 53.5, 1_500_000.0)))
     assert float(row["volume_mult"]) == 1.5 and int(row["avg_volume_50"]) == 1_000_000
     # The average uses only the days before the gap day: a huge gap-day volume does not lift its own average.
-    row = _one(_tape(gap_bar=(52.0, 54.0, 51.5, 53.5, 10_000_000.0)))
+    row = _one(_tape(gap_bar=(53.0, 54.0, 51.5, 53.5, 10_000_000.0)))
     assert float(row["volume_mult"]) == 10.0
-    assert len(_scan({"AAA": _tape(gap_bar=(52.0, 54.0, 51.5, 53.5, 1_000_000.0))}, {"gap_up": {"volume_filter": False}})) == 1
+    assert len(_scan({"AAA": _tape(gap_bar=(53.0, 54.0, 51.5, 53.5, 1_000_000.0))}, {"gap_up": {"volume_filter": False}})) == 1
 
 
 def test_hold_rule_and_equal_to_low():
@@ -136,15 +166,15 @@ def test_21_day_window_includes_today():
 
 
 def test_most_recent_holding_gap_per_stock():
-    # Older gap at -15 (low 51.5) holds. A newer gap at -5 (open 56 over high 54.5, low 55.5) then a close at 55.0 under it.
-    old = (52.0, 54.0, 51.5, 53.5, 2_000_000.0)
+    # Older gap at -15 (low 51.5) holds. A newer gap at -5 (open 56.5 over high 54.5, low 55.5) then a close at 55.0 under it.
+    old = (53.0, 54.0, 51.5, 53.5, 2_000_000.0)
     frame = _tape(gap_at=-15, gap_bar=old, after_close=54.0,
-                  extra={-5: (56.0, 57.0, 55.5, 56.5, 2_000_000.0), -3: (55.2, 55.4, 54.8, 55.0, 1_000_000.0)})
+                  extra={-5: (56.5, 57.0, 55.5, 56.5, 2_000_000.0), -3: (55.2, 55.4, 54.8, 55.0, 1_000_000.0)})
     out = _scan({"AAA": frame})
     assert len(out) == 1
     assert out.iloc[0]["gap_date"] == str(frame.index[-15].date()), "newer gap broke, so the older holding gap is the row"
     # Both hold: the newer gap wins.
-    frame2 = _tape(gap_at=-15, gap_bar=old, after_close=54.0, extra={-5: (56.0, 57.0, 55.5, 56.5, 2_000_000.0),
+    frame2 = _tape(gap_at=-15, gap_bar=old, after_close=54.0, extra={-5: (56.5, 57.0, 55.5, 56.5, 2_000_000.0),
                                                                      -4: (56.0, 56.5, 55.8, 56.0, 1_000_000.0), -3: (56.0, 56.5, 55.8, 56.0, 1_000_000.0),
                                                                      -2: (56.0, 56.5, 55.8, 56.0, 1_000_000.0), -1: (56.0, 56.5, 55.8, 56.0, 1_000_000.0)})
     row = _one(frame2)
@@ -160,7 +190,7 @@ def test_price_and_liquidity_floor():
     assert len(_scan({"AAA": cheap})) == 0
     assert len(_scan({"AAA": cheap}, {"gap_up": {"price_floor": False}})) == 1
     # Last close exactly $5 passes.
-    five = _tape(gap_bar=(5.2, 5.4, 4.95, 5.3, 2_000_000.0), after_close=5.0)
+    five = _tape(gap_bar=(5.21, 5.4, 4.95, 5.3, 2_000_000.0), after_close=5.0)
     for col in ("open", "high", "low", "close"):
         five.iloc[:-5, five.columns.get_loc(col)] = five[col].iloc[:-5] * 0.1
     five["volume"] = five["volume"] * 10
@@ -176,8 +206,8 @@ def test_sorting_newest_first_then_gap_pct():
     frames = {
         "OLD": _tape(gap_at=-10, gap_bar=(60.0, 62.0, 59.0, 61.0, 3_000_000.0), after_close=61.0),
         "BIG": _tape(gap_at=-2, gap_bar=(58.0, 60.0, 57.0, 59.0, 3_000_000.0), after_close=59.0),
-        "SML": _tape(gap_at=-2, gap_bar=(51.0, 52.0, 50.8, 51.5, 3_000_000.0), after_close=51.5),
-        "AAB": _tape(gap_at=-2, gap_bar=(51.0, 52.0, 50.8, 51.5, 3_000_000.0), after_close=51.5),
+        "SML": _tape(gap_at=-2, gap_bar=(52.1, 53.0, 51.9, 52.5, 3_000_000.0), after_close=52.5),
+        "AAB": _tape(gap_at=-2, gap_bar=(52.1, 53.0, 51.9, 52.5, 3_000_000.0), after_close=52.5),
     }
     out = _scan(frames)
     assert list(out["ticker"]) == ["BIG", "AAB", "SML", "OLD"]
