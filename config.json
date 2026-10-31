@@ -68,6 +68,10 @@
     "default_theme": "dark",
     "match_device_option": true
   },
+  "vcp": {
+    "_note": "VCP scanner (vcp.html). A stock is listed only when Nick's indicator would draw its green VCP tag: the trend template is 8 of 8 and there are at least two tightening pullbacks. READY is at or under the buy line. BROKEN OUT today is a close over it on at least 1.5 times the 50-day volume. WATCHING is over it without that. show_weaker_trend brings back names that are not a VCP yet, labeled WATCHING (trend not 8/8) or WATCHING (one pullback). Those rows never feed Buy setups or Leaders. Nothing new is downloaded.",
+    "show_weaker_trend": false
+  },
   "chart_viewer": {
     "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. Turn the whole page off with features.chart_viewer.",
     "list_picker": true,

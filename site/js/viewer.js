@@ -25,6 +25,8 @@
     "READY": 1, "EP TODAY - FORMING": 1, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "BUYING": 1,
     "IN TRADE": 2, "NEAR HIGH": 2, "SELLING": 2, "ON WATCHLIST": 2,
     "DELAYED EP WATCH": 3, "NEW LOW": 3, "WATCHING": 4, "EP FADED": 5, "CLOSED": 6,
+    // VCP rows that are not a VCP yet (vcp.show_weaker_trend on). They rank under plain WATCHING.
+    "WATCHING (one pullback)": 5, "WATCHING (trend not 8/8)": 5,
   };
   function rankOf(status) {
     const r = STATUS_RANK[String(status || "")];
@@ -42,6 +44,7 @@
     const n = Number(s);
     return Number.isFinite(n) ? n : null;
   }
+  function isWatching(status) { return /^WATCHING\b/.test(txt(status)); }
   function yes(v) { return txt(v).toLowerCase() === "yes"; }
   // Short version of a long reason: whole sentences while they fit, then a clean word cut.
   function shorten(text, max) {
@@ -70,7 +73,8 @@
       const status = txt(row.status);
       if (!status) return null;
       if (status === "CLOSED" && !opts.includeClosed) return null;
-      if (status === "WATCHING" && !opts.includeWatching) return null;
+      // WATCHING and its labeled kinds, such as WATCHING (trend not 8/8), follow include_watching.
+      if (isWatching(status) && !opts.includeWatching) return null;
       return { status: status, reason: txt(row.reason) };
     }
     if (list.kind === "pass") {
@@ -196,7 +200,7 @@
     if (plotPx - boxPx < plotPx * 0.35) boxPx = plotPx * 0.65;
     return Math.max(3, (boxPx * visibleBars) / (plotPx - boxPx));
   }
-  const api = { LISTS: LISTS, entryFor: entryFor, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, padBars: padBars, rankOf: rankOf };
+  const api = { LISTS: LISTS, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, padBars: padBars, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 

@@ -397,18 +397,39 @@ def vcp_last(high, low, close, volume, spy):
     }
 
 
-def _vcp_status(state):
+VCP_WEAK_TREND = "WATCHING (trend not 8/8)"
+VCP_WEAK_ONE = "WATCHING (one pullback)"
+VCP_STATUS_RANK = {"BROKEN OUT today": 0, "READY": 1, "WATCHING": 2, VCP_WEAK_ONE: 3, VCP_WEAK_TREND: 4}
+
+
+def vcp_show_weaker(cfg):
+    """vcp.show_weaker_trend from config.json. Off unless it is set to true."""
+    block = (cfg or {}).get("vcp") if isinstance(cfg, dict) else None
+    return bool(isinstance(block, dict) and block.get("show_weaker_trend") is True)
+
+
+def _vcp_status(state, show_weaker=False):
+    """A row is listed only when the indicator would draw its green VCP tag:
+    trend template 8 of 8 and at least two tightening pullbacks (is_vcp).
+
+    BROKEN OUT today: today's close crossed the buy point on 1.5x volume.
+    READY: at or under the buy point. WATCHING: over the buy point without
+    that breakout today. With show_weaker on, names that are not a VCP yet
+    come back with a label that says why, so they never read as plain WATCHING.
+    """
+    if state["breakout"] and state["is_vcp"]:
+        return "BROKEN OUT today"
+    if state["is_vcp"] and state["pivot"] is not None:
+        return "READY" if state["close"] <= state["pivot"] else "WATCHING"
+    if not show_weaker:
+        return None
     if state["cnt"] <= 0 and not state["in_trade"]:
         return None
-    if state["breakout"]:
-        return "BROKEN OUT today"
-    if state["in_trade"]:
-        return "WATCHING"
-    if state["is_vcp"] and state["pivot"] is not None and state["close"] <= state["pivot"]:
-        return "READY"
-    if state["is_vcp"] or state["cnt"] >= 2 or state["in_trade"] or (state["cnt"] == 1 and state["score"] >= 6):
-        return "WATCHING"
-    return None
+    if not (state["cnt"] >= 2 or state["in_trade"] or (state["cnt"] == 1 and state["score"] >= 6)):
+        return None
+    if state["score"] < 8:
+        return VCP_WEAK_TREND
+    return VCP_WEAK_ONE
 
 
 def _vcp_levels(state):
@@ -433,13 +454,17 @@ def _vcp_reason(state, status, dates):
         bits.append("Today's close crossed above the buy point on volume above 1.5 times the 50-day average, with the trend template at 8 of 8 and at least two tightening pullbacks.")
     elif status == "READY":
         bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price has not closed through the buy point yet.")
-    elif state["is_vcp"] and state["pivot"] is not None and state["close"] > state["pivot"] and not state["big_vol"]:
-        bits.append("Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
-    elif state["cnt"] >= 2 and score < 8:
+    elif status == "WATCHING":
+        if not state["big_vol"]:
+            bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is through the buy point, but volume was not 1.5 times the 50-day average, so the indicator did not print a buy today.")
+        else:
+            bits.append("The trend template is 8 of 8 and the pullbacks are tightening. Price is already above the buy point. It did not cross it today, so it is not BROKEN OUT today.")
+    elif status == VCP_WEAK_TREND:
         failed = [str(i + 1) for i, ok in enumerate(state["rules"]) if not ok]
-        bits.append("Pullbacks are tightening, but the trend template is not 8 of 8. Still open: rule %s." % ", ".join(failed))
-    elif state["cnt"] == 1:
-        bits.append("One pullback so far. The indicator needs a second, tighter one before it will call this a VCP.")
+        lead = "Pullbacks are tightening" if state["cnt"] >= 2 else ("One pullback so far" if state["cnt"] == 1 else "No live pullback")
+        bits.append("%s, but the trend template is %d of 8, not 8 of 8. Still open: rule %s. This is not a VCP yet. It shows only because vcp.show_weaker_trend is on, and it never feeds Buy setups." % (lead, score, ", ".join(failed)))
+    elif status == VCP_WEAK_ONE:
+        bits.append("The trend template is 8 of 8, but there is only %s so far. The indicator needs at least two tightening pullbacks before it will call this a VCP. It shows only because vcp.show_weaker_trend is on, and it never feeds Buy setups." % ("one pullback" if state["cnt"] == 1 else "no live pullback"))
     if state["in_trade"] and state["entry"] is not None:
         when = ""
         if dates is not None and 0 <= state["entry_bar"] < len(dates):
@@ -515,8 +540,9 @@ def _panel_date(close):
     return pd.Timestamp(eligible.index.max())
 
 
-def scan_vcp(close, high, low, vol, universe):
+def scan_vcp(close, high, low, vol, universe, cfg=None):
     rows = []
+    show_weaker = vcp_show_weaker(cfg)
     panel = _panel_date(close)
     spy = close["SPY"] if close is not None and "SPY" in close.columns else None
     names = list(universe["ticker"]) if universe is not None and len(universe) else []
@@ -531,7 +557,7 @@ def scan_vcp(close, high, low, vol, universe):
         )
         if state is None:
             continue
-        status = _vcp_status(state)
+        status = _vcp_status(state, show_weaker)
         if status is None:
             continue
         stop, target, _, basis = _vcp_levels(state)
@@ -571,8 +597,7 @@ def scan_vcp(close, high, low, vol, universe):
     if not rows:
         return pd.DataFrame()
     out = pd.DataFrame(rows)
-    rank = {"BROKEN OUT today": 0, "READY": 1, "WATCHING": 2}
-    out["_k"] = out["status"].map(rank)
+    out["_k"] = out["status"].map(VCP_STATUS_RANK)
     out = out.sort_values(["_k", "strength"], ascending=[True, False]).drop(columns="_k")
     return out
 
@@ -2837,7 +2862,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_hv = features.get("scanner_volume", True)
     want_q = features.get("scanner_qullamaggie", True)
     want_m = features.get("scanner_marios", True)
-    vcp = scan_vcp(close, high, low, vol, universe) if (want_v or want_l) else pd.DataFrame()
+    vcp = scan_vcp(close, high, low, vol, universe, cfg) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()

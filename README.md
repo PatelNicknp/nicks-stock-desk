@@ -74,6 +74,8 @@ Source of truth: `reference/nicks_minervini_with_exit_strategy.pine`, using the 
 - A contraction is a swing high followed by a swing low. Swings use 4 bars left and 3 bars right, so a turn confirms 3 sessions later. A pullback under 3%, or shorter than 2 bars, is ignored. A lower high and a lower low extend the same contraction. The base starts at the highest swing high unless a later high beats it by more than 5%. The live count is the latest run of tightening pullbacks, at most 4.
 - READY: 8 of 8 and at least two tightening pullbacks, and the close is still at or under the buy point (the high of the latest contraction). The score is written as "8 of 8" so a spreadsheet does not treat it as a date.
 - BROKEN OUT today: that same setup, and today's close crossed above the buy point on volume above 1.5 times the 50-day average.
+- WATCHING: that same setup (8 of 8 and at least two tightening pullbacks), and the close is above the buy point without a 1.5 times volume cross today.
+- A stock is listed only when the indicator would draw its green VCP tag: 8 of 8 and at least two tightening pullbacks. `vcp.show_weaker_trend` in `config.json` (off by default) brings back names that are not a VCP yet, labeled `WATCHING (trend not 8/8)` or `WATCHING (one pullback)`. Those labels never feed Buy setups, Leaders, or sector rotation.
 - Exit, once a buy prints: stop 7% under that bar's close, moved to breakeven after a gain of 2.5 times the initial risk, sell part at 20%, trail is a close under the 20-day average after three days in the trade, and a 25% jump in 10 days is a climax warning rather than the target.
 
 What is not a separate rule, or not a perfect copy:
@@ -83,7 +85,7 @@ What is not a separate rule, or not a perfect copy:
 - A tie for the high or the low is not a swing. That is how TradingView's pivot function works.
 - Rule 8 uses SPY, which is the indicator's default. SPY is lined up on the stock's sessions. If SPY has no bar that day, the prior SPY close is used. A holiday can make that one session differ from TradingView.
 - Prices are the split-adjusted daily bars already in the cache. A TradingView chart on a different adjustment can disagree by a few cents.
-- The page leaves off symbols with no contraction. A single contraction is listed as WATCHING only when the template is at least 6/8. The indicator still draws on every symbol.
+- The page leaves off every symbol without the green VCP tag. With `vcp.show_weaker_trend` on, a weaker name needs two tightening pullbacks, a live trade, or one pullback with the template at least 6/8. The indicator still draws on every symbol.
 - Strength is the template (up to 80) plus 5 points per contraction, up to 4. The indicator does not define that score. It is only for sorting.
 
 ### CANSLIM
