@@ -4,7 +4,8 @@
  * on screen and the candles spread across the width (only the reason-box padding on the right). It must be put
  * back after a resize, a turn of the device, and opening or closing full screen, and also when the chart was
  * first drawn only a few px wide and widened later. A range the user dragged to is kept through all of those
- * until a range chip is tapped.
+ * until a range chip is tapped. On an iPhone in portrait (390 px), the All chip must fill the space left of the
+ * Why box with hundreds of bars (it used to show only a couple), with the newest candle just left of the box.
  * Files are served from this checkout. Nothing goes to the network; Yahoo is blocked.
  * Usage: node tests/chart_viewer_fit.mjs   (needs playwright; PLAYWRIGHT_ROOT can point at it)
  * Prints "chart viewer fit ok" and exits 0 when every check passes.
@@ -155,6 +156,29 @@ try {
     firstView(await view(page), dates, L("3M chip"), 3);
     await page.setViewportSize({ width: c.h, height: c.w }); await settle(page);
     firstView(await view(page), dates, L("3M chip turned"), 3);
+    // All: as much history as fits left of the Why box. At 390 px it used to show 1 or 2 bars.
+    await page.setViewportSize({ width: c.w, height: c.h }); await settle(page);
+    await page.$eval('#cvtools [data-range="all"]', (e) => e.click());
+    await settle(page);
+    const all = await page.evaluate(() => {
+      const ts = window.__charts[window.__charts.length - 1].timeScale();
+      const lr = ts.getVisibleLogicalRange();
+      const why = document.querySelector(".cv-why");
+      const host = document.getElementById("cvchart").getBoundingClientRect();
+      return { from: lr.from, to: lr.to, plot: ts.width(), sp: ts.options().barSpacing,
+        hostLeft: host.left, whyLeft: why && !why.hidden ? why.getBoundingClientRect().left : null };
+    });
+    const allShown = Math.min(n - 1, Math.floor(all.to)) - Math.max(0, Math.ceil(all.from)) + 1;
+    const xLast = all.hostLeft + (n - 1 - all.from) * (all.plot / (all.to - all.from));
+    check(allShown >= (c.w <= 400 ? 300 : n - 1), L("All chip") + ": shows " + allShown + " of " + n + " bars, not just a few");
+    check(all.to >= n - 1, L("All chip") + ": newest candle on screen");
+    if (all.whyLeft != null) {
+      check(xLast < all.whyLeft, L("All chip") + ": the Why box does not cover the newest candle (" + Math.round(xLast) + " vs " + Math.round(all.whyLeft) + ")");
+      check(all.whyLeft - xLast < 40, L("All chip") + ": the newest candle sits just left of the Why box (" + Math.round(all.whyLeft - xLast) + " px)");
+    }
+    await page.$eval('#cvtools [data-range="3m"]', (e) => e.click());
+    await settle(page);
+    firstView(await view(page), dates, L("3M chip after All"), 3);
     check(net.outside === 0, L("network") + ": no requests leave this checkout (" + net.outside + ")");
     check(errors.length === 0, L("errors") + ": " + errors.join("; "));
     await ctx.close();
