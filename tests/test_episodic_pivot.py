@@ -137,12 +137,35 @@ def test_trigger_partial_breakeven_and_trail():
     assert float(row["result_pct"]) > 0
 
 
-def test_stockbee_time_stop_is_a_switch():
-    flat = [(57.5, 58.3, 57.6, 58.1)] + [(58.1, 58.4, 57.7, 58.1)] * 5
-    row = _row(_tape(after=flat), cfg={"episodic_pivot": {"breakeven_after_partial": False}})
-    assert row["status"] == "CLOSED" and "time stop" in row["exit_reason"]
-    row = _row(_tape(after=flat), cfg={"episodic_pivot": {"time_stop": False, "breakeven_after_partial": False}})
-    assert row["status"] == "IN TRADE"
+def test_stockbee_time_stop_only_flags():
+    # Fill at 58.0 on the first bar after the EP, then flat closes at 58.1 for 6 sessions: never 1 ADR above the fill.
+    flat = [(57.5, 58.3, 57.6, 58.1)] + [(58.1, 58.4, 57.7, 58.1)] * 6
+    off_be = {"breakeven_after_partial": False}
+    row = _row(_tape(after=flat), cfg={"episodic_pivot": off_be})
+    assert row["status"] == "IN TRADE"  # never closes on the time stop
+    assert int(row["days_in_trade"]) == 6 and row["signal"] == "NO FOLLOW-THROUGH"
+    assert "No follow-through: not up 1 normal day's move after 5 sessions (Stockbee's time stop)." in row["reason"]
+    assert row["exit_reason"] == "" and row["buy_status"] == ""
+    # Day 5 is still in the partial window: SELL PART shows first, the reason carries the flag.
+    row = _row(_tape(after=flat[:-1]), cfg={"episodic_pivot": off_be})
+    assert row["status"] == "IN TRADE" and int(row["days_in_trade"]) == 5 and row["signal"] == "SELL PART"
+    assert "No follow-through" in row["reason"]
+    # Day 4: too early for the flag.
+    row = _row(_tape(after=flat[:-2]), cfg={"episodic_pivot": off_be})
+    assert "No follow-through" not in row["reason"]
+    # Switch off: no flag.
+    row = _row(_tape(after=flat), cfg={"episodic_pivot": dict(off_be, time_stop_flag=False)})
+    assert row["status"] == "IN TRADE" and row["signal"] == "HOLD" and "No follow-through" not in row["reason"]
+    # A best close one ADR above the fill clears the flag.
+    run = [(57.5, 58.3, 57.6, 58.1), (58.1, 61.5, 58.0, 61.0)] + [(60.0, 60.5, 59.5, 60.0)] * 5
+    row = _row(_tape(after=run), cfg={"episodic_pivot": off_be})
+    assert row["status"] == "IN TRADE" and row["signal"] == "HOLD" and "No follow-through" not in row["reason"]
+
+
+def test_time_stop_keys_use_india_names():
+    p = ep.ep_cfg(None)
+    assert p["time_stop_flag"] is True and p["time_stop_days"] == 5 and p["time_stop_adr_mult"] == 1.0
+    assert "time_stop" not in p and "time_stop_adr" not in p
 
 
 def test_close_under_the_ep_low_ends_the_watch():
@@ -155,6 +178,56 @@ def test_too_wide_stop_stays_listed_but_not_a_buy():
     row = _row(_tape(ep_bar=(56.0, 62.0, 52.0, 61.0, 4_000_000.0)))
     assert row["status"] == "EP TODAY - CONFIRMED"
     assert row["stop_check"] == "Too wide, skip"
+    assert row["buy_status"] == ""
+    # stop_width_check off: the same row is OK and READY.
+    row = _row(_tape(ep_bar=(56.0, 62.0, 52.0, 61.0, 4_000_000.0)), cfg={"episodic_pivot": {"stop_width_check": False}})
+    assert row["stop_check"] == "OK" and row["buy_status"] == "READY"
+
+
+def test_confirm_needs_upper_half_and_above_open():
+    # Upper half of the day (dcr 60%) but under the open: faded by default.
+    f = _tape(ep_bar=(57.8, 58.0, 55.0, 56.8, 4_000_000.0))
+    assert _row(f)["status"] == "EP FADED"
+    assert _row(f, cfg={"episodic_pivot": {"confirm_close_above_open": False}})["status"] == "EP TODAY - CONFIRMED"
+    # Above the open but in the lower half: faded unless the upper-half switch is off.
+    g = _tape(ep_bar=(55.2, 58.0, 55.0, 56.0, 4_000_000.0))
+    assert _row(g)["status"] == "EP FADED"
+    assert _row(g, cfg={"episodic_pivot": {"close_upper_half_for_confirm": False}})["status"] == "EP TODAY - CONFIRMED"
+    assert ep.EP_DEFAULTS["confirm_close_above_open"] is True
+
+
+def test_gap_and_volume_switches():
+    small = _tape(ep_bar=(56.0, 58.0, 55.0, 57.5, 2_000_000.0))  # 2x volume
+    assert len(_scan(small)) == 0
+    assert _row(small, cfg={"episodic_pivot": {"rvol_filter": False}})["status"] == "EP TODAY - CONFIRMED"
+    # Gap trigger off with the close-move rule off: nothing counts.
+    assert len(_scan(_tape(), cfg={"episodic_pivot": {"gap_trigger": False}})) == 0
+    # Gap trigger off, Stockbee close move on: the 15% close move alone still counts.
+    assert _row(_tape(), cfg={"episodic_pivot": {"gap_trigger": False, "sb_close_change_pct": 8}})["status"] == "EP TODAY - CONFIRMED"
+
+
+def test_broke_out_today_feeds_buy_setups():
+    # Day 2: high 58.6 crosses the EP-day high 58.0 today.
+    row = _row(_tape(after=[(57.5, 58.6, 57.2, 58.4)]))
+    assert row["status"] == "IN TRADE" and int(row["days_in_trade"]) == 0
+    assert row["buy_status"] == "BROKEN OUT today"
+    assert float(row["entry"]) == 58.0 and row["entry_basis"] == "EP-day high"
+    bf = ep.ep_buy_frame(_scan(_tape(after=[(57.5, 58.6, 57.2, 58.4)])))
+    assert list(bf["status"]) == ["BROKEN OUT today"] and float(bf.iloc[0]["pivot"]) == 58.0
+    # One session later it is just IN TRADE, no longer on Buy setups.
+    row = _row(_tape(after=[(57.5, 58.6, 57.2, 58.4), (58.4, 58.9, 58.1, 58.7)]))
+    assert row["status"] == "IN TRADE" and row["buy_status"] == ""
+    # A wide stop keeps a breakout off Buy setups.
+    wide = _tape(ep_bar=(56.0, 62.0, 52.0, 61.0, 4_000_000.0), after=[(61.0, 62.5, 60.5, 62.2)])
+    row = _row(wide)
+    assert row["status"] == "IN TRADE" and row["stop_check"] == "Too wide, skip" and row["buy_status"] == ""
+
+
+def test_delayed_breakout_is_not_a_buy_setup():
+    # Faded EP, then a tight 5-day range, then a move above it today: a delayed trigger, not on Buy setups.
+    after = [(54.6, 55.2, 54.4, 54.9)] * 5 + [(55.0, 55.8, 54.9, 55.6)]
+    row = _row(_tape(ep_bar=(56.0, 58.0, 54.0, 54.5, 4_000_000.0), after=after))
+    assert row["status"] == "IN TRADE" and row["entry_basis"] == "tight-range high after the EP"
     assert row["buy_status"] == ""
 
 
@@ -180,13 +253,35 @@ def test_earnings_link_after_close_and_before_open():
 def test_nick_switches_default_off_and_work():
     f = _tape()
     p = ep.ep_cfg(None)
-    assert p["nick_min_price"] == 0 and p["nick_min_mcap_usd"] == 0 and p["nick_min_avgvol_30d"] == 0
-    assert p["nick_max_perf_3m_pct"] == 0 and p["nick_require_earnings"] is False
+    switches = ("nick_gap_filter", "nick_rvol_filter", "nick_price_floor", "nick_min_mcap", "nick_min_avg_volume",
+                "nick_max_perf_3m", "nick_require_earnings", "nick_require_catalyst", "nick_require_flat_base")
+    assert all(p[k] is False for k in switches)
+    assert p["nick_gap_min_pct"] == 10 and p["nick_rvol_min"] == 3 and p["nick_min_price"] == 5
+    assert p["nick_min_mcap_usd"] == 500_000_000 and p["nick_avg_volume_days"] == 30 and p["nick_min_avg_volume_shares"] == 500_000
+    assert p["nick_max_perf_3m_pct"] == 30 and p["nick_min_catalyst_score"] == 2 and p["nick_flat_base_grade"] == "A"
+    # Numbers alone do nothing while the switch is off.
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_price": 60, "nick_min_avg_volume_shares": 2_000_000}})) == 1
     assert len(_scan(f, cfg={"episodic_pivot": {"nick_require_earnings": True}})) == 0
-    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_price": 60}})) == 0
-    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_avgvol_30d": 2_000_000}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_price_floor": True, "nick_min_price": 60}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_price_floor": True}})) == 1  # $50 passes $5
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_avg_volume": True, "nick_min_avg_volume_shares": 2_000_000}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_avg_volume": True}})) == 1  # 1M passes 500K
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_gap_filter": True, "nick_gap_min_pct": 15}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_gap_filter": True}})) == 1  # 12% gap
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_rvol_filter": True, "nick_rvol_min": 5}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_rvol_filter": True}})) == 1  # 4x volume
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_max_perf_3m": True}})) == 1  # flat before the gap
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_max_perf_3m": True, "nick_max_perf_3m_pct": -5}})) == 0
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_require_flat_base": True}})) == 1  # grade A
+    # Catalyst score: no earnings and no quarters is 0, under 2.
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_require_catalyst": True}})) == 0
+    d = f.index[-1]
+    earn = _earn("%s 07:00:00-04:00" % d.date())  # linked + 20% beat = 2
+    assert len(_scan(f, earnings=earn, cfg={"episodic_pivot": {"nick_require_catalyst": True}})) == 1
+    assert len(_scan(f, earnings=earn, cfg={"episodic_pivot": {"nick_require_catalyst": True, "nick_min_catalyst_score": 3}})) == 0
     # Market cap: unknown fails the switch; a known cap above it passes and shows as a column.
-    on = {"episodic_pivot": {"nick_min_mcap_usd": 500_000_000}}
+    on = {"episodic_pivot": {"nick_min_mcap": True}}
+    assert len(_scan(f, cfg={"episodic_pivot": {"nick_min_mcap_usd": 500_000_000}})) == 1
     assert len(_scan(f, cfg=on)) == 0
     info = pd.DataFrame([{"ticker": "AAA", "market_cap": 2_000_000_000, "analyst_count": 3}])
     row = _row(f, cfg=on, info=info)
@@ -212,6 +307,28 @@ def test_growth_and_acceleration_from_filed_quarters():
 def test_neglect_grade_ranks():
     row = _row(_tape())
     assert row["neglect_grade"] == "A"
+    # Thresholds are config numbers: a negative A cap pushes a flat stock to B, a negative B cap to C.
+    assert _row(_tape(), cfg={"episodic_pivot": {"neglect_a_max_63d_pct": -5}})["neglect_grade"] == "B"
+    assert _row(_tape(), cfg={"episodic_pivot": {"neglect_a_max_63d_pct": -5, "neglect_b_max_63d_pct": -5}})["neglect_grade"] == "C"
+
+
+def test_catalyst_check_switch():
+    f = _tape()
+    d = f.index[-1]
+    row = _row(f, earnings=_earn("%s 07:00:00-04:00" % d.date()), cfg={"episodic_pivot": {"catalyst_check": False}})
+    assert row["catalyst_tag"] == "Non-earnings - check news" and row["catalyst_score"] == ""
+
+
+def test_trail_switches():
+    after = [(57.5, 58.6, 57.2, 58.4), (58.5, 59.5, 58.2, 59.3)]
+    # Before the partial the trail is not used by default; with trail_after_partial_only off a close under it ends the trade.
+    dip = after + [(59.0, 59.2, 58.3, 58.5)]
+    cfg = {"trail_fast_adr_pct": 3, "trail_fast_ma": 2, "breakeven_after_partial": False}
+    assert _row(_tape(after=dip), cfg={"episodic_pivot": cfg})["status"] == "IN TRADE"
+    row = _row(_tape(after=dip), cfg={"episodic_pivot": dict(cfg, trail_after_partial_only=False)})
+    assert row["status"] == "CLOSED" and "2-day" in row["exit_reason"]
+    p = ep.ep_cfg(None)
+    assert p["trail_fast_ma"] == 10 and p["trail_slow_ma"] == 20 and p["trail_after_partial_only"] is True
 
 
 # Buy setups and config
@@ -221,12 +338,18 @@ def test_buy_setups_take_only_ready_ep_rows():
         return {"ticker": t, "status": status, "entry": 100.0, "pivot": 100.0, "stop": 96.0, "strength": 50, "stop_check": check,
                 "buy_status": buy, "company": t, "sector": "Tech", "index_membership": "SP500", "price": 99, "price_as_of": "2026-10-29"}
     epf = pd.DataFrame([rec("GOOD", "DAY 2-5 WATCH", "READY", "OK"), rec("FADE", "EP FADED", "", "OK"),
-                        rec("WIDE", "EP TODAY - CONFIRMED", "", "Too wide, skip")])
-    scores = pd.DataFrame([{"ticker": t, "verdict": "BUY", "score": 9} for t in ("GOOD", "FADE", "WIDE")])
-    out = setups.build_buy_setups(None, None, None, None, scores, sma_ok={"GOOD": True, "FADE": True, "WIDE": True},
+                        rec("WIDE", "EP TODAY - CONFIRMED", "", "Too wide, skip"),
+                        rec("BRKO", "IN TRADE", "BROKEN OUT today", "OK"), rec("HELD", "IN TRADE", "", "OK"),
+                        rec("DLYD", "DELAYED EP WATCH", "", "OK")])
+    names = ("GOOD", "FADE", "WIDE", "BRKO", "HELD", "DLYD")
+    scores = pd.DataFrame([{"ticker": t, "verdict": "BUY", "score": 9} for t in names])
+    out = setups.build_buy_setups(None, None, None, None, scores, sma_ok={t: True for t in names},
                                   market={"spy": True, "qqq": True}, ep=epf)
-    assert list(out["ticker"]) == ["GOOD"]
-    assert out.iloc[0]["setup_sources"] == "EP" and out.iloc[0]["best_status"] == "READY"
+    assert sorted(out["ticker"]) == ["BRKO", "GOOD"]
+    by = out.set_index("ticker")
+    assert by.loc["GOOD", "setup_sources"] == "EP" and by.loc["GOOD", "best_status"] == "READY"
+    assert by.loc["BRKO", "best_status"] == "BROKEN OUT today" and float(by.loc["BRKO", "entry"]) == 100.0
+    assert "broke out today" in by.loc["BRKO", "reason"]
     assert "EP" in setups.BUY_SETUP_ORDER
 
 

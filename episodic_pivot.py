@@ -16,8 +16,10 @@ from setups import _num, _round, _sma
 
 EP_DEFAULTS = {
     # Detection
+    "gap_trigger": True,
     "gap_min_pct": 10.0,
     "sb_close_change_pct": 0.0,
+    "rvol_filter": True,
     "rvol_min": 3.0,
     "rvol_avg_len": 50,
     "early_volume_test": True,
@@ -27,11 +29,17 @@ EP_DEFAULTS = {
     "min_price": 1.0,
     "min_dollar_volume_50d": 3000000.0,
     "close_upper_half_for_confirm": True,
+    "confirm_close_above_open": True,
     "adr_days": 20,
+    "stop_width_check": True,
     "max_stop_adr_mult": 1.5,
     # Ranking and catalyst
     "neglect_rank": True,
+    "neglect_a_max_63d_pct": 10.0,
+    "neglect_a_max_126d_pct": 20.0,
+    "neglect_b_max_63d_pct": 30.0,
     "first_ep_lookback": 126,
+    "catalyst_check": True,
     "surprise_min_pct": 10.0,
     "growth_min_pct": 25.0,
     "analyst_neglect_max": 5,
@@ -48,16 +56,24 @@ EP_DEFAULTS = {
     "partial_day_max": 5,
     "breakeven_after_partial": True,
     "trail_fast_adr_pct": 5.0,
-    "time_stop": True,
+    "trail_fast_ma": 10,
+    "trail_slow_ma": 20,
+    "trail_after_partial_only": True,
+    # Stockbee time stop: a flag only. The trade stays IN TRADE.
+    "time_stop_flag": True,
     "time_stop_days": 5,
-    "time_stop_adr": 1.0,
+    "time_stop_adr_mult": 1.0,
     "feed_buy_setups": True,
-    # Nick's own filters. 0 or false = off.
-    "nick_min_price": 0.0,
-    "nick_min_mcap_usd": 0.0,
-    "nick_min_avgvol_30d": 0.0,
-    "nick_max_perf_3m_pct": 0.0,
+    # Nick's own filters. Each is a switch, off by default, with its number ready.
+    "nick_gap_filter": False, "nick_gap_min_pct": 10.0,
+    "nick_rvol_filter": False, "nick_rvol_min": 3.0,
+    "nick_price_floor": False, "nick_min_price": 5.0,
+    "nick_min_mcap": False, "nick_min_mcap_usd": 500000000.0,
+    "nick_min_avg_volume": False, "nick_avg_volume_days": 30, "nick_min_avg_volume_shares": 500000,
+    "nick_max_perf_3m": False, "nick_max_perf_3m_pct": 30.0,
     "nick_require_earnings": False,
+    "nick_require_catalyst": False, "nick_min_catalyst_score": 2,
+    "nick_require_flat_base": False, "nick_flat_base_grade": "A",
 }
 
 EP_STATUS_RANK = {
@@ -65,12 +81,14 @@ EP_STATUS_RANK = {
     "DELAYED EP WATCH": 4, "EP FADED": 5, "CLOSED": 6,
 }
 EP_BUY_STATUSES = ("EP TODAY - CONFIRMED", "DAY 2-5 WATCH")
+EP_BROKE_OUT = "BROKEN OUT today"
 EP_NOTE = (
     "Episodic Pivot: a gap up of 10% or more on news, with volume at least 3 times normal. "
     "Daily bars only: the desk cannot see the pre-market or the opening range high, so the next-day level is the EP-day high "
     "and the stop is the EP-day low. Research only. This desk never places trades."
 )
 MANUAL_CHECK = "Guidance raised? Revenue beat? Non-earnings news? Check the news link by hand."
+NO_FOLLOW_TEXT = "No follow-through: not up 1 normal day's move after %d sessions (Stockbee's time stop)."
 
 
 def ep_cfg(cfg):
@@ -219,12 +237,14 @@ def _arrays(frame, p):
     v = frame["volume"].to_numpy(dtype=float)
     n = int(p["rvol_avg_len"])
     avg = pd.Series(v).rolling(n, min_periods=n).mean().shift(1).to_numpy()
-    avg30 = pd.Series(v).rolling(30, min_periods=30).mean().shift(1).to_numpy()
+    nd = int(p["nick_avg_volume_days"])
+    avg30 = pd.Series(v).rolling(nd, min_periods=nd).mean().shift(1).to_numpy()
     dvol = pd.Series(c * v).rolling(n, min_periods=n).mean().shift(1).to_numpy()
     return {
         "o": o, "h": h, "l": l, "c": c, "v": v, "avg": avg, "avg30": avg30, "dvol": dvol,
         "adr": setups._adr_series(h, l, int(p["adr_days"])),
         "s10": _sma(c, 10), "s20": _sma(c, 20),
+        "s_fast": _sma(c, int(p["trail_fast_ma"])), "s_slow": _sma(c, int(p["trail_slow_ma"])),
     }
 
 
@@ -244,7 +264,7 @@ def _is_event(a, i, p, partial=False, share=1.0, early_window=False):
     if gap is None:
         return None
     sb = float(p["sb_close_change_pct"] or 0)
-    moved = gap >= float(p["gap_min_pct"]) or (sb > 0 and chg is not None and chg >= sb)
+    moved = (bool(p["gap_trigger"]) and gap >= float(p["gap_min_pct"])) or (sb > 0 and chg is not None and chg >= sb)
     if not moved:
         return None
     avg = a["avg"][i]
@@ -254,11 +274,11 @@ def _is_event(a, i, p, partial=False, share=1.0, early_window=False):
     if partial:
         pace = a["v"][i] / (avg * max(share, 1e-6))
         early = bool(p["early_volume_test"]) and early_window and a["v"][i] >= float(p["early_volume_min_x"]) * avg
-        if not (pace >= float(p["rvol_min"]) or early):
+        if p["rvol_filter"] and not (pace >= float(p["rvol_min"]) or early):
             return None
         rvol, basis = pace, "pace so far today (volume so far vs %.0f%% of a normal day)" % (share * 100.0)
     else:
-        if rvol_full < float(p["rvol_min"]):
+        if p["rvol_filter"] and rvol_full < float(p["rvol_min"]):
             return None
         rvol, basis = rvol_full, "full day vs the %d-day average" % int(p["rvol_avg_len"])
     rng = a["h"][i] - a["l"][i]
@@ -268,8 +288,10 @@ def _is_event(a, i, p, partial=False, share=1.0, early_window=False):
     return {"i": i, "gap": gap, "chg": chg, "rvol": rvol, "rvol_basis": basis, "dcr": dcr}
 
 
-def _gates(a, i, p, mcap, earn_linked):
-    """Liquidity floor plus Nick's switches, judged on the day before the EP. (passes, reason if not)."""
+def _gates(a, i, p, mcap, erow, ev=None, cat=None):
+    """Liquidity floor plus Nick's switches, judged on the day before the EP. (passes, reason if not).
+
+    cat: a callable that returns the catalyst score, used only when nick_require_catalyst is on."""
     e = i - 1
     px = a["c"][e]
     if not (np.isfinite(px) and px >= float(p["min_price"])):
@@ -277,18 +299,30 @@ def _gates(a, i, p, mcap, earn_linked):
     dv = a["dvol"][i]
     if float(p["min_dollar_volume_50d"]) > 0 and not (np.isfinite(dv) and dv >= float(p["min_dollar_volume_50d"])):
         return False, "dollar volume"
-    if float(p["nick_min_price"] or 0) > 0 and not px > float(p["nick_min_price"]):
+    if p["nick_gap_filter"] and not (ev is not None and ev["gap"] is not None and ev["gap"] >= float(p["nick_gap_min_pct"])):
+        return False, "Nick gap"
+    if p["nick_rvol_filter"] and not (ev is not None and ev["rvol"] is not None and ev["rvol"] >= float(p["nick_rvol_min"])):
+        return False, "Nick volume"
+    if p["nick_price_floor"] and not px >= float(p["nick_min_price"]):
         return False, "Nick price"
-    if float(p["nick_min_mcap_usd"] or 0) > 0 and not (mcap is not None and mcap > float(p["nick_min_mcap_usd"])):
+    if p["nick_min_mcap"] and not (mcap is not None and mcap >= float(p["nick_min_mcap_usd"])):
         return False, "Nick market cap"
-    if float(p["nick_min_avgvol_30d"] or 0) > 0 and not (np.isfinite(a["avg30"][i]) and a["avg30"][i] > float(p["nick_min_avgvol_30d"])):
-        return False, "Nick 30-day volume"
-    if float(p["nick_max_perf_3m_pct"] or 0) > 0:
+    if p["nick_min_avg_volume"] and not (np.isfinite(a["avg30"][i]) and a["avg30"][i] >= float(p["nick_min_avg_volume_shares"])):
+        return False, "Nick average volume"
+    if p["nick_max_perf_3m"]:
         r63 = _ret(a, e, 63)
-        if r63 is None or r63 >= float(p["nick_max_perf_3m_pct"]):
+        if r63 is None or r63 > float(p["nick_max_perf_3m_pct"]):
             return False, "Nick 3-month run"
-    if p["nick_require_earnings"] and not earn_linked:
+    if p["nick_require_earnings"] and erow is None:
         return False, "Nick earnings only"
+    if p["nick_require_catalyst"]:
+        score = cat() if cat is not None else None
+        if score is None or score < int(p["nick_min_catalyst_score"]):
+            return False, "Nick catalyst score"
+    if p["nick_require_flat_base"]:
+        grade = _neglect(a, i, p)["neglect_grade"]
+        if not (grade and grade <= str(p["nick_flat_base_grade"]).upper()):
+            return False, "Nick flat base"
     return True, ""
 
 
@@ -301,15 +335,16 @@ def _ret(a, e, bars):
     return (a1 / a0 - 1.0) * 100.0
 
 
-def _neglect(a, i):
+def _neglect(a, i, p=None):
     e = i - 1
     r63, r126 = _ret(a, e, 63), _ret(a, e, 126)
     lo = max(0, i - 126)
     hh, ll = np.nanmax(a["h"][lo:i]), np.nanmin(a["l"][lo:i])
     base = (hh - ll) / ll * 100.0 if ll > 0 else None
-    if r63 is not None and r126 is not None and r63 <= 10.0 and r126 <= 20.0:
+    p = p or EP_DEFAULTS
+    if r63 is not None and r126 is not None and r63 <= float(p["neglect_a_max_63d_pct"]) and r126 <= float(p["neglect_a_max_126d_pct"]):
         grade = "A"
-    elif r63 is not None and r63 <= 30.0:
+    elif r63 is not None and r63 <= float(p["neglect_b_max_63d_pct"]):
         grade = "B"
     elif r63 is not None:
         grade = "C"
@@ -330,7 +365,7 @@ def _first_ep(a, i, p):
 
 def _confirmed(a, ev, p):
     i = ev["i"]
-    ok_open = a["c"][i] >= a["o"][i]
+    ok_open = a["c"][i] >= a["o"][i] if p["confirm_close_above_open"] else True
     ok_half = ev["dcr"] >= 50.0 if p["close_upper_half_for_confirm"] else True
     return bool(ok_open and ok_half)
 
@@ -348,27 +383,28 @@ def _tight_range(a, j, e, p, adr_px):
 
 
 def _simulate_trade(a, k, fill, stop, adr_pct, p):
-    """Bar-by-bar from the bar after the trigger. Partial on day 3-5, breakeven, trail, Stockbee time stop."""
+    """Bar-by-bar from the bar after the trigger. Partial on day 3-5, breakeven, trail, and the Stockbee time stop flag.
+
+    The time stop never closes the trade: after time_stop_days sessions, a best close still under
+    fill x (1 + time_stop_adr_mult ADR) sets no_follow and the signal NO FOLLOW-THROUGH."""
     c, h, l = a["c"], a["h"], a["l"]
     fast = adr_pct is not None and adr_pct >= float(p["trail_fast_adr_pct"])
-    sma = a["s10"] if fast else a["s20"]
-    word = "10-day" if fast else "20-day"
-    adr_px = fill * adr_pct / 100.0 if adr_pct else None
+    n_ma = int(p["trail_fast_ma"]) if fast else int(p["trail_slow_ma"])
+    sma = a["s_fast"] if fast else a["s_slow"]
+    word = "%d-day" % n_ma
     partial, be = None, False
+    best_close = float(c[k])
     for j in range(k + 1, len(c)):
         if l[j] <= stop:
             return dict(status="CLOSED", exit_bar=j, exit_price=float(min(a["o"][j], stop)) if np.isfinite(a["o"][j]) else float(stop),
                         exit_reason="breakeven stop" if be else "stop at the EP-day low", signal="SELL",
-                        partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma)
+                        partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma, no_follow=False)
         days = j - k
-        if partial is not None and np.isfinite(sma[j]) and c[j] < sma[j]:
+        active = partial is not None or not p["trail_after_partial_only"]
+        if active and np.isfinite(sma[j]) and c[j] < sma[j]:
             return dict(status="CLOSED", exit_bar=j, exit_price=float(c[j]), exit_reason="first close under the %s average" % word,
-                        signal="SELL", partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma)
-        if p["time_stop"] and days == int(p["time_stop_days"]) and adr_px is not None:
-            if not float(np.nanmax(h[k:j + 1])) > fill + float(p["time_stop_adr"]) * adr_px:
-                return dict(status="CLOSED", exit_bar=j, exit_price=float(c[j]),
-                            exit_reason="no follow-through in %d days (Stockbee time stop)" % int(p["time_stop_days"]),
-                            signal="NO FOLLOW-THROUGH", partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma)
+                        signal="SELL", partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma, no_follow=False)
+        best_close = max(best_close, float(c[j]))
         if partial is None and days >= int(p["partial_day_min"]):
             partial = j
             if p["breakeven_after_partial"]:
@@ -376,12 +412,17 @@ def _simulate_trade(a, k, fill, stop, adr_pct, p):
                 be = True
     t = len(c) - 1
     days_t = t - k
+    no_follow = False
+    if p["time_stop_flag"] and days_t >= int(p["time_stop_days"]) and adr_pct:
+        no_follow = bool(best_close < fill * (1.0 + float(p["time_stop_adr_mult"]) * adr_pct / 100.0))
     if partial is not None and int(p["partial_day_min"]) <= days_t <= int(p["partial_day_max"]):
         sig = "SELL PART"
+    elif no_follow:
+        sig = "NO FOLLOW-THROUGH"
     else:
         sig = "HOLD"
     return dict(status="IN TRADE", exit_bar=None, exit_price=None, exit_reason="", signal=sig,
-                partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma)
+                partial_bar=partial, stop_now=stop, trail_word=word, trail_arr=sma, no_follow=no_follow)
 
 
 def _lifecycle(a, ev, p, confirmed):
@@ -480,8 +521,13 @@ def scan_ep(close, high, low, vol, opn, universe, cfg=None, earnings=None, quart
             if ev is None:
                 continue
             prev_date = frame.index[i - 1]
-            erow, timing = link_earnings(earn.get(ticker), frame.index[i], prev_date)
-            ok, _why = _gates(a, i, p, mcap, erow is not None)
+            if p["catalyst_check"]:
+                erow, timing = link_earnings(earn.get(ticker), frame.index[i], prev_date)
+            else:
+                erow, timing = None, ""
+            ep_day = frame.index[i]
+            ok, _why = _gates(a, i, p, mcap, erow, ev,
+                              cat=lambda erow=erow, ep_day=ep_day: catalyst_score(erow, quarter_growth(quarters, ticker, ep_day), p))
             if not ok:
                 continue
             # The newest EP that passes decides the row. A CLOSED one older than closed_keep_days shows nothing.
@@ -513,19 +559,17 @@ def _build_row(a, frame, ev, p, forming, erow, timing, quarters, ticker, meta, m
     i = ev["i"]
     t = len(a["c"]) - 1
     ep_date = pd.Timestamp(frame.index[i])
-    neg = _neglect(a, i)
+    neg = _neglect(a, i, p)
     adr_pre = a["adr"][i - 1] if np.isfinite(a["adr"][i - 1]) else None
     surprise = _num(erow.get("surprise_pct")) if erow is not None else None
     eps_a = _num(erow.get("eps_actual")) if erow is not None else None
     eps_e = _num(erow.get("eps_estimate")) if erow is not None else None
-    growth = quarter_growth(quarters, ticker, ep_date)
-    pts = 0
-    pts += 1 if erow is not None else 0
-    pts += 1 if surprise is not None and surprise >= float(p["surprise_min_pct"]) else 0
-    gmin = float(p["growth_min_pct"])
-    strong = (growth["eps_yoy"] is not None and growth["eps_yoy"] >= gmin) or (growth["rev_yoy"] is not None and growth["rev_yoy"] >= gmin)
-    pts += 1 if strong else 0
-    pts += 1 if growth["rev_accel"] else 0
+    if p["catalyst_check"]:
+        growth = quarter_growth(quarters, ticker, ep_date)
+        pts = catalyst_score(erow, growth, p)
+    else:
+        growth = {"eps_yoy": None, "rev_yoy": None, "rev_accel": None}
+        pts = None
     analysts = _num(meta.get("analyst_count"))
     row = {
         "ep_date": str(ep_date.date()), "days_since_ep": t - i,
@@ -541,7 +585,7 @@ def _build_row(a, frame, ev, p, forming, erow, timing, quarters, ticker, meta, m
         "surprise_pct": _round(surprise, 1) if surprise is not None else ("Pending, fills after 6:30 PM ET" if erow is not None else ""),
         "eps_yoy_last_filed": _round(growth["eps_yoy"], 1), "rev_yoy_last_filed": _round(growth["rev_yoy"], 1),
         "rev_accel": "" if growth["rev_accel"] is None else ("yes" if growth["rev_accel"] else "no"),
-        "analyst_count": _round(analysts, 0), "catalyst_score": pts, "manual_check": MANUAL_CHECK,
+        "analyst_count": _round(analysts, 0), "catalyst_score": "" if pts is None else pts, "manual_check": MANUAL_CHECK,
         "market_cap": _round(mcap, 0),
         "small_young_tag": ("under $%dB" % int(float(p["small_cap_tag_usd"]) / 1e9)) if mcap is not None and mcap < float(p["small_cap_tag_usd"]) else "",
         "adr_pct": _round(adr_pre, 2),
@@ -591,10 +635,15 @@ def _build_row(a, frame, ev, p, forming, erow, timing, quarters, ticker, meta, m
     rva = risk / adr_pre if risk is not None and adr_pre else None
     row.update({"entry": _round(row["entry"]), "stop": _round(row["stop"]),
                 "pivot": _round(row["entry"]), "risk_pct": _round(risk, 1), "risk_vs_adr": _round(rva, 2)})
-    too_wide = rva is not None and rva > float(p["max_stop_adr_mult"])
+    too_wide = bool(p["stop_width_check"]) and rva is not None and rva > float(p["max_stop_adr_mult"])
     row["stop_check"] = "Too wide, skip" if too_wide else ("OK" if rva is not None else "")
-    if p["feed_buy_setups"] and row["status"] in EP_BUY_STATUSES and not too_wide and _num(row["entry"]) is not None:
-        row["buy_status"] = "READY"
+    if p["feed_buy_setups"] and not too_wide and _num(row["entry"]) is not None:
+        if row["status"] in EP_BUY_STATUSES:
+            row["buy_status"] = "READY"
+        elif (row["status"] == "IN TRADE" and life.get("trigger_bar") == t and not life.get("delayed")
+              and life.get("entry_basis") == "EP-day high"):
+            # Broke out today: today's high crossed the EP-day high (day 2 to 5). Delayed-range triggers stay out.
+            row["buy_status"] = EP_BROKE_OUT
     row["strength"] = _strength(row, ev, p)
     row["reason"] = _reason(row, ev, p, forming, life)
     return row
@@ -603,7 +652,7 @@ def _build_row(a, frame, ev, p, forming, erow, timing, quarters, ticker, meta, m
 def _strength(row, ev, p):
     pts = min(ev["rvol"] / 10.0, 1.0) * 30.0 + min(max(ev["gap"], 0) / 30.0, 1.0) * 20.0
     pts += {"A": 20.0, "B": 10.0}.get(row["neglect_grade"], 0.0)
-    pts += row["catalyst_score"] * 5.0
+    pts += (_num(row["catalyst_score"]) or 0) * 5.0
     pts += 10.0 if ev["dcr"] >= 50 else 0.0
     return round(min(pts, 100.0), 1)
 
@@ -633,9 +682,9 @@ def _reason(row, ev, p, forming, life):
     if st == "EP TODAY - FORMING":
         bits.append("Still forming today. Watch the opening range high on your chart. Stop is today's low so far at %s." % row["stop"])
     elif st == "EP TODAY - CONFIRMED":
-        bits.append("Closed strong (top half of the day, at or above the open). Next sessions: a move above the EP-day high %s; stop at the EP-day low %s." % (row["entry"], row["stop"]))
+        bits.append("Closed strong (%s). Next sessions: a move above the EP-day high %s; stop at the EP-day low %s." % (_confirm_words(p), row["entry"], row["stop"]))
     elif st == "EP FADED":
-        bits.append("Faded: the close was in the lower half of the day or under the open. Not an entry. It is watched for a delayed EP for %d sessions." % int(p["delayed_watch_days"]))
+        bits.append("Faded: the close was %s. Not an entry. It is watched for a delayed EP for %d sessions." % (_fade_words(p), int(p["delayed_watch_days"])))
     elif st == "DAY 2-5 WATCH":
         bits.append("Day %d after the EP. Not yet above the EP-day high %s, and has not closed under the EP-day low %s." % (row["days_since_ep"] + 1, row["entry"], row["stop"]))
     elif st == "DELAYED EP WATCH":
@@ -645,7 +694,11 @@ def _reason(row, ev, p, forming, life):
             bits.append("Held above the EP-day low but has not built a tight range yet.")
     elif st == "IN TRADE":
         bits.append("Traded above %s on %s (fill %s). Day %s in the trade. Signal: %s." % (row["entry"], row["trigger_date"], row["fill"], row["days_in_trade"], row["signal"]))
+        if row.get("buy_status") == EP_BROKE_OUT:
+            bits.append("It broke out today above the EP-day high, so it is on Buy setups as broke out.")
         bits.append("Plan: sell 1/3 to 1/2 on day 3 to 5, move the stop to breakeven, then sell the rest on the first close under the %s average." % row["trail_with"])
+        if life.get("no_follow"):
+            bits.append(NO_FOLLOW_TEXT % int(p["time_stop_days"]))
     elif st == "CLOSED":
         bits.append("CLOSED%s: %s." % ((" on " + row["exit_date"]) if row["exit_date"] else "", row["exit_reason"]))
     if _num(row["risk_vs_adr"]) is not None:
@@ -655,18 +708,55 @@ def _reason(row, ev, p, forming, life):
     return " ".join(bits)
 
 
+def _confirm_words(p):
+    parts = []
+    if p["close_upper_half_for_confirm"]:
+        parts.append("top half of the day")
+    if p["confirm_close_above_open"]:
+        parts.append("at or above the open")
+    return ", ".join(parts) if parts else "no close test"
+
+
+def _fade_words(p):
+    parts = []
+    if p["close_upper_half_for_confirm"]:
+        parts.append("in the lower half of the day")
+    if p["confirm_close_above_open"]:
+        parts.append("under the open")
+    return " or ".join(parts) if parts else "weak"
+
+
+def catalyst_score(erow, growth, p):
+    """0 to 4: earnings linked to the EP day, EPS beat by surprise_min_pct, strong growth, revenue speeding up."""
+    pts = 0
+    if erow is not None:
+        pts += 1
+        surprise = _num(erow.get("surprise_pct"))
+        if surprise is not None and surprise >= float(p["surprise_min_pct"]):
+            pts += 1
+    gmin = float(p["growth_min_pct"])
+    if (growth["eps_yoy"] is not None and growth["eps_yoy"] >= gmin) or (growth["rev_yoy"] is not None and growth["rev_yoy"] >= gmin):
+        pts += 1
+    if growth["rev_accel"]:
+        pts += 1
+    return pts
+
+
 def _fmt(x):
     x = float(x)
     return ("%d" % x) if x == int(x) else str(x)
 
 
 def ep_buy_frame(ep):
-    """EP rows that feed Buy setups, renamed to the shape the builder reads (status READY, pivot = entry)."""
+    """EP rows that feed Buy setups, renamed to the shape the builder reads.
+
+    READY: EP TODAY - CONFIRMED and DAY 2-5 WATCH. BROKEN OUT today: today's high crossed the EP-day high.
+    Entry (pivot) is the EP-day high either way. Too wide, faded and delayed rows never carry a buy_status."""
     if ep is None or len(ep) == 0 or "buy_status" not in ep.columns:
         return pd.DataFrame()
-    rows = ep[ep["buy_status"].astype(str) == "READY"].copy()
+    rows = ep[ep["buy_status"].astype(str).isin(["READY", EP_BROKE_OUT])].copy()
     if len(rows) == 0:
         return pd.DataFrame()
-    rows["status"] = "READY"
+    rows["status"] = rows["buy_status"].astype(str)
     rows["pivot"] = rows["entry"]
     return rows

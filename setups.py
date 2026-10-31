@@ -2657,13 +2657,14 @@ def buy_rows_visible(df, market_filter):
 
 
 def _ep_buy_rows(ep):
-    """Episodic Pivot rows marked buy_status READY (EP TODAY - CONFIRMED and DAY 2-5 WATCH, stop not too wide)."""
+    """Episodic Pivot rows with a buy_status: READY (EP TODAY - CONFIRMED and DAY 2-5 WATCH) or
+    BROKEN OUT today (today's high crossed the EP-day high). Stop not too wide; faded and delayed rows stay out."""
     if ep is None or len(getattr(ep, "index", [])) == 0 or "buy_status" not in getattr(ep, "columns", []):
         return None
-    rows = ep[ep["buy_status"].astype(str) == "READY"].copy()
+    rows = ep[ep["buy_status"].astype(str).isin(["READY", "BROKEN OUT today"])].copy()
     if len(rows) == 0:
         return None
-    rows["status"] = "READY"
+    rows["status"] = rows["buy_status"].astype(str)
     rows["pivot"] = rows["entry"]
     return rows
 
