@@ -20,6 +20,7 @@ import fundamentals as fund
 import scoring
 import tables
 import setups
+import episodic_pivot
 import sector_rotation
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
@@ -759,6 +760,8 @@ def load_yahoo(tickers, cfg, cache, mode):
                 "analyst_count": inf.get("numberOfAnalystOpinions"),
                 "target_mean": inf.get("targetMeanPrice"),
                 "target_median": inf.get("targetMedianPrice"),
+                # Same tk.info response as above. One more field, no new request.
+                "market_cap": inf.get("marketCap"),
                     "earnings_ts": inf.get("earningsTimestamp"),
             })
             done.add(t)
@@ -2180,6 +2183,16 @@ def main(argv=None):
         if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []):
             return 0
         return int((frame["ticker"].astype(str) != "").sum())
+    ep_on = features.get("scanner_ep", True)
+    if ep_on and len(close) and len(universe) and long is not None and len(long) and "open" in long.columns:
+        # now_et only tells the scan whether today's bar is still forming (hourly runs in market hours).
+        setup_frames["scanner_ep"] = episodic_pivot.scan_ep(
+            close, high, low, vol, wide_from_long(long, "open"), universe, cfg,
+            earnings=earnings, quarters=quarters, info=info, now_et=pd.Timestamp.now(tz=ET) if mode != "offline" else None,
+        )
+    else:
+        setup_frames["scanner_ep"] = pd.DataFrame()
+    log("Episodic pivot", "OK", asof if ep_on else "", ("EP rows %d. Cached prices, earnings dates, and profiles only. No new downloads." % _n(setup_frames["scanner_ep"])) if ep_on else "feature off")
     log("Pattern scanners", "OK", asof, "VCP %d, CANSLIM %d, box %d, breakdown %d, flag %d, Qullamaggie %d, Marios %d, high volume %d, leaders %d, 52-week %d names over %d sessions. No new downloads." % (
         _n(setup_frames["scanner_vcp"]), _n(setup_frames["scanner_canslim"]),
         _n(setup_frames["scanner_box"]), _n(setup_frames.get("scanner_breakdown")),
@@ -2194,6 +2207,7 @@ def main(argv=None):
             setup_frames.get("scanner_flag"), setup_frames.get("scanner_canslim"),
             scores, close, setup_frames.get("scanner_52w"),
             qullamaggie=setup_frames.get("scanner_qullamaggie"), marios=setup_frames.get("scanner_marios"),
+            ep=setup_frames.get("scanner_ep") if ep_on else None,
         )
     else:
         buy = pd.DataFrame()
@@ -2274,6 +2288,7 @@ def main(argv=None):
         "scanner_flag": gated(setup_frames["scanner_flag"], "scanner_flag", features.get("scanner_flag", True), "No flag setups in the cached prices."),
         "scanner_qullamaggie": gated(setup_frames.get("scanner_qullamaggie"), "scanner_qullamaggie", features.get("scanner_qullamaggie", True), "No Qullamaggie setups in the cached prices."),
         "scanner_marios": gated(setup_frames.get("scanner_marios"), "scanner_marios", features.get("scanner_marios", True), "No Marios setups in the cached prices."),
+        "scanner_ep": gated(setup_frames.get("scanner_ep"), "scanner_ep", features.get("scanner_ep", True), "No episodic pivots in the cached prices. An EP needs a gap of 10% or more on at least 3 times normal volume."),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),

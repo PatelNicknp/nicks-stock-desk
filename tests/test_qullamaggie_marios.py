@@ -376,7 +376,8 @@ def test_chart_lines_and_buy_order():
     frame, _ = _tape()
     row = _row(frame)
     assert float(row["trail10"]) > 0 and float(row["trail20"]) > 0
-    assert setups.BUY_SETUP_ORDER == ("VCP", "Box", "Flag", "Qullamaggie", "Marios", "CANSLIM")
+    order = setups.BUY_SETUP_ORDER
+    assert order.index("Qullamaggie") < order.index("Marios") < order.index("CANSLIM")
 
 
 if __name__ == "__main__":

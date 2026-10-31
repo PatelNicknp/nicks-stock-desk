@@ -69,7 +69,7 @@ BUY_STOP_PCT = PINE["stop_pct"]
 BUY_PART_PCT = PINE["part_pct"]
 BUY_MAX_RISK_PCT = 8.0
 BUY_TARGET2_R = 3.0
-BUY_SETUP_ORDER = ("VCP", "Box", "Flag", "Qullamaggie", "Marios", "CANSLIM")
+BUY_SETUP_ORDER = ("VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "CANSLIM")
 BUY_LIVE_STATUS = ("READY", "BROKEN OUT today")
 
 VCP_NOTE = (
@@ -2656,8 +2656,20 @@ def buy_rows_visible(df, market_filter):
     return rows.iloc[0:0]
 
 
+def _ep_buy_rows(ep):
+    """Episodic Pivot rows marked buy_status READY (EP TODAY - CONFIRMED and DAY 2-5 WATCH, stop not too wide)."""
+    if ep is None or len(getattr(ep, "index", [])) == 0 or "buy_status" not in getattr(ep, "columns", []):
+        return None
+    rows = ep[ep["buy_status"].astype(str) == "READY"].copy()
+    if len(rows) == 0:
+        return None
+    rows["status"] = "READY"
+    rows["pivot"] = rows["entry"]
+    return rows
+
+
 def build_buy_setups(vcp, box, flag, canslim, scores, close=None, week=None, sma_ok=None, market=None,
-                     qullamaggie=None, marios=None):
+                     qullamaggie=None, marios=None, ep=None):
     """Names that pass the stock rules. market_ok is SPY's uptrend, for the page filter.
 
     No network. Scanners, scores, the 52-week file, and the cached closes are the inputs.
@@ -2665,7 +2677,7 @@ def build_buy_setups(vcp, box, flag, canslim, scores, close=None, week=None, sma
     """
     grouped = {}
     for source, frame in (("VCP", vcp), ("Box", box), ("Flag", flag), ("Qullamaggie", qullamaggie),
-                          ("Marios", marios), ("CANSLIM", canslim)):
+                          ("Marios", marios), ("EP", _ep_buy_rows(ep)), ("CANSLIM", canslim)):
         for rec in _setup_records(frame, source):
             grouped.setdefault(rec["ticker"], []).append(rec)
     score_idx = None
