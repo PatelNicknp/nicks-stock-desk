@@ -1020,6 +1020,7 @@ def help_rows():
         ("Chart Viewer swipes", "Swipe right for the next chart and left for the one before. The Swipe button at the top swaps that. The arrows on the sides and the left and right keys on a keyboard also work, and the counter shows where you are, like 3 of 120. The chart does not slide when you drag it, so a swipe always changes the chart. Set chart_viewer.chart_touch_pan to true if you want to drag the chart; then only a quick sideways flick changes the chart."),
         ("Chart Viewer lines and reason box", "The MA buttons turn the 10, 20, 50, 150, and 200-day average lines on and off. 50, 150, and 200 start on. Vol shows or hides the volume bars. The box in the lower right lists every scanner the stock is on, its status, and a short reason. Tap it to read the full reason. Tap Why to hide or show the box. Your choices are saved on this device."),
         ("Chart Viewer settings", "Every Chart Viewer option has its own switch in the chart_viewer block of config.json: the list picker, full screen, swipes, the swipe button, the arrows, the keys, the counter, loading the next chart early, each average line, volume, the reason box, the company line, and the day change. include_watching adds stocks still forming a setup. include_closed adds finished trades."),
+        ("Light mode", "The Theme switch at the top of the left menu picks Dark, Light, or Match device. Match device follows your iPhone or iPad setting, so the desk turns light in the day and dark at night if your device does. Dark is the default. Your pick is saved on that device only. Every page, the Chart Viewer, and the charts change color; the numbers stay the same. On a phone, open the menu with the button at the top left. Hide the switch with features.light_mode in config.json; the desk then stays dark."),
     ]
 
 
@@ -1041,7 +1042,7 @@ def settings_rows(cfg):
     for key in ("near_high_pct", "w52_bars", "tail_keep", "macro_lookback", "yield_flat_band"):
         if key in rot:
             rows.append({"setting": "sector_rotation." + key, "value": rot[key]})
-    for block in ("qullamaggie", "marios", "episodic_pivot", "chart_viewer"):
+    for block in ("qullamaggie", "marios", "episodic_pivot", "chart_viewer", "light_mode"):
         for key, value in (cfg.get(block) or {}).items():
             if str(key).startswith("_"):
                 continue

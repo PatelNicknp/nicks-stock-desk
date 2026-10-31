@@ -60,7 +60,13 @@
     "scanner_qullamaggie": true,
     "scanner_marios": true,
     "scanner_ep": true,
-    "chart_viewer": true
+    "chart_viewer": true,
+    "light_mode": true
+  },
+  "light_mode": {
+    "_note": "Light mode. features.light_mode shows or hides the Theme switch (Dark, Light, Match device) at the top of the left menu. With the switch hidden the whole desk stays dark. default_theme is what a phone or iPad sees before it picks one: dark, light, or device. The pick is saved on that device. match_device_option shows the Match device button. Colors only; nothing new is downloaded.",
+    "default_theme": "dark",
+    "match_device_option": true
   },
   "chart_viewer": {
     "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. Turn the whole page off with features.chart_viewer.",

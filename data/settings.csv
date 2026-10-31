@@ -59,6 +59,7 @@ feature.scanner_qullamaggie,True
 feature.scanner_marios,True
 feature.scanner_ep,True
 feature.chart_viewer,True
+feature.light_mode,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
@@ -277,4 +278,6 @@ chart_viewer.company_line,True
 chart_viewer.day_change,True
 chart_viewer.range_months,6
 chart_viewer.range_months_phone,3
+light_mode.default_theme,dark
+light_mode.match_device_option,True
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

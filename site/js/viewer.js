@@ -431,7 +431,7 @@
       }
       msg.hidden = true;
       const LC = LightweightCharts;
-      chart = LC.createChart(host, {
+      chart = D.themedChart(LC.createChart(host, D.themed({
         autoSize: true,
         layout: { background: { type: "solid", color: "#0B0F17" }, textColor: D.MU, fontFamily: "Roboto, Arial, sans-serif", fontSize: 11,
           attributionLogo: false, panes: { separatorColor: "#1E293B", separatorHoverColor: "rgba(0,0,0,0)", enableResize: false } },
@@ -442,7 +442,7 @@
         handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: touchPan, vertTouchDrag: false },
         handleScale: { mouseWheel: true, pinch: touchPan, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: false, mouse: false },
-      });
+      })));
       const price = chart.addSeries(LC.CandlestickSeries, {
         upColor: D.UP, downColor: D.DN, borderUpColor: D.UP, borderDownColor: D.DN, wickUpColor: D.UP, wickDownColor: D.DN,
         priceLineVisible: false, lastValueVisible: true,
@@ -460,7 +460,7 @@
       if (state.vol) {
         const vol = chart.addSeries(LC.HistogramSeries, { priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false }, 1);
         vol.setData(bars.filter((b) => b.v != null).map((b) => ({ time: b.date, value: b.v,
-          color: b.c >= b.o ? "rgba(34,197,94,.55)" : "rgba(239,68,68,.55)" })));
+          color: b.c >= b.o ? (D.isLight() ? "rgba(21,128,61,.6)" : "rgba(34,197,94,.55)") : (D.isLight() ? "rgba(220,38,38,.6)" : "rgba(239,68,68,.55)") })));
         const panes = chart.panes();
         if (panes[0]) panes[0].setStretchFactor(4);
         if (panes[1]) panes[1].setStretchFactor(1);
