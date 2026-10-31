@@ -1071,6 +1071,46 @@
     },
   });
 
+  const gapStatus = ["GAP UP today", "GAP HOLDING"];
+  function gapLines(row) {
+    const lines = [];
+    if (!row) return lines;
+    if (D.num(row.gap_high) != null) lines.push({ value: D.num(row.gap_high), color: "#F59E0B", label: "Gap-day high " + D.fmt(row.gap_high, 2) });
+    if (D.num(row.gap_open) != null) lines.push({ value: D.num(row.gap_open), color: "#E6EBF5", label: "Gap-day open " + D.fmt(row.gap_open, 2) });
+    if (D.num(row.hold_level) != null) lines.push({ value: D.num(row.hold_level), color: "#EF4444", label: "Hold level (gap-day low) " + D.fmt(row.hold_level, 2) });
+    return lines;
+  }
+  const gapUp = patternPage({
+    file: "scanner_gap_up.csv",
+    caption: "Research only. A true gap means the open was above the previous day's high. The hold level is the gap-day low: a close under it drops the stock from this list. Gap Up does not feed Buy setups.",
+    filters: { status: true, statusDefault: gapStatus, index: true, sector: true, ticker: true,
+      single: [{ key: "above_sma50", label: "Above 50-day" }, { key: "above_sma200", label: "Above 200-day" }] },
+    sort: "gap_date",
+    dir: "desc",
+    sort2: "gap_pct",
+    columns: [TK, T("gap_date", "Gap date"), T("days_ago", "Days ago", "num", { dec: 0 }),
+      T("gap_pct", "Gap % (vs prior high)", "pct", { dec: 2 }), T("gap_vs_close_pct", "Gap % vs prior close", "pct", { dec: 2 }),
+      T("volume_mult", "Volume vs 50-day", "volx", { dec: 2 }), T("hold_level", "Hold level (gap-day low)", "num", { dec: 2, tone: "stop" }),
+      T("price", "Last close", "num", { dec: 2 }), T("pct_above_hold", "% above hold", "pct", { dec: 1 }),
+      T("close_pos_pct", "Close in day range %", "rangepos"),
+      T("above_sma50", "Above 50-day", "flag"), T("above_sma200", "Above 200-day", "flag"),
+      T("other_scanners", "Other scanners", "text"), T("status", "Status", "setup"), T("freshness", "Data", "fresh")],
+    price: gapLines,
+    priceSub: (row) => "Gap day " + ((row && row.gap_date) || "") + ": the hold level (gap-day low), the gap-day high, and the gap-day open",
+    cards(all) {
+      const recent = countWhere(all, (r) => D.num(r.days_ago) != null && D.num(r.days_ago) <= 4);
+      return card("Holding gaps", String(all.length)) +
+        card("Gapped today", String(countWhere(all, (r) => r.status === "GAP UP today"))) +
+        card("Last 5 days", String(recent)) +
+        card("Above 50 and 200-day", String(countWhere(all, (r) => r.above_sma50 === "yes" && r.above_sma200 === "yes")));
+    },
+    detail(row) {
+      if (!row) return "";
+      const other = row.other_scanners ? '<p class="cap">Also on: ' + D.esc(row.other_scanners) + "</p>" : "";
+      return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines([row]) + other + "</div>";
+    },
+  });
+
   const breakdowns = patternPage({
     file: "scanner_breakdown.csv",
     caption: "Desk rule: close under the 50-day and the 50-day under the 200-day, with the 200-day not rising. A 20 to 60 day base that tightens, then a close under the base low on volume at least 1.4 times the 50-day average. The stop on the chart is the base high.",
@@ -2927,6 +2967,7 @@
     breakdowns: "The opposite of a breakout: stocks below a falling or flat 200-day average, with the 50-day under the 200-day, sitting in a tight range. BROKEN DOWN today means it closed under the bottom of the range on heavy volume. Use it to spot stocks to avoid or sell, not to buy.",
     leaders: "Stocks that show up on both VCP (ready or broke out today) and a strict CANSLIM qualify. When two different methods agree, the setup is usually stronger. A name on only one list still shows here, so check which ones agree.",
     week52: "Shows which stocks are at a new 52-week high or low today, using the closing price. Many new highs means the market is healthy; many new lows means it is weak. Pick a tab below to see each group.",
+    gapup: "Finds stocks that opened above the high of the day before, so there is an empty space on the chart (a true gap, not just a higher open inside yesterday's range). Any size of gap counts. On the gap day the stock had to trade at least {gap_vol_mult} times its normal volume, and it must cost at least ${gap_min_price} and trade enough each day to skip thin stocks. It stays on the list only while it holds: no close below the low of the gap day. Gaps from the last {gap_days} trading days are shown, newest first. Tap a row to see the chart with the hold level.",
     "week52:highs": "Stocks that closed above their highest price of the past year (252 trading days) today. New highs often keep going higher because there are no unhappy buyers above. A new high on big volume is stronger; see the On volume tab.",
     "week52:lows": "Stocks that closed below their lowest price of the past year today. New lows often keep falling, so be careful. Use this to see what is weak, not to bargain hunt.",
     "week52:near": "Stocks within 5% of their 52-week high. They are close to breaking out to a new high. Watch them for a close above that high on big volume.",
@@ -2971,8 +3012,15 @@
   };
   function descFill(text, ctx, extra) {
     const rows = (ctx && ctx.settings) || [];
-    const val = (key) => { const r = rows.find((x) => x.setting === "scoring." + key); return r ? r.value : null; };
-    const defaults = { buy_at: "8", growth_min_pct: "15", quality_max_de: "1.5", dividend_min_pct: "1.5", wheel_min_dollar_volume: "20000000" };
+    // gap_ placeholders read the gap_up block; the rest read scoring.
+    const GAP_KEYS = { gap_vol_mult: "vol_mult", gap_min_price: "min_price", gap_days: "lookback_days" };
+    const val = (key) => {
+      const name = GAP_KEYS[key] ? "gap_up." + GAP_KEYS[key] : "scoring." + key;
+      const r = rows.find((x) => x.setting === name);
+      return r ? r.value : null;
+    };
+    const defaults = { buy_at: "8", growth_min_pct: "15", quality_max_de: "1.5", dividend_min_pct: "1.5", wheel_min_dollar_volume: "20000000",
+      gap_vol_mult: "1.5", gap_min_price: "5", gap_days: "21" };
     return text.replace(/\{(\w+)\}/g, (m, k) => {
       if (extra && extra[k] != null) return extra[k];
       let v = val(k);
@@ -3082,6 +3130,7 @@
     qullamaggie: qullamaggie,
     marios: marios,
     ep: episodic,
+    gapup: gapUp,
     breakdowns: breakdowns,
     volume: { files: ["scanner_volume.csv"], render: renderVolume },
     leaders: leaders,

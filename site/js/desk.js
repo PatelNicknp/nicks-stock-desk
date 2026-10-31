@@ -137,6 +137,7 @@
       ["Qullamaggie breakout", "qullamaggie.html", "qullamaggie"],
       ["Marios breakout", "marios.html", "marios"],
       ["Episodic pivot", "episodic-pivot.html", "ep"],
+      ["Gap Up", "gap-up.html", "gapup"],
       ["Breakdowns", "breakdowns.html", "breakdowns"],
       ["High volume", "volume.html", "volume"],
       ["Leaders", "leaders.html", "leaders"],
@@ -2159,6 +2160,7 @@
     qullamaggie: "feature.scanner_qullamaggie",
     marios: "feature.scanner_marios",
     ep: "feature.scanner_ep",
+    gapup: "feature.scanner_gap_up",
     breakdowns: "feature.scanner_breakdown",
     volume: "feature.scanner_volume",
     leaders: "feature.scanner_leaders",
@@ -2196,7 +2198,7 @@
   };
   // Lists the Chart Viewer can open. The key is the page id, so a scanner page links to its own list.
   const VIEWER_LISTS = ["buysetups", "watchlist", "growth", "quality", "dividend", "wheel", "vcp", "canslim", "box", "flag",
-    "qullamaggie", "marios", "ep", "breakdowns", "volume", "leaders", "week52"];
+    "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "leaders", "week52"];
   function settingVal(key) {
     const row = SETTINGS.find((r) => r.setting === key);
     return row ? row.value : null;
