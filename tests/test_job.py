@@ -270,15 +270,39 @@ def test_rank_tiebreak_is_missing_count_then_ticker():
 
 
 def test_week_ago_score_needs_seven_days():
+    # The dates are fixed, so "today" is fixed too. Before this, the test used the wall clock
+    # and broke for good once 2026-10-23 itself became 7 days old (2026-10-30).
     hist = pd.DataFrame({
         "date": ["2026-10-01", "2026-10-23"],
         "ticker": ["AAA", "AAA"],
         "score": [7, 9],
     })
-    assert stock_desk._week_score(hist, "AAA") == 7
+    today = "2026-10-26"
+    assert stock_desk._week_score(hist, "AAA", today) == 7
     recent = hist[hist["date"] >= "2026-10-20"]
-    assert stock_desk._week_score(recent, "AAA") is None
-    assert stock_desk._week_score(pd.DataFrame(), "AAA") is None
+    assert stock_desk._week_score(recent, "AAA", today) is None
+    assert stock_desk._week_score(pd.DataFrame(), "AAA", today) is None
+    assert stock_desk._week_score(hist, "BBB", today) is None
+    # Exactly 7 days old counts. 6 days old does not.
+    assert stock_desk._week_score(hist, "AAA", "2026-10-30") == 9
+    assert stock_desk._week_score(hist, "AAA", "2026-10-29") == 7
+    assert stock_desk._week_score(recent, "AAA", "2026-10-29") is None
+
+
+def test_week_ago_score_defaults_to_the_new_york_date():
+    hist = pd.DataFrame({"date": ["2026-10-01", "2026-10-23"], "ticker": ["AAA", "AAA"], "score": [7, 9]})
+    real = stock_desk.today_et
+    try:
+        stock_desk.today_et = lambda: "2026-10-29"
+        assert stock_desk._week_score(hist, "AAA") == 7
+        stock_desk.today_et = lambda: "2026-10-30"
+        assert stock_desk._week_score(hist, "AAA") == 9
+    finally:
+        stock_desk.today_et = real
+    # A time-zone-aware "today" uses its own calendar date.
+    late_friday_ny = pd.Timestamp("2026-10-30 23:30", tz="America/New_York")
+    assert stock_desk._week_score(hist, "AAA", late_friday_ny) == 9
+    assert stock_desk._desk_day(late_friday_ny) == pd.Timestamp("2026-10-30")
 
 
 def test_gics_sector_collapses_yahoo_names():
@@ -445,6 +469,7 @@ if __name__ == "__main__":
     test_market_row_buy_count_and_qqq()
     test_rank_tiebreak_is_missing_count_then_ticker()
     test_week_ago_score_needs_seven_days()
+    test_week_ago_score_defaults_to_the_new_york_date()
     test_gics_sector_collapses_yahoo_names()
     test_sma_is_warm_before_the_chart_window_and_skips_holes()
     test_blank_column_is_partial_not_ok()
