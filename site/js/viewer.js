@@ -25,8 +25,8 @@
     "READY": 1, "EP TODAY - FORMING": 1, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "BUYING": 1,
     "IN TRADE": 2, "NEAR HIGH": 2, "SELLING": 2, "ON WATCHLIST": 2,
     "DELAYED EP WATCH": 3, "NEW LOW": 3, "WATCHING": 4, "EP FADED": 5, "CLOSED": 6,
-    // VCP rows that are not a VCP yet (vcp.show_weaker_trend on). They rank under plain WATCHING.
-    "WATCHING (one pullback)": 5, "WATCHING (trend not 8/8)": 5,
+    // VCP rows under 8 of 8 (vcp.show_weaker_trend on). They rank under plain WATCHING.
+    "WATCHING (trend not 8/8)": 5,
   };
   function rankOf(status) {
     const r = STATUS_RANK[String(status || "")];

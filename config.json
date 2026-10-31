@@ -69,7 +69,7 @@
     "match_device_option": true
   },
   "vcp": {
-    "_note": "VCP scanner (vcp.html). A stock is listed only when Nick's indicator would draw its green VCP tag: the trend template is 8 of 8 and there are at least two tightening pullbacks. READY is at or under the buy line. BROKEN OUT today is a close over it on at least 1.5 times the 50-day volume. WATCHING is over it without that. show_weaker_trend brings back names that are not a VCP yet, labeled WATCHING (trend not 8/8) or WATCHING (one pullback). Those rows never feed Buy setups or Leaders. Nothing new is downloaded.",
+    "_note": "VCP scanner (vcp.html). A stock is listed only when the trend template is 8 of 8. READY is the green VCP tag (two or more tightening pullbacks) at or under the buy line. BROKEN OUT today is a close over it on at least 1.5 times the 50-day volume. WATCHING is 8 of 8 with one pullback so far, or over the buy line without that, or an open trade whose buy printed at 8 of 8. show_weaker_trend brings back stocks under 8 of 8, labeled WATCHING (trend not 8/8) and listed last. Those rows never feed Buy setups or Leaders. Nothing new is downloaded.",
     "show_weaker_trend": false
   },
   "chart_viewer": {
