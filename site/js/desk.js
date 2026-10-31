@@ -293,7 +293,7 @@
   function setupHtml(v) {
     const map = { "BROKEN OUT today": UP, READY: AM, WATCHING: MU, "IN TRADE": AC, CLOSED: MU, SELL: DN, "SELL 1/3": AM, EXIT: DN, STOPPED: DN, HOLD: MU,
       "EP TODAY - FORMING": AM, "EP TODAY - CONFIRMED": UP, "DAY 2-5 WATCH": AM, "DELAYED EP WATCH": MU, "EP FADED": DN,
-      "SELL PART": AM, "NO FOLLOW-THROUGH": DN };
+      "SELL PART": AM, "NO FOLLOW-THROUGH": AM };
     return colored(v, map[v] || TX);
   }
   function freshHtml(v) {
