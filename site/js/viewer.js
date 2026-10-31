@@ -181,10 +181,19 @@
     lists.unshift({ id: "all", label: "All scanner stocks", scanner: true, items: all });
     return { lists: lists, info: info };
   }
+  // Where a touch started: "bar" (header row, or a chip bar that fits, so a sideways swipe changes the chart),
+  // "scroll" (a chip bar wider than the screen: the swipe scrolls the chips and never changes the chart),
+  // or "chart" (the chart itself, where only a quick flick changes it).
+  function swipeZone(inHeader, inTools, toolsScrollWidth, toolsClientWidth) {
+    if (inHeader) return "bar";
+    if (inTools) return toolsScrollWidth > toolsClientWidth + 1 ? "scroll" : "bar";
+    return "chart";
+  }
   // Which way a finished touch went: "next", "prev", or "" (not a swipe).
   // touchPan: the chart moves with one finger ("Drag: move chart"), so a touch that starts on the chart
   // changes the chart only when it is a quick flick (maxMs or less). onBar: the touch started on the
-  // header or the chip bar, where nothing pans, so any long enough sideways swipe changes the chart.
+  // header row (ticker, price, counter), or on a chip bar that fits without scrolling, where nothing pans,
+  // so any long enough sideways swipe changes the chart.
   function swipeDirection(dx, dy, ms, opts) {
     opts = opts || {};
     const minPx = opts.minPx > 0 ? opts.minPx : 80;
@@ -236,7 +245,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
+  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -672,13 +681,19 @@
     // Swipes. "Drag: move chart" (chart_touch_pan on): a one-finger drag on the chart moves it back and
     // forward and pinch zooms, so only a quick flick (swipe_max_ms or less) changes the chart there.
     // "Drag: next chart": the chart ignores one-finger drags and a sideways swipe always changes the chart.
-    // A swipe that starts on the header or the chip bar always changes the chart.
+    // A swipe that starts on the header row (ticker, price, counter) always changes the chart. On the chip bar it
+    // changes the chart only when every chip fits; a chip bar wider than the screen just scrolls.
     if (on("swipe")) {
       let start = null;
       cv.addEventListener("touchstart", (e) => {
         if (e.touches.length !== 1 || e.target.closest(".cv-why, .cv-arrow, select")) { start = null; return; }
         const p = e.touches[0];
-        start = { x: p.clientX, y: p.clientY, t: Date.now(), onBar: !body.contains(e.target) };
+        const bar = document.getElementById("cvtools");
+        const inTools = !!(bar && bar.contains(e.target));
+        const zone = swipeZone(!!e.target.closest(".cv-top"), inTools, inTools ? bar.scrollWidth : 0, inTools ? bar.clientWidth : 0);
+        // A chip bar wider than the screen scrolls natively; that swipe never changes the chart.
+        if (zone === "scroll") { start = null; return; }
+        start = { x: p.clientX, y: p.clientY, t: Date.now(), onBar: zone === "bar" };
       }, { passive: true });
       cv.addEventListener("touchmove", (e) => { if (e.touches.length > 1) start = null; }, { passive: true });
       cv.addEventListener("touchend", (e) => {

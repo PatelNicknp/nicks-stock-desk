@@ -441,8 +441,11 @@ body.cv-lock{overflow:hidden;overscroll-behavior:none}
 .cvchip.on i{opacity:1}
 .cv-body{position:relative;flex:1;min-height:0;touch-action:pan-y}
 .cv.full .cv-body{touch-action:none}
-.cv-top,.cv-tools{touch-action:pan-y}
-.cv.full .cv-top,.cv.full .cv-tools{touch-action:none}
+.cv-top{touch-action:pan-y}
+.cv-tools{touch-action:pan-x pan-y}
+.cv.full .cv-top{touch-action:none}
+/* A chip bar wider than the screen scrolls sideways with a finger; it does not change the chart. */
+.cv.full .cv-tools{touch-action:pan-x}
 .cvrange{min-width:40px;justify-content:center}
 .cv-chart{position:absolute;inset:0}
 .cv-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--mu);font-size:14px}
@@ -468,7 +471,7 @@ body.cv-lock{overflow:hidden;overscroll-behavior:none}
   .cv-co{font-size:13px}
   .cv-px{font-size:14px}
   .cv-arrow{width:32px;height:32px;margin-top:-16px;font-size:20px;line-height:28px}
-  .cv-tools{gap:5px}
+  .cv-tools{gap:5px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .cvchip{height:26px;padding:0 8px;font-size:11px}
   .cv-why{width:150px;font-size:10.5px;line-height:13px}
   .cv-next{right:58px}
