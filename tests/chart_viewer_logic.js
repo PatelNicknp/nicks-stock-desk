@@ -65,6 +65,25 @@ built = V.buildLists(files, { featureOn: allOn, includeWatching: false, includeC
 eq(built.lists[0].items, ["CCC", "AAA", "DDD", "BBB", "EEE"], "include_closed adds DDD, include_watching off drops BBB from VCP");
 eq(built.lists.find((l) => l.id === "vcp").items, ["AAA"], "WATCHING left out when include_watching is off");
 
+// vcp.show_weaker_trend on: labeled WATCHING rows follow include_watching and rank under plain WATCHING.
+const weakFiles = {
+  "scanner_vcp.csv": [
+    { ticker: "AAA", status: "READY", strength: "80", reason: "Trend template 8/8." },
+    { ticker: "HHH", status: "WATCHING (trend not 8/8)", strength: "95", reason: "Pullbacks are tightening, but the trend template is 0 of 8." },
+    { ticker: "OOO", status: "WATCHING (one pullback)", strength: "85", reason: "The trend template is 8 of 8, but there is only one pullback so far." },
+    { ticker: "WWW", status: "WATCHING", strength: "70", reason: "Price is through the buy point." },
+  ],
+};
+eq(V.isWatching("WATCHING (trend not 8/8)") && V.isWatching("WATCHING (one pullback)") && V.isWatching("WATCHING"), true, "labeled WATCHING counts as WATCHING");
+eq(V.isWatching("READY") || V.isWatching("BROKEN OUT today"), false, "READY and BROKEN OUT are not WATCHING");
+eq(V.rankOf("WATCHING (trend not 8/8)") > V.rankOf("WATCHING"), true, "weaker label ranks under plain WATCHING");
+built = V.buildLists(weakFiles, { featureOn: allOn, includeWatching: true });
+eq(built.lists.find((l) => l.id === "vcp").items, ["AAA", "WWW", "HHH", "OOO"], "weaker rows sort after READY and plain WATCHING");
+eq(built.info.HHH.entries.map((e) => e.label + " " + e.status), ["VCP WATCHING (trend not 8/8)"], "reason box keeps the full label");
+built = V.buildLists(weakFiles, { featureOn: allOn, includeWatching: false });
+eq(built.lists.find((l) => l.id === "vcp").items, ["AAA"], "include_watching off drops every WATCHING label");
+eq(built.lists[0].items, ["AAA"], "All scanner stocks drops weaker rows with include_watching off");
+
 built = V.buildLists(files, { featureOn: (k) => k !== "feature.scanner_box", includeWatching: true });
 eq(built.lists.some((l) => l.id === "box"), false, "a list turned off in settings is not offered");
 eq(built.lists[0].items.indexOf("CCC") >= 0, true, "CCC stays in All through the 52-week list");

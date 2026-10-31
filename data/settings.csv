@@ -110,6 +110,7 @@ sector_rotation.w52_bars,252
 sector_rotation.tail_keep,12
 sector_rotation.macro_lookback,63
 sector_rotation.yield_flat_band,0.05
+vcp.show_weaker_trend,False
 qullamaggie.price_filter,True
 qullamaggie.min_price,20.0
 qullamaggie.adr_filter,True

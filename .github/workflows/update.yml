@@ -73,6 +73,7 @@ jobs:
           python tests/test_watchdog.py
           python tests/test_chart_viewer.py
           python tests/test_light_mode.py
+          python tests/test_vcp_green_tag.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |
