@@ -113,6 +113,15 @@ eq(V.swipeZone(false, true, 370, 370), "bar", "a chip bar that fits is a swipe b
 eq(V.swipeZone(false, true, 371, 370), "bar", "one pixel of rounding still fits");
 eq(V.swipeZone(false, true, 640, 370), "scroll", "an overflowing chip bar scrolls and never changes the chart");
 eq(V.swipeZone(false, false, 0, 0), "chart", "the chart area needs a quick flick");
+// After a resize, a turn, or full screen: keep a dragged range, else refit once the chart is 120 px wide.
+eq(V.viewAfterResize(null, 300, 120), "fit", "no drag: put the first view back");
+eq(V.viewAfterResize(null, 119, 120), "wait", "a chart under 120 px wide waits, so bars are not packed at the right edge");
+eq(V.viewAfterResize(null, 0, 120), "wait", "a chart not laid out yet waits");
+eq(V.viewAfterResize({ from: 900, to: 1000 }, 300, 120), "keep", "a dragged range is kept");
+eq(V.viewAfterResize({ from: 900, to: 1000 }, 50, 120), "keep", "a dragged range is kept at any width");
+eq(V.viewAfterResize({ from: 5, to: 5 }, 300, 120), "fit", "an empty range is not a drag");
+eq(V.viewAfterResize({ from: NaN, to: 9 }, 300, 120), "fit", "a broken range is not a drag");
+eq(V.viewAfterResize(null, 130), "fit", "120 px is the default minimum");
 eq(sw2(-120, 10, 2000, { onBar: true }), "prev", "header swipe left is the one before");
 eq(sw2(60, 0, 100, { onBar: true }), "", "header swipes still need swipe_min_px");
 eq(sw2(120, 10, 2000, { touchPan: false }), "next", "drag mode next chart: any sideways swipe changes it");
