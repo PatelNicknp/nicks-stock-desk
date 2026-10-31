@@ -1670,7 +1670,7 @@ def watch_table(cfg, inp):
     return df
 
 
-def build_portfolio(holds, scores, history):
+def build_portfolio(holds, scores, history, today=None):
     if holds is None or len(holds) == 0 or scores is None or len(scores) == 0:
         return pd.DataFrame(), pd.DataFrame()
     sc = scores.set_index("ticker")
@@ -1687,14 +1687,14 @@ def build_portfolio(holds, scores, history):
         price = float(r["price"])
         value = shares * price
         basis = shares * cost
-        week = _week_score(history, t)
+        week = _week_score(history, t, today)
         change = None if week is None or scoring._f(r.get("score")) is None else int(r["score"]) - int(week)
         status = "On track"
         if scoring._f(r.get("stop")) and price < float(r["stop"]):
             status = "Below stop"
         elif r.get("next_earnings"):
             try:
-                days = (pd.Timestamp(r["next_earnings"]) - pd.Timestamp.now().normalize()).days
+                days = (pd.Timestamp(r["next_earnings"]) - _desk_day(today)).days
                 if 0 <= days <= 7:
                     status = "Earnings soon"
             except Exception:
@@ -1735,14 +1735,24 @@ def build_portfolio(holds, scores, history):
     return port, summary
 
 
-def _week_score(history, ticker):
+def _desk_day(today=None):
+    """The desk's calendar day at midnight, no time zone. score_history.csv dates are New York dates,
+    so the default is today in New York, not the runner's clock (UTC on GitHub)."""
+    day = pd.Timestamp(today if today is not None else today_et())
+    if day.tzinfo is not None:
+        day = day.tz_localize(None)
+    return day.normalize()
+
+
+def _week_score(history, ticker, today=None):
+    """Latest saved score that is at least 7 days older than today (New York date unless given)."""
     if history is None or len(history) == 0:
         return None
     sub = history[history["ticker"] == ticker].copy()
     if not len(sub):
         return None
     sub["date"] = pd.to_datetime(sub["date"])
-    cut = pd.Timestamp.now().normalize() - pd.Timedelta(days=7)
+    cut = _desk_day(today) - pd.Timedelta(days=7)
     old = sub[sub["date"] <= cut]
     if not len(old):
         return None
