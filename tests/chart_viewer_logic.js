@@ -97,6 +97,44 @@ eq(V.shorten("word ".repeat(40), 30).endsWith("..."), true, "shorten cuts a long
 eq(V.shorten("Short.", 110), "Short.", "short reasons stay as they are");
 
 const sw = (dx, dy, ms, extra) => V.swipeDirection(dx, dy, ms, Object.assign({ minPx: 50, maxMs: 700, ratio: 1.5 }, extra || {}));
+// New defaults: a flick is at least 80 px and at most 300 ms; ratio stays 1.5.
+const sw2 = (dx, dy, ms, extra) => V.swipeDirection(dx, dy, ms, Object.assign({ minPx: 80, maxMs: 300, ratio: 1.5, touchPan: true }, extra || {}));
+eq(sw2(120, 10, 200), "next", "drag mode move chart: a quick flick on the chart changes it");
+eq(sw2(-120, 10, 250), "prev", "a quick flick left is the one before");
+eq(sw2(120, 10, 300), "next", "exactly swipe_max_ms still counts");
+eq(sw2(120, 10, 301), "", "a slow drag on the chart never changes the chart");
+eq(sw2(400, 5, 1500), "", "a long slow drag back through history never changes the chart");
+eq(sw2(70, 0, 100), "", "a flick under 80 px is not a swipe");
+eq(sw2(120, 90, 100), "", "ratio 1.5 still rules out a mostly up-down flick");
+eq(sw2(120, 10, 2000, { onBar: true }), "next", "a slow swipe on the header or chip bar always changes the chart");
+eq(sw2(-120, 10, 2000, { onBar: true }), "prev", "header swipe left is the one before");
+eq(sw2(60, 0, 100, { onBar: true }), "", "header swipes still need swipe_min_px");
+eq(sw2(120, 10, 2000, { touchPan: false }), "next", "drag mode next chart: any sideways swipe changes it");
+eq(sw2(120, 10, 2000, { onBar: true, rightIsNext: false }), "prev", "the flip button works for header swipes");
+eq(V.swipeDirection(70, 0, 100, { touchPan: true }), "", "built-in default minPx is 80");
+eq(V.swipeDirection(120, 0, 350, { touchPan: true }), "", "built-in default maxMs is 300");
+
+// Range: the chart holds every saved bar; range_months and the range chips only pick the first view.
+const days = [];
+for (let d = new Date(Date.UTC(2021, 10, 1)); d <= new Date(Date.UTC(2026, 9, 29)); d.setUTCDate(d.getUTCDate() + 1)) {
+  if (d.getUTCDay() % 6) days.push(d.toISOString().slice(0, 10));
+}
+eq(days[V.rangeFrom(days, 3)] >= "2026-07-29" && days[V.rangeFrom(days, 3) - 1] < "2026-07-29", true, "3M starts three months back");
+eq(days[V.rangeFrom(days, 6)] >= "2026-04-29", true, "6M starts six months back");
+eq(days[V.rangeFrom(days, 12)] >= "2025-10-29" && days[V.rangeFrom(days, 12) - 1] < "2025-10-29", true, "1Y starts a year back");
+eq(V.rangeFrom(days, 0), 0, "All shows every saved bar");
+eq(V.rangeFrom(days, "all"), 0, "all shows every saved bar");
+eq(V.rangeFrom(days.slice(-40), 6), 0, "a short history shows from its first bar");
+eq(V.rangeFrom([], 6), 0, "no bars is 0");
+eq(V.RANGES.map((r) => r.label), ["3M", "6M", "1Y", "All"], "range chips are 3M, 6M, 1Y, All");
+eq(V.RANGES.map((r) => r.months), [3, 6, 12, 0], "range chip months");
+
+// Memory: only the last few bar files stay parsed, so swiping a long list stays light on an iPad.
+let kr = [[], []];
+["A", "B", "C"].forEach((n) => { kr = V.keepRecent(kr[0], n, 2); });
+eq(kr, [["B", "C"], ["A"]], "keepRecent drops the oldest");
+eq(V.keepRecent(["B", "C"], "B", 2), [["C", "B"], []], "seeing a chart again moves it to the end");
+
 eq(sw(120, 10, 200), "next", "swipe right is next by default");
 eq(sw(-120, 10, 200), "prev", "swipe left is the one before");
 eq(sw(120, 10, 200, { rightIsNext: false }), "prev", "the flip button swaps it");

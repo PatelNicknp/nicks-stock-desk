@@ -2280,7 +2280,7 @@
     matchText: matchText, matchMin: matchMin,
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
-    loadCsv: loadCsv, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
+    loadCsv: loadCsv, forgetCsv: (name) => { cache.delete(name); }, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
     themed: themed, themedChart: themedChart, isLight: () => LIGHT,
     settingVal: settingVal, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
