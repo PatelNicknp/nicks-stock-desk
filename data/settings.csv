@@ -301,6 +301,8 @@ chart_viewer.day_change,True
 chart_viewer.range_months,6
 chart_viewer.range_months_phone,3
 chart_viewer.range_chips,True
+chart_viewer.fit_wide_ranges,True
+chart_viewer.min_bar_spacing,0.3
 light_mode.default_theme,dark
 light_mode.match_device_option,True
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

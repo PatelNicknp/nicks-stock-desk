@@ -161,6 +161,22 @@ eq(sw(150, 10, 300, { touchPan: true }), "next", "with chart_touch_pan a quick f
 
 eq(Math.round(V.padBars(120, 600, 200) * 10) / 10, 60, "pad bars keep the last candle left of the box");
 eq(V.padBars(120, 600, 0), 3, "no box, the normal small gap");
+// All on an iPhone (326 px plot, 164 px Why box, 1254 bars): the pad alone would need bars under 0.3 px.
+// fitRange keeps the same 164 empty pixels on the right and fills the rest with history at 0.3 px.
+(function () {
+  const n = 1254, plot = 326, pad = V.padBars(n, plot, 164);
+  const r = V.fitRange(0, n - 1, pad, plot, 0.3);
+  eq(Math.abs(plot / (r.to - r.from) - 0.3) < 1e-9, true, "All on a phone uses the thinnest bars");
+  eq(Math.abs((r.to - (n - 1)) * 0.3 - 164) < 1, true, "All on a phone keeps the newest candle just left of the box");
+  eq(Math.round((n - 1 - r.from) * 0.3), 162, "All on a phone fills the space left of the box");
+  eq(n - Math.ceil(r.from) > 500, true, "All on a phone shows hundreds of bars, not a couple");
+  const wide = V.fitRange(0, n - 1, V.padBars(n, 780, 250), 780, 0.3);
+  eq(wide.from, -0.5, "a range that fits still starts at its first bar");
+  eq(wide.to, n - 1 + V.padBars(n, 780, 250), "a range that fits keeps its pad");
+  const m3 = V.fitRange(1190, n - 1, V.padBars(64, 326, 164), 326, 0.3);
+  eq(m3.from, 1189.5, "3M on a phone is unchanged");
+  eq(V.fitRange(0, n - 1, 3, 326, 0).from, -0.5, "no minimum spacing, no change");
+})();
 eq(V.padBars(120, 300, 290) <= (0.65 * 300 * 120) / (0.35 * 300) + 1e-9, true, "a very wide box never squeezes the candles under a third");
 
 // iPhone and iPad skip Safari's own full screen (its grey X covers the stock name) unless native_fullscreen_ios is on.

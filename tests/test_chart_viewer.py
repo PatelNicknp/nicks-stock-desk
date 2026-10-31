@@ -49,7 +49,7 @@ def test_switch_and_config_block():
     assert (cv["ma_10"], cv["ma_20"], cv["ma_50"], cv["ma_150"], cv["ma_200"]) == (False, False, True, True, True)
     assert cv["volume"] is True and cv["reason_box"] is True and cv["reason_box_toggle"] is True
     for key in ("list_picker", "fullscreen", "native_fullscreen_ios", "swipe", "flip_toggle", "arrows", "keyboard", "counter", "preload_next",
-                "ma_chips", "volume_toggle", "company_line", "day_change", "scanner_links", "drag_mode_toggle", "range_chips"):
+                "ma_chips", "volume_toggle", "company_line", "day_change", "scanner_links", "drag_mode_toggle", "range_chips", "fit_wide_ranges"):
         assert isinstance(cv[key], bool), key
 
 
@@ -208,7 +208,13 @@ def _playwright_env():
 def test_first_view_refits_and_keeps_a_dragged_range():
     """The first view waits for a 120 px wide chart and is put back on resize, unless the user dragged the chart."""
     js = _read("site", "js", "viewer.js")
-    assert "minBarSpacing: 0.3" in js
+    assert "minBarSpacing: minSpacing()" in js and 'cfgNum("min_bar_spacing", 0.3)' in js
+    # A range too long to fit (All on a phone) fills the space left of the Why box at the thinnest bars.
+    assert 'on("fit_wide_ranges") ? fitRange(from, n - 1, pad, plot, minSpacing())' in js
+    cv = _cfg()["chart_viewer"]
+    assert cv["fit_wide_ranges"] is True and cv["min_bar_spacing"] == 0.3
+    assert "fit_wide_ranges" in dict(tables.help_rows())["Chart Viewer history and range"]
+    assert "fit_wide_ranges" in dict(tables.help_rows())["Chart Viewer settings"]
     assert "viewAfterResize(userRange, plotWidth(), 120)" in js
     assert js.count("requestAnimationFrame(() => refit())") == 2  # full screen and resize
     assert "requestAnimationFrame(() => { if (my === token) refit(); })" in js  # after the data loads

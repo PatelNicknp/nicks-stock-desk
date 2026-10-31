@@ -253,6 +253,21 @@
     if (plotPx - boxPx < plotPx * 0.35) boxPx = plotPx * 0.65;
     return Math.max(3, (boxPx * visibleBars) / (plotPx - boxPx));
   }
+  // The visible range for a first view: the first bar of the range (from) at the left edge and pad empty
+  // bars after the newest bar (last) on the right. When that would need bars thinner than minSpacing px
+  // (All on a phone, where the pad for the Why box is as wide as the history), the chart cannot draw it:
+  // it would clamp the spacing and keep the right edge, leaving only the empty pad and a bar or two on
+  // screen. Then keep the newest candle in the same spot (the same empty pixels on the right) and fill
+  // the space left of the Why box with as much history as fits at minSpacing.
+  function fitRange(from, last, pad, plotPx, minSpacing) {
+    let lo = from - 0.5, hi = last + pad;
+    const min = minSpacing > 0 ? minSpacing : 0;
+    if (min && plotPx > 0 && hi > lo) {
+      const sp = plotPx / (hi - lo);
+      if (sp < min) { hi = last + (pad * sp) / min; lo = hi - plotPx / min; }
+    }
+    return { from: lo, to: hi };
+  }
   // iPhone and iPad. iPadOS Safari reports as a Mac, so a Mac with a touch screen counts too.
   function isAppleTouch(ua, platform, maxTouchPoints) {
     ua = String(ua || "");
@@ -264,7 +279,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, rankOf: rankOf };
+  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -437,6 +452,8 @@
           D.esc(state.open ? e.reason : shorten(e.reason, max)) + "</div></div>").join("") +
         '<div class="cv-why-x">' + (state.open ? "Tap to make it small" : (hidden ? "+ " + hidden + " more. " : "") + "Tap to read all") + "</div>";
     }
+    // The thinnest bar spacing the chart allows, in px (chart_viewer.min_bar_spacing, 0.3).
+    function minSpacing() { return Math.max(0.05, cfgNum("min_bar_spacing", 0.3)); }
     function boxPad() {
       if (!why || why.hidden || !chart) return 0;
       return why.offsetWidth + 14;
@@ -463,7 +480,7 @@
       const from = rangeFrom(bars.map((b) => b.date), months);
       const visible = n - from;
       const pad = padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad());
-      setRange({ from: from - 0.5, to: n - 1 + pad });
+      setRange(on("fit_wide_ranges") ? fitRange(from, n - 1, pad, plot, minSpacing()) : { from: from - 0.5, to: n - 1 + pad });
     }
     // A range the user dragged or pinched to on this chart. It is read when a finger, the mouse, or the
     // wheel lets go of the chart, and only counts when it differs from the view set last (lastSet).
@@ -551,7 +568,7 @@
         grid: { vertLines: { color: "#161E2E" }, horzLines: { color: "#161E2E" } },
         crosshair: { mode: LC.CrosshairMode.Magnet },
         rightPriceScale: { borderColor: "#1E293B", scaleMargins: { top: 0.08, bottom: 0.06 } },
-        timeScale: { borderColor: "#1E293B", rightOffset: 4, minBarSpacing: 0.3 },
+        timeScale: { borderColor: "#1E293B", rightOffset: 4, minBarSpacing: minSpacing() },
         handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: state.pan, vertTouchDrag: false },
         handleScale: { mouseWheel: true, pinch: state.pan, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: false, mouse: false },
