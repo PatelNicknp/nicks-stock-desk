@@ -73,7 +73,7 @@
     "show_weaker_trend": false
   },
   "chart_viewer": {
-    "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. Turn the whole page off with features.chart_viewer.",
+    "_note": "Chart Viewer page (chart-viewer.html). Full-screen charts you swipe through, one stock at a time. It reads the saved daily bars and the scanner files only. No new downloads. Every option has its own on/off switch. native_fullscreen_ios is off, so on an iPhone or iPad Full screen fills the page without Safari's own full screen and its grey X over the stock name; turn it on to use Safari's full screen again. Computers always use the browser's full screen. Turn the whole page off with features.chart_viewer.",
     "list_picker": true,
     "include_watching": true,
     "include_closed": false,
@@ -81,6 +81,7 @@
     "include_watchlist": true,
     "scanner_links": true,
     "fullscreen": true,
+    "native_fullscreen_ios": false,
     "swipe": true,
     "swipe_right_is_next": true,
     "flip_toggle": true,
