@@ -1426,11 +1426,25 @@
       '<div class="empty">' + esc(text) + "</div>";
   }
 
+  // Moving average colors (chart_colors block of config.json): MA 10 green, 20 orange, 50 blue, 150 yellow, 200 red.
+  // These defaults match config.json, so a settings file without the rows still draws the same colors.
+  // Light mode uses slightly darker shades so each line shows on white.
+  const MA_COLORS = { "10": "#22c55e", "20": "#f97316", "50": "#3b82f6", "150": "#eab308", "200": "#ef4444" };
+  const MA_COLORS_LIGHT = { "10": "#16a34a", "20": "#ea580c", "50": "#2563eb", "150": "#ca8a04", "200": "#dc2626" };
+  function maColor(n) {
+    const key = String(n);
+    const block = LIGHT ? "ma_colors_light" : "ma_colors";
+    const v = String(settingVal("chart_colors." + block + "." + key) || "").trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) return v;
+    return (LIGHT ? MA_COLORS_LIGHT : MA_COLORS)[key] || null;
+  }
+  // A row chart average with an "ma" length takes the shared color; the others keep their own.
+  function defColor(def) { return (def.ma && maColor(def.ma)) || def.color; }
   const MA_DEFS = [
     { id: "sma21", label: "SMA 21", kind: "sma", n: 21, color: "#7C9CFF" },
-    { id: "sma50", label: "SMA 50", kind: "sma", n: 50, color: "#C3CBDB" },
-    { id: "sma150", label: "SMA 150", kind: "sma", n: 150, color: "#F59E0B" },
-    { id: "sma200", label: "SMA 200", kind: "sma", n: 200, color: "#E879F9" },
+    { id: "sma50", label: "SMA 50", kind: "sma", n: 50, ma: 50, color: MA_COLORS["50"] },
+    { id: "sma150", label: "SMA 150", kind: "sma", n: 150, ma: 150, color: MA_COLORS["150"] },
+    { id: "sma200", label: "SMA 200", kind: "sma", n: 200, ma: 200, color: MA_COLORS["200"] },
     { id: "ema21", label: "EMA 21", kind: "ema", n: 21, color: "#38BDF8" },
     { id: "ema50", label: "EMA 50", kind: "ema", n: 50, color: "#F472B6" },
     { id: "ema150", label: "EMA 150", kind: "ema", n: 150, color: "#34D399" },
@@ -1710,7 +1724,7 @@
       MA_DEFS.forEach((def) => {
         if (!mas[def.id]) return;
         const series = chart.addSeries(LC.LineSeries, {
-          color: def.color, lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          color: defColor(def), lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
         });
         const data = [];
         averages[def.id].forEach((value, i) => {
@@ -1725,7 +1739,7 @@
         const bar = bars[i];
         const prev = i > 0 ? bars[i - 1].c : null;
         const shown = MA_DEFS.filter((def) => mas[def.id] && averages[def.id][i] != null).map((def) => ({
-          label: def.label, color: def.color, value: averages[def.id][i],
+          label: def.label, color: defColor(def), value: averages[def.id][i],
         }));
         legend.innerHTML = legendHtml(bar, prev, shown);
       };
@@ -1779,7 +1793,7 @@
     if (chips) {
       chips.innerHTML = MA_DEFS.map((def) =>
         '<button type="button" class="machip' + (mas[def.id] ? " on" : "") + '" data-ma="' + def.id + '" aria-pressed="' + (mas[def.id] ? "true" : "false") + '">' +
-        '<i style="background:' + def.color + '"></i>' + esc(def.label) + "</button>"
+        '<i style="background:' + defColor(def) + '"></i>' + esc(def.label) + "</button>"
       ).join("");
     }
     const rerun = () => drawPriceChart(panel, opts);
@@ -2339,7 +2353,7 @@
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
     loadCsv: loadCsv, forgetCsv: (name) => { cache.delete(name); }, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
-    themed: themed, themedChart: themedChart, isLight: () => LIGHT,
+    themed: themed, themedChart: themedChart, isLight: () => LIGHT, maColor: maColor,
     settingVal: settingVal, splitOn: splitOn, groupOf: groupOf, navGroups: navGroups, SCANNER_GROUPS: SCANNER_GROUPS, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
   };

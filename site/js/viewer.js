@@ -323,13 +323,10 @@
 
   // ---------- Page ----------
   const D = window.Desk;
-  const MAS = [
-    { n: 10, color: "#38BDF8" },
-    { n: 20, color: "#7C9CFF" },
-    { n: 50, color: "#C3CBDB" },
-    { n: 150, color: "#F59E0B" },
-    { n: 200, color: "#E879F9" },
-  ];
+  // Line colors come from the chart_colors block (ma_colors, ma_colors_light in light mode) through D.maColor:
+  // MA 10 green, MA 20 orange, MA 50 blue, MA 150 yellow, MA 200 red. The chips use the same colors.
+  const MAS = [{ n: 10 }, { n: 20 }, { n: 50 }, { n: 150 }, { n: 200 }];
+  function maColor(n) { return D.maColor(n); }
   const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING|GAP UP|GAP HOLDING/;
   const WARN = /WATCH|NEAR HIGH|QUIET|ON WATCHLIST|DAY 2-5/;
   const BAD = /BROKEN DOWN|SELLING|NEW LOW|FADED/;
@@ -427,7 +424,7 @@
       : "";
     const fsBtn = on("fullscreen") ? '<button type="button" class="cvbtn cvgo" id="cvgo">Full screen</button>' : "";
     const chips = (on("ma_chips") ? MAS.map((m) =>
-      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + m.color + '"></i>MA ' + m.n + "</button>").join("") : "") +
+      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i>MA ' + m.n + "</button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("reason_box") && on("reason_box_toggle") ? '<button type="button" class="cvchip" data-tool="why" aria-pressed="false">Why</button>' : "") +
       (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "") +
@@ -638,7 +635,7 @@
       price.setData(bars.map((b) => ({ time: b.date, open: b.o, high: b.h, low: b.l, close: b.c })));
       const closes = bars.map((b) => b.c);
       MAS.forEach((m) => {
-        const s = chart.addSeries(LC.LineSeries, { color: m.color, lineWidth: 1, priceLineVisible: false, lastValueVisible: false,
+        const s = chart.addSeries(LC.LineSeries, { color: maColor(m.n), lineWidth: 1, priceLineVisible: false, lastValueVisible: false,
           crosshairMarkerVisible: false, visible: !!state.ma[m.n] });
         const data = [];
         D.smaValues(closes, m.n).forEach((v, i) => { if (v != null) data.push({ time: bars[i].date, value: v }); });
