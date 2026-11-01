@@ -2996,6 +2996,7 @@
     breadth: "The share of desk stocks trading above their 20, 50, 100, and 200-day averages. When most stocks are above their averages, the market is healthy. A falling line warns that fewer stocks are holding up.",
     secperf: "How each sector's stocks did over a day, week, month, 3 months, and the year so far, as an equal-weight average of the desk's stocks. It shows where money is flowing. Strong sectors make it easier for their stocks to rise.",
     chartviewer: "Shows one big chart at a time so you can flip through stocks fast. Pick a list: All scanner stocks puts every stock from every scanner in one list, once, with the stocks on the most scanners first. Tap Full screen. Drag the chart with one finger to look at older days (about five years are saved) and pinch to zoom. Flick quickly sideways, or swipe on the stock name, for the next chart (the Swipe button swaps the way; the Drag button makes any drag change the chart). 3M, 6M, 1Y, and All pick how much history shows. The MA buttons turn the average lines on and off, and the box in the lower right says which scanners picked the stock and why. Tap that box to read more.",
+    "chartviewer:split": "Shows one big chart at a time so you can flip through stocks fast. Pick Technical (chart patterns, breakouts, gaps, volume) or Fundamental (CANSLIM, Leaders, Growth, Quality, Dividend) at the top; the list and the reason box then show only that side, and your pick is saved on this device. All technical stocks or All fundamental stocks puts every stock from that side in one list, once, with the stocks on the most scanners first. Tap Full screen. Drag the chart with one finger to look at older days (about five years are saved) and pinch to zoom. Flick quickly sideways, or swipe on the stock name, for the next chart (the Swipe button swaps the way; the Drag button makes any drag change the chart). 3M, 6M, 1Y, and All pick how much history shows. The MA buttons turn the average lines on and off, and the box in the lower right says which scanners on that side picked the stock and why. Tap that box to read more.",
     heatmaps: "Each stock's return over 1 day, 1 week, 1 month, and the year so far, colored green for up and red for down. The table on the right is each sector's average 1-day move. Use it to spot what is hot or cold at a glance.",
   };
   // Where a tab's or section's box goes. tabs: the active button decides the text. secs: extra boxes inside the page.
@@ -3057,7 +3058,9 @@
           const old = document.getElementById("about");
           if (old) old.remove();
           const title = DESC_PAGE_KIND[id] === "page" ? "What this page does" : "What this scanner does";
-          ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, descFill(DESC[id], ctx)) + "</div>");
+          // With the Technical | Fundamental switch on, the Chart Viewer box describes the switch.
+          const split = id === "chartviewer" && D.splitOn && D.splitOn() && D.viewerOn("group_toggle") && DESC[id + ":split"];
+          ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, descFill(split || DESC[id], ctx)) + "</div>");
           const wrap = document.getElementById("about");
           const tabs = DESC_TABS[id];
           if (tabs) {
