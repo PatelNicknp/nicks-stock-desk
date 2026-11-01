@@ -76,6 +76,7 @@ jobs:
           python tests/test_light_mode.py
           python tests/test_vcp_green_tag.py
           python tests/test_split_tech_fund.py
+          python tests/test_ma_colors.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |

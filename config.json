@@ -143,6 +143,11 @@
     "group_toggle": true,
     "default_group": "technical"
   },
+  "chart_colors": {
+    "_note": "Moving average line colors, shared by every price chart: the Chart Viewer (chart-viewer.html) and the expand-in-place row charts on the scanner and list pages. The same color is used for the line, its toggle chip, and its value in the legend. ma_colors is for dark mode: MA 10 green, MA 20 orange, MA 50 blue, MA 150 yellow, MA 200 red. The row charts' SMA 50, SMA 150, and SMA 200 use the 50, 150, and 200 colors; their SMA 21 and EMA lines keep their own colors. ma_colors_light is used in light mode, with slightly darker shades so each line still shows on white (yellow is #ca8a04). Each value is a #RRGGBB color. A missing or bad value falls back to these defaults. Colors only; nothing new is downloaded.",
+    "ma_colors": {"10": "#22c55e", "20": "#f97316", "50": "#3b82f6", "150": "#eab308", "200": "#ef4444"},
+    "ma_colors_light": {"10": "#16a34a", "20": "#ea580c", "50": "#2563eb", "150": "#ca8a04", "200": "#dc2626"}
+  },
   "episodic_pivot": {
     "_note": "Episodic Pivot scan. Original Qullamaggie and Stockbee rules on cached daily bars, earnings dates, and Yahoo profiles. No new downloads. Every rule has an on/off switch and its number here. Percents are whole numbers (10 means 10%). Money is US dollars. The nick_ switches are Nick's own extra filters and are off by default. The time stop only flags NO FOLLOW-THROUGH; it never closes a trade. Turn the whole page off with features.scanner_ep.",
     "gap_trigger": true,

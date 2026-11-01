@@ -306,6 +306,16 @@ chart_viewer.fit_wide_ranges,True
 chart_viewer.min_bar_spacing,0.3
 chart_viewer.group_toggle,True
 chart_viewer.default_group,technical
+chart_colors.ma_colors.10,#22c55e
+chart_colors.ma_colors.20,#f97316
+chart_colors.ma_colors.50,#3b82f6
+chart_colors.ma_colors.150,#eab308
+chart_colors.ma_colors.200,#ef4444
+chart_colors.ma_colors_light.10,#16a34a
+chart_colors.ma_colors_light.20,#ea580c
+chart_colors.ma_colors_light.50,#2563eb
+chart_colors.ma_colors_light.150,#ca8a04
+chart_colors.ma_colors_light.200,#dc2626
 light_mode.default_theme,dark
 light_mode.match_device_option,True
 scanner_groups.vcp,technical
