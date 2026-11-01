@@ -1838,6 +1838,61 @@
     });
   }
 
+  // ---------- Technical | Fundamental (features.split_tech_fund) ----------
+  // Defaults match the scanner_groups block in config.json; a settings.csv row wins. Keys are page ids.
+  const SCANNER_GROUPS = {
+    vcp: "technical", box: "technical", flag: "technical", qullamaggie: "technical", marios: "technical", ep: "technical",
+    gapup: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
+    breakdowns: "technical", trends: "technical", wheel: "technical",
+    canslim: "fundamental", leaders: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
+    scorecard: "fundamental", top: "fundamental",
+  };
+  // Off unless settings.csv says true, so a settings file from before the split keeps the old menu and viewer.
+  function splitOn() {
+    const v = settingVal("feature.split_tech_fund");
+    return v != null && String(v).trim().toLowerCase() === "true";
+  }
+  function groupOf(id) {
+    const v = settingVal("scanner_groups." + id);
+    if (v != null && String(v).trim() !== "") {
+      const g = String(v).trim().toLowerCase();
+      return g === "technical" || g === "fundamental" ? g : "";
+    }
+    return SCANNER_GROUPS[id] || "";
+  }
+  // Page ids in the order of the scanner_groups rows in settings.csv, then any default not listed there.
+  function groupOrder() {
+    const out = [];
+    SETTINGS.forEach((r) => {
+      const m = /^scanner_groups\.(.+)$/.exec(String(r.setting || ""));
+      if (m && out.indexOf(m[1]) < 0) out.push(m[1]);
+    });
+    Object.keys(SCANNER_GROUPS).forEach((id) => { if (out.indexOf(id) < 0) out.push(id); });
+    return out;
+  }
+  // The menu. Split off: NAV as it was. Split on: every screener page moves under a Technical or a Fundamental
+  // heading where Scanners was, in scanner_groups order; the rest stay put, and the leftover Technicals group
+  // (market-wide pages) is called Market so it is not mixed up with Technical.
+  function navGroups() {
+    if (!splitOn()) return NAV;
+    const byId = {};
+    NAV.forEach((g) => g[1].forEach((it) => { byId[it[2]] = it; }));
+    const pick = (grp) => groupOrder().filter((id) => byId[id] && groupOf(id) === grp).map((id) => byId[id]);
+    const tech = pick("technical");
+    const fund = pick("fundamental");
+    const out = [];
+    NAV.forEach(([name, items]) => {
+      const rest = items.filter((it) => !groupOf(it[2]));
+      if (name === "Scanners") {
+        out.push(["Technical", tech], ["Fundamental", fund]);
+        if (rest.length) out.push(["Scanners", rest]);
+        return;
+      }
+      if (rest.length) out.push([name === "Technicals" ? "Market" : name, rest]);
+    });
+    return out;
+  }
+  let NAV_NOW = NAV;
   function navOn(items) {
     return items.filter((it) => !FEATURE[it[2]] || featureOn(FEATURE[it[2]]));
   }
@@ -2065,7 +2120,8 @@
     }
   }
   function renderShell(page) {
-    const groups = NAV.map(([name, items]) => {
+    NAV_NOW = navGroups();
+    const groups = NAV_NOW.map(([name, items]) => {
       const shown = navOn(items);
       if (!shown.length) return "";
       const open = shown.some((it) => it[2] === page.id);
@@ -2098,7 +2154,7 @@
       const open = items.hasAttribute("hidden");
       if (open) {
         const name = btn.textContent.replace(/[▾▸]/g, "").replace(/\d+$/, "").trim();
-        const spec = NAV.find((g) => g[0] === name);
+        const spec = NAV_NOW.find((g) => g[0] === name);
         if (spec && !items.childElementCount) {
           items.innerHTML = navOn(spec[1]).map((it) => {
             return '<a class="item' + (it[2] === page.id ? " sel" : "") + '" href="' + it[1] + '">' + esc(it[0]) + "</a>";
@@ -2284,7 +2340,7 @@
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
     loadCsv: loadCsv, forgetCsv: (name) => { cache.delete(name); }, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
     themed: themed, themedChart: themedChart, isLight: () => LIGHT,
-    settingVal: settingVal, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
+    settingVal: settingVal, splitOn: splitOn, groupOf: groupOf, navGroups: navGroups, SCANNER_GROUPS: SCANNER_GROUPS, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
   };
 })();

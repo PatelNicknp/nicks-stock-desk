@@ -118,6 +118,40 @@
     return null;
   }
   function compareTickers(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+  // Technical | Fundamental (features.split_tech_fund). These defaults match the scanner_groups block in
+  // config.json and are used only when settings.csv has no row for a list. Buy setups and Watchlist are in both.
+  const GROUPS = ["technical", "fundamental"];
+  const GROUP_LABEL = { technical: "Technical", fundamental: "Fundamental" };
+  const DEFAULT_GROUPS = {
+    vcp: "technical", box: "technical", flag: "technical", qullamaggie: "technical", marios: "technical", ep: "technical",
+    gapup: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
+    breakdowns: "technical", trends: "technical", wheel: "technical",
+    canslim: "fundamental", leaders: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
+    scorecard: "fundamental", top: "fundamental",
+  };
+  function cleanGroup(v) {
+    const g = txt(v).toLowerCase();
+    return GROUPS.indexOf(g) >= 0 ? g : "";
+  }
+  // A page or list id's group: the scanner_groups setting when there is a row (any other word leaves it out of
+  // both groups), else the default above. read(key) returns the settings value or null.
+  function groupOf(id, read) {
+    const v = read ? read("scanner_groups." + id) : null;
+    if (v != null && String(v).trim() !== "") {
+      const g = String(v).trim().toLowerCase();
+      return GROUPS.indexOf(g) >= 0 ? g : "";
+    }
+    return DEFAULT_GROUPS[id] || "";
+  }
+  // Which group the viewer opens on: a group in the address, else the group of the list in the address,
+  // else the last pick saved on this device, else chart_viewer.default_group, else technical.
+  function pickGroup(param, listId, saved, def, groupFor) {
+    const p = cleanGroup(param);
+    if (p) return p;
+    const fromList = listId && listId !== "all" && groupFor ? cleanGroup(groupFor(listId)) : "";
+    if (fromList) return fromList;
+    return cleanGroup(saved) || cleanGroup(def) || "technical";
+  }
   // files: { "scanner_vcp.csv": [rows], ... }. opts.featureOn(key) says if a list is turned on.
   function buildLists(files, opts) {
     opts = opts || {};
@@ -138,8 +172,12 @@
       return info[t];
     };
     const lists = [];
+    // opts.group (technical or fundamental): only that group's scanners, plus Buy setups and Watchlist.
+    const group = cleanGroup(opts.group);
+    const groupFor = opts.groupOf || ((id) => groupOf(id));
     LISTS.forEach((list, order) => {
       if (!on(list.feature)) return;
+      if (group && list.scanner && cleanGroup(groupFor(list.id)) !== group) return;
       if (list.kind === "buy" && opts.includeBuySetups === false) return;
       if (list.kind === "watch" && opts.includeWatchlist === false) return;
       if (list.kind === "gap" && opts.includeGapUp === false) return;
@@ -190,7 +228,7 @@
     Object.keys(info).forEach((t) => {
       info[t].entries.sort((x, y) => rankOf(x.status) - rankOf(y.status) || x.order - y.order);
     });
-    lists.unshift({ id: "all", label: "All scanner stocks", scanner: true, items: all });
+    lists.unshift({ id: "all", label: group ? "All " + group + " stocks" : "All scanner stocks", scanner: true, items: all });
     return { lists: lists, info: info };
   }
   // Where a touch started: "bar" (header row, or a chip bar that fits, so a sideways swipe changes the chart),
@@ -279,7 +317,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -338,16 +376,27 @@
     try { localStorage.setItem("desk-cv-ma", JSON.stringify(state)); } catch (e) { /* ignore */ }
   }
 
+  const GROUP_KEY = "desk-cv-group";
+  function storedGroup() {
+    try { return localStorage.getItem(GROUP_KEY) || ""; } catch (e) { return ""; }
+  }
   function render(ctx) {
-    const built = buildLists(ctx.files, {
+    const params = new URLSearchParams(location.search);
+    // Technical | Fundamental switch: features.split_tech_fund and chart_viewer.group_toggle. Off is the old single viewer.
+    const grouped = !!(D.splitOn && D.splitOn()) && on("group_toggle");
+    const groupFor = (id) => groupOf(id, D.settingVal);
+    let group = grouped ? pickGroup(params.get("group"), params.get("list"), storedGroup(), D.settingVal("chart_viewer.default_group"), groupFor) : "";
+    const build = () => buildLists(ctx.files, {
       featureOn: D.featureOn,
       includeWatching: on("include_watching"),
       includeClosed: on("include_closed"),
       includeBuySetups: on("include_buy_setups"),
       includeWatchlist: on("include_watchlist"),
       includeGapUp: on("include_gap_up"),
+      group: group,
+      groupOf: groupFor,
     });
-    const params = new URLSearchParams(location.search);
+    let built = build();
     let list = built.lists.find((l) => l.id === params.get("list")) || built.lists[0];
     let items = list.items.slice();
     const startTicker = String(params.get("t") || "").trim().toUpperCase();
@@ -364,11 +413,17 @@
       open: false,
     };
 
-    const shownLists = built.lists.filter((l) => l.items.length || l.id === list.id || l.id === "all");
+    const optionsHtml = () => built.lists.filter((l) => l.items.length || l.id === list.id || l.id === "all")
+      .map((l) => '<option value="' + D.esc(l.id) + '"' + (l.id === list.id ? " selected" : "") + ">" +
+        D.esc(l.label + " (" + l.items.length + ")") + "</option>").join("");
+    const groupBtn = (g) => '<button type="button" data-group="' + g + '" aria-pressed="' + (g === group ? "true" : "false") + '"' +
+      (g === group ? ' class="on"' : "") + ">" + GROUP_LABEL[g] + "</button>";
+    const switcher = grouped
+      ? '<div class="seg cvgroup" id="cvgroup" role="group" aria-label="Technical or fundamental lists">' + GROUPS.map(groupBtn).join("") + "</div>"
+      : "";
     const picker = on("list_picker")
       ? '<label class="ctl wide cvpick"><span class="lab">List</span><select id="cvlist" aria-label="Pick a list">' +
-        shownLists.map((l) => '<option value="' + D.esc(l.id) + '"' + (l.id === list.id ? " selected" : "") + ">" +
-          D.esc(l.label + " (" + l.items.length + ")") + "</option>").join("") + "</select></label>"
+        optionsHtml() + "</select></label>"
       : "";
     const fsBtn = on("fullscreen") ? '<button type="button" class="cvbtn cvgo" id="cvgo">Full screen</button>' : "";
     const chips = (on("ma_chips") ? MAS.map((m) =>
@@ -379,7 +434,7 @@
       (on("drag_mode_toggle") ? '<button type="button" class="cvchip" data-tool="drag" title="Pick what a one-finger drag on the chart does"></button>' : "") +
       (on("range_chips") ? RANGES.map((r) => '<button type="button" class="cvchip cvrange" data-range="' + r.id + '" aria-pressed="false">' + r.label + "</button>").join("") : "");
     ctx.page.innerHTML =
-      '<div class="ctrls cvctrls">' + picker + fsBtn + "</div>" +
+      '<div class="ctrls cvctrls">' + switcher + picker + fsBtn + "</div>" +
       '<p class="cap" id="cvsum"></p>' +
       '<div class="cv" id="cv" tabindex="-1">' +
         '<div class="cv-top">' +
@@ -441,7 +496,7 @@
     function reasonHtml(t) {
       const it = built.info[t];
       const entries = (it && it.entries) || [];
-      if (!entries.length) return '<div class="cv-why-h">Why it is here</div><div class="cv-why-r">Not on a scanner list today.</div>';
+      if (!entries.length) return '<div class="cv-why-h">Why it is here</div><div class="cv-why-r">Not on a ' + (group ? group + " scanner" : "scanner list") + " today.</div>";
       const max = cfgNum("reason_max_chars", 110);
       const count = it.count;
       const keep = cfgNum("reason_collapsed_items", 3);
@@ -614,6 +669,8 @@
       const url = new URL(location.href);
       url.searchParams.set("list", list.id);
       url.searchParams.set("t", t);
+      if (group) url.searchParams.set("group", group);
+      else url.searchParams.delete("group");
       history.replaceState(null, "", url);
       header(t, null);
       remember("ohlc/" + t + ".csv");
@@ -694,6 +751,30 @@
       items = list.items.slice();
       index = 0;
       state.open = false;
+      summary();
+      show();
+    });
+    // The switch keeps the stock on screen when it is on the new group's All list, else starts at the top.
+    const groupBox = document.getElementById("cvgroup");
+    if (groupBox) groupBox.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-group]");
+      if (!b) return;
+      const next = b.getAttribute("data-group");
+      try { localStorage.setItem(GROUP_KEY, next); } catch (err) { /* storage can be blocked */ }
+      if (next === group) return;
+      const current = items[index];
+      group = next;
+      built = build();
+      list = built.lists.find((l) => l.id === list.id && l.id !== "all") || built.lists[0];
+      items = list.items.slice();
+      index = Math.max(0, items.indexOf(current));
+      state.open = false;
+      groupBox.querySelectorAll("[data-group]").forEach((x) => {
+        const onNow = x.getAttribute("data-group") === group;
+        x.classList.toggle("on", onNow);
+        x.setAttribute("aria-pressed", onNow ? "true" : "false");
+      });
+      if (sel) sel.innerHTML = optionsHtml();
       summary();
       show();
     });

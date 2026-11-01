@@ -61,6 +61,7 @@ feature.scanner_ep,True
 feature.scanner_gap_up,True
 feature.chart_viewer,True
 feature.light_mode,True
+feature.split_tech_fund,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
@@ -303,6 +304,29 @@ chart_viewer.range_months_phone,3
 chart_viewer.range_chips,True
 chart_viewer.fit_wide_ranges,True
 chart_viewer.min_bar_spacing,0.3
+chart_viewer.group_toggle,True
+chart_viewer.default_group,technical
 light_mode.default_theme,dark
 light_mode.match_device_option,True
+scanner_groups.vcp,technical
+scanner_groups.box,technical
+scanner_groups.flag,technical
+scanner_groups.qullamaggie,technical
+scanner_groups.marios,technical
+scanner_groups.ep,technical
+scanner_groups.gapup,technical
+scanner_groups.week52,technical
+scanner_groups.breakouts,technical
+scanner_groups.volume,technical
+scanner_groups.pullbacks,technical
+scanner_groups.breakdowns,technical
+scanner_groups.trends,technical
+scanner_groups.wheel,technical
+scanner_groups.canslim,fundamental
+scanner_groups.leaders,fundamental
+scanner_groups.growth,fundamental
+scanner_groups.quality,fundamental
+scanner_groups.dividend,fundamental
+scanner_groups.scorecard,fundamental
+scanner_groups.top,fundamental
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

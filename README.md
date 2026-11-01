@@ -154,6 +154,15 @@ Price Check solves implied vol from the mid and compares the debit with a blend 
 
 Quotes are one delayed Cboe request per ticker, only for those names, with a pause of about a second and a half. Raw chains stay in `cache/options_chains/` and are not committed. A full run refreshes them. An hourly run refreshes them only around 10:30 ET and 3:30 ET, once per window. The risk-free rate is the Treasury 3-month yield, with a fallback. Greeks are computed in `options/`. If Cboe fails, the last good chain is kept and the page shows its as-of time. A failure here does not stop the rest of the update. `options_spreads_check.csv` is the same math in a small file for a cross-check. It is not a sheet tab.
 
+### Technical and Fundamental
+
+Switch: `features.split_tech_fund`, on. The left menu puts every screener page under a **Technical** or a **Fundamental** heading (where Scanners was), and the Chart Viewer gets a Technical | Fundamental switch at the top (`chart_viewer.group_toggle`). On the switch's side the list picker shows only that side's lists plus Buy setups and Watchlist, the first list is All technical stocks or All fundamental stocks, and the Why box lists only that side's scanners (Buy setup and Watchlist lines show on both). The pick is saved on each device in `localStorage` (`desk-cv-group`); a new device starts on `chart_viewer.default_group` (`technical`), and a link from a scanner page opens that scanner's side. The `scanner_groups` block in `config.json` maps each page id to `technical` or `fundamental`, in menu order:
+
+- Technical: VCP, Box, Flag, Qullamaggie, Marios, Episodic pivot, Gap Up, 52-week, 52-week breakouts, High volume, Pullbacks, and the US-only Breakdowns, Trends, and Wheel (stocks only).
+- Fundamental: CANSLIM, Leaders, Growth, Quality, Dividend, Stock scorecard, and Top stocks.
+
+Today, Buy setups, Watchlist, Alerts, Backtest, Options, Earnings, Sentiment, Financials (including Dividend fundamentals), Macro, and the market-wide pages (Gainers and losers, Breadth, Sector performance, Heatmaps, shown under Market) are not screeners and stay outside both. With `features.split_tech_fund` off the menu and the Chart Viewer are exactly as before. Tests: `tests/test_split_tech_fund.py` (it runs `tests/split_tech_fund_logic.js` and, with Playwright, `tests/split_tech_fund.mjs`).
+
 ### Sector rotation
 
 The sector rotation page uses the 11 SPDR sector ETFs and SPY already in the price cache. It does not add a Yahoo request. Dollar, oil, and gold are not in that cache and they are not in the two FRED files (the 10-year yield and the 10-year minus 2-year spread), so the page lists those three as missing.
