@@ -1,6 +1,6 @@
 ticker,company,shares,avg_cost,price,day_pct,value,cost,gain,gain_pct,weight_pct,score,score_week_ago,score_week_change,verdict,stop,status,example,data_status,note,disclaimer
 NVDA,Nvidia,40.0,95.0,202.06,-1.26,8082.4,3800.0,4282.4,112.69,12.9,5,7.0,-2,HOLD,199.41,Weakening,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 AAPL,Apple Inc.,80.0,175.0,338.32,-1.83,27065.6,14000.0,13065.6,93.33,43.0,1,4.0,-3,AVOID,321.97,Earnings soon,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-MSFT,Microsoft,30.0,380.0,507.12,-2.83,15213.6,11400.0,3813.6,33.45,24.2,7,11.0,-4,HOLD,491.72,Weakening,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+MSFT,Microsoft,30.0,380.0,507.12,-2.83,15213.6,11400.0,3813.6,33.45,24.2,7,11.0,-4,HOLD,491.73,Weakening,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 JPM,JPMorgan Chase,25.0,190.0,340.58,1.05,8514.5,4750.0,3764.5,79.25,13.5,5,3.0,2,HOLD,315.95,On track,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 UNH,UnitedHealth Group,10.0,520.0,400.44,-1.6,4004.4,5200.0,-1195.6,-22.99,6.4,4,4.0,0,HOLD,365.64,On track,yes,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

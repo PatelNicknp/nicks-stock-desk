@@ -1,7 +1,6 @@
 ticker,company,sector,ret_1d,ret_1w,ret_1m,ret_ytd,above_sma20,above_sma50,above_sma100,above_sma200,data_status,note,disclaimer
 BR,Broadridge Financial Solutions,Industrials,3.02,1.73,17.39,-14.89,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 MCO,Moody's Corporation,Financials,2.45,4.45,14.65,2.09,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-AMT,American Tower,Real Estate,0.28,0.01,16.09,11.03,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CTAS,Cintas,Industrials,2.25,-0.51,16.45,22.5,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 DIS,Walt Disney Company (The),Communication Services,1.96,2.45,10.69,1.9,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ICE,Intercontinental Exchange,Financials,2.03,7.64,14.74,8.79,1,1,1,1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

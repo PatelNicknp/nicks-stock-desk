@@ -1,7 +1,6 @@
 ticker,company,sector,price,trend_label,sma_alignment,above_sma20,above_sma50,above_sma100,above_sma200,score,data_status,note,disclaimer
 BR,Broadridge Financial Solutions,Industrials,184.22,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,13,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 MCO,Moody's Corporation,Financials,506.02,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,13,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-AMT,American Tower,Real Estate,188.3,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,13,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CTAS,Cintas,Industrials,224.77,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,12,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 DIS,Walt Disney Company (The),Communication Services,113.11,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,12,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ICE,Intercontinental Exchange,Financials,172.28,Uptrend,"above 20, above 50, above 100, above 200",1,1,1,1,12,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
