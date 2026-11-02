@@ -1,6 +1,7 @@
 ticker,company,sector,price,score,verdict,div_yield,div_yield_avg,pts_div_yield,passes,why,data_status,note,disclaimer
 BR,Broadridge Financial Solutions,Industrials,184.22,13,BUY,2.12,1.75,1.0,yes,Dividend yield clears the screen and the label is not AVOID.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 MCO,Moody's Corporation,Financials,506.02,13,BUY,0.74,0.67,1.0,no,Does not pass the dividend screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AMT,American Tower,Real Estate,188.3,13,BUY,3.57,3.18,1.0,yes,Dividend yield clears the screen and the label is not AVOID.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CTAS,Cintas,Industrials,224.77,12,BUY,0.8,0.64,1.0,no,Does not pass the dividend screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 DIS,Walt Disney Company (The),Communication Services,113.11,12,BUY,0.0,0.0,0.0,no,Does not pass the dividend screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ICE,Intercontinental Exchange,Financials,172.28,12,BUY,1.11,1.0,1.0,no,Does not pass the dividend screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

@@ -1,6 +1,7 @@
 ticker,company,sector,price,score,verdict,rev_growth,eps_growth,rs_spy_3m,passes,why,data_status,note,disclaimer
 BR,Broadridge Financial Solutions,Industrials,184.22,13,BUY,8.53,35.21,12.31,no,Does not pass the growth screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 MCO,Moody's Corporation,Financials,506.02,13,BUY,8.89,21.4,7.09,no,Does not pass the growth screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AMT,American Tower,Real Estate,188.3,13,BUY,20.82,12.03,10.86,yes,Revenue growth is at least the screen level and the label is not AVOID.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CTAS,Cintas,Industrials,224.77,12,BUY,12.85,17.06,12.91,no,Does not pass the growth screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 DIS,Walt Disney Company (The),Communication Services,113.11,12,BUY,6.95,52.05,17.46,no,Does not pass the growth screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ICE,Intercontinental Exchange,Financials,172.28,12,BUY,7.47,20.71,18.1,no,Does not pass the growth screen.,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

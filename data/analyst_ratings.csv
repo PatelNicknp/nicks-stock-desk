@@ -1,6 +1,7 @@
 ticker,company,analyst_mean,analyst_count,pts_analyst,target_analyst,target_analyst_kind,price,upside_pct,data_status,note,disclaimer
 BR,Broadridge Financial Solutions,2.3333,8.0,1.0,213.0,median,184.22,13.25,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 MCO,Moody's Corporation,1.7083,21.0,2.0,560.0,median,506.02,9.11,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AMT,American Tower,1.52,23.0,2.0,210.0,median,188.3,14.62,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 CTAS,Cintas,2.2,16.0,1.0,224.5,median,224.77,-2.82,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 DIS,Walt Disney Company (The),1.4848,32.0,2.0,127.5,median,113.11,11.91,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 ICE,Intercontinental Exchange,1.8125,15.0,1.0,190.0,median,172.28,11.49,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
