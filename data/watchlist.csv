@@ -1,6 +1,6 @@
 ticker,company,price,day_pct,score,verdict,entry_low,entry_high,distance_to_entry_pct,timing,note_input,data_status,note,disclaimer
-AVGO,Broadcom,325.42,-0.2,8,HOLD,330.9,343.84,-5.36,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-LLY,Lilly (Eli),1416.45,-0.08,10,BUY,1211.44,1259.68,12.45,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-COST,Costco,1039.41,2.68,11,BUY,963.51,982.39,5.8,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-CAT,Caterpillar Inc.,613.14,-1.54,1,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-PLTR,Palantir Technologies,181.57,-1.38,4,HOLD,187.47,196.85,-7.76,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AVGO,Broadcom,322.23,-1.18,8,HOLD,330.67,343.68,-6.24,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+LLY,Lilly (Eli),1410.99,-0.46,10,BUY,1210.8,1259.4,12.04,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+COST,Costco,1040.55,2.79,11,BUY,963.57,982.44,5.91,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+CAT,Caterpillar Inc.,613.62,-1.47,1,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+PLTR,Palantir Technologies,178.34,-3.13,4,HOLD,187.17,196.69,-9.33,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
