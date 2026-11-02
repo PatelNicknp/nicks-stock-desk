@@ -1,6 +1,4 @@
 date,pct_above_sma20,pct_above_sma50,pct_above_sma100,pct_above_sma200,data_status,note,disclaimer
-2026-04-13,72.3,51.3,52.3,57.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-2026-04-14,74.4,55.0,54.6,58.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-15,74.0,53.7,52.7,56.5,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-16,76.0,55.2,55.0,56.8,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-17,80.6,62.7,59.6,61.7,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
@@ -138,4 +136,6 @@ date,pct_above_sma20,pct_above_sma50,pct_above_sma100,pct_above_sma200,data_stat
 2026-10-26,69.4,59.1,53.4,59.8,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-10-27,70.9,60.4,53.9,61.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-10-28,67.7,57.4,53.7,61.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-2026-10-29,72.7,63.9,59.9,64.6,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+2026-10-29,72.9,63.9,59.9,64.6,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+2026-10-30,67.9,59.7,57.6,60.4,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+2026-11-02,70.4,65.9,61.5,64.4,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
