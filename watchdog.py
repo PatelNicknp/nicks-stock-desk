@@ -32,7 +32,12 @@ own clock, so it does not depend on GitHub cron. One keeper job is always alive.
 check_after_min (10) minutes past the next New York slot (weekdays, NYSE holidays skipped), then
 checks that slot. If no real update started at or after the slot, none is queued or running, and
 the last one started over min_gap_min (50) minutes ago, it dispatches exactly one update of the
-slot's mode (reason=keeper, so the guard's duplicate check still collapses a late cron). A hosted
+slot's mode (reason=keeper, so the guard's duplicate check still collapses a late cron). At
+verify_after_min (45) past the slot it verifies: the slot's run must have succeeded and data/meta.json
+price_as_of must be the slot's New York date. If every run for the slot failed, it dispatches one
+retry (reason=keeper_retry); after max_tries (2) runs it records "gave up" and never retries that
+slot again. A success with stale price_as_of is recorded (annotation and job summary), not retried.
+A run still going is looked at again every recheck_min (15) minutes, up to 3 hours. A hosted
 job lives at most 6 hours, so after chunk_min (330) minutes the keeper dispatches the next keeper
 and exits. A keeper exits without chaining when the switch is off (read live from main), or when
 a newer keeper is live. Every update run and watchdog run ends with ensure-keeper, which starts a
@@ -59,7 +64,10 @@ OVERDUE_MIN = 75
 MAX_LATE_MIN = 180
 KEEPER_FILE = "keeper.yml"
 LOOKBACK_MIN = 15
-KEEPER_DEFAULTS = {"check_after_min": 10, "chunk_min": 330, "min_gap_min": 50}
+KEEPER_DEFAULTS = {"check_after_min": 10, "verify_after_min": 45, "recheck_min": 15,
+                   "chunk_min": 330, "min_gap_min": 50, "max_tries": 2}
+FAILED = {"failure", "timed_out"}
+VERIFY_FOR_MIN = 180  # stop re-verifying a slot whose run is still going after 3 hours
 # NYSE full-day closures (nyse.com hours-calendars). The keeper makes up no slot on these days.
 # Early-close days (Nov 27 2026, Dec 24 2026, Nov 26 2027) keep their slots. Years not listed: weekdays only.
 NYSE_HOLIDAYS = {dt.date.fromisoformat(d) for d in (
@@ -243,14 +251,37 @@ def next_check(after, check_after_min=10):
     return None, None, None
 
 
-def plan(now, deadline, after=None, check_after_min=10):
-    """What the keeper does next: ('check', check_time, slot, mode) when the next check falls before
-    `deadline`, else ('handoff', deadline, None, None). `after` is the last check already done
-    (a new keeper passes its start minus LOOKBACK_MIN, so a check due during a hand-off is not lost)."""
-    when, slot, mode = next_check(after if after is not None else now, check_after_min)
+def next_event(after, check_after_min=10, verify_after_min=None):
+    """(kind, time, slot, mode) for the first keeper event strictly after `after`: 'check' at
+    slot + check_after_min (make up a slot that did not run) and, when verify_after_min is set,
+    'verify' at slot + verify_after_min (did it succeed, did the data advance; retry once)."""
+    lags = [("check", check_after_min)] + ([("verify", verify_after_min)] if verify_after_min else [])
+    longest = max(m for _, m in lags)
+    day = (after - dt.timedelta(minutes=longest)).astimezone(NY).date()
+    best = None
+    for ahead in range(0, 21):
+        for when, mode in market_slots_for_day(day + dt.timedelta(days=ahead)):
+            for kind, lag in lags:
+                t = when + dt.timedelta(minutes=lag)
+                if t > after and (best is None or t < best[1]):
+                    best = (kind, t, when, mode)
+        if best is not None and ahead >= 1:
+            break
+    return best or (None, None, None, None)
+
+
+def plan(now, deadline, after=None, check_after_min=10, verify_after_min=None, extra=()):
+    """What the keeper does next: ('check' or 'verify', time, slot, mode) when the next event falls
+    before `deadline`, else ('handoff', deadline, None, None). `after` is the last event already done
+    (a new keeper passes its start minus LOOKBACK_MIN, so an event due during a hand-off is not lost).
+    `extra` holds re-verifies (time, slot, mode) for a slot whose run was still going."""
+    kind, when, slot, mode = next_event(after if after is not None else now, check_after_min, verify_after_min)
+    for t, s_, m in extra:
+        if when is None or t < when:
+            kind, when, slot, mode = "verify", t, s_, m
     if when is None or when > deadline:
         return "handoff", deadline, None, None
-    return "check", when, slot, mode
+    return kind, when, slot, mode
 
 
 def sleep_seconds(now, until):
@@ -284,6 +315,55 @@ def keeper_decide(now, slot, mode, runs, did_work=None, min_gap_min=50):
     return "dispatch", "missed slot %s (%s); last start %s" % (fmt(slot), mode, fmt(latest) if latest else "none")
 
 
+def slot_runs(slot, runs, did_work=None, until=None):
+    """Real update runs that started at or after `slot` (and before `until`, the next slot)."""
+    out = []
+    for r in runs:
+        start = run_start(r)
+        if start is None or start < slot or (until is not None and start >= until):
+            continue
+        if r.get("status") in ACTIVE or counts_as_run(r, did_work):
+            out.append(r)
+    return sorted(out, key=run_start)
+
+
+def verify_decide(slot, mode, runs, price_as_of=None, did_work=None, max_tries=2, until=None):
+    """After a slot's run should be done. Returns (action, reason):
+    'wait'    an update is still queued or running: look again later
+    'none'    no run for this slot (the check step handles make-ups)
+    'ok'      a run succeeded and price_as_of reached the slot's New York date
+    'stale'   a run succeeded but price_as_of is older than the slot's date: recorded, not retried
+    'retry'   every run for the slot failed and fewer than max_tries ran: start one more
+    'gave_up' the slot failed max_tries times: recorded, never retried again
+    """
+    active = [r for r in runs if r.get("status") in ACTIVE]
+    if active:
+        return "wait", "update run %s is %s" % (active[0].get("id"), active[0].get("status"))
+    mine = slot_runs(slot, runs, did_work, until)
+    if not mine:
+        return "none", "no run for slot %s" % fmt(slot)
+    good = [r for r in mine if r.get("conclusion") == "success"]
+    if good:
+        day = slot.astimezone(NY).date().isoformat()
+        if not price_as_of:
+            return "ok", "run %s succeeded (price_as_of unreadable)" % good[-1].get("id")
+        if str(price_as_of)[:10] < day:
+            return "stale", "run %s succeeded but price_as_of is %s, expected %s" % (good[-1].get("id"), price_as_of, day)
+        return "ok", "run %s succeeded, price_as_of %s" % (good[-1].get("id"), price_as_of)
+    failed = [r for r in mine if r.get("conclusion") in FAILED]
+    if not failed:
+        return "none", "no finished run for slot %s" % fmt(slot)
+    if len(mine) >= max_tries:
+        return "gave_up", "slot %s failed %d times (runs %s); not retrying again" % (
+            fmt(slot), len(mine), ", ".join(str(r.get("id")) for r in mine))
+    return "retry", "run %s for slot %s ended %s; one retry" % (failed[-1].get("id"), fmt(slot), failed[-1].get("conclusion"))
+
+
+def next_slot_start(slot):
+    _, nxt, _ = next_check(slot, 0)
+    return nxt
+
+
 def live_keepers(keeper_runs, my_id=None):
     return [r for r in keeper_runs if r.get("status") in ACTIVE and str(r.get("id")) != str(my_id)]
 
@@ -314,6 +394,8 @@ def keeper_settings(cfg):
         if k in out:
             out[k] = int(v)
     out["chunk_min"] = max(30, min(out["chunk_min"], 340))  # hosted jobs stop at 360 min
+    out["max_tries"] = max(1, min(out["max_tries"], 2))       # at most one retry per slot
+    out["recheck_min"] = max(5, out["recheck_min"])
     return out
 
 
@@ -382,6 +464,34 @@ def live_config(path="config.json"):
         return read_config(path)
 
 
+def fetch_price_as_of():
+    """data/meta.json price_as_of on main right now, or None."""
+    try:
+        repo = os.environ["GITHUB_REPOSITORY"]
+        req = urllib.request.Request("https://api.github.com/repos/%s/contents/data/meta.json?ref=main" % repo, headers={
+            "Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
+            "Accept": "application/vnd.github.raw+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read()).get("price_as_of")
+    except Exception as e:
+        print("could not read data/meta.json (%s)" % e, flush=True)
+        return None
+
+
+def record(level, text):
+    """Leave a mark in the Actions run (annotation and job summary). No email, no message."""
+    print("::%s title=Update keeper::%s" % (level, text), flush=True)
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        try:
+            with open(path, "a") as f:
+                f.write("- %s: %s\n" % (level.upper(), text))
+        except Exception:
+            pass
+
+
 def _dispatch(workflow, inputs, tries=3):
     for i in range(tries):
         try:
@@ -416,6 +526,7 @@ def run_keeper(env, now=None, sleep=time.sleep):
     started = now()
     deadline = started + dt.timedelta(minutes=settings["chunk_min"])
     last = started - dt.timedelta(minutes=LOOKBACK_MIN)
+    extra = []  # re-verifies: (time, slot, mode)
     while True:
         if not keeper_on(cfg):
             print("keeper: switch self_heal_keeper is off, stopping (no next keeper)", flush=True)
@@ -428,7 +539,8 @@ def run_keeper(env, now=None, sleep=time.sleep):
         if yield_:
             print("keeper: stepping aside -", why, flush=True)
             return "yield"
-        kind, when, slot, mode = plan(now(), deadline, last, settings["check_after_min"])
+        kind, when, slot, mode = plan(now(), deadline, last, settings["check_after_min"],
+                                      settings["verify_after_min"], extra)
         print("keeper: next %s at %s (%s UTC), sleeping %d s" % (
             kind, fmt(when), when.strftime("%Y-%m-%d %H:%M"), sleep_seconds(now(), when)), flush=True)
         sleep(sleep_seconds(now(), when))
@@ -446,16 +558,34 @@ def run_keeper(env, now=None, sleep=time.sleep):
             ok = _dispatch(KEEPER_FILE, {})
             print("keeper: handed off to the next keeper" if ok else "keeper: hand-off failed, crons will restart one", flush=True)
             return "handoff"
-        last = when
+        if (when, slot, mode) in extra:
+            extra.remove((when, slot, mode))
+        else:
+            last = when
         try:
             runs = fetch_runs()
         except Exception as e:
-            print("keeper: could not read update runs (%s), skipping this check" % e, flush=True)
+            print("keeper: could not read update runs (%s), skipping this %s" % (e, kind), flush=True)
             continue
-        action, why = keeper_decide(now(), slot, mode, runs, api_did_work, settings["min_gap_min"])
-        print("keeper decision:", action.upper(), "-", why, flush=True)
-        if action == "dispatch" and _dispatch(WORKFLOW_FILE, {"mode": mode, "reason": "keeper"}):
-            print("keeper: dispatched one %s update" % mode, flush=True)
+        if kind == "check":
+            action, why = keeper_decide(now(), slot, mode, runs, api_did_work, settings["min_gap_min"])
+            print("keeper decision:", action.upper(), "-", why, flush=True)
+            if action == "dispatch" and _dispatch(WORKFLOW_FILE, {"mode": mode, "reason": "keeper"}):
+                print("keeper: dispatched one %s update" % mode, flush=True)
+            continue
+        action, why = verify_decide(slot, mode, runs, fetch_price_as_of(), api_did_work,
+                                    settings["max_tries"], next_slot_start(slot))
+        print("keeper verify:", action.upper(), "-", why, flush=True)
+        if action == "wait":
+            t = now() + dt.timedelta(minutes=settings["recheck_min"])
+            if (t - slot).total_seconds() / 60.0 <= VERIFY_FOR_MIN:
+                extra.append((t, slot, mode))
+        elif action == "retry":
+            if _dispatch(WORKFLOW_FILE, {"mode": mode, "reason": "keeper_retry"}):
+                print("keeper: dispatched one %s retry" % mode, flush=True)
+                extra.append((now() + dt.timedelta(minutes=settings["verify_after_min"]), slot, mode))
+        elif action in ("stale", "gave_up"):
+            record("warning", why)
 
 
 def switch_on(path="config.json"):
