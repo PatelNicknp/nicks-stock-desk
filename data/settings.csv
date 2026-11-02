@@ -341,6 +341,9 @@ scanner_groups.dividend,fundamental
 scanner_groups.scorecard,fundamental
 scanner_groups.top,fundamental
 keeper.check_after_min,10
+keeper.verify_after_min,45
+keeper.recheck_min,15
 keeper.chunk_min,330
 keeper.min_gap_min,50
+keeper.max_tries,2
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

@@ -21,7 +21,7 @@ on:
         type: choice
         options: ["full", "hourly"]
       reason:
-        description: "Set to watchdog or keeper by those workflows. Leave blank for a manual run."
+        description: "Set to watchdog, keeper, or keeper_retry by those workflows. Leave blank for a manual run."
         required: false
         default: ""
 
@@ -41,7 +41,8 @@ jobs:
       - uses: actions/checkout@v4
       # Scheduled runs: skip unless this cron is a New York-time slot (the other DST twin stops here).
       # Scheduled and watchdog runs: a late cron and a make-up for the same slot collapse into one.
-      # Manual runs are never skipped. If the run list cannot be read, the duplicate check lets it run.
+      # Manual runs and the keeper's single retry of a failed slot (keeper_retry) are never skipped.
+      # If the run list cannot be read, the duplicate check lets it run.
       - name: Keep to New York slots and skip duplicates
         id: guard
         if: github.event_name == 'schedule' || inputs.reason == 'watchdog' || inputs.reason == 'keeper'

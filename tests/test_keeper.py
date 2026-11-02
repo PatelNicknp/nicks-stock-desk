@@ -236,8 +236,11 @@ class Fake:
 
 
 def with_fake(f, fn):
-    saved = (w.live_config, w.fetch_keeper_runs, w.fetch_runs, w._dispatch, w.api_did_work)
+    saved = (w.live_config, w.fetch_keeper_runs, w.fetch_runs, w._dispatch, w.api_did_work, w.fetch_price_as_of, w.record)
     w.live_config = f.config
+    w.fetch_price_as_of = lambda: getattr(f, "asof", None)
+    f.records = []
+    w.record = lambda level, text: f.records.append((level, text))
     w.fetch_keeper_runs = lambda n=20: f.keeper_runs
     w.fetch_runs = lambda n=50: f.update_runs
     w._dispatch = lambda wf, inputs, tries=3: f.dispatched.append((wf, inputs)) or True
@@ -245,7 +248,8 @@ def with_fake(f, fn):
     try:
         return fn()
     finally:
-        w.live_config, w.fetch_keeper_runs, w.fetch_runs, w._dispatch, w.api_did_work = saved
+        (w.live_config, w.fetch_keeper_runs, w.fetch_runs, w._dispatch, w.api_did_work,
+         w.fetch_price_as_of, w.record) = saved
 
 
 def test_loop_makes_up_missed_slots_then_hands_off():
@@ -314,6 +318,117 @@ def test_ensure_keeper():
     assert with_fake(f, lambda: w.ensure_keeper({"features": {"self_heal_keeper": False}})) is False and f.dispatched == []
 
 
+# ---------------------------------------------------------------- success and fresh data, retry once
+def ev(after, lag=10, verify=45):
+    kind, when, slot, mode = w.next_event(T(after), lag, verify)
+    return kind, when.strftime("%Y-%m-%d %H:%M"), slot.strftime("%H:%M"), mode
+
+
+def test_next_event_with_verify():
+    assert ev("2026-11-02 19:55") == ("verify", "2026-11-02 20:00", "19:15", "hourly")
+    assert ev("2026-11-02 20:00") == ("check", "2026-11-02 20:25", "20:15", "hourly")
+    assert ev("2026-11-02 20:25") == ("verify", "2026-11-02 21:00", "20:15", "hourly")
+    assert ev("2026-11-02 21:00") == ("check", "2026-11-02 21:25", "21:15", "hourly")
+    assert ev("2026-11-02 23:40") == ("verify", "2026-11-03 00:15", "23:30", "full")   # full run verified 19:15 ET
+    assert ev("2026-11-03 00:15") == ("check", "2026-11-03 15:25", "15:15", "hourly")
+    assert ev("2026-10-30 23:15") == ("check", "2026-11-02 15:25", "15:15", "hourly")  # Fri EDT verify done -> Mon EST
+    assert ev("2026-11-25 23:40") == ("verify", "2026-11-26 00:15", "23:30", "full")   # Wed before Thanksgiving
+    assert ev("2026-11-26 00:15") == ("check", "2026-11-27 15:25", "15:15", "hourly")
+    assert w.next_slot_start(T("2026-11-02 23:30")) == T("2026-11-03 15:15")
+    assert w.next_slot_start(T("2026-11-02 20:15")) == T("2026-11-02 21:15")
+
+
+def test_plan_prefers_due_recheck():
+    now = T("2026-11-02 21:00")
+    kind, when, slot, _ = w.plan(now, now + dt.timedelta(minutes=330), now, 10, 45,
+                                 [(T("2026-11-02 21:15"), T("2026-11-02 20:15"), "hourly")])
+    assert (kind, when, slot) == ("verify", T("2026-11-02 21:15"), T("2026-11-02 20:15"))
+
+
+def test_verify_decide():
+    S, U = T("2026-11-02 20:15"), T("2026-11-02 21:15")
+    V = lambda runs, asof="2026-11-02", tries=2: w.verify_decide(S, "hourly", runs, asof, did_work, tries, U)[0]
+    assert V([run(1, "2026-11-02 20:17")]) == "ok"
+    assert V([run(1, "2026-11-02 20:17")], asof="2026-10-30") == "stale"           # success but data did not move
+    assert V([run(1, "2026-11-02 20:17")], asof=None) == "ok"                      # unreadable: no false alarm
+    assert V([run(1, "2026-11-02 20:17", conclusion="failure")]) == "retry"         # India case: failed on a test
+    assert V([run(1, "2026-11-02 20:17", conclusion="timed_out")]) == "retry"
+    assert V([run(2, "2026-11-02 21:01", conclusion="failure"), run(1, "2026-11-02 20:17", conclusion="failure")]) == "gave_up"
+    assert V([run(2, "2026-11-02 21:01"), run(1, "2026-11-02 20:17", conclusion="failure")]) == "ok"  # retry worked
+    assert V([run(1, "2026-11-02 20:17", conclusion="failure")], tries=1) == "gave_up"
+    assert V([run(1, "2026-11-02 20:40", "in_progress", None)]) == "wait"
+    assert V([]) == "none" and V([run(1, "2026-11-02 19:16")]) == "none"            # earlier slot's run is not this slot's
+    assert V([run(1, "2026-11-02 20:17", conclusion="cancelled")]) == "none"
+    assert V([run(1, "2026-11-02 20:17", worked=False)]) == "none"                  # guard-skipped twin
+    assert V([run(3, "2026-11-02 21:16", conclusion="failure")]) == "none"          # next slot's run is not this slot's
+    # Full slot: price_as_of must be that New York date, even though it is the next UTC day.
+    full = w.verify_decide(T("2026-11-02 23:30"), "full", [run(1, "2026-11-02 23:31")], "2026-11-02", did_work, 2,
+                           T("2026-11-03 15:15"))
+    assert full[0] == "ok"
+
+
+def test_retry_cap_setting():
+    assert w.keeper_settings({"keeper": {"max_tries": 9}})["max_tries"] == 2
+    assert w.keeper_settings({"keeper": {"max_tries": 0}})["max_tries"] == 1
+
+
+def test_loop_retries_a_failed_slot_once_then_records():
+    # Cron runs fire on time but every run fails (like the India desk failing a test). Mon 20:15 slot.
+    f = Fake(T("2026-11-02 19:55"), [], [K(100, "in_progress")])
+    f.asof = "2026-11-02"
+    sent = []
+
+    def dispatch(wf, inputs, tries=3):
+        sent.append((wf, inputs.get("reason"), f.t.strftime("%H:%M")))
+        if wf == w.WORKFLOW_FILE:
+            f.update_runs.insert(0, run(500 + len(sent), f.t.strftime("%Y-%m-%d %H:%M"), conclusion="failure"))
+        return True
+
+    def sleep(s):
+        f.sleep(s)
+        for c in ("2026-11-02 20:16", "2026-11-02 21:16", "2026-11-02 22:16", "2026-11-02 23:31"):
+            stamp = T(c).strftime("%Y-%m-%dT%H:%M:%SZ")
+            if T(c) <= f.t and all(r["created_at"] != stamp for r in f.update_runs):
+                f.update_runs.insert(0, run(len(f.update_runs) + 2, c, conclusion="failure"))
+
+    def go():
+        w._dispatch = dispatch
+        return w.run_keeper({"GITHUB_RUN_ID": "100"}, now=f.now, sleep=sleep)
+    assert with_fake(f, go) == "handoff"
+    retries = [x for x in sent if x[1] == "keeper_retry"]
+    assert retries == [("update.yml", "keeper_retry", "21:00"), ("update.yml", "keeper_retry", "22:00"),
+                       ("update.yml", "keeper_retry", "23:00"), ("update.yml", "keeper_retry", "00:15")]  # one per slot
+    assert [x for x in sent if x[1] == "keeper"] == []              # cron runs existed, no make-ups
+    gave_up = [t for lvl, t in f.records if "not retrying again" in t]
+    assert len(gave_up) == 4 and all(lvl == "warning" for lvl, _ in f.records)  # each slot: one retry, then recorded
+
+
+def test_loop_records_stale_data_without_retry():
+    f = Fake(T("2026-11-02 19:55"), [], [K(100, "in_progress")])
+    f.asof = "2026-10-30"
+
+    def sleep(s):
+        f.sleep(s)
+        stamp = "2026-11-02T20:16:00Z"
+        if T("2026-11-02 20:16") <= f.t and all(r["created_at"] != stamp for r in f.update_runs):
+            f.update_runs.insert(0, run(7, "2026-11-02 20:16"))
+    with_fake(f, lambda: w.run_keeper({"GITHUB_RUN_ID": "100"}, now=f.now, sleep=sleep))
+    assert any("price_as_of is 2026-10-30" in t for _, t in f.records)
+    assert [d for d in f.dispatched if d[1].get("reason") == "keeper_retry"] == []
+
+
+def test_loop_waits_for_a_long_run():
+    f = Fake(T("2026-11-02 23:41"), [run(1, "2026-11-02 23:31", "in_progress", None)], [K(100, "in_progress")])
+    f.asof = "2026-11-02"
+
+    def sleep(s):
+        f.sleep(s)
+        if f.t >= T("2026-11-03 00:40"):
+            f.update_runs[0] = run(1, "2026-11-02 23:31")
+    with_fake(f, lambda: w.run_keeper({"GITHUB_RUN_ID": "100"}, now=f.now, sleep=sleep))
+    assert f.dispatched == [(w.KEEPER_FILE, {})] and f.records == []
+
+
 def test_workflows_wired():
     wf = lambda n: open(os.path.join(ROOT, ".github", "workflows", n)).read()
     keeper, update, dog = wf("keeper.yml"), wf("update.yml"), wf("watchdog.yml")
@@ -321,6 +436,8 @@ def test_workflows_wired():
     assert "group: update-keeper" in keeper and "actions: write" in keeper
     assert "timeout-minutes: 350" in keeper and "watchdog.py keeper" in keeper
     assert "inputs.reason == 'keeper'" in update and "watchdog.py ensure-keeper" in update
+    guard_if = [l for l in update.splitlines() if "github.event_name == 'schedule'" in l][0]
+    assert "keeper_retry" not in guard_if   # the one retry is not collapsed by the duplicate guard
     assert "python tests/test_keeper.py" in update
     assert "watchdog.py ensure-keeper" in dog
 
