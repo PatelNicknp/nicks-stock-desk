@@ -56,6 +56,7 @@
     "help": true,
     "company_blurbs": true,
     "self_heal_schedule": true,
+    "self_heal_keeper": true,
     "scanner_descriptions": true,
     "scanner_qullamaggie": true,
     "scanner_marios": true,
@@ -64,6 +65,12 @@
     "chart_viewer": true,
     "light_mode": true,
     "split_tech_fund": true
+  },
+  "keeper": {
+    "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. It only triggers the normal slots, so Yahoo traffic does not grow.",
+    "check_after_min": 10,
+    "chunk_min": 330,
+    "min_gap_min": 50
   },
   "light_mode": {
     "_note": "Light mode. features.light_mode shows or hides the Theme switch (Dark, Light, Match device) at the top of the left menu. With the switch hidden the whole desk stays dark. default_theme is what a phone or iPad sees before it picks one: dark, light, or device. The pick is saved on that device. match_device_option shows the Match device button. Colors only; nothing new is downloaded.",

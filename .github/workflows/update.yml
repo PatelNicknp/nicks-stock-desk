@@ -11,7 +11,7 @@ on:
     - cron: "15 14-22 * * 1-5"
     # Full run: 22:30 UTC in EDT, 23:30 UTC in EST.
     - cron: "30 22,23 * * 1-5"
-  # The crons above stay as the main schedule. The watchdog workflow only fills in a slot GitHub skipped.
+  # The crons above stay as the main schedule. The keeper workflow (and the cron watchdog) fill in a slot GitHub skipped.
   workflow_dispatch:
     inputs:
       mode:
@@ -21,7 +21,7 @@ on:
         type: choice
         options: ["full", "hourly"]
       reason:
-        description: "Set to watchdog by the watchdog workflow. Leave blank for a manual run."
+        description: "Set to watchdog or keeper by those workflows. Leave blank for a manual run."
         required: false
         default: ""
 
@@ -44,7 +44,7 @@ jobs:
       # Manual runs are never skipped. If the run list cannot be read, the duplicate check lets it run.
       - name: Keep to New York slots and skip duplicates
         id: guard
-        if: github.event_name == 'schedule' || inputs.reason == 'watchdog'
+        if: github.event_name == 'schedule' || inputs.reason == 'watchdog' || inputs.reason == 'keeper'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT_NAME: ${{ github.event_name }}
@@ -72,6 +72,7 @@ jobs:
           python tests/test_gap_up.py
           python tests/test_sector_rotation.py
           python tests/test_watchdog.py
+          python tests/test_keeper.py
           python tests/test_chart_viewer.py
           python tests/test_light_mode.py
           python tests/test_vcp_green_tag.py
@@ -81,7 +82,7 @@ jobs:
         if: steps.guard.outputs.skip != 'true'
         run: |
           set -e
-          # A manual run is full, as before. A watchdog make-up uses the mode of the slot it replaces.
+          # A manual run is full, as before. A watchdog or keeper make-up uses the mode of the slot it replaces.
           # A scheduled run uses the mode of its New York slot (the 18:30 ET slot is the full run).
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" = "hourly" ]; then
             python stock_desk.py --hourly
@@ -102,3 +103,25 @@ jobs:
             git commit -m "Update desk data $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
+
+  # Second way in for the keeper: if no keeper is queued or running (chain broken), start one.
+  # Does nothing when one is live or features.self_heal_keeper is off. Reads no market data.
+  keeper:
+    needs: update
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            config.json
+            watchdog.py
+          sparse-checkout-cone-mode: false
+      - name: Start a keeper if none is live
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 watchdog.py ensure-keeper

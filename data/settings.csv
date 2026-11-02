@@ -54,6 +54,7 @@ feature.updates_log,True
 feature.help,True
 feature.company_blurbs,True
 feature.self_heal_schedule,True
+feature.self_heal_keeper,True
 feature.scanner_descriptions,True
 feature.scanner_qullamaggie,True
 feature.scanner_marios,True
@@ -339,4 +340,7 @@ scanner_groups.quality,fundamental
 scanner_groups.dividend,fundamental
 scanner_groups.scorecard,fundamental
 scanner_groups.top,fundamental
+keeper.check_after_min,10
+keeper.chunk_min,330
+keeper.min_gap_min,50
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

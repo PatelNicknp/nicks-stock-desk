@@ -1,0 +1,36 @@
+name: Update keeper
+
+# The desk's own clock, so updates do not depend only on GitHub cron (which can skip runs for days).
+# One keeper job is always alive: it sleeps until 10 minutes past the next New York slot (weekdays,
+# NYSE holidays skipped), checks whether that slot ran, and if not dispatches exactly one update of
+# that slot's mode. After about 5.5 hours it starts the next keeper and exits (hosted jobs stop at 6h).
+# It reads no market data. Switch: features.self_heal_keeper in config.json (read live from main);
+# off means the keeper stops and does not chain. Every update and watchdog run restarts a keeper
+# if none is live, so a broken chain heals on the next cron GitHub does fire.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+# Only one keeper runs at a time. A second one waits, and the newest waiting one replaces older ones.
+concurrency:
+  group: update-keeper
+  cancel-in-progress: false
+
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            config.json
+            watchdog.py
+          sparse-checkout-cone-mode: false
+      - name: Sleep to each slot and make up a missed one
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -u watchdog.py keeper

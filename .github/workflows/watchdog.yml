@@ -4,6 +4,7 @@ name: Update watchdog
 # It never adds extra runs: it does nothing while an update is queued or running,
 # or when the latest expected slot already ran. It reads no market data.
 # Switch: features.self_heal_schedule in config.json.
+# It also restarts the keeper (keeper.yml) if none is live. Switch: features.self_heal_keeper.
 on:
   schedule:
     # Odd minutes over the update hours in UTC for both EDT and EST: the first slot is 14:15 UTC (EDT)
@@ -43,3 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: python3 watchdog.py check
+      - name: Start a keeper if none is live
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: python3 watchdog.py ensure-keeper
