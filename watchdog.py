@@ -1,9 +1,11 @@
 """Keep the update on New York market time and make up missed runs. Standard library only.
 
-Never calls Yahoo. Two commands:
+Never calls Yahoo. Four commands:
 
-    python watchdog.py check     # watchdog workflow: dispatch one make-up if a slot was missed
-    python watchdog.py guard     # first step of the update job
+    python watchdog.py check         # watchdog workflow: dispatch one make-up if a slot was missed
+    python watchdog.py guard         # first step of the update job
+    python watchdog.py keeper        # keeper workflow: sleep to each slot, make it up if it did not run
+    python watchdog.py ensure-keeper # end of every update and watchdog run: start a keeper if none is live
 
 Intended slots are New York time (America/New_York), Monday to Friday:
 hourly at 10:15, 11:15, ... 17:15 and the full run at 18:30. GitHub cron is UTC only,
@@ -24,11 +26,24 @@ running, or when the latest intended slot already ran. Dispatch exactly one upda
 that slot is 20 minutes to 3 hours past and the last real update started over 75 minutes ago.
 A run whose data step was skipped by the guard does not count as a run. A failed run does
 count, so it is never retried. A cancelled run does not count.
+
+keeper (switch features.self_heal_keeper, settings in the keeper block of config.json): the desk's
+own clock, so it does not depend on GitHub cron. One keeper job is always alive. It sleeps until
+check_after_min (10) minutes past the next New York slot (weekdays, NYSE holidays skipped), then
+checks that slot. If no real update started at or after the slot, none is queued or running, and
+the last one started over min_gap_min (50) minutes ago, it dispatches exactly one update of the
+slot's mode (reason=keeper, so the guard's duplicate check still collapses a late cron). A hosted
+job lives at most 6 hours, so after chunk_min (330) minutes the keeper dispatches the next keeper
+and exits. A keeper exits without chaining when the switch is off (read live from main), or when
+a newer keeper is live. Every update run and watchdog run ends with ensure-keeper, which starts a
+keeper only if the switch is on and no keeper is queued or running, so a broken chain restarts
+on the next cron that GitHub does fire.
 """
 import datetime as dt
 import json
 import os
 import sys
+import time
 import urllib.request
 from zoneinfo import ZoneInfo
 
@@ -42,6 +57,17 @@ FULL_NY = (18, 30)
 GRACE_MIN = 20
 OVERDUE_MIN = 75
 MAX_LATE_MIN = 180
+KEEPER_FILE = "keeper.yml"
+LOOKBACK_MIN = 15
+KEEPER_DEFAULTS = {"check_after_min": 10, "chunk_min": 330, "min_gap_min": 50}
+# NYSE full-day closures (nyse.com hours-calendars). The keeper makes up no slot on these days.
+# Early-close days (Nov 27 2026, Dec 24 2026, Nov 26 2027) keep their slots. Years not listed: weekdays only.
+NYSE_HOLIDAYS = {dt.date.fromisoformat(d) for d in (
+    "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25",
+    "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+    "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31",
+    "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24",
+)}
 ACTIVE = {"queued", "in_progress", "waiting", "requested", "pending"}
 NOT_A_RUN = {"cancelled", "skipped", "startup_failure", "stale"}
 
@@ -198,6 +224,99 @@ def guard(me, runs, enabled=True, did_work=None):
     return duplicate(me, runs, did_work)
 
 
+# ---------------------------------------------------------------- keeper (pure; never reads the clock)
+def market_slots_for_day(day):
+    """Intended slots on a NYSE trading day: weekdays, minus NYSE_HOLIDAYS."""
+    if day in NYSE_HOLIDAYS:
+        return []
+    return slots_for_day(day)
+
+
+def next_check(after, check_after_min=10):
+    """(check_time, slot_utc, mode) for the first market slot whose check time is strictly after `after`."""
+    lag = dt.timedelta(minutes=check_after_min)
+    day = (after - lag).astimezone(NY).date()
+    for ahead in range(0, 21):
+        for when, mode in market_slots_for_day(day + dt.timedelta(days=ahead)):
+            if when + lag > after:
+                return when + lag, when, mode
+    return None, None, None
+
+
+def plan(now, deadline, after=None, check_after_min=10):
+    """What the keeper does next: ('check', check_time, slot, mode) when the next check falls before
+    `deadline`, else ('handoff', deadline, None, None). `after` is the last check already done
+    (a new keeper passes its start minus LOOKBACK_MIN, so a check due during a hand-off is not lost)."""
+    when, slot, mode = next_check(after if after is not None else now, check_after_min)
+    if when is None or when > deadline:
+        return "handoff", deadline, None, None
+    return "check", when, slot, mode
+
+
+def sleep_seconds(now, until):
+    return max(0, int((until - now).total_seconds()))
+
+
+def slot_already_ran(slot, runs, did_work=None):
+    """(True, why) when a real update started at or after `slot`, or one is queued or running."""
+    for r in runs:
+        if r.get("status") in ACTIVE:
+            return True, "update run %s is %s" % (r.get("id"), r.get("status"))
+    for r in runs:
+        start = run_start(r)
+        if start is not None and start >= slot and counts_as_run(r, did_work):
+            return True, "run %s started %s" % (r.get("id"), fmt(start))
+    return False, "no update started since %s" % fmt(slot)
+
+
+def keeper_decide(now, slot, mode, runs, did_work=None, min_gap_min=50):
+    """Return (action, reason). action is 'dispatch' or 'none'. One make-up at most per slot."""
+    ran, why = slot_already_ran(slot, runs, did_work)
+    if ran:
+        return "none", "slot %s already ran: %s" % (fmt(slot), why)
+    latest = None
+    for r in runs:
+        start = run_start(r)
+        if start is not None and counts_as_run(r, did_work) and (latest is None or start > latest):
+            latest = start
+    if latest is not None and (now - latest).total_seconds() / 60.0 < min_gap_min:
+        return "none", "last start %s is under %d min ago" % (fmt(latest), min_gap_min)
+    return "dispatch", "missed slot %s (%s); last start %s" % (fmt(slot), mode, fmt(latest) if latest else "none")
+
+
+def live_keepers(keeper_runs, my_id=None):
+    return [r for r in keeper_runs if r.get("status") in ACTIVE and str(r.get("id")) != str(my_id)]
+
+
+def should_yield(my_id, keeper_runs):
+    """A keeper steps aside when a newer keeper is queued or running, so the chain never forks."""
+    newer = [r for r in live_keepers(keeper_runs, my_id) if int(r.get("id") or 0) > int(my_id or 0)]
+    return (True, "newer keeper %s is %s" % (newer[0].get("id"), newer[0].get("status"))) if newer else (False, "")
+
+
+def should_start_keeper(keeper_runs, enabled=True):
+    """(start, why) for ensure-keeper: start one only when the switch is on and none is live."""
+    if not enabled:
+        return False, "switch self_heal_keeper is off"
+    live = live_keepers(keeper_runs)
+    if live:
+        return False, "keeper %s is already %s" % (live[0].get("id"), live[0].get("status"))
+    return True, "no live keeper"
+
+
+def keeper_on(cfg):
+    return bool(((cfg or {}).get("features") or {}).get("self_heal_keeper", True))
+
+
+def keeper_settings(cfg):
+    out = dict(KEEPER_DEFAULTS)
+    for k, v in ((cfg or {}).get("keeper") or {}).items():
+        if k in out:
+            out[k] = int(v)
+    out["chunk_min"] = max(30, min(out["chunk_min"], 340))  # hosted jobs stop at 360 min
+    return out
+
+
 # ---------------------------------------------------------------- GitHub API
 def _api(method, path, body=None):
     repo = os.environ["GITHUB_REPOSITORY"]
@@ -233,6 +352,110 @@ def api_did_work(run):
         except Exception:
             _WORK[rid] = True
     return _WORK[rid]
+
+
+def fetch_keeper_runs(n=20):
+    return _api("GET", "/actions/workflows/%s/runs?per_page=%d" % (KEEPER_FILE, n)).get("workflow_runs", [])
+
+
+def read_config(path="config.json"):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def live_config(path="config.json"):
+    """config.json as it is on main right now, so a switch flipped mid-sleep is obeyed. Falls back to the checkout."""
+    try:
+        repo = os.environ["GITHUB_REPOSITORY"]
+        req = urllib.request.Request("https://api.github.com/repos/%s/contents/config.json?ref=main" % repo, headers={
+            "Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
+            "Accept": "application/vnd.github.raw+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())
+    except Exception as e:
+        print("could not read config.json from main (%s), using the checkout" % e, flush=True)
+        return read_config(path)
+
+
+def _dispatch(workflow, inputs, tries=3):
+    for i in range(tries):
+        try:
+            _api("POST", "/actions/workflows/%s/dispatches" % workflow, {"ref": "main", "inputs": inputs})
+            return True
+        except Exception as e:
+            print("dispatch %s failed (%s), try %d of %d" % (workflow, e, i + 1, tries), flush=True)
+            time.sleep(20)
+    return False
+
+
+def ensure_keeper(cfg=None, dry=False):
+    cfg = read_config() if cfg is None else cfg
+    try:
+        runs = fetch_keeper_runs() if keeper_on(cfg) else []
+    except Exception as e:
+        print("ensure-keeper: could not read keeper runs (%s), leaving it" % e)
+        return False
+    start, why = should_start_keeper(runs, keeper_on(cfg))
+    print("ensure-keeper:", "START" if start else "NONE", "-", why, "(dry run)" if dry else "", flush=True)
+    if start and not dry:
+        return _dispatch(KEEPER_FILE, {})
+    return False
+
+
+def run_keeper(env, now=None, sleep=time.sleep):
+    """The keeper job's loop. Only this wrapper reads the clock."""
+    now = now or (lambda: dt.datetime.now(UTC).replace(microsecond=0))
+    me = env.get("GITHUB_RUN_ID")
+    cfg = live_config()
+    settings = keeper_settings(cfg)
+    started = now()
+    deadline = started + dt.timedelta(minutes=settings["chunk_min"])
+    last = started - dt.timedelta(minutes=LOOKBACK_MIN)
+    while True:
+        if not keeper_on(cfg):
+            print("keeper: switch self_heal_keeper is off, stopping (no next keeper)", flush=True)
+            return "off"
+        try:
+            yield_, why = should_yield(me, fetch_keeper_runs())
+        except Exception as e:
+            yield_, why = False, ""
+            print("keeper: could not read keeper runs (%s)" % e, flush=True)
+        if yield_:
+            print("keeper: stepping aside -", why, flush=True)
+            return "yield"
+        kind, when, slot, mode = plan(now(), deadline, last, settings["check_after_min"])
+        print("keeper: next %s at %s (%s UTC), sleeping %d s" % (
+            kind, fmt(when), when.strftime("%Y-%m-%d %H:%M"), sleep_seconds(now(), when)), flush=True)
+        sleep(sleep_seconds(now(), when))
+        cfg = live_config()
+        if not keeper_on(cfg):
+            continue  # top of loop prints and stops
+        if kind == "handoff":
+            try:
+                others = live_keepers(fetch_keeper_runs(), me)
+            except Exception:
+                others = []
+            if others:
+                print("keeper: keeper %s is already live, not chaining" % others[0].get("id"), flush=True)
+                return "yield"
+            ok = _dispatch(KEEPER_FILE, {})
+            print("keeper: handed off to the next keeper" if ok else "keeper: hand-off failed, crons will restart one", flush=True)
+            return "handoff"
+        last = when
+        try:
+            runs = fetch_runs()
+        except Exception as e:
+            print("keeper: could not read update runs (%s), skipping this check" % e, flush=True)
+            continue
+        action, why = keeper_decide(now(), slot, mode, runs, api_did_work, settings["min_gap_min"])
+        print("keeper decision:", action.upper(), "-", why, flush=True)
+        if action == "dispatch" and _dispatch(WORKFLOW_FILE, {"mode": mode, "reason": "keeper"}):
+            print("keeper: dispatched one %s update" % mode, flush=True)
 
 
 def switch_on(path="config.json"):
@@ -282,6 +505,12 @@ def run_guard(env, fetch=None):
 
 def main(argv):
     cmd = argv[1] if len(argv) > 1 else "check"
+    if cmd == "keeper":
+        run_keeper(os.environ)
+        return 0
+    if cmd == "ensure-keeper":
+        ensure_keeper(dry=os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes"))
+        return 0
     if cmd == "guard":
         skip, mode = run_guard(os.environ)
         _out("skip", "true" if skip else "false")
