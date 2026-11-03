@@ -1,23 +1,23 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,reused cache (refreshes once a day),2026-11-03 11:26 PT
-Universe (Wikipedia Nasdaq-100),OK,101,reused cache (refreshes once a day),2026-11-03 11:26 PT
-Prices (Yahoo Finance),OK,2026-11-03,"672177 rows, batched",2026-11-03 11:27 PT
-SEC company tickers,OK,2026-11-02,reused cache,2026-11-03 11:27 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 11:27 PT
-Analyst and profile (Yahoo Finance),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 11:27 PT
-Earnings dates (Yahoo Finance),OK,2026-11-02,reused cache,2026-11-03 11:27 PT
-Institutional 13F and insider (Nasdaq),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 11:27 PT
-News headlines (Yahoo Finance),OK,2026-11-02,reused cache,2026-11-03 11:28 PT
-Option walls (Yahoo option chain),OK,2026-11-02,reused cache (option chains refresh at most once a day),2026-11-03 11:28 PT
-Put/call (CBOE),OK,2026-11-02,reused cache,2026-11-03 11:28 PT
-FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-03 11:28 PT
-Economic calendar (Nasdaq),OK,2026-11-02,reused cache,2026-11-03 11:28 PT
-Backtest,OK,,reused the last test (it rebuilds on the after-close run),2026-11-03 11:28 PT
-Price candles,OK,2026-11-03,"522 tickers, up to 1255 cached sessions. No new download.",2026-11-03 11:29 PT
-Episodic pivot,OK,2026-11-03,"EP rows 6. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-03 11:30 PT
-Pattern scanners,OK,2026-11-03,"VCP 91, CANSLIM 257, box 93, breakdown 0, flag 12, Qullamaggie 28, Marios 28, high volume 31, leaders 191, 52-week 524 names over 1004 sessions. No new downloads.",2026-11-03 11:30 PT
-Gap up,OK,2026-11-03,Gap up rows 42. Cached daily bars only. No new downloads.,2026-11-03 11:30 PT
-Buy setups,OK,2026-11-03,Buy setups 31. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-03 11:30 PT
-Options chains,OK,,"calls 0, puts 0, skipped 15. rate 4% fallback. outside the 10:30 and 3:30 ET windows, used saved chains. Education, not financial advice. No broker.",2026-11-03 11:30 PT
-Sector rotation,OK,2026-11-03,"11 sectors, 3 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-03 11:30 PT
-Column check,PARTIAL,,"A column is blank on every row: scanner_canslim, scanner_ep, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-03 11:30 PT
+Universe (Wikipedia S&P 500),OK,503,reused cache (refreshes once a day),2026-11-03 12:26 PT
+Universe (Wikipedia Nasdaq-100),OK,101,reused cache (refreshes once a day),2026-11-03 12:26 PT
+Prices (Yahoo Finance),OK,2026-11-03,"672177 rows, batched",2026-11-03 12:28 PT
+SEC company tickers,OK,2026-11-02,reused cache,2026-11-03 12:28 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 12:28 PT
+Analyst and profile (Yahoo Finance),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 12:28 PT
+Earnings dates (Yahoo Finance),OK,2026-11-02,reused cache,2026-11-03 12:28 PT
+Institutional 13F and insider (Nasdaq),OK,2026-11-02,reused cache (slow sources refresh at most once a day),2026-11-03 12:28 PT
+News headlines (Yahoo Finance),OK,2026-11-02,reused cache,2026-11-03 12:28 PT
+Option walls (Yahoo option chain),OK,2026-11-02,reused cache (option chains refresh at most once a day),2026-11-03 12:28 PT
+Put/call (CBOE),OK,2026-11-02,reused cache,2026-11-03 12:28 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-03 12:29 PT
+Economic calendar (Nasdaq),OK,2026-11-02,reused cache,2026-11-03 12:29 PT
+Backtest,OK,,reused the last test (it rebuilds on the after-close run),2026-11-03 12:29 PT
+Price candles,OK,2026-11-03,"522 tickers, up to 1255 cached sessions. No new download.",2026-11-03 12:29 PT
+Episodic pivot,OK,2026-11-03,"EP rows 6. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-03 12:30 PT
+Pattern scanners,OK,2026-11-03,"VCP 92, CANSLIM 257, box 93, breakdown 0, flag 12, Qullamaggie 28, Marios 28, high volume 49, leaders 187, 52-week 524 names over 1004 sessions. No new downloads.",2026-11-03 12:30 PT
+Gap up,OK,2026-11-03,Gap up rows 42. Cached daily bars only. No new downloads.,2026-11-03 12:30 PT
+Buy setups,OK,2026-11-03,Buy setups 30. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-03 12:30 PT
+Options chains,OK,2026-11-03T15:10:03,"calls 2, puts 0, skipped 13. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 11/02/2026. Education, not financial advice. No broker.",2026-11-03 12:30 PT
+Sector rotation,OK,2026-11-03,"11 sectors, 3 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-03 12:30 PT
+Column check,PARTIAL,,"A column is blank on every row: scanner_canslim, scanner_ep, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-03 12:30 PT
