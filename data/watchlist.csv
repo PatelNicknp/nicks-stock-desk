@@ -1,6 +1,6 @@
 ticker,company,price,day_pct,score,verdict,entry_low,entry_high,distance_to_entry_pct,timing,note_input,data_status,note,disclaimer
-AVGO,Broadcom,333.3,3.44,8,HOLD,328.61,341.56,-2.42,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-LLY,Lilly (Eli),1419.56,0.61,10,BUY,1224.39,1272.51,11.56,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-COST,Costco,1024.27,-1.57,12,BUY,968.58,986.94,3.78,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-CAT,Caterpillar Inc.,625.73,1.97,0,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-PLTR,Palantir Technologies,172.18,-3.45,4,HOLD,186.8,195.7,-12.02,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AVGO,Broadcom,332.61,3.22,8,HOLD,328.58,341.52,-2.61,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+LLY,Lilly (Eli),1418.48,0.53,10,BUY,1224.34,1272.45,11.48,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+COST,Costco,1021.88,-1.79,12,BUY,968.46,986.82,3.55,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+CAT,Caterpillar Inc.,624.0,1.69,0,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+PLTR,Palantir Technologies,174.5,-2.15,4,HOLD,186.85,195.81,-10.88,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
