@@ -306,6 +306,55 @@
     }
     return { from: lo, to: hi };
   }
+  // Monday of the week that holds a YYYY-MM-DD session, in UTC. Weeks are Monday to Friday.
+  // Saturday and Sunday stay with the Monday that began that week. The date string is the only input.
+  function weekMonday(dateStr) {
+    const s = String(dateStr || "").slice(0, 10);
+    const p = s.split("-");
+    if (p.length < 3) return s;
+    const y = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+    if (!(y > 0) || !(m >= 1 && m <= 12) || !(d >= 1 && d <= 31)) return s;
+    const dt = Date.UTC(y, m - 1, d);
+    const day = new Date(dt).getUTCDay();
+    const delta = day === 0 ? 6 : day - 1;
+    return new Date(dt - delta * 86400000).toISOString().slice(0, 10);
+  }
+  // Weekly bars from daily bars already loaded. No new files. Open is the week's first open,
+  // high and low are the week's max and min, close is the last close, volume is the sum.
+  // The bar's date is the last session in the week, so the current partial week counts.
+  function aggregateWeekly(bars) {
+    const src = (bars || []).filter((b) => b && b.date).slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const out = [];
+    let cur = null;
+    let key = "";
+    src.forEach((b) => {
+      const k = weekMonday(b.date);
+      const h = b.h == null ? b.c : b.h;
+      const l = b.l == null ? b.c : b.l;
+      if (!cur || k !== key) {
+        cur = { date: String(b.date).slice(0, 10), o: b.o, h: h, l: l, c: b.c, v: b.v == null ? null : b.v };
+        key = k;
+        out.push(cur);
+      } else {
+        cur.date = String(b.date).slice(0, 10);
+        if (h != null && (cur.h == null || h > cur.h)) cur.h = h;
+        if (l != null && (cur.l == null || l < cur.l)) cur.l = l;
+        cur.c = b.c;
+        if (b.v != null) cur.v = (cur.v == null ? 0 : cur.v) + b.v;
+      }
+    });
+    return out;
+  }
+  // Pixels of plot kept clear on the right when the reason box is not sitting there,
+  // so the newest candle stays just left of the price axis on every chart.
+  const RIGHT_MARGIN_PX = 12;
+  function edgePad(visibleBars, plotPx, marginPx) {
+    if (!(visibleBars > 0) || !(plotPx > 0)) return 2;
+    const m = marginPx == null || !(marginPx >= 0) ? RIGHT_MARGIN_PX : marginPx;
+    const room = plotPx - m;
+    if (!(room > 0)) return visibleBars;
+    return (m * visibleBars) / room;
+  }
   // iPhone and iPad. iPadOS Safari reports as a Mac, so a Mac with a touch screen counts too.
   function isAppleTouch(ua, platform, maxTouchPoints) {
     ua = String(ua || "");
@@ -317,7 +366,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -358,6 +407,26 @@
   }
   function store(key, value) {
     try { localStorage.setItem(key, value ? "1" : "0"); } catch (e) { /* ignore */ }
+  }
+  function storedStr(key, allowed, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      if (allowed.indexOf(v) >= 0) return v;
+    } catch (e) { /* storage can be blocked */ }
+    return fallback;
+  }
+  function storeStr(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+  function hexSetting(key, fallback) {
+    const v = String(D.settingVal("chart_viewer." + key) || "").trim();
+    return /^#[0-9a-fA-F]{6}$/.test(v) ? v : fallback;
+  }
+  // Up bars are blue, down bars are pink. Dark and light each have their own color in config.
+  function barColor(up) {
+    const light = !!(D.isLight && D.isLight());
+    if (up) return hexSetting(light ? "bar_up_light" : "bar_up", light ? "#1d4ed8" : "#60a5fa");
+    return hexSetting(light ? "bar_down_light" : "bar_down", light ? "#a21caf" : "#d946ef");
   }
   function maState() {
     const out = {};
@@ -405,6 +474,10 @@
       why: on("reason_box") && (on("reason_box_toggle") ? stored("desk-cv-why", true) : true),
       // Drag: move chart (true) or Drag: next chart (false). chart_touch_pan is the default; the chip saves a pick.
       pan: on("drag_mode_toggle") ? stored("desk-cv-drag-pan", on("chart_touch_pan")) : on("chart_touch_pan"),
+      // Daily is the start. Weekly is built from those daily bars. The pick is saved on this device.
+      tf: on("weekly_toggle") ? storedStr("desk-cv-tf", ["daily", "weekly"], "daily") : "daily",
+      // Candles is the start. Bars are high-low lines with an open tick and a close tick.
+      style: on("bars_toggle") ? storedStr("desk-cv-style", ["candles", "bars"], "candles") : "candles",
       range: null, // a range chip pick for this visit; null uses range_months / range_months_phone
       rightIsNext: on("flip_toggle") ? stored("desk-cv-right-next", on("swipe_right_is_next")) : on("swipe_right_is_next"),
       open: false,
@@ -429,7 +502,13 @@
       (on("reason_box") && on("reason_box_toggle") ? '<button type="button" class="cvchip" data-tool="why" aria-pressed="false">Why</button>' : "") +
       (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "") +
       (on("drag_mode_toggle") ? '<button type="button" class="cvchip" data-tool="drag" title="Pick what a one-finger drag on the chart does"></button>' : "") +
-      (on("range_chips") ? RANGES.map((r) => '<button type="button" class="cvchip cvrange" data-range="' + r.id + '" aria-pressed="false">' + r.label + "</button>").join("") : "");
+      (on("weekly_toggle") ? '<div class="cvseg" role="group" aria-label="Daily or weekly">' +
+        '<button type="button" data-tf="daily" aria-pressed="false">Daily</button>' +
+        '<button type="button" data-tf="weekly" aria-pressed="false">Weekly</button></div>' : "") +
+      (on("bars_toggle") ? '<div class="cvseg" role="group" aria-label="Candles or bars">' +
+        '<button type="button" data-style="candles" aria-pressed="false">Candles</button>' +
+        '<button type="button" data-style="bars" aria-pressed="false">Bars</button></div>' : "") +
+      (on("range_chips") && !on("hide_range_chips") ? RANGES.map((r) => '<button type="button" class="cvchip cvrange" data-range="' + r.id + '" aria-pressed="false">' + r.label + "</button>").join("") : "");
     ctx.page.innerHTML =
       '<div class="ctrls cvctrls">' + switcher + picker + fsBtn + "</div>" +
       '<p class="cap" id="cvsum"></p>' +
@@ -445,12 +524,12 @@
         '<div class="cv-body" id="cvbody">' +
           '<div class="cv-chart" id="cvchart"></div>' +
           '<div class="cv-msg" id="cvmsg" hidden></div>' +
-          (on("reason_box") ? '<div class="cv-why" id="cvwhy" role="button" tabindex="0" aria-expanded="false"></div>' : "") +
+          (on("reason_box") ? '<div class="cv-why' + (on("why_box_top_left") ? " tl" : "") + '" id="cvwhy" role="button" tabindex="0" aria-expanded="false"></div>' : "") +
           (on("arrows") ? '<button type="button" class="cv-arrow cv-prev" id="cvprev" aria-label="Previous chart">‹</button>' +
             '<button type="button" class="cv-arrow cv-next" id="cvnext" aria-label="Next chart">›</button>' : "") +
         "</div>" +
       "</div>" +
-      '<p class="cap">Daily bars saved by the desk. Averages are worked out in your browser. Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.</p>';
+      '<p class="cap">Daily bars saved by the desk. Weekly bars and averages are worked out in your browser. Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.</p>';
 
     const cv = document.getElementById("cv");
     const body = document.getElementById("cvbody");
@@ -476,6 +555,16 @@
       if (flip) flip.textContent = state.rightIsNext ? "Swipe right: next" : "Swipe left: next";
       const drag = document.querySelector('#cvtools [data-tool="drag"]');
       if (drag) drag.textContent = state.pan ? "Drag: move chart" : "Drag: next chart";
+      document.querySelectorAll("#cvtools [data-tf]").forEach((b) => {
+        const v = b.getAttribute("data-tf") === state.tf;
+        b.classList.toggle("on", v);
+        b.setAttribute("aria-pressed", v ? "true" : "false");
+      });
+      document.querySelectorAll("#cvtools [data-style]").forEach((b) => {
+        const v = b.getAttribute("data-style") === state.style;
+        b.classList.toggle("on", v);
+        b.setAttribute("aria-pressed", v ? "true" : "false");
+      });
       document.querySelectorAll("#cvtools [data-range]").forEach((b) => {
         const v = state.range === b.getAttribute("data-range");
         b.classList.toggle("on", v);
@@ -512,6 +601,21 @@
     }
     function placeBox() {
       if (!why || !chart) return;
+      if (on("why_box_top_left")) {
+        why.classList.add("tl");
+        why.style.left = "8px";
+        why.style.top = "8px";
+        why.style.right = "auto";
+        why.style.bottom = "auto";
+        let psw = 56;
+        try { psw = chart.priceScale("right").width() || psw; } catch (e) { /* not drawn yet */ }
+        why.style.maxWidth = "calc(100% - " + (psw + 18) + "px)";
+        return;
+      }
+      why.classList.remove("tl");
+      why.style.left = "";
+      why.style.top = "";
+      why.style.maxWidth = "";
       let psw = 56, tsh = 26;
       try { psw = chart.priceScale("right").width() || psw; } catch (e) { /* not drawn yet */ }
       try { tsh = chart.timeScale().height() || tsh; } catch (e) { /* not drawn yet */ }
@@ -528,10 +632,14 @@
       let plot = 0;
       try { plot = chart.timeScale().width(); } catch (e) { plot = host.clientWidth - 60; }
       const pick = RANGES.find((r) => r.id === state.range);
-      const months = pick ? pick.months : (plot && plot < 520 ? cfgNum("range_months_phone", 3) : cfgNum("range_months", 6));
+      const phone = plot && plot < 520;
+      // Daily keeps range_months / range_months_phone. Weekly opens wider so a week-sized bar still fills the view.
+      const months = pick ? pick.months : (state.tf === "weekly"
+        ? (phone ? cfgNum("range_months_weekly_phone", 12) : cfgNum("range_months_weekly", 24))
+        : (phone ? cfgNum("range_months_phone", 3) : cfgNum("range_months", 6)));
       const from = rangeFrom(bars.map((b) => b.date), months);
       const visible = n - from;
-      const pad = padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad());
+      const pad = on("why_box_top_left") ? edgePad(visible, plot, RIGHT_MARGIN_PX) : padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad());
       setRange(on("fit_wide_ranges") ? fitRange(from, n - 1, pad, plot, minSpacing()) : { from: from - 0.5, to: n - 1 + pad });
     }
     // A range the user dragged or pinched to on this chart. It is read when a finger, the mouse, or the
@@ -604,8 +712,9 @@
     function draw(t, rows, my) {
       if (my !== token) return;
       dropChart();
-      bars = D.barsFromRows(rows || []);
-      header(t, bars);
+      const daily = D.barsFromRows(rows || []);
+      bars = state.tf === "weekly" ? aggregateWeekly(daily) : daily;
+      header(t, daily);
       if (!bars.length) {
         msg.hidden = false;
         msg.textContent = "No saved chart for " + t + ". Swipe for the next one.";
@@ -628,8 +737,15 @@
       userRange = carryRange;
       carryRange = null;
       lastSet = null;
-      const price = chart.addSeries(LC.CandlestickSeries, {
-        upColor: D.UP, downColor: D.DN, borderUpColor: D.UP, borderDownColor: D.DN, wickUpColor: D.UP, wickDownColor: D.DN,
+      const barsMode = state.style === "bars";
+      const upC = barsMode ? barColor(true) : D.UP;
+      const dnC = barsMode ? barColor(false) : D.DN;
+      // Bars: a vertical high-low line, a left tick for the open, a right tick for the close.
+      const price = chart.addSeries(barsMode ? LC.BarSeries : LC.CandlestickSeries, barsMode ? {
+        upColor: upC, downColor: dnC, openVisible: true, thinBars: true,
+        priceLineVisible: false, lastValueVisible: true,
+      } : {
+        upColor: upC, downColor: dnC, borderUpColor: upC, borderDownColor: dnC, wickUpColor: upC, wickDownColor: dnC,
         priceLineVisible: false, lastValueVisible: true,
       });
       price.setData(bars.map((b) => ({ time: b.date, open: b.o, high: b.h, low: b.l, close: b.c })));
@@ -782,6 +898,27 @@
       const ma = b.getAttribute("data-ma");
       const tool = b.getAttribute("data-tool");
       const range = b.getAttribute("data-range");
+      const tf = b.getAttribute("data-tf");
+      const style = b.getAttribute("data-style");
+      if (tf) {
+        if (tf === state.tf) return;
+        state.tf = tf;
+        storeStr("desk-cv-tf", tf);
+        state.range = null;
+        userRange = null;
+        syncTools();
+        show();
+        return;
+      }
+      if (style) {
+        if (style === state.style) return;
+        state.style = style;
+        storeStr("desk-cv-style", style);
+        carryRange = userRange;
+        syncTools();
+        show();
+        return;
+      }
       if (range) {
         state.range = range;
         userRange = null;

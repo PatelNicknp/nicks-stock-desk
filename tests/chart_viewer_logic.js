@@ -144,6 +144,43 @@ eq(V.rangeFrom([], 6), 0, "no bars is 0");
 eq(V.RANGES.map((r) => r.label), ["3M", "6M", "1Y", "All"], "range chips are 3M, 6M, 1Y, All");
 eq(V.RANGES.map((r) => r.months), [3, 6, 12, 0], "range chip months");
 
+// Weekly bars from fixed daily sessions. No clock: every date is written out.
+// Week of Mon 2026-10-26, a partial week Mon-Wed 2026-11-02, then a week that starts Tuesday.
+(function () {
+  const d = (date, o, h, l, c, v) => ({ date: date, o: o, h: h, l: l, c: c, v: v });
+  eq(V.weekMonday("2026-10-26"), "2026-10-26", "Monday is its own week");
+  eq(V.weekMonday("2026-10-30"), "2026-10-26", "Friday belongs to that Monday");
+  eq(V.weekMonday("2026-11-01"), "2026-10-26", "Sunday stays with the Monday that began the week");
+  eq(V.weekMonday("2026-11-02"), "2026-11-02", "the next Monday starts a new week");
+  const days = [
+    d("2026-10-26", 10, 12, 9, 11, 100),
+    d("2026-10-27", 11, 14, 10, 13, 50),
+    d("2026-10-28", 13, 13, 8, 9, null),
+    d("2026-10-29", 9, 11, 9, 10, 25),
+    d("2026-10-30", 10, 15, 10, 14, 75),
+    d("2026-11-02", 14, 16, 13, 15, 10),
+    d("2026-11-03", 15, 17, 14, 16, 20),
+    d("2026-11-04", 16, 18, 12, 13, 30),
+    d("2026-11-10", 20, 22, 19, 21, 5),
+    d("2026-11-13", 21, 24, 18, 19, 7),
+  ];
+  const weeks = V.aggregateWeekly(days);
+  eq(weeks.map((b) => b.date), ["2026-10-30", "2026-11-04", "2026-11-13"], "one bar per week, dated on the last session");
+  eq([weeks[0].o, weeks[0].h, weeks[0].l, weeks[0].c, weeks[0].v], [10, 15, 8, 14, 250], "full week: first open, max high, min low, last close, summed volume");
+  eq([weeks[1].o, weeks[1].h, weeks[1].l, weeks[1].c, weeks[1].v], [14, 18, 12, 13, 60], "a partial week still counts");
+  eq([weeks[2].o, weeks[2].c, weeks[2].h, weeks[2].l, weeks[2].v], [20, 19, 24, 18, 12], "a week with no Monday uses Tuesday's open");
+  eq(V.aggregateWeekly([]), [], "no daily bars is no weekly bars");
+  eq(V.aggregateWeekly([d("2026-11-04", 1, 2, 0.5, 1.5, 3)]).length, 1, "one day is one week");
+  // Unsorted input still groups by week.
+  const shuffled = V.aggregateWeekly([days[4], days[0], days[2]]);
+  eq(shuffled.length, 1, "same week stays one bar");
+  eq([shuffled[0].o, shuffled[0].c, shuffled[0].h, shuffled[0].l], [10, 14, 15, 8], "sorts before taking open and close");
+  // Right margin: a fixed pixel gap, not a gap the size of the Why box.
+  eq(Math.abs(V.edgePad(60, 300, 12) - (12 * 60) / (300 - 12)) < 1e-9, true, "edge pad leaves 12 px on the right");
+  eq(V.edgePad(0, 300, 12), 2, "no bars, the small fallback gap");
+  eq(V.RIGHT_MARGIN_PX, 12, "the right margin is 12 px");
+})();
+
 // Memory: only the last few bar files stay parsed, so swiping a long list stays light on an iPad.
 let kr = [[], []];
 ["A", "B", "C"].forEach((n) => { kr = V.keepRecent(kr[0], n, 2); });

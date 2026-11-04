@@ -4,8 +4,8 @@
  * on screen and the candles spread across the width (only the reason-box padding on the right). It must be put
  * back after a resize, a turn of the device, and opening or closing full screen, and also when the chart was
  * first drawn only a few px wide and widened later. A range the user dragged to is kept through all of those
- * until a range chip is tapped. On an iPhone in portrait (390 px), the All chip must fill the space left of the
- * Why box with hundreds of bars (it used to show only a couple), with the newest candle just left of the box.
+ * until a range chip is tapped. With the Why box at the top left, the newest candle stays about 12 px
+ * left of the price axis. 3M, 6M, 1Y, and All are hidden; Daily | Weekly is in their place.
  * Files are served from this checkout. Nothing goes to the network; Yahoo is blocked.
  * Usage: node tests/chart_viewer_fit.mjs   (needs playwright; PLAYWRIGHT_ROOT can point at it)
  * Prints "chart viewer fit ok" and exits 0 when every check passes.
@@ -15,7 +15,7 @@ import path from "path";
 import { createRequire } from "module";
 import { fileURLToPath, pathToFileURL } from "url";
 
-const killer = setTimeout(() => { console.log("chart viewer fit: timed out"); process.exit(2); }, 240000);
+const killer = setTimeout(() => { console.log("chart viewer fit: timed out"); process.exit(2); }, 420000);
 
 async function loadChromium() {
   try {
@@ -48,11 +48,12 @@ function datesOf(ticker) {
   return lines.map((l) => l.slice(0, 10)).filter(Boolean).sort();
 }
 
-async function openPage(browser, c, narrowPx) {
-  const ctx = await browser.newContext({ userAgent: c.ua, viewport: { width: c.w, height: c.h }, isMobile: c.mobile, hasTouch: true, deviceScaleFactor: 2 });
-  await ctx.addInitScript((narrow) => {
+async function openPage(browser, c, narrowPx, theme) {
+  const ctx = await browser.newContext({ userAgent: c.ua, viewport: { width: c.w, height: c.h }, isMobile: c.mobile, hasTouch: true, deviceScaleFactor: 2, colorScheme: theme === "light" ? "light" : "dark" });
+  await ctx.addInitScript((opts) => {
     Object.defineProperty(navigator, "maxTouchPoints", { get: () => 5 });
     if (/Macintosh/.test(navigator.userAgent)) Object.defineProperty(navigator, "platform", { get: () => "MacIntel" });
+    if (opts.theme) { try { localStorage.setItem("desk-theme", opts.theme); } catch (e) { /* ignore */ } }
     // Keep a handle on each chart the viewer makes, to read its visible range.
     window.__charts = [];
     let lc;
@@ -61,13 +62,13 @@ async function openPage(browser, c, narrowPx) {
       lc = Object.assign({}, v, { createChart: function () { const ch = make.apply(this, arguments); window.__charts.push(ch); return ch; } });
     } });
     // Draw the chart only a few px wide (layout not done yet), to widen it later.
-    if (narrow) document.addEventListener("DOMContentLoaded", () => {
+    if (opts.narrow) document.addEventListener("DOMContentLoaded", () => {
       const st = document.createElement("style");
       st.id = "narrow";
-      st.textContent = "#cvchart{right:auto!important;width:" + narrow + "px!important}";
+      st.textContent = "#cvchart{right:auto!important;width:" + opts.narrow + "px!important}";
       document.head.appendChild(st);
     });
-  }, narrowPx || 0);
+  }, { narrow: narrowPx || 0, theme: theme || "" });
   const page = await ctx.newPage();
   const net = { outside: 0 };
   await page.route("**/*", (route) => {
@@ -102,7 +103,7 @@ function firstView(v, dates, what, monthsWanted) {
   check(v.to >= n - 1, what + ": newest candle on screen");
   const share = (n - 1 - Math.max(v.from, 0)) / (v.to - v.from);
   check(share >= 0.34, what + ": candles use " + Math.round(share * 100) + "% of the width, not a narrow strip");
-  check(share <= 0.999, what + ": a little room on the right for the reason box");
+  check(share <= 0.999, what + ": a small gap left of the price axis");
   const pxPerBar = v.plot / (v.to - v.from);
   check(pxPerBar > 1.2, what + ": candles are not squeezed (" + pxPerBar.toFixed(2) + " px per bar)");
 }
@@ -126,11 +127,12 @@ try {
     // Drag the chart slowly to the right (back in time). The same stock stays, and the dragged range is kept.
     const box = await page.$eval("#cvchart", (e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
     const cdp = await ctx.newCDPSession(page);
-    const y = box.y + box.h * 0.4;
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x + box.w * 0.2, y }] });
+    // Right of the top-left Why box and in the price pane, so the drag lands on the chart.
+    const y = box.y + box.h * 0.42;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x + box.w * 0.62, y }] });
     for (let i = 1; i <= 12; i++) {
       await new Promise((r) => setTimeout(r, 70));
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: box.x + box.w * (0.2 + (0.5 * i) / 12), y }] });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: box.x + box.w * (0.62 + (0.28 * i) / 12), y }] });
     }
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await page.waitForTimeout(600);
@@ -150,35 +152,26 @@ try {
     await kept("closed full screen after drag");
     await page.click("#cvgo"); await settle(page);
     await kept("full screen again after drag");
-    await page.$eval('#cvtools [data-range="3m"]', (e) => e.scrollIntoView({ inline: "end" }));
-    await page.$eval('#cvtools [data-range="3m"]', (e) => e.click());
+    // Daily | Weekly replaces the range chips. Weekly refits to its own span and drops the dragged range.
+    await page.click('#cvtools [data-tf="weekly"]');
     await settle(page);
-    firstView(await view(page), dates, L("3M chip"), 3);
-    await page.setViewportSize({ width: c.h, height: c.w }); await settle(page);
-    firstView(await view(page), dates, L("3M chip turned"), 3);
-    // All: as much history as fits left of the Why box. At 390 px it used to show 1 or 2 bars.
-    await page.setViewportSize({ width: c.w, height: c.h }); await settle(page);
-    await page.$eval('#cvtools [data-range="all"]', (e) => e.click());
-    await settle(page);
-    const all = await page.evaluate(() => {
-      const ts = window.__charts[window.__charts.length - 1].timeScale();
+    const weekly = await page.evaluate(() => {
+      const chart = window.__charts[window.__charts.length - 1];
+      const ts = chart.timeScale();
       const lr = ts.getVisibleLogicalRange();
-      const why = document.querySelector(".cv-why");
-      const host = document.getElementById("cvchart").getBoundingClientRect();
-      return { from: lr.from, to: lr.to, plot: ts.width(), sp: ts.options().barSpacing,
-        hostLeft: host.left, whyLeft: why && !why.hidden ? why.getBoundingClientRect().left : null };
+      const data = chart.panes()[0].getSeries()[0].data();
+      return { from: lr.from, to: lr.to, plot: ts.width(), dates: data.map((d) => d.time) };
     });
-    const allShown = Math.min(n - 1, Math.floor(all.to)) - Math.max(0, Math.ceil(all.from)) + 1;
-    const xLast = all.hostLeft + (n - 1 - all.from) * (all.plot / (all.to - all.from));
-    check(allShown >= (c.w <= 400 ? 300 : n - 1), L("All chip") + ": shows " + allShown + " of " + n + " bars, not just a few");
-    check(all.to >= n - 1, L("All chip") + ": newest candle on screen");
-    if (all.whyLeft != null) {
-      check(xLast < all.whyLeft, L("All chip") + ": the Why box does not cover the newest candle (" + Math.round(xLast) + " vs " + Math.round(all.whyLeft) + ")");
-      check(all.whyLeft - xLast < 40, L("All chip") + ": the newest candle sits just left of the Why box (" + Math.round(all.whyLeft - xLast) + " px)");
-    }
-    await page.$eval('#cvtools [data-range="3m"]', (e) => e.click());
+    const wMonths = weekly.plot < 520 ? 12 : 24;
+    const wFrom = V.rangeFrom(weekly.dates, wMonths);
+    check(weekly.dates.length < n / 3, L("Weekly") + ": " + weekly.dates.length + " weekly bars from " + n + " daily bars");
+    check(Math.abs(weekly.from - (wFrom - 0.5)) <= 1, L("Weekly") + ": opens " + wMonths + " months back");
+    check(weekly.to >= weekly.dates.length - 1, L("Weekly") + ": newest week on screen");
+    const wGap = weekly.plot * (weekly.to - (weekly.dates.length - 1)) / (weekly.to - weekly.from);
+    check(wGap > 6 && wGap < 22, L("Weekly") + ": newest bar is " + wGap.toFixed(1) + " px left of the price axis");
+    await page.click('#cvtools [data-tf="daily"]');
     await settle(page);
-    firstView(await view(page), dates, L("3M chip after All"), 3);
+    firstView(await view(page), dates, L("back to Daily"));
     check(net.outside === 0, L("network") + ": no requests leave this checkout (" + net.outside + ")");
     check(errors.length === 0, L("errors") + ": " + errors.join("; "));
     await ctx.close();
@@ -192,6 +185,94 @@ try {
     firstView(await view(nw.page), nw.dates, L("drawn narrow, then full screen"));
     check(nw.errors.length === 0, L("narrow errors") + ": " + nw.errors.join("; "));
     await nw.ctx.close();
+  }
+
+  // Why box, candle spot, chip bar, and both themes at the sizes Nick uses.
+  const LAYOUTS = [
+    { name: "iPhone 390", w: 390, h: 844, ua: IPHONE, mobile: true },
+    { name: "iPad 820", w: 820, h: 1180, ua: IPAD, mobile: false },
+    { name: "iPad 1180", w: 1180, h: 820, ua: IPAD, mobile: false },
+  ];
+  for (const theme of ["dark", "light"]) {
+    for (const c of LAYOUTS) {
+      const opened = await openPage(browser, c, 0, theme);
+      const { page, errors } = opened;
+      const L = (step) => c.name + " " + theme + " " + step;
+      const spot = await page.evaluate(() => {
+        const chart = window.__charts[window.__charts.length - 1];
+        const ts = chart.timeScale();
+        const lr = ts.getVisibleLogicalRange();
+        const data = chart.panes()[0].getSeries()[0].data();
+        const why = document.getElementById("cvwhy").getBoundingClientRect();
+        const host = document.getElementById("cvchart").getBoundingClientRect();
+        const tools = document.getElementById("cvtools").getBoundingClientRect();
+        const doc = document.documentElement;
+        const bar = document.getElementById("cvtools");
+        return {
+          from: lr.from, to: lr.to, plot: ts.width(), n: data.length,
+          up: chart.panes()[0].getSeries()[0].options().upColor,
+          why: { t: why.top, l: why.left, r: why.right, b: why.bottom },
+          host: { t: host.top, l: host.left, r: host.right, b: host.bottom },
+          toolsBottom: tools.bottom,
+          psw: chart.priceScale("right").width(),
+          pageOver: doc.scrollWidth - doc.clientWidth,
+          toolsOver: bar.scrollWidth - bar.clientWidth,
+          ranges: bar.querySelectorAll("[data-range]").length,
+          theme: document.documentElement.getAttribute("data-theme"),
+          cls: document.getElementById("cvwhy").className,
+        };
+      });
+      const gap = spot.plot * (spot.to - (spot.n - 1)) / (spot.to - spot.from);
+      check(spot.theme === theme, L("theme") + " is " + spot.theme);
+      check(spot.cls.indexOf("tl") >= 0, L("why") + " is at the top left");
+      check(spot.why.t >= spot.toolsBottom - 2, L("why") + " stays below the chips");
+      check(spot.why.t <= spot.host.t + 16, L("why") + " starts at the top of the chart");
+      check(spot.why.l <= spot.host.l + 16, L("why") + " starts at the left of the chart");
+      check(spot.why.r < spot.host.r - spot.psw, L("why") + " does not cover the price axis");
+      check(spot.why.b - spot.why.t < (spot.host.b - spot.host.t) * 0.5, L("why") + " stays compact");
+      check(gap > 6 && gap < 22, L("candle") + " is " + gap.toFixed(1) + " px left of the price axis");
+      check(spot.ranges === 0, L("ranges") + " are hidden");
+      check(spot.toolsOver <= 1, L("chips") + " fit (" + spot.toolsOver + " px)");
+      check(spot.pageOver <= 1, L("page") + " does not scroll sideways (" + spot.pageOver + " px)");
+      const candleUp = theme === "light" ? "#137336" : "#22c55e";
+      check(String(spot.up).toLowerCase() === candleUp, L("candles") + " stay green (" + spot.up + ")");
+      await page.click('#cvtools [data-style="bars"]');
+      await settle(page);
+      const barsLook = await page.evaluate(() => {
+        const chart = window.__charts[window.__charts.length - 1];
+        const series = chart.panes()[0].getSeries()[0];
+        const lr = chart.timeScale().getVisibleLogicalRange();
+        return { up: String(series.options().upColor).toLowerCase(), down: String(series.options().downColor).toLowerCase(), n: series.data().length, to: lr.to };
+      });
+      const wantUp = theme === "light" ? "#1d4ed8" : "#60a5fa";
+      const wantDn = theme === "light" ? "#a21caf" : "#d946ef";
+      check(barsLook.up === wantUp && barsLook.down === wantDn, L("bars") + " colors " + barsLook.up + " " + barsLook.down);
+      check(barsLook.n === spot.n && barsLook.to >= barsLook.n - 1, L("bars") + " keeps the daily bars");
+      await page.click("#cvwhy");
+      await settle(page);
+      const open = await page.evaluate(() => {
+        const why = document.getElementById("cvwhy");
+        const host = document.getElementById("cvchart").getBoundingClientRect();
+        const wr = why.getBoundingClientRect();
+        const tools = document.getElementById("cvtools").getBoundingClientRect();
+        const psw = window.__charts[window.__charts.length - 1].priceScale("right").width();
+        return { open: why.classList.contains("open"), top: wr.top, right: wr.right, tools: tools.bottom, axis: host.right - psw };
+      });
+      check(open.open, L("why tap") + " reads the full reason");
+      check(open.top >= open.tools - 2, L("why tap") + " still clears the chips");
+      check(open.right < open.axis, L("why tap") + " still clears the price axis");
+      await page.click('#cvtools [data-tf="weekly"]');
+      await settle(page);
+      const both = await page.evaluate(() => {
+        const chart = window.__charts[window.__charts.length - 1];
+        const series = chart.panes()[0].getSeries()[0];
+        return { n: series.data().length, up: String(series.options().upColor).toLowerCase() };
+      });
+      check(both.n < spot.n / 3, L("weekly bars") + " " + both.n + " from " + spot.n + " daily");
+      check(both.up === wantUp, L("weekly bars") + " keep the bar colors");
+      check(errors.length === 0, L("errors") + ": " + errors.join("; "));
+      await opened.ctx.close();
+    }
   }
 } finally {
   await browser.close();

@@ -75,6 +75,7 @@ jobs:
           python tests/test_watchdog.py
           python tests/test_keeper.py
           python tests/test_chart_viewer.py
+          python tests/test_chart_viewer_weekly.py
           python tests/test_light_mode.py
           python tests/test_vcp_green_tag.py
           python tests/test_split_tech_fund.py
