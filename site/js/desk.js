@@ -117,6 +117,7 @@
       ["Today", "index.html", "today"],
       ["Top stocks", "top-stocks.html", "top"],
       ["Buy setups", "buy-setups.html", "buysetups"],
+      ["Trading Floor", "trading-floor.html", "tradingfloor"],
       ["Stock scorecard", "scorecard.html", "scorecard"],
       ["Watchlist and portfolio", "watchlist.html", "watchlist"],
       ["Alerts", "alerts.html", "alerts"],
@@ -2215,6 +2216,7 @@
   const FEATURE = {
     top: "feature.top_stocks",
     buysetups: "feature.buy_setups",
+    tradingfloor: "feature.trading_floor",
     scorecard: "feature.scorecard",
     watchlist: "feature.watchlist_portfolio",
     alerts: "feature.alerts",
@@ -2339,7 +2341,7 @@
   window.Desk = {
     UP: UP, DN: DN, AM: AM, AC: AC, MU: MU, TX: TX, SPD: SPD,
     num: num, isBlank: isBlank, esc: esc, na: na, fmt: fmt, compact: compact,
-    realRows: realRows, alertDataRows: alertDataRows, quietMessage: quietMessage, showQuiet: showQuiet,
+    pricePanel: pricePanel, realRows: realRows, alertDataRows: alertDataRows, quietMessage: quietMessage, showQuiet: showQuiet,
     banner: banner, noteOf: noteOf, statusOf: statusOf, drawPriceChart: drawPriceChart,
     scoreHtml: scoreHtml, scoreFill: scoreFill, tickerHtml: tickerHtml, etfHtml: etfHtml, pctHtml: pctHtml, moneyHtml: moneyHtml,
     verdictHtml: verdictHtml, trendHtml: trendHtml, pointsHtml: pointsHtml, zoneHtml: zoneHtml, signedPts: signedPts,

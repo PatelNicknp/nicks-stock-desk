@@ -2265,6 +2265,127 @@
     draw();
   }
 
+  // ---------- Trading Floor (features.trading_floor): six roles debate today's top picks. Reads trading_floor.csv only.
+  const TF_ROLES = [["news", "News"], ["scout", "Scout"], ["charts", "Charts"], ["skeptic", "Skeptic"], ["sentiment", "Sentiment"]];
+  const TF_TONE = { BUY: "buy", WAIT: "wait", SKIP: "skip" };
+  function tfPts(v) {
+    const n = D.num(v);
+    if (n == null) return '<span class="tf-pts">–</span>';
+    return '<span class="tf-pts ' + (n > 0 ? "pos" : n < 0 ? "neg" : "zero") + '">' + (n > 0 ? "+" + n : n < 0 ? "−" + Math.abs(n) : "0") + "</span>";
+  }
+  function tfLines(row) {
+    const lines = [];
+    const add = (key, color, label) => {
+      const n = D.num(row[key]);
+      if (n != null) lines.push({ value: n, color: color, label: label + " " + D.fmt(n, 2) });
+    };
+    add("entry", "#F59E0B", "Entry");
+    add("stop", "#EF4444", "Stop");
+    add("target1", "#22C55E", "Target");
+    return lines;
+  }
+  function tfCard(row) {
+    const t = String(row.ticker || "").trim().toUpperCase();
+    const verdict = String(row.verdict || "").toUpperCase();
+    const total = D.num(row.total);
+    const roles = TF_ROLES.map(([key, label]) => {
+      let text = D.esc(row[key + "_line"] || "");
+      if (key === "news" && !D.isBlank(row.headline_link)) {
+        text += ' <a class="tf-src" href="' + D.esc(row.headline_link) + '" target="_blank" rel="noopener">Source</a>';
+      }
+      const veto = key === "charts" && String(row.charts_veto || "").toLowerCase() === "yes" ? ' <span class="tf-flag">veto</span>' : "";
+      const hard = key === "skeptic" && String(row.skeptic_hard_no || "").toLowerCase() === "yes" ? ' <span class="tf-flag">hard no</span>' : "";
+      return '<div class="tf-role"><span class="tf-who">' + D.esc(label) + "</span>" + tfPts(row[key + "_pts"]) +
+        '<span class="tf-say">' + text + veto + hard + "</span></div>";
+    }).join("");
+    const viewer = D.viewerOn("scanner_links") ? '<a class="cvlink" href="' +
+      D.esc(D.viewerHref(row.pick_source === "Buy setups" ? "buysetups" : "all", t)) + '">Open in Chart Viewer</a>' : "";
+    const sub = [row.pick_source, row.setup_sources, row.best_status].filter((x) => !D.isBlank(x)).map(D.esc).join(" · ");
+    return '<article class="tf-card" data-t="' + D.esc(t) + '">' +
+      '<button type="button" class="tf-head" aria-expanded="false" title="Show the chart">' +
+        '<span class="tf-id"><span class="tk">' + D.esc(t) + '</span><span class="tf-co">' + D.esc(row.company || "") + "</span></span>" +
+        '<span class="tf-verdict ' + (TF_TONE[verdict] || "") + '">' + D.esc(verdict || "–") + "</span>" +
+        '<span class="tf-total">' + (total == null ? "–" : (total > 0 ? "+" : total < 0 ? "−" : "") + Math.abs(total)) + "</span>" +
+      "</button>" +
+      '<div class="tf-sub">' + sub + "</div>" +
+      '<div class="tf-role tf-chief"><span class="tf-who">Chief</span><span class="tf-pts tf-sum">Σ</span><span class="tf-say">' + D.esc(row.chief_line || "") + "</span></div>" +
+      roles +
+      '<div class="tf-foot"><button type="button" class="tf-chart">Chart</button>' + viewer + "</div>" +
+      '<div class="tf-drop" hidden></div>' +
+    "</article>";
+  }
+  function renderTradingFloor(ctx) {
+    const raw = ctx.files["trading_floor.csv"];
+    const rows = D.realRows(raw).filter((r) => String(r.ticker || "").trim());
+    const count = (v) => rows.filter((r) => String(r.verdict || "").toUpperCase() === v).length;
+    const withNews = rows.filter((r) => (D.num(r.headline_count) || 0) > 0).length;
+    const buyAt = D.settingVal("trading_floor.verdict.buy_min_total") || "2";
+    const waitAt = D.settingVal("trading_floor.verdict.wait_min_total") || "0";
+    ctx.page.innerHTML =
+      '<p class="cap">Research only. A desk debate, not a recommendation. This desk never places trades, never calls a broker, and sends no alerts.</p>' +
+      '<div class="cards tf-kpis" id="cards"></div>' +
+      '<div class="ctrls tf-ctrls" id="ctrls"><div class="seg" id="tfseg" role="group" aria-label="Show">' +
+        ["All", "BUY", "WAIT", "SKIP"].map((v, i) => '<button type="button" data-v="' + v + '"' + (i === 0 ? ' class="on"' : "") + ">" + v + "</button>").join("") +
+      "</div></div>" +
+      '<div class="tf-grid" id="tfgrid"></div>' +
+      '<p class="cap">How the Chief decides: News, Scout, Charts, Skeptic, and Sentiment each give +1, 0, or −1. A total of {buy} or more with no hard no from the Skeptic is BUY, {wait} or more is WAIT, and anything lower is SKIP. A Charts veto (no usable entry, stop, and target, or the price already under the stop) is always SKIP. Picks are the Buy setups list in its own order, topped up with stocks that are ready or broke out today on two or more pattern scanners, {max} at most. Volume is compared with the 50 sessions before today, like the High volume page. Tap a stock for its chart with the entry, stop, and target lines. Every number is in Settings under trading_floor.</p>'
+        .replace("{buy}", D.esc(buyAt))
+        .replace("{wait}", D.esc(waitAt))
+        .replace("{max}", D.esc(D.settingVal("trading_floor.max_stocks") || "15"));
+    const tone = (n, color) => '<span style="color:' + color + '">' + n + "</span>";
+    document.getElementById("cards").innerHTML =
+      card("Stocks debated", String(rows.length), withNews + " with fresh news" + (rows[0] && rows[0].price_as_of ? ", " + D.esc(rows[0].price_as_of) : "")) +
+      card("BUY", tone(count("BUY"), "#22C55E"), "Total " + D.esc(buyAt) + " or more, no hard no") +
+      card("WAIT", tone(count("WAIT"), "#F59E0B"), "Total " + D.esc(waitAt) + " to " + D.esc(String(Number(buyAt) - 1)) + ", or a hard no") +
+      card("SKIP", tone(count("SKIP"), "#EF4444"), "Lower, or a Charts veto");
+    D.placeFeed(document.getElementById("ctrls"), raw);
+    let pick = "All";
+    const grid = document.getElementById("tfgrid");
+    const draw = () => {
+      D.destroyCharts();
+      const shown = rows.filter((r) => pick === "All" || String(r.verdict || "").toUpperCase() === pick);
+      grid.innerHTML = shown.length ? shown.map(tfCard).join("") :
+        '<div class="panel pad m2" style="font-size:13px">' + (rows.length ? "No " + D.esc(pick) + " calls today." :
+          D.esc(D.noteOf(raw) || "No picks to debate today.")) + "</div>";
+    };
+    document.getElementById("tfseg").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-v]");
+      if (!b) return;
+      pick = b.getAttribute("data-v");
+      document.querySelectorAll("#tfseg button").forEach((x) => x.classList.toggle("on", x === b));
+      draw();
+    });
+    const toggle = (cardEl) => {
+      const drop = cardEl.querySelector(".tf-drop");
+      const head = cardEl.querySelector(".tf-head");
+      const btn = cardEl.querySelector(".tf-chart");
+      const row = rows.find((r) => String(r.ticker || "").trim().toUpperCase() === cardEl.getAttribute("data-t"));
+      if (!drop || !row) return;
+      const open = drop.hasAttribute("hidden");
+      if (!open) {
+        drop.setAttribute("hidden", "");
+        drop.innerHTML = "";
+        head.setAttribute("aria-expanded", "false");
+        btn.textContent = "Chart";
+        cardEl.classList.remove("open");
+        return;
+      }
+      drop.innerHTML = D.pricePanel("Entry, stop, and target from the desk's levels");
+      drop.removeAttribute("hidden");
+      head.setAttribute("aria-expanded", "true");
+      btn.textContent = "Hide chart";
+      cardEl.classList.add("open");
+      requestAnimationFrame(() => D.drawPriceChart(drop.querySelector("[data-px-panel]"), { ticker: row.ticker, lines: tfLines(row) }));
+    };
+    grid.addEventListener("click", (e) => {
+      if (e.target.closest("a")) return;
+      const hit = e.target.closest(".tf-head, .tf-chart");
+      if (!hit) return;
+      toggle(hit.closest(".tf-card"));
+    });
+    draw();
+  }
+
   function renderBreakouts(ctx) {
     const raw = ctx.files["breakouts.csv"];
     const all = D.realRows(raw);
@@ -2952,6 +3073,7 @@
   // Wording follows the rules in setups.py, tables.py, and scoring.py. Numbers in {braces} come from settings.csv.
   const DESC = {
     top: "Every stock on the desk, ranked by its score. The score adds points for things like faster sales growth than usual, a cheaper price than usual, and a rising price trend. A score of {buy_at} or more is usually BUY; tap a row to see the entry zone, stop, and target on the chart.",
+    tradingfloor: "A short desk debate about today's top picks (the Buy setups list, topped up with stocks ready on two or more scanners). For each stock, News says why it may be moving, Scout checks volume against normal, Charts gives the entry, stop, and target the desk already worked out, Skeptic argues against the trade, and Sentiment says whether the crowd is too hot. Each gives +1, 0, or -1 and the Chief adds them up into BUY, WAIT, or SKIP with a one-line reason. Use the BUY, WAIT, and SKIP buttons to filter, read the lines that disagree, and tap a stock to see its chart. It is research to help you think, not an order.",
     buysetups: "Stocks where VCP, Box, Flag, Qullamaggie, Marios, or CANSLIM is ready or broke out today, or an Episodic Pivot is confirmed today, on day 2 to 5, or went above the EP-day high today (Qullamaggie, Marios, and EP only when the stop is not too wide), the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
     growth: "Stocks whose sales grew at least {growth_min_pct}%, leaving out anything rated AVOID. Fast-growing sales often push a stock up over time. Compare the EPS growth and the vs S&P 500 columns to see if profits and the price are keeping up.",
     quality: "Stocks whose return on equity is above their own past level and whose debt is less than {quality_max_de} times their equity, leaving out AVOID. That means the company earns more on its money than usual without borrowing a lot. These tend to be steadier businesses to hold.",
@@ -3037,7 +3159,7 @@
       return String(n);
     });
   }
-  const DESC_PAGE_KIND = { top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page", chartviewer: "page" };
+  const DESC_PAGE_KIND = { tradingfloor: "page", top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page", chartviewer: "page" };
   function descBox(title, text, extraClass) {
     return '<section class="about' + (extraClass ? " " + extraClass : "") + '" aria-label="' + D.esc(title) + '"><div class="about-title">' + D.esc(title) +
       '</div><p>' + D.esc(text) + "</p></section>";
@@ -3123,6 +3245,7 @@
     today: { files: ["market_today.csv", "breadth_history.csv", "sectors.csv", "alerts.csv"], render: renderToday },
     top: { files: ["scores.csv"], render: renderTop },
     buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
+    tradingfloor: { files: ["trading_floor.csv"], render: renderTradingFloor },
     scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
     watchlist: { files: ["portfolio.csv", "portfolio_summary.csv", "watchlist.csv"], render: renderWatch },
     alerts: { files: ["alerts.csv", "score_changes.csv"], render: renderAlerts },

@@ -23,6 +23,7 @@ import setups
 import episodic_pivot
 import gap_up
 import sector_rotation
+import trading_floor
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -1954,6 +1955,46 @@ def source_status(name):
     return ""
 
 
+def load_trading_floor(buy, frames, close, opn, vol, news, scores, asof, cfg, cache, mode):
+    """Trading Floor (features.trading_floor). Built from what this run already has.
+
+    Headlines: the desk's own stored headlines first. Only picks with none of those get one free
+    Google News RSS request each, only on the full run, at most once a day (trading_floor.news.google_news).
+    Hourly and offline runs reuse cache/trading_floor_news.csv. No Yahoo request is made here.
+    """
+    p = trading_floor.config(cfg)
+    picks = trading_floor.pick_stocks(buy, frames, close, p)
+    path = os.path.join(cache, "trading_floor_news.csv")
+    cached = read_csv(path)
+    floor_news = cached
+    src = "Trading Floor headlines (Google News RSS)"
+    n = p["news"]
+    if n.get("on", True) and n.get("google_news", True) and picks:
+        need = [pk for pk in picks if not trading_floor.headlines_for(pk["ticker"], pk.get("company"), news, None, asof, p)[0]]
+        decision = _need_fetch("trading_floor_news", path, mode) if os.path.exists(path) else ("fetch" if mode == "full" else "missing")
+        if decision == "fetch" and need:
+            lim = netutil.RateLimiter(n.get("google_per_second", 1))
+            rows, failed = trading_floor.fetch_google_news(need, p, today_et(), wait=lim.wait)
+            done = [pk["ticker"] for pk in need if pk["ticker"] not in failed]
+            floor_news = trading_floor.merge_news_cache(cached, rows, done, today_et(), n.get("keep_days", 14))
+            floor_news.to_csv(path, index=False)
+            STAMPS["trading_floor_news"] = today_et()
+            status = "OK" if not failed else ("PARTIAL" if done else ("CACHED" if len(cached) else "MISSING"))
+            log(src, status, today_et(), "%d requests for %d picks without desk headlines, %d headlines, %d failed (they say No fresh headlines found)." % (
+                len(need), len(need), len(rows), len(failed)))
+        else:
+            log(src, "OK" if len(cached) else "MISSING", STAMPS.get("trading_floor_news", ""),
+                ("reused cache" if len(cached) else "no cache yet") + ", no request this run (the fetch runs once a day on the full run, only for picks without desk headlines)")
+    earn = {}
+    if scores is not None and len(scores) and "next_earnings" in scores.columns:
+        earn = dict(zip(scores["ticker"].astype(str), scores["next_earnings"]))
+    floor = trading_floor.build_floor(picks, close, opn, vol, news, floor_news, asof, cfg, earnings=earn)
+    c = trading_floor.counts(floor)
+    log("Trading Floor", "OK", asof, "%d stocks debated: BUY %d, WAIT %d, SKIP %d. Research only, no orders, no alerts." % (
+        len(floor), c["BUY"], c["WAIT"], c["SKIP"]))
+    return floor
+
+
 def main(argv=None):
     global ROOT
     argv = list(sys.argv[1:] if argv is None else argv)
@@ -2224,6 +2265,16 @@ def main(argv=None):
             setup_frames, scanner_growth=g, scanner_quality=q, scanner_dividend=d, scanner_wheel=w), cfg)
     log("Gap up", "OK", asof if gap_on else "", ("Gap up rows %d. Cached daily bars only. No new downloads." % _n(setup_frames["scanner_gap_up"])) if gap_on else "feature off")
     log("Buy setups", "OK", asof, "Buy setups %d. Research list only. Built from the scanners already on the desk. No new downloads." % _n(buy))
+    floor_on = features.get("trading_floor", True)
+    floor = pd.DataFrame()
+    if floor_on and len(close):
+        try:
+            floor = load_trading_floor(buy, setup_frames, close, wide_from_long(long, "open") if long is not None and len(long) and "open" in long.columns else None,
+                                       vol, news, scores, asof, cfg, cache, mode)
+        except Exception as ex:
+            log("Trading Floor", "MISSING", "", "skipped this run: %s" % ex)
+    elif not floor_on:
+        log("Trading Floor", "OK", "", "feature off")
     opt_on = features.get("options", True)
     ideas = pd.DataFrame()
     skipped_opt = pd.DataFrame()
@@ -2306,6 +2357,7 @@ def main(argv=None):
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
         "buy_setups": gated(buy, "buy_setups", buy_on, "No buy setups. The list is built from the scanners already on the desk. This desk never places trades."),
+        "trading_floor": gated(floor, "trading_floor", floor_on, "No picks to debate today. The Trading Floor reads Buy setups and the cross-scanner picks. Research only."),
         "options_ideas": gated(ideas, "options_ideas", opt_on, "No debit spreads. Education only. This desk never places a trade."),
         "options_skipped": gated(skipped_opt, "options_skipped", opt_on, "No names were skipped. Education only. This desk never places a trade."),
         "earnings_calendar": gated(earn_pages.get("calendar"), "earnings_calendar", features.get("earnings_calendar", True), "No earnings dates."),
