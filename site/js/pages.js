@@ -2323,6 +2323,7 @@
     const waitAt = D.settingVal("trading_floor.verdict.wait_min_total") || "0";
     ctx.page.innerHTML =
       '<p class="cap">Research only. A desk debate, not a recommendation. This desk never places trades, never calls a broker, and sends no alerts.</p>' +
+      (D.featureOn("feature.trading_floor_paper") ? '<div class="cvbar"><a class="cvlink" href="paper-test.html">Paper Test</a><span class="m2">How the BUY calls do with fake money.</span></div>' : "") +
       '<div class="cards tf-kpis" id="cards"></div>' +
       '<div class="ctrls tf-ctrls" id="ctrls"><div class="seg" id="tfseg" role="group" aria-label="Show">' +
         ["All", "BUY", "WAIT", "SKIP"].map((v, i) => '<button type="button" data-v="' + v + '"' + (i === 0 ? ' class="on"' : "") + ">" + v + "</button>").join("") +
@@ -2384,6 +2385,95 @@
       toggle(hit.closest(".tf-card"));
     });
     draw();
+  }
+
+  // ---------- Paper Test (features.trading_floor_paper): FAKE MONEY test of the Trading Floor's BUY calls.
+  function ptMoney(v, signed) {
+    const n = D.num(v);
+    if (n == null) return D.na();
+    const s = (n < 0 ? "−$" : (signed && n > 0 ? "+$" : "$")) + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return signed ? '<span style="color:' + (n > 0 ? "#22C55E" : n < 0 ? "#EF4444" : "#E6EBF5") + '">' + D.esc(s) + "</span>" : D.esc(s);
+  }
+  function ptPct(v) {
+    const n = D.num(v);
+    if (n == null) return D.na();
+    return '<span style="color:' + (n > 0 ? "#22C55E" : n < 0 ? "#EF4444" : "#E6EBF5") + '">' + D.esc((n > 0 ? "+" : n < 0 ? "−" : "") + D.fmt(Math.abs(n), 2) + "%") + "</span>";
+  }
+  function ptLines(row) {
+    const lines = [];
+    const add = (key, color, label) => { const n = D.num(row[key]); if (n != null) lines.push({ value: n, color: color, label: label + " " + D.fmt(n, 2) }); };
+    add("entry_price", "#F59E0B", "Bought");
+    add("stop", "#EF4444", "Stop");
+    add("target", "#22C55E", "Target");
+    add("exit_price", "#7C9CFF", "Sold");
+    return lines;
+  }
+  function renderPaperTest(ctx) {
+    const s = D.realRows(ctx.files["paper_summary.csv"])[0] || {};
+    const eq = D.realRows(ctx.files["paper_equity.csv"]).filter((r) => r.date);
+    const trades = D.realRows(ctx.files["paper_trades.csv"]).filter((r) => r.ticker);
+    const open = trades.filter((r) => r.status === "OPEN" || r.status === "PENDING");
+    const closed = trades.filter((r) => r.status === "CLOSED");
+    const other = trades.filter((r) => r.status === "SKIPPED" || r.status === "NOT FILLED");
+    ctx.page.innerHTML =
+      '<div class="fakebar" role="note"><b>FAKE MONEY</b><span>Pretend $' + D.esc(D.fmt(D.num(s.start_cash) || 10000, 0)) +
+        ' account. No real orders, no broker, no alerts.</span></div>' +
+      '<p class="cap"><a href="trading-floor.html">Back to the Trading Floor</a> · Started ' + D.esc(s.start_date || "–") +
+        " · Updated through " + D.esc(s.last_bar || "–") + " · Buys at the next session's open · " + D.esc(s.share_mode || "fractional") + " shares</p>" +
+      '<div class="cards pt-kpis" id="cards"></div>' +
+      '<div class="panel pad"><div class="ptitle">Fake account vs SPY</div><div class="psub">Both start at the same fake cash on the start day. Daily closes.</div>' +
+        '<div class="chart-box"><canvas id="pteq"></canvas></div><p class="cap" id="ptcap"></p></div>' +
+      '<div class="panel" id="ptopen"></div><div class="panel" id="ptclosed"></div><div class="panel" id="ptother"></div>' +
+      '<p class="cap">Each BUY call from the after-close run is bought at the next session\'s open with ' + ptMoney(s.position_size) +
+        ' of fake cash, at most ' + D.esc(D.settingVal("trading_floor_paper.max_open") || "10") + ' at once. It is sold at the stop, at target 1, or at the close after ' +
+        D.esc(D.settingVal("trading_floor_paper.time_stop_days") || "20") + ' trading days. If a day touches both the stop and the target, the stop counts. A gap past the stop or target sells at the open. Past fake results do not promise future ones.</p>';
+    const winRate = D.num(s.win_rate_pct);
+    document.getElementById("cards").innerHTML =
+      card("Fake account", ptMoney(s.equity), "Cash " + ptMoney(s.cash)) +
+      card("Total return", ptPct(s.total_return_pct), "SPY " + ptPct(s.spy_return_pct)) +
+      card("Vs SPY", ptPct(s.vs_spy_pct), "Max drawdown " + ptPct(s.max_drawdown_pct)) +
+      card("Win rate", winRate == null ? D.na() : D.esc(D.fmt(winRate, 0) + "%"), D.esc((s.wins || 0) + " won, " + (s.losses || 0) + " lost")) +
+      card("Average win", ptMoney(s.avg_win, true), s.avg_win_pct ? ptPct(s.avg_win_pct) : "No wins yet") +
+      card("Average loss", ptMoney(s.avg_loss, true), s.avg_loss_pct ? ptPct(s.avg_loss_pct) : "No losses yet") +
+      card("Open", D.esc(String(s.open_count || 0)), D.esc((s.pending_count || 0) + " waiting for the open")) +
+      card("Closed", D.esc(String(s.closed_count || 0)), "Total P&L " + ptMoney(s.total_pnl, true));
+    D.destroyCharts();
+    const few = eq.length < 40 ? 3 : 0;
+    D.lineChart(document.getElementById("pteq"), eq.map((r) => r.date), [
+      { label: "Fake account", data: D.seriesNum(eq, "equity"), color: "#22C55E", spanGaps: true, pointRadius: few },
+      { label: "SPY buy and hold", data: D.seriesNum(eq, "spy_equity"), color: "#7C9CFF", spanGaps: true, pointRadius: few },
+    ], { y: { ticks: { callback: (v) => "$" + D.compact(v) } }, plugins: { barLabels: false } });
+    document.getElementById("ptcap").textContent = eq.length <= 1 ? "The test has just started. A new point is added after each after-close run." :
+      eq.length + " trading days so far.";
+    const status = (r) => r.status === "PENDING" ? "Waiting for the next open" : "Open";
+    open.forEach((r) => { r._state = status(r); });
+    const WHY = { STOP: "Hit the stop", STOP_GAP: "Opened under the stop", TARGET: "Hit target 1", TARGET_GAP: "Opened over target 1",
+      STOP_SAME_BAR: "Stop and target same day", TIME: "Time stop" };
+    closed.forEach((r) => { r._why = WHY[r.exit_reason] || r.exit_reason || ""; });
+    D.drawTable(document.getElementById("ptopen"), {
+      title: "Open positions", sub: "Waiting rows are bought at the next session's open.",
+      rows: open, state: { sort: "signal_date", dir: "desc", page: 0 }, pageSize: 15, expandable: true, fit: true,
+      columns: [TK, T("_state", "State", "text"), T("pnl_pct", "P&L %", "pct", { dec: 2, color: true }), T("pnl", "P&L $", "delta", { dec: 2 }),
+        T("signal_date", "Called", "date"), T("entry_date", "Bought", "date"), T("entry_price", "Buy price", "num", { dec: 2 }),
+        T("shares", "Shares", "num", { dec: 4 }), T("stop", "Stop", "num", { dec: 2, tone: "stop" }),
+        T("target", "Target", "num", { dec: 2, tone: "target" }), T("last_close", "Last close", "num", { dec: 2 }), T("days_held", "Days", "num", { dec: 0 })],
+      lines: ptLines, priceSub: "Buy price, stop, and target",
+      empty: "No open positions yet.",
+    });
+    D.drawTable(document.getElementById("ptclosed"), {
+      title: "Closed trades", rows: closed, state: { sort: "exit_date", dir: "desc", page: 0 }, pageSize: 15, expandable: true, fit: true,
+      columns: [TK, T("pnl_pct", "P&L %", "pct", { dec: 2, color: true }), T("_why", "Why it closed", "text"),
+        T("pnl", "P&L $", "delta", { dec: 2 }), T("entry_date", "Bought", "date"), T("entry_price", "Buy price", "num", { dec: 2 }),
+        T("exit_date", "Sold", "date"), T("exit_price", "Sell price", "num", { dec: 2 }), T("days_held", "Days", "num", { dec: 0 }),
+        T("exit_words", "Why it closed", "text", { wrap: true })],
+      lines: ptLines, priceSub: "Buy price, stop, target, and sell price",
+      empty: "No closed trades yet.",
+    });
+    D.drawTable(document.getElementById("ptother"), {
+      title: "Calls not bought", sub: "Skipped or not filled, with the reason.", rows: other, state: { sort: "signal_date", dir: "desc", page: 0 }, pageSize: 10,
+      columns: [TK, T("signal_date", "Called", "date"), T("status", "Result", "text"), T("note", "Why", "text", { wrap: true })],
+      empty: "Every call so far was bought or is waiting.",
+    });
   }
 
   function renderBreakouts(ctx) {
@@ -3073,6 +3163,7 @@
   // Wording follows the rules in setups.py, tables.py, and scoring.py. Numbers in {braces} come from settings.csv.
   const DESC = {
     top: "Every stock on the desk, ranked by its score. The score adds points for things like faster sales growth than usual, a cheaper price than usual, and a rising price trend. A score of {buy_at} or more is usually BUY; tap a row to see the entry zone, stop, and target on the chart.",
+    papertest: "FAKE MONEY. A pretend $10,000 account that follows the Trading Floor's BUY calls, to see if they would have made or lost money. Each BUY call from the after-close run is bought at the next day's open with $1,000, and sold at its stop, at target 1, or after 20 trading days. The chart compares the account with simply buying SPY on the start day. Read the cards for the score so far, the first table for what is held now, and the second for each closed trade and why it closed. No real orders are placed.",
     tradingfloor: "A short desk debate about today's top picks (the Buy setups list, topped up with stocks ready on two or more scanners). For each stock, News says why it may be moving, Scout checks volume against normal, Charts gives the entry, stop, and target the desk already worked out, Skeptic argues against the trade, and Sentiment says whether the crowd is too hot. Each gives +1, 0, or -1 and the Chief adds them up into BUY, WAIT, or SKIP with a one-line reason. Use the BUY, WAIT, and SKIP buttons to filter, read the lines that disagree, and tap a stock to see its chart. It is research to help you think, not an order.",
     buysetups: "Stocks where VCP, Box, Flag, Qullamaggie, Marios, or CANSLIM is ready or broke out today, or an Episodic Pivot is confirmed today, on day 2 to 5, or went above the EP-day high today (Qullamaggie, Marios, and EP only when the stop is not too wide), the verdict is BUY, the price is above its 50-day and 200-day averages, and the stop is 8% or less below the entry. These are the cleanest setups on the desk. When SPY is not in an uptrend the list stays empty; tap Show anyway to see those names greyed.",
     growth: "Stocks whose sales grew at least {growth_min_pct}%, leaving out anything rated AVOID. Fast-growing sales often push a stock up over time. Compare the EPS growth and the vs S&P 500 columns to see if profits and the price are keeping up.",
@@ -3159,7 +3250,7 @@
       return String(n);
     });
   }
-  const DESC_PAGE_KIND = { tradingfloor: "page", top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page", chartviewer: "page" };
+  const DESC_PAGE_KIND = { papertest: "page", tradingfloor: "page", top: "page", options: "page", rotation: "page", trends: "page", gainers: "page", breadth: "page", secperf: "page", heatmaps: "page", chartviewer: "page" };
   function descBox(title, text, extraClass) {
     return '<section class="about' + (extraClass ? " " + extraClass : "") + '" aria-label="' + D.esc(title) + '"><div class="about-title">' + D.esc(title) +
       '</div><p>' + D.esc(text) + "</p></section>";
@@ -3184,6 +3275,12 @@
           const split = id === "chartviewer" && D.splitOn && D.splitOn() && D.viewerOn("group_toggle") && DESC[id + ":split"];
           ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, descFill(split || DESC[id], ctx)) + "</div>");
           const wrap = document.getElementById("about");
+          if (id === "papertest") {
+            // The FAKE MONEY label stays the first thing on the page, above the description.
+            document.querySelectorAll("body > * .fakebar.moved").forEach((x) => x.remove());
+            const fb = ctx.page.querySelector(".fakebar");
+            if (fb) { fb.classList.add("moved"); wrap.parentNode.insertBefore(fb, wrap); }
+          }
           const tabs = DESC_TABS[id];
           if (tabs) {
             wrap.insertAdjacentHTML("beforeend", '<div class="about-tab" id="abouttab"></div>');
@@ -3246,6 +3343,7 @@
     top: { files: ["scores.csv"], render: renderTop },
     buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
     tradingfloor: { files: ["trading_floor.csv"], render: renderTradingFloor },
+    papertest: { files: ["paper_summary.csv", "paper_equity.csv", "paper_trades.csv"], render: renderPaperTest },
     scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
     watchlist: { files: ["portfolio.csv", "portfolio_summary.csv", "watchlist.csv"], render: renderWatch },
     alerts: { files: ["alerts.csv", "score_changes.csv"], render: renderAlerts },

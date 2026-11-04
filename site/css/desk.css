@@ -549,3 +549,10 @@ html[data-theme="light"] .nav,html[data-theme="light"] .panel,html[data-theme="l
   .tf-drop{margin-left:-12px;margin-right:-12px}
   .tf-drop .panel.pad{padding:10px 8px}
 }
+/* Paper Test (paper-test.html): the FAKE MONEY label and a 4 / 2 card grid. */
+.fakebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:2px solid var(--am);border-radius:8px;padding:10px 14px;margin:0 0 12px;background:var(--panel);color:var(--tx2);font-size:13px;line-height:18px}
+.fakebar b{color:var(--am);font-size:18px;letter-spacing:.08em;font-weight:800}
+.cards.pt-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:699px){
+  .cards.pt-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

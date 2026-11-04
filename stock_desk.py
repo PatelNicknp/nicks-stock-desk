@@ -24,6 +24,7 @@ import episodic_pivot
 import gap_up
 import sector_rotation
 import trading_floor
+import trading_floor_paper
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -2275,6 +2276,29 @@ def main(argv=None):
             log("Trading Floor", "MISSING", "", "skipped this run: %s" % ex)
     elif not floor_on:
         log("Trading Floor", "OK", "", "feature off")
+    paper_on = features.get("trading_floor_paper", True)
+    if paper_on and mode in ("full", "offline") and len(close) and long is not None and len(long) and "open" in long.columns:
+        # FAKE MONEY paper test of the Trading Floor's BUY calls. Saved daily bars only, no new request.
+        # Hourly runs never touch the paper files; a second full run on the same day changes nothing.
+        try:
+            paper_cfg = trading_floor_paper.config(cfg)
+            state = trading_floor_paper.load_state(data)
+            # The asof bar counts only once that session is over (after 16:15 ET), so a manual full run
+            # during the session never fills or exits on a half-day bar.
+            now_et = pd.Timestamp.now(tz=ET)
+            asof_final = asof < now_et.strftime("%Y-%m-%d") or now_et.strftime("%H:%M") >= "16:15"
+            state = trading_floor_paper.update(state, {"open": wide_from_long(long, "open"), "high": high, "low": low, "close": close},
+                                               floor, asof, paper_cfg, asof_final=asof_final)
+            trading_floor_paper.save_state(state, data)
+            sm = state["summary"]
+            log("Trading Floor paper test", "OK", sm.get("last_bar", ""), "FAKE MONEY. Equity %s, open %s, waiting %s, closed %s. Fills at the next session's open. No orders, no broker, no new downloads." % (
+                sm.get("equity"), sm.get("open_count"), sm.get("pending_count"), sm.get("closed_count")))
+        except Exception as ex:
+            log("Trading Floor paper test", "CACHED", "", "kept the last paper files: %s" % ex)
+    elif paper_on:
+        log("Trading Floor paper test", "OK", "", "unchanged: it updates only on the full after-close run")
+    else:
+        log("Trading Floor paper test", "OK", "", "feature off: the paper files are left as they were")
     opt_on = features.get("options", True)
     ideas = pd.DataFrame()
     skipped_opt = pd.DataFrame()
@@ -2439,7 +2463,7 @@ def main(argv=None):
         "mode": mode,
         "label": DISCLAIMER,
         "n_stocks": int(len(scores)),
-        "tabs": sorted(files),
+        "tabs": sorted(list(files) + (["paper_equity", "paper_summary", "paper_trades"] if paper_on else [])),
     }
     with open(os.path.join(data, "meta.json"), "w") as f:
         json.dump(meta, f, indent=1)
