@@ -65,6 +65,7 @@ feature.light_mode,True
 feature.split_tech_fund,True
 feature.trading_floor,True
 feature.trading_floor_paper,True
+feature.incremental_prices,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
@@ -422,4 +423,15 @@ keeper.recheck_min,15
 keeper.chunk_min,330
 keeper.min_gap_min,50
 keeper.max_tries,2
+incremental_prices.repair,True
+incremental_prices.refresh,True
+incremental_prices.refresh_mode,weekly
+incremental_prices.refresh_every_days,7
+incremental_prices.refresh_slices,8
+incremental_prices.overlap_days,5
+incremental_prices.adjust_tolerance_pct,0.05
+incremental_prices.adjust_tolerance_dollars,0.02
+incremental_prices.chart_concurrency,2
+incremental_prices.repair_below_bars,126
+incremental_prices.history_period,5y
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
