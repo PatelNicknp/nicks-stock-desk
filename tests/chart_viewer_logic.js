@@ -181,6 +181,30 @@ eq(V.RANGES.map((r) => r.months), [3, 6, 12, 0], "range chip months");
   eq(V.RIGHT_MARGIN_PX, 12, "the right margin is 12 px");
 })();
 
+// Dense open view: one candle width, 12 px right margin, no clock.
+(function () {
+  function spacing(r, plot) { return plot / (r.to - r.from); }
+  function gap(r, plot, last) { return plot * (r.to - last) / (r.to - r.from); }
+  const wide = V.denseRange(1253, 756, 12, 5.8, 3, 8);
+  eq(Math.abs(spacing(wide, 756) - 5.8) < 1e-9, true, "820 px plot uses the 5.8 px target");
+  eq(Math.abs(gap(wide, 756, 1253) - 12) < 1e-6, true, "820 px keeps a 12 px right margin");
+  const phone = V.denseRange(1253, 326, 12, 5.8, 3, 8);
+  eq(Math.abs(spacing(phone, 326) - 5.8) < 1e-9, true, "390 px plot uses the same 5.8 px candles");
+  eq(Math.abs(gap(phone, 326, 1253) - 12) < 1e-6, true, "390 px keeps a 12 px right margin");
+  const land = V.denseRange(1253, 1116, 12, 5.8, 3, 8);
+  eq(Math.abs(spacing(land, 1116) - 5.8) < 1e-9, true, "1180 px plot uses the same 5.8 px candles");
+  eq(land.from < wide.from, true, "a wider screen shows more bars, not fatter ones");
+  const week = V.denseRange(250, 756, 12, 5.8, 3, 8);
+  eq(Math.abs(spacing(week, 756) - spacing(wide, 756)) < 1e-9, true, "weekly bars use the same thickness when enough weeks exist");
+  const short = V.denseRange(29, 756, 12, 5.8, 3, 8);
+  eq(Math.abs(spacing(short, 756) - 8) < 1e-9, true, "a short history stops at the 8 px cap");
+  eq(short.from < -0.5, true, "a short history leaves empty room on the left");
+  eq(Math.abs(gap(short, 756, 29) - 12) < 1e-6, true, "a short history still keeps the 12 px margin");
+  const floored = V.denseRange(5000, 400, 12, 1, 3, 8);
+  eq(Math.abs(spacing(floored, 400) - 3) < 1e-9, true, "spacing does not go under the 3 px minimum");
+  eq(V.denseRange(-1, 100, 12, 5.8, 3, 8).from, -0.5, "no bars is a safe empty range");
+})();
+
 // Memory: only the last few bar files stay parsed, so swiping a long list stays light on an iPad.
 let kr = [[], []];
 ["A", "B", "C"].forEach((n) => { kr = V.keepRecent(kr[0], n, 2); });

@@ -379,6 +379,10 @@ chart_viewer.bar_up,#60a5fa
 chart_viewer.bar_down,#d946ef
 chart_viewer.bar_up_light,#1d4ed8
 chart_viewer.bar_down_light,#a21caf
+chart_viewer.dense_default,True
+chart_viewer.target_bar_spacing,5.8
+chart_viewer.min_bar_spacing_px,3
+chart_viewer.max_bar_spacing_px,8
 chart_colors.ma_colors.10,#22c55e
 chart_colors.ma_colors.20,#f97316
 chart_colors.ma_colors.50,#3b82f6
