@@ -87,7 +87,7 @@ async function main() {
     const g = Object.fromEntries(groups);
     eq(g.Technical, TECH, "Technical heading pages");
     eq(g.Fundamental, FUND, "Fundamental heading pages");
-    eq(g.Overview, ["Today", "Buy setups", "Trading Floor", "Watchlist and portfolio", "Alerts", "Backtest"], "non-screener pages stay in Overview");
+    eq(g.Overview, ["Today", "Buy setups", "Trading Floor", "Paper Test", "Watchlist and portfolio", "Alerts", "Backtest"], "non-screener pages stay in Overview");
     eq(g.Market, ["Gainers and losers", "Breadth", "Sector performance", "Heatmaps"], "market pages stay outside both");
     eq(g.Options, ["Debit spreads"], "Options stays outside both");
     eq(await page.$$eval("#nav .group[data-open='1'] .grp", (b) => b.map((x) => x.textContent.replace(/[▾▸]/g, "").replace(/\d+$/, "").trim())), ["Technical"], "VCP page opens the Technical heading");

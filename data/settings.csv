@@ -64,6 +64,7 @@ feature.chart_viewer,True
 feature.light_mode,True
 feature.split_tech_fund,True
 feature.trading_floor,True
+feature.trading_floor_paper,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
@@ -114,6 +115,14 @@ sector_rotation.w52_bars,252
 sector_rotation.tail_keep,12
 sector_rotation.macro_lookback,63
 sector_rotation.yield_flat_band,0.05
+trading_floor_paper.start_cash,10000.0
+trading_floor_paper.position_pct,10.0
+trading_floor_paper.max_open,10
+trading_floor_paper.time_stop_days,20
+trading_floor_paper.fractional_shares,True
+trading_floor_paper.share_decimals,4
+trading_floor_paper.skip_if_held,True
+trading_floor_paper.skip_gap_past_plan,True
 trading_floor.max_stocks,15
 trading_floor.fill_from_scanners,True
 trading_floor.fill_min_scanners,2

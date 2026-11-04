@@ -6,6 +6,7 @@ PAGES = [
     ("top-stocks.html", "top", "Top stocks"),
     ("buy-setups.html", "buysetups", "Buy setups"),
     ("trading-floor.html", "tradingfloor", "Trading Floor"),
+    ("paper-test.html", "papertest", "Paper Test"),
     ("scorecard.html", "scorecard", "Stock scorecard"),
     ("watchlist.html", "watchlist", "Watchlist and portfolio"),
     ("alerts.html", "alerts", "Alerts"),

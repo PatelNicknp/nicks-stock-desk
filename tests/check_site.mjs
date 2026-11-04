@@ -20,7 +20,7 @@ async function loadChromium() {
 const base = process.argv[2] || "http://127.0.0.1:8765/site/";
 const outDir = process.argv[3] || "/opt/cursor/artifacts/site-screenshots-v3";
 const pages = [
-  "index.html", "top-stocks.html", "trading-floor.html", "chart-viewer.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
+  "index.html", "top-stocks.html", "trading-floor.html", "paper-test.html", "chart-viewer.html", "scorecard.html", "watchlist.html", "alerts.html", "backtest.html",
   "growth.html", "quality.html", "dividend.html", "wheel.html", "vcp.html", "canslim.html",
   "box.html", "flag.html", "qullamaggie.html", "marios.html", "episodic-pivot.html", "gap-up.html", "breakdowns.html", "volume.html", "leaders.html", "earnings-calendar.html", "earnings-heatmap.html",
   "earnings-cards.html", "put-call.html", "walls.html", "analysts.html", "thirteen-f.html", "aaii.html",
@@ -107,6 +107,8 @@ function checkScores(dataDir) {
     const hasVerdict = Object.prototype.hasOwnProperty.call(rows[0], "verdict");
     if (!Object.prototype.hasOwnProperty.call(rows[0], "ticker") || (!hasScore && !hasVerdict)) continue;
     if (name === "scores.csv") continue;
+    // The Trading Floor verdict is its own BUY / WAIT / SKIP debate call, not the score verdict.
+    if (name === "trading_floor.csv") continue;
     let use = rows;
     if (name === "score_history.csv") {
       const latest = new Map();

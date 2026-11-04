@@ -65,7 +65,8 @@
     "chart_viewer": true,
     "light_mode": true,
     "split_tech_fund": true,
-    "trading_floor": true
+    "trading_floor": true,
+    "trading_floor_paper": true
   },
   "keeper": {
     "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. At verify_after_min past each slot it checks that the slot's run succeeded and that data/meta.json price_as_of reached that day. A failed slot gets one retry (max_tries 2 means the run plus one retry, never more); a run still going is looked at again every recheck_min minutes. Stale data after a success is recorded in the keeper run, not retried. It only triggers the normal slots and at most one retry of a failed slot, so Yahoo traffic does not grow.",
@@ -86,7 +87,7 @@
     "show_weaker_trend": false
   },
   "scanner_groups": {
-    "_note": "Technical and Fundamental split (features.split_tech_fund). With it on, the left menu puts every screener page under a Technical or a Fundamental heading, in the order listed here, and the Chart Viewer gets a Technical | Fundamental switch (chart_viewer.group_toggle) whose list picker, All technical stocks or All fundamental stocks list, and Why box show only that side. Each key is a page id (the name in chart-viewer.html?list=...): vcp, box, flag, qullamaggie, marios, ep (Episodic pivot), gapup (Gap Up), week52 (52-week), breakouts (52-week breakouts), volume (High volume), pullbacks, breakdowns, trends, wheel, canslim, leaders, growth, quality, dividend, scorecard (Stock scorecard), and top (Top stocks). The value is technical or fundamental; any other word leaves that page where it was and out of both. Buy setups and Watchlist are in both sides of the Chart Viewer. Today, Watchlist, Buy setups, Trading Floor, Alerts, Backtest, Options, Earnings, Sentiment, Financials, Macro, and the market pages (Gainers and losers, Breadth, Sector performance, Heatmaps, under Market) are not screeners and stay outside both. Turn features.split_tech_fund off for exactly the old menu and viewer. Nothing new is downloaded.",
+    "_note": "Technical and Fundamental split (features.split_tech_fund). With it on, the left menu puts every screener page under a Technical or a Fundamental heading, in the order listed here, and the Chart Viewer gets a Technical | Fundamental switch (chart_viewer.group_toggle) whose list picker, All technical stocks or All fundamental stocks list, and Why box show only that side. Each key is a page id (the name in chart-viewer.html?list=...): vcp, box, flag, qullamaggie, marios, ep (Episodic pivot), gapup (Gap Up), week52 (52-week), breakouts (52-week breakouts), volume (High volume), pullbacks, breakdowns, trends, wheel, canslim, leaders, growth, quality, dividend, scorecard (Stock scorecard), and top (Top stocks). The value is technical or fundamental; any other word leaves that page where it was and out of both. Buy setups and Watchlist are in both sides of the Chart Viewer. Today, Watchlist, Buy setups, Trading Floor, Paper Test, Alerts, Backtest, Options, Earnings, Sentiment, Financials, Macro, and the market pages (Gainers and losers, Breadth, Sector performance, Heatmaps, under Market) are not screeners and stay outside both. Turn features.split_tech_fund off for exactly the old menu and viewer. Nothing new is downloaded.",
     "vcp": "technical",
     "box": "technical",
     "flag": "technical",
@@ -324,6 +325,17 @@
   },
   "buy_setups": {
     "market_filter": true
+  },
+  "trading_floor_paper": {
+    "_note": "Paper test of the Trading Floor's BUY calls with FAKE MONEY (paper-test.html, features.trading_floor_paper). It starts with start_cash fake dollars on the first full run (Nov 3, 2026) and only goes forward; nothing is replayed. Each BUY call on a full run waits for the next session and is bought at that session's open, on the next full run, from the saved daily bar. A call is skipped when the stock is already held or waiting (skip_if_held), when max_open positions are open or waiting, or when free fake cash is under one position. Each position is position_pct percent of start_cash, in fractional shares rounded to share_decimals (fractional_shares off buys whole shares). With skip_gap_past_plan on, a stock that opens at or under its stop or at or over target 1 is not bought. Stop and target 1 are frozen at the call. Every daily bar from the entry day on: an open at or under the stop sells at the open; an open at or over the target sells at the open; a day that touches both counts as the stop; else the stop or target price; after time_stop_days trading days (the entry day is day 1) it sells at the close. The state is in data/paper_trades.csv, data/paper_equity.csv, and data/paper_summary.csv. Only the full run changes them, and running the same day twice changes nothing. No real orders, no broker, no alerts, no new downloads. Rules: docs/trading_floor_paper_rules.md.",
+    "start_cash": 10000.0,
+    "position_pct": 10.0,
+    "max_open": 10,
+    "time_stop_days": 20,
+    "fractional_shares": true,
+    "share_decimals": 4,
+    "skip_if_held": true,
+    "skip_gap_past_plan": true
   },
   "trading_floor": {
     "_note": "Trading Floor page (trading-floor.html, features.trading_floor). Six desk roles debate today's top picks: the Buy setups list in its own order, then (fill_from_scanners) stocks READY or BROKEN OUT today on at least fill_min_scanners pattern scanners, max_stocks in all. News, Scout, Charts, Skeptic, and Sentiment each give +1, 0, or -1 and the Chief adds them: Charts veto (no valid entry, stop, and target) is SKIP; a total of verdict.buy_min_total or more with no Skeptic hard no is BUY; verdict.wait_min_total or more is WAIT; under that is SKIP. News uses the desk's stored headlines first; only picks with none get one free Google News RSS request each, on the full run, once a day (news.google_news), cached in cache/trading_floor_news.csv. Percents are whole numbers (5.0 means 5%). Volume ratios compare today with the 50 sessions before it, like the High volume page. Every check has its own on/off switch. Research only: no orders, no broker, no alerts. Rules in plain words: docs/trading_floor_rules.md.",
