@@ -1,7 +1,7 @@
 {
- "updated_pt": "2026-11-03 16:10 PT",
- "price_as_of": "2026-11-03",
- "mode": "full",
+ "updated_pt": "2026-11-04 07:28 PT",
+ "price_as_of": "2026-11-04",
+ "mode": "hourly",
  "label": "Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts.",
  "n_stocks": 522,
  "tabs": [
@@ -39,6 +39,9 @@
   "option_walls",
   "options_ideas",
   "options_skipped",
+  "paper_equity",
+  "paper_summary",
+  "paper_trades",
   "portfolio",
   "portfolio_summary",
   "prices",
@@ -70,6 +73,7 @@
   "sector_rotation_tails",
   "sectors",
   "settings",
+  "trading_floor",
   "trends",
   "universe",
   "updates_log",
