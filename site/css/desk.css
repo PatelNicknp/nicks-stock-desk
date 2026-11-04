@@ -510,3 +510,42 @@ body.cv-lock{overflow:hidden;overscroll-behavior:none}
   .themeseg button{font-size:13px}
 }
 html[data-theme="light"] .nav,html[data-theme="light"] .panel,html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(15,23,42,.06)}
+/* Trading Floor (trading-floor.html): one card per stock, one line per role. 1 column on a phone, 2 on an iPad, 3 on a wide screen. */
+.tf-ctrls{margin:4px 0 14px}
+.cards.tf-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:12px;align-items:start}
+.tf-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.tf-card.open{grid-column:1/-1}
+.tf-head{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:0;color:var(--tx);cursor:pointer;text-align:left;font:inherit;min-height:32px}
+.tf-id{display:flex;align-items:baseline;gap:8px;min-width:0;flex:1}
+.tf-id .tk{font-size:16px}
+.tf-co{color:var(--tx2);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tf-verdict{flex:none;font-size:12px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:5px;border:1px solid currentColor}
+.tf-verdict.buy{color:var(--up)}
+.tf-verdict.wait{color:var(--am)}
+.tf-verdict.skip{color:var(--dn)}
+.tf-total{flex:none;min-width:30px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:var(--tx)}
+.tf-sub{font-size:12px;color:var(--mu);margin:4px 0 8px;line-height:16px}
+.tf-role{display:grid;grid-template-columns:70px 28px minmax(0,1fr);gap:8px;align-items:start;padding:6px 0;border-top:1px solid var(--line);font-size:13px;line-height:18px}
+.tf-who{font-weight:700;color:var(--mu);font-size:12px;line-height:18px}
+.tf-say{color:var(--tx2);overflow-wrap:anywhere}
+.tf-chief .tf-say{color:var(--tx);font-weight:700}
+.tf-pts{display:inline-block;text-align:center;font-size:12px;font-weight:700;border-radius:4px;line-height:18px;background:var(--hover);color:var(--mu)}
+.tf-pts.pos{color:var(--up)}
+.tf-pts.neg{color:var(--dn)}
+.tf-pts.tf-sum{color:var(--ac)}
+.tf-flag{display:inline-block;font-size:11px;font-weight:700;color:var(--dn);border:1px solid var(--dn);border-radius:4px;padding:0 5px;margin-left:4px;line-height:16px}
+.tf-src{font-size:12px;font-weight:700;margin-left:4px;white-space:nowrap}
+.tf-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:10px;border-top:1px solid var(--line)}
+.tf-chart{min-height:32px;padding:0 14px;background:var(--panel);border:1px solid var(--line2);border-radius:6px;color:var(--tx);cursor:pointer;font:inherit;font-size:13px;font-weight:700}
+.tf-chart:hover{background:var(--hover)}
+.tf-drop{margin-top:12px}
+.tf-drop .panel{margin-bottom:0}
+@media (max-width:699px){
+  .tf-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .tf-card{padding:12px}
+  .tf-role{grid-template-columns:64px 26px minmax(0,1fr);gap:6px}
+  .cards.tf-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tf-drop{margin-left:-12px;margin-right:-12px}
+  .tf-drop .panel.pad{padding:10px 8px}
+}
