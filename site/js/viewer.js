@@ -355,6 +355,33 @@
     if (!(room > 0)) return visibleBars;
     return (m * visibleBars) / room;
   }
+  // First view as a fixed candle width, in px. The newest bar stays marginPx from the right edge.
+  // Spacing is target, but never thinner than minSp or fatter than maxSp. When fewer bars exist
+  // than that width can hold, spacing stops at maxSp and the empty room stays on the left.
+  function denseRange(last, plotPx, marginPx, target, minSp, maxSp) {
+    const lastN = Number(last);
+    if (!(lastN >= 0) || !(plotPx > 0)) return { from: -0.5, to: (lastN >= 0 ? lastN : 0) + 2 };
+    let s = target > 0 ? target : 5.8;
+    const loS = minSp > 0 ? minSp : 0;
+    const hiS = maxSp > 0 ? maxSp : 0;
+    if (loS) s = Math.max(s, loS);
+    if (hiS) s = Math.min(s, hiS);
+    const m = marginPx >= 0 ? marginPx : RIGHT_MARGIN_PX;
+    const avail = lastN + 1;
+    const count = (plotPx - Math.min(m, plotPx * 0.5)) / s;
+    if (avail < count) {
+      let s2 = avail > 0 ? (plotPx - Math.min(m, plotPx * 0.5)) / avail : s;
+      if (!(s2 > 0)) s2 = s;
+      if (hiS && s2 > hiS) s2 = hiS;
+      if (loS && s2 < loS) s2 = loS;
+      const pad = Math.min(m, plotPx * 0.5) / s2;
+      const hi = lastN + pad;
+      return { from: hi - plotPx / s2, to: hi };
+    }
+    const pad = Math.min(m, plotPx * 0.5) / s;
+    const hi = lastN + pad;
+    return { from: hi - plotPx / s, to: hi };
+  }
   // iPhone and iPad. iPadOS Safari reports as a Mac, so a Mac with a touch screen counts too.
   function isAppleTouch(ua, platform, maxTouchPoints) {
     ua = String(ua || "");
@@ -366,7 +393,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -633,6 +660,13 @@
       try { plot = chart.timeScale().width(); } catch (e) { plot = host.clientWidth - 60; }
       const pick = RANGES.find((r) => r.id === state.range);
       const phone = plot && plot < 520;
+      // dense_default: one candle width on every screen, daily or weekly. Off uses the month spans below.
+      if (on("dense_default") && !pick && plot > 0) {
+        let marginPx = on("why_box_top_left") ? RIGHT_MARGIN_PX : (state.open ? Math.min(boxPad(), 260) : boxPad());
+        if (!(marginPx > 0)) marginPx = RIGHT_MARGIN_PX;
+        setRange(denseRange(n - 1, plot, marginPx, cfgNum("target_bar_spacing", 5.8), cfgNum("min_bar_spacing_px", 3), cfgNum("max_bar_spacing_px", 8)));
+        return;
+      }
       // Daily keeps range_months / range_months_phone. Weekly opens wider so a week-sized bar still fills the view.
       const months = pick ? pick.months : (state.tf === "weekly"
         ? (phone ? cfgNum("range_months_weekly_phone", 12) : cfgNum("range_months_weekly", 24))

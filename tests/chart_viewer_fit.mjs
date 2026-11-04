@@ -1,7 +1,7 @@
 /**
  * Chart Viewer first view on iPhone and iPad, portrait and landscape, with the real chart in a headless browser.
- * The first view must show the last range_months_phone (3) or range_months (6) months with the newest candle
- * on screen and the candles spread across the width (only the reason-box padding on the right). It must be put
+ * With dense_default on, the first view uses one candle width (target_bar_spacing) on every screen,
+ * daily or weekly, with the newest candle about 12 px left of the price axis. It must be put
  * back after a resize, a turn of the device, and opening or closing full screen, and also when the chart was
  * first drawn only a few px wide and widened later. A range the user dragged to is kept through all of those
  * until a range chip is tapped. With the Why box at the top left, the newest candle stays about 12 px
@@ -28,6 +28,7 @@ async function loadChromium() {
 }
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const CV = JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8")).chart_viewer;
 const V = createRequire(import.meta.url)(path.join(ROOT, "site", "js", "viewer.js"));
 const BASE = "http://desk.test/";
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".csv": "text/csv", ".json": "application/json",
@@ -97,15 +98,22 @@ const settle = (page) => page.waitForTimeout(500);
 
 function firstView(v, dates, what, monthsWanted) {
   const n = dates.length;
-  const months = monthsWanted || (v.plot < 520 ? 3 : 6);
-  const want = V.rangeFrom(dates, months);
-  check(Math.abs(v.from - (want - 0.5)) <= 1, what + ": starts " + months + " months back (from " + v.from.toFixed(1) + ", want " + (want - 0.5) + ")");
+  const pxPerBar = v.plot / (v.to - v.from);
+  const gap = v.plot * (v.to - (n - 1)) / (v.to - v.from);
   check(v.to >= n - 1, what + ": newest candle on screen");
+  if (monthsWanted) {
+    const want = V.rangeFrom(dates, monthsWanted);
+    check(Math.abs(v.from - (want - 0.5)) <= 1, what + ": starts " + monthsWanted + " months back (from " + v.from.toFixed(1) + ")");
+  } else if (CV.dense_default) {
+    const r = V.denseRange(n - 1, v.plot, V.RIGHT_MARGIN_PX, CV.target_bar_spacing, CV.min_bar_spacing_px, CV.max_bar_spacing_px);
+    check(Math.abs(v.from - r.from) <= 1.2 && Math.abs(v.to - r.to) <= 1.2, what + ": opens at the dense range (from " + v.from.toFixed(1) + ", want " + r.from.toFixed(1) + ")");
+    check(Math.abs(pxPerBar - CV.target_bar_spacing) < 0.35, what + ": bar spacing " + pxPerBar.toFixed(2) + " px");
+  }
   const share = (n - 1 - Math.max(v.from, 0)) / (v.to - v.from);
   check(share >= 0.34, what + ": candles use " + Math.round(share * 100) + "% of the width, not a narrow strip");
   check(share <= 0.999, what + ": a small gap left of the price axis");
-  const pxPerBar = v.plot / (v.to - v.from);
-  check(pxPerBar > 1.2, what + ": candles are not squeezed (" + pxPerBar.toFixed(2) + " px per bar)");
+  check(pxPerBar > CV.min_bar_spacing_px - 0.05, what + ": candles stay readable (" + pxPerBar.toFixed(2) + " px per bar)");
+  check(gap > 6 && gap < 22, what + ": newest candle is " + gap.toFixed(1) + " px left of the price axis");
 }
 
 const chromium = await loadChromium();
@@ -162,10 +170,9 @@ try {
       const data = chart.panes()[0].getSeries()[0].data();
       return { from: lr.from, to: lr.to, plot: ts.width(), dates: data.map((d) => d.time) };
     });
-    const wMonths = weekly.plot < 520 ? 12 : 24;
-    const wFrom = V.rangeFrom(weekly.dates, wMonths);
+    const wPx = weekly.plot / (weekly.to - weekly.from);
     check(weekly.dates.length < n / 3, L("Weekly") + ": " + weekly.dates.length + " weekly bars from " + n + " daily bars");
-    check(Math.abs(weekly.from - (wFrom - 0.5)) <= 1, L("Weekly") + ": opens " + wMonths + " months back");
+    check(Math.abs(wPx - CV.target_bar_spacing) < 0.35, L("Weekly") + ": same thickness as daily (" + wPx.toFixed(2) + " px)");
     check(weekly.to >= weekly.dates.length - 1, L("Weekly") + ": newest week on screen");
     const wGap = weekly.plot * (weekly.to - (weekly.dates.length - 1)) / (weekly.to - weekly.from);
     check(wGap > 6 && wGap < 22, L("Weekly") + ": newest bar is " + wGap.toFixed(1) + " px left of the price axis");
@@ -223,7 +230,9 @@ try {
         };
       });
       const gap = spot.plot * (spot.to - (spot.n - 1)) / (spot.to - spot.from);
+      const px = spot.plot / (spot.to - spot.from);
       check(spot.theme === theme, L("theme") + " is " + spot.theme);
+      check(Math.abs(px - CV.target_bar_spacing) < 0.45, L("spacing") + " is " + px.toFixed(2) + " px");
       check(spot.cls.indexOf("tl") >= 0, L("why") + " is at the top left");
       check(spot.why.t >= spot.toolsBottom - 2, L("why") + " stays below the chips");
       check(spot.why.t <= spot.host.t + 16, L("why") + " starts at the top of the chart");
@@ -266,10 +275,12 @@ try {
       const both = await page.evaluate(() => {
         const chart = window.__charts[window.__charts.length - 1];
         const series = chart.panes()[0].getSeries()[0];
-        return { n: series.data().length, up: String(series.options().upColor).toLowerCase() };
+        const lr = chart.timeScale().getVisibleLogicalRange();
+        return { n: series.data().length, up: String(series.options().upColor).toLowerCase(), px: chart.timeScale().width() / (lr.to - lr.from) };
       });
       check(both.n < spot.n / 3, L("weekly bars") + " " + both.n + " from " + spot.n + " daily");
       check(both.up === wantUp, L("weekly bars") + " keep the bar colors");
+      check(Math.abs(both.px - CV.target_bar_spacing) < 0.45, L("weekly spacing") + " is " + both.px.toFixed(2) + " px");
       check(errors.length === 0, L("errors") + ": " + errors.join("; "));
       await opened.ctx.close();
     }
