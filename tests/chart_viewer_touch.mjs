@@ -1,7 +1,7 @@
 /**
  * Chart Viewer touch check on an iPhone in portrait (390x844), with real touches sent through the browser.
- * The chip bar is wider than the screen, so a sideways swipe there scrolls the chips and keeps the chart.
- * A sideways swipe on the header row (ticker, price, counter) still changes the chart.
+ * The chip bar fits the screen, so it does not scroll sideways. Daily | Weekly and Candles | Bars are there,
+ * and 3M, 6M, 1Y, and All are not. A sideways swipe on the header row still changes the chart.
  * Files are served from this checkout. Nothing goes to the network; Yahoo is blocked.
  * Usage: node tests/chart_viewer_touch.mjs   (needs playwright; PLAYWRIGHT_ROOT can point at it)
  * Prints "chart viewer touch ok" and exits 0 when every check passes.
@@ -66,25 +66,21 @@ try {
 
   check(await page.$eval("#cv", (e) => e.classList.contains("full")), "full screen overlay is open");
   const fit = await page.$eval("#cvtools", (e) => ({ sw: e.scrollWidth, cw: e.clientWidth, left: e.scrollLeft }));
-  check(fit.sw > fit.cw, "chip bar overflows at 390x844 (scrollWidth " + fit.sw + " > clientWidth " + fit.cw + ")");
+  check(fit.sw <= fit.cw + 1, "chip bar fits at 390x844 (scrollWidth " + fit.sw + ", clientWidth " + fit.cw + ")");
   const v = await page.evaluate(() => window.DeskViewer.swipeZone(false, true, 600, 370));
   check(v === "scroll", "swipeZone says an overflowing chip bar scrolls");
-
-  // A quick sideways swipe on the chip bar, right to left (toward the Drag and range chips).
-  const bar = await rect("#cvtools");
-  const before = await ticker();
-  await swipe(bar.x + bar.w - 30, bar.y + bar.h / 2, bar.x + 40, 200);
-  const afterBar = await ticker();
-  const left = await page.$eval("#cvtools", (e) => e.scrollLeft);
-  check(afterBar === before, "chip bar swipe keeps the same chart (" + before + " -> " + afterBar + ")");
-  check(left > fit.left, "chip bar swipe scrolls the chips (scrollLeft " + fit.left + " -> " + left + ")");
-  // The far chips are reachable and still work after the scroll.
-  await page.$eval('#cvtools [data-range="all"]', (e) => e.scrollIntoView({ inline: "end" }));
-  await page.tap('#cvtools [data-range="all"]');
-  check(await page.$eval('#cvtools [data-range="all"]', (e) => e.classList.contains("on")), "All chip works after scrolling");
-  check((await ticker()) === before, "tapping a range chip keeps the chart");
+  const chips = await page.$eval("#cvtools", (e) => ({
+    ranges: e.querySelectorAll("[data-range]").length,
+    daily: !!e.querySelector('[data-tf="daily"].on'),
+    candles: !!e.querySelector('[data-style="candles"].on'),
+  }));
+  check(chips.ranges === 0, "3M, 6M, 1Y, and All are hidden");
+  check(chips.daily && chips.candles, "Daily and Candles start on");
+  const pageOver = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  check(pageOver <= 1, "the page does not scroll sideways (" + pageOver + " px)");
 
   // A sideways swipe on the header row still changes the chart, even a slow one.
+  const before = await ticker();
   const head = await rect(".cv-top");
   await swipe(head.x + 60, head.y + head.h / 2, head.x + 330, 900);
   const afterHead = await ticker();

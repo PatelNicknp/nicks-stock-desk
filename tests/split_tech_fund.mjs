@@ -112,12 +112,13 @@ async function main() {
     let labels = await whyLabels(page, 12);
     eq(labels.filter((l) => !TECH_SHORT.concat(BOTH_SHORT).includes(l)), [], "technical Why box shows only technical reasons");
     eq(await page.evaluate(() => document.querySelector("#cvsum").textContent.startsWith("All technical stocks:")), true, "summary names the side");
-    // Other viewer tools still work: MA chip, range chip, arrows.
+    // Other viewer tools still work: MA chip and Daily | Weekly. The 3M, 6M, 1Y, All buttons are hidden.
     const ma = await page.$eval('#cvtools [data-ma="20"]', (b) => b.getAttribute("aria-pressed"));
     await page.click('#cvtools [data-ma="20"]');
     eq(await page.$eval('#cvtools [data-ma="20"]', (b) => b.getAttribute("aria-pressed")), ma === "true" ? "false" : "true", "MA chip still toggles");
-    await page.click('#cvtools [data-range="1y"]');
-    eq(await page.$eval('#cvtools [data-range="1y"]', (b) => b.getAttribute("aria-pressed")), "true", "range chip still works");
+    eq(await page.$$eval("#cvtools [data-range]", (bs) => bs.length), 0, "range chips stay hidden");
+    await page.click('#cvtools [data-tf="weekly"]');
+    eq(await page.$eval('#cvtools [data-tf="weekly"]', (b) => b.getAttribute("aria-pressed")), "true", "Weekly still toggles");
 
     // Switch to Fundamental: picker, All, Why box, saved pick.
     await page.click('#cvgroup [data-group="fundamental"]');

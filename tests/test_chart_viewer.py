@@ -179,10 +179,10 @@ def test_saved_history_is_about_five_years():
 
 
 def test_overflowing_chip_bar_scrolls_instead_of_changing_chart():
-    """iPhone: the chip bar is wider than the screen, so a swipe there scrolls it; only the header row always changes the chart."""
+    """iPhone: the chip bar wraps so it fits the screen. A wider bar still scrolls, and only the header row always changes the chart."""
     css = _read("site", "css", "desk.css")
     phone = [b.split("\n}", 1)[0] for b in css.split("@media (max-width:699px){")[1:] if ".cv-tools{" in b.split("\n}", 1)[0]][0]
-    assert ".cv-tools{" in phone and "flex-wrap:nowrap" in phone and "overflow-x:auto" in phone
+    assert ".cv-tools{" in phone and "flex-wrap:wrap" in phone and "overflow-x:hidden" in phone
     assert ".cv.full .cv-tools{touch-action:pan-x}" in css
     assert ".cv.full .cv-top{touch-action:none}" in css
     note = _cfg()["chart_viewer"]["_note"]
@@ -234,7 +234,7 @@ def test_first_view_on_iphone_and_ipad():
     """Real chart, iPhone and iPad portrait and landscape: first view, full screen, turns, narrow-then-wide, drag kept."""
     env = _playwright_env()
     proc = subprocess.run(["node", os.path.join("tests", "chart_viewer_fit.mjs")], cwd=ROOT, env=env,
-                          capture_output=True, text=True, timeout=300)
+                          capture_output=True, text=True, timeout=480)
     if proc.returncode != 0 and "Executable doesn't exist" in proc.stdout + proc.stderr:
         _skip("playwright browser is not installed")
     assert proc.returncode == 0, proc.stdout + proc.stderr

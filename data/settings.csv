@@ -369,6 +369,16 @@ chart_viewer.fit_wide_ranges,True
 chart_viewer.min_bar_spacing,0.3
 chart_viewer.group_toggle,True
 chart_viewer.default_group,technical
+chart_viewer.why_box_top_left,True
+chart_viewer.weekly_toggle,True
+chart_viewer.range_months_weekly,24
+chart_viewer.range_months_weekly_phone,12
+chart_viewer.hide_range_chips,True
+chart_viewer.bars_toggle,True
+chart_viewer.bar_up,#60a5fa
+chart_viewer.bar_down,#d946ef
+chart_viewer.bar_up_light,#1d4ed8
+chart_viewer.bar_down_light,#a21caf
 chart_colors.ma_colors.10,#22c55e
 chart_colors.ma_colors.20,#f97316
 chart_colors.ma_colors.50,#3b82f6
