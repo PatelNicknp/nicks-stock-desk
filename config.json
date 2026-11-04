@@ -66,7 +66,8 @@
     "light_mode": true,
     "split_tech_fund": true,
     "trading_floor": true,
-    "trading_floor_paper": true
+    "trading_floor_paper": true,
+    "incremental_prices": true
   },
   "keeper": {
     "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. At verify_after_min past each slot it checks that the slot's run succeeded and that data/meta.json price_as_of reached that day. A failed slot gets one retry (max_tries 2 means the run plus one retry, never more); a run still going is looked at again every recheck_min minutes. Stale data after a success is recorded in the keeper run, not retried. It only triggers the normal slots and at most one retry of a failed slot, so Yahoo traffic does not grow.",
@@ -388,6 +389,20 @@
     "wheel_min_dollar_volume": 20000000,
     "fear_line": 1.0,
     "greed_line": 0.7
+  },
+  "incremental_prices": {
+    "_note": "Daily prices (features.incremental_prices). On: each run asks Yahoo only for the days since the last saved bar, starting overlap_days calendar days earlier, and merges those bars into cache/ohlcv.csv.gz. Older bars stay, so a short download cannot wipe a stock. The newest bar is not part of the adjustment check, because it is still forming during the day. An older overlap close that moved by more than the wider of adjust_tolerance_dollars and adjust_tolerance_pct percent of the old close (0.05 means 0.05 percent, not 5 percent) is treated as a split or dividend adjustment, and that one symbol is downloaded again for history_period. repair (on) does that full download once for a symbol with fewer than repair_below_bars saved bars, such as a history cut down to a single day, and does not repeat it if the full download is still short. refresh (on) redownloads adjusted history on the after-close run only. refresh_mode weekly does everyone when the last full refresh is at least refresh_every_days old. refresh_mode slice does one of refresh_slices slices each after-close run. The first full run after this is turned on starts the weekly clock and does not redownload five years that day. chart_concurrency is how many chart calls run at once (1 or 2). The same backoff as the rest of the desk still applies. Off: every run downloads history_period for every symbol with the old parallel download and replaces the price file.",
+    "repair": true,
+    "refresh": true,
+    "refresh_mode": "weekly",
+    "refresh_every_days": 7,
+    "refresh_slices": 8,
+    "overlap_days": 5,
+    "adjust_tolerance_pct": 0.05,
+    "adjust_tolerance_dollars": 0.02,
+    "chart_concurrency": 2,
+    "repair_below_bars": 126,
+    "history_period": "5y"
   },
   "rate_limit": {
     "sec_user_agent": "NickStockDesk research nicks-stock-desk@example.com",

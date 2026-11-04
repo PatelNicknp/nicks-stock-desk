@@ -185,7 +185,284 @@ def _normalize_index(df):
     return df
 
 
-def download_prices(tickers, cfg):
+PRICE_COLS = ["date", "ticker", "close", "high", "low", "volume", "open"]
+
+
+def incremental_price_settings(cfg):
+    """Knobs for the incremental price download. Missing keys keep these defaults."""
+    raw = cfg.get("incremental_prices") or {}
+    mode = str(raw.get("refresh_mode") or "weekly").strip().lower()
+    if mode not in ("weekly", "slice"):
+        mode = "weekly"
+    try:
+        concurrency = int(raw.get("chart_concurrency", 2))
+    except (TypeError, ValueError):
+        concurrency = 2
+    try:
+        overlap = int(raw.get("overlap_days", 5))
+    except (TypeError, ValueError):
+        overlap = 5
+    try:
+        below = int(raw.get("repair_below_bars", 126))
+    except (TypeError, ValueError):
+        below = 126
+    try:
+        every = int(raw.get("refresh_every_days", 7))
+    except (TypeError, ValueError):
+        every = 7
+    try:
+        slices = int(raw.get("refresh_slices", 8))
+    except (TypeError, ValueError):
+        slices = 8
+    try:
+        pct = float(raw.get("adjust_tolerance_pct", 0.05))
+    except (TypeError, ValueError):
+        pct = 0.05
+    try:
+        dollars = float(raw.get("adjust_tolerance_dollars", 0.02))
+    except (TypeError, ValueError):
+        dollars = 0.02
+    period = str(raw.get("history_period") or "5y").strip() or "5y"
+    return {
+        "repair": bool(raw.get("repair", True)),
+        "refresh": bool(raw.get("refresh", True)),
+        "refresh_mode": mode,
+        "refresh_every_days": max(1, every),
+        "refresh_slices": max(1, slices),
+        "overlap_days": max(1, overlap),
+        "adjust_tolerance_pct": max(0.0, pct),
+        "adjust_tolerance_dollars": max(0.0, dollars),
+        "chart_concurrency": min(8, max(1, concurrency)),
+        "repair_below_bars": max(1, below),
+        "history_period": period,
+    }
+
+
+def incremental_prices_on(cfg):
+    return bool((cfg.get("features") or {}).get("incremental_prices", True))
+
+
+def _price_frame(df):
+    """One row per date and ticker, dates as YYYY-MM-DD. Drops a row with no close."""
+    cols = PRICE_COLS
+    if df is None or len(df) == 0:
+        return pd.DataFrame(columns=cols)
+    out = df.copy()
+    if "date" not in out.columns or "ticker" not in out.columns:
+        return pd.DataFrame(columns=cols)
+    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    out = out.dropna(subset=["date"])
+    out["date"] = out["date"].dt.strftime("%Y-%m-%d")
+    out["ticker"] = out["ticker"].astype(str).str.upper().str.replace(".", "-", regex=False)
+    # ^VIX is uppercased to ^VIX. A class share stored as BF.B becomes BF-B, matching the universe.
+    for col in ("close", "high", "low", "volume", "open"):
+        if col not in out.columns:
+            out[col] = np.nan
+        else:
+            out[col] = pd.to_numeric(out[col], errors="coerce")
+    out = out.dropna(subset=["close"])
+    out = out.drop_duplicates(["date", "ticker"], keep="last")
+    return out[cols]
+
+
+def close_mismatch(old, new, pct, dollars):
+    """True when the close moved by more than the wider of a cent band and a percent band."""
+    try:
+        old_n = float(old)
+        new_n = float(new)
+    except (TypeError, ValueError):
+        return False
+    if old_n != old_n or new_n != new_n:
+        return False
+    band = max(float(dollars), abs(old_n) * float(pct) / 100.0)
+    return abs(new_n - old_n) > band
+
+
+def weekly_refresh_due(stamp, today, every_days):
+    """True when a recorded full refresh is at least every_days old.
+
+    A missing stamp is not due. The file on disk is already a full history, and
+    the caller records today so the clock starts without a second full download.
+    """
+    if not stamp or not today:
+        return False
+    try:
+        age = (pd.Timestamp(str(today)[:10]) - pd.Timestamp(str(stamp)[:10])).days
+    except (TypeError, ValueError):
+        return False
+    return age >= int(every_days)
+
+
+def refresh_slice_index(today, slices):
+    """Which slice a calendar day refreshes. The same day always picks the same slice."""
+    n = max(1, int(slices))
+    return int(pd.Timestamp(str(today)[:10]).dayofyear) % n
+
+
+def ticker_in_slice(ticker, slices, index):
+    n = max(1, int(slices))
+    return sum(ord(c) for c in str(ticker)) % n == int(index) % n
+
+
+def _cached_price_stats(cached):
+    frame = _price_frame(cached)
+    if len(frame) == 0:
+        return {}, {}
+    grouped = frame.groupby("ticker")["date"]
+    return grouped.size().to_dict(), grouped.max().to_dict()
+
+
+def _repair_already_done(repairs, ticker, bars):
+    """A one-time full fetch already ran and the cache still has at least that many bars."""
+    row = (repairs or {}).get(ticker) or (repairs or {}).get(str(ticker))
+    if not isinstance(row, dict):
+        return False
+    try:
+        recorded = int(row.get("bars", 0))
+    except (TypeError, ValueError):
+        return False
+    return bars >= recorded
+
+
+def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False, slice_index=None, repairs=None):
+    """How to fetch each symbol. No clock and no network.
+
+    enabled False: every symbol is a full download (the old run).
+    Otherwise a symbol is full when it has no saved bars, its history is a short
+    stub that has not already been repaired, the weekly refresh is due, or it
+    falls in today's slice. Everyone else is incremental, starting overlap_days
+    before the last saved bar.
+    """
+    settings = settings or {}
+    counts, last = _cached_price_stats(cached)
+    plan = {}
+    for ticker in tickers:
+        symbol = str(ticker).upper().replace(".", "-")
+        if not enabled:
+            plan[symbol] = {"kind": "full", "start": None, "reason": "switched_off"}
+            continue
+        bars = int(counts.get(symbol, 0))
+        if bars <= 0:
+            plan[symbol] = {"kind": "full", "start": None, "reason": "new"}
+            continue
+        short = settings.get("repair") and bars < int(settings.get("repair_below_bars", 126))
+        if short and not _repair_already_done(repairs, symbol, bars):
+            plan[symbol] = {"kind": "full", "start": None, "reason": "repair"}
+            continue
+        if refresh_all:
+            plan[symbol] = {"kind": "full", "start": None, "reason": "refresh"}
+            continue
+        if slice_index is not None and settings.get("refresh") and settings.get("refresh_mode") == "slice":
+            if ticker_in_slice(symbol, settings.get("refresh_slices", 8), slice_index):
+                plan[symbol] = {"kind": "full", "start": None, "reason": "refresh"}
+                continue
+        last_day = pd.Timestamp(last[symbol])
+        start = (last_day - pd.Timedelta(days=int(settings.get("overlap_days", 5)))).strftime("%Y-%m-%d")
+        plan[symbol] = {"kind": "incremental", "start": start, "reason": "update"}
+    return plan
+
+
+def overlap_mismatches(cached, fresh, settings):
+    """Symbols whose completed overlap closes moved enough to suggest a split or adjustment.
+
+    The newest downloaded bar is left out. During the session that bar is still
+    forming, so a different close there is the hourly update, not a split.
+    """
+    old = _price_frame(cached)
+    new = _price_frame(fresh)
+    if len(old) == 0 or len(new) == 0:
+        return []
+    newest = new.groupby("ticker")["date"].max()
+    both = old.merge(new, on=["date", "ticker"], suffixes=("_old", "_new"))
+    if len(both) == 0:
+        return []
+    both = both[both["date"] < both["ticker"].map(newest)]
+    if len(both) == 0:
+        return []
+    pct = settings.get("adjust_tolerance_pct", 0.05)
+    dollars = settings.get("adjust_tolerance_dollars", 0.02)
+    bad = pd.Series(
+        [close_mismatch(a, b, pct, dollars) for a, b in zip(both["close_old"], both["close_new"])],
+        index=both.index,
+    )
+    return sorted(set(both.loc[bad, "ticker"].astype(str)))
+
+
+def merge_price_rows(cached, fresh, settings, hold_back=None):
+    """Keep every saved bar. Replace a date the download also returned, and append new dates.
+
+    Symbols in hold_back are left untouched, so a mismatched overlap is not mixed
+    into the old adjustment basis while a full refetch is still to come.
+    Returns (merged, mismatch_symbols).
+    """
+    old = _price_frame(cached)
+    new = _price_frame(fresh)
+    mismatches = overlap_mismatches(old, new, settings) if hold_back is None else []
+    skip = set(hold_back or []) | set(mismatches)
+    if skip and len(new):
+        new = new[~new["ticker"].isin(skip)]
+    if len(old) == 0:
+        return new.reset_index(drop=True), mismatches
+    if len(new) == 0:
+        return old.reset_index(drop=True), mismatches
+    keys = new[["date", "ticker"]].drop_duplicates()
+    keys["_hit"] = 1
+    marked = old.merge(keys, on=["date", "ticker"], how="left")
+    kept = marked[marked["_hit"].isna()].drop(columns="_hit")
+    out = pd.concat([kept[PRICE_COLS], new[PRICE_COLS]], ignore_index=True)
+    out = out.drop_duplicates(["date", "ticker"], keep="last")
+    out = out.sort_values(["ticker", "date"]).reset_index(drop=True)
+    return out, mismatches
+
+
+def combine_downloaded_prices(cached, fresh, merge, settings):
+    """Switch off replaces the file with the download. Switch on merges and never shrinks."""
+    if not merge:
+        return _price_frame(fresh), []
+    merged, mismatches = merge_price_rows(cached, fresh, settings)
+    return merged, mismatches
+
+
+def load_price_repairs(cache):
+    path = os.path.join(cache, "price_repairs.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_price_repairs(cache, repairs):
+    with open(os.path.join(cache, "price_repairs.json"), "w") as f:
+        json.dump(repairs, f, indent=1, sort_keys=True)
+
+
+def note_price_repairs(repairs, merged, fresh, tickers, min_bars):
+    """Remember a full fetch so a still-short history (a new listing) is not fetched again every hour.
+
+    A one-bar answer is not remembered. That is the truncated file we are trying
+    to repair, and the next run should ask for the full history again.
+    """
+    got = _price_frame(fresh)
+    if len(got) == 0 or merged is None or len(merged) == 0:
+        return repairs
+    counts = merged.groupby(merged["ticker"].astype(str)).size()
+    out = dict(repairs or {})
+    for ticker in tickers:
+        symbol = str(ticker)
+        sub = got[got["ticker"] == symbol]
+        if len(sub) < 2 or symbol not in counts.index:
+            continue
+        span_days = (pd.Timestamp(sub["date"].max()) - pd.Timestamp(sub["date"].min())).days
+        if len(sub) < int(min_bars) and span_days < 10:
+            continue
+        out[symbol] = {"bars": int(counts[symbol])}
+    return out
+
+
+def download_prices(tickers, cfg, start=None, threads=True, period=None):
     import yfinance as yf
     batch = int(rl(cfg)["yahoo_batch_size"])
     pause = float(rl(cfg)["yahoo_batch_pause_seconds"])
@@ -193,8 +470,14 @@ def download_prices(tickers, cfg):
 
     def pull(chunk):
         def once():
-            df = yf.download(chunk, period="5y", interval="1d", auto_adjust=True, progress=False,
-                             group_by="ticker", threads=True)
+            # period="5y" is the full history. A start date asks only for the overlap and the new days.
+            common = dict(interval="1d", auto_adjust=True, progress=False, group_by="ticker", threads=threads)
+            if start:
+                df = yf.download(chunk, start=start, **common)
+            elif period and period != "5y":
+                df = yf.download(chunk, period=period, **common)
+            else:
+                df = yf.download(chunk, period="5y", **common)
             got = frames_from_download(df)
             if got is None or got[0] is None or got[0].dropna(how="all").empty:
                 raise netutil.RetryableError("empty price batch (%d names)" % len(chunk))
@@ -207,7 +490,7 @@ def download_prices(tickers, cfg):
             mid = len(chunk) // 2
             return ("split", chunk[:mid], chunk[mid:])
 
-    queue = [tickers[i:i + batch] for i in range(0, len(tickers), batch)]
+    queue = [list(tickers)[i:i + batch] for i in range(0, len(tickers), batch)]
     while queue:
         chunk = queue.pop(0)
         got = pull(chunk)
@@ -259,6 +542,19 @@ def wide_from_long(df, col):
     return w
 
 
+def _download_long(tickers, cfg, start, threads, period):
+    if not tickers:
+        return pd.DataFrame(columns=PRICE_COLS)
+    frames = download_prices(tickers, cfg, start=start, threads=threads, period=period)
+    return _price_frame(ohlcv_long(*frames))
+
+
+def _save_prices(path, frame):
+    out = _price_frame(frame)
+    out.to_csv(path, index=False, compression="gzip")
+    return out
+
+
 def load_prices(tickers, cfg, cache, mode):
     path = os.path.join(cache, "ohlcv.csv.gz")
     cached = read_csv(path) if os.path.exists(path) else pd.DataFrame()
@@ -268,13 +564,110 @@ def load_prices(tickers, cfg, cache, mode):
             return cached
         log("Prices (Yahoo Finance)", "MISSING", "", "offline and no price cache")
         return pd.DataFrame()
+    settings = incremental_price_settings(cfg)
+    use_merge = incremental_prices_on(cfg) and len(cached) > 0
+    if not use_merge:
+        try:
+            # Switch off is the old download: five years, yfinance's own parallel threads, and the file is replaced.
+            # Switch on with an empty cache still uses the configured length and the slower chart concurrency.
+            if incremental_prices_on(cfg):
+                full_period, full_threads = settings["history_period"], settings["chart_concurrency"]
+            else:
+                full_period, full_threads = None, True
+            long = _download_long(tickers, cfg, None, full_threads, full_period)
+            long = _save_prices(path, long)
+            last = str(pd.to_datetime(long["date"]).max().date()) if len(long) else ""
+            note = "%d rows, batched" % len(long)
+            if not incremental_prices_on(cfg):
+                note += ", incremental prices off"
+            log("Prices (Yahoo Finance)", "OK", last, note)
+            return long
+        except Exception as exc:
+            if len(cached):
+                log("Prices (Yahoo Finance)", "CACHED", cached["date"].max(), str(exc)[:160])
+                return cached
+            log("Prices (Yahoo Finance)", "MISSING", "", str(exc)[:160])
+            return pd.DataFrame()
     try:
-        c, h, l, v, opn = download_prices(tickers, cfg)
-        long = ohlcv_long(c, h, l, v, opn)
-        long.to_csv(path, index=False, compression="gzip")
-        last = str(pd.to_datetime(long["date"]).max().date())
-        log("Prices (Yahoo Finance)", "OK", last, "%d rows, batched" % len(long))
-        return long
+        today = today_et()
+        repairs = load_price_repairs(cache)
+        refresh_all = False
+        slice_index = None
+        if settings["refresh"] and mode == "full":
+            if settings["refresh_mode"] == "slice":
+                slice_index = refresh_slice_index(today, settings["refresh_slices"])
+            elif weekly_refresh_due(STAMPS.get("prices_full_refresh"), today, settings["refresh_every_days"]):
+                refresh_all = True
+            elif not STAMPS.get("prices_full_refresh"):
+                # The cache is already a full history. Start the weekly clock without downloading it again.
+                STAMPS["prices_full_refresh"] = today
+        plan = classify_price_fetches(
+            tickers, cached, settings, True,
+            refresh_all=refresh_all, slice_index=slice_index, repairs=repairs,
+        )
+        groups = {}
+        for symbol, item in plan.items():
+            groups.setdefault((item["kind"], item["start"]), []).append(symbol)
+        fresh_parts = []
+        failed_groups = 0
+        threads = settings["chart_concurrency"]
+        for (kind, start), group in sorted(groups.items(), key=lambda kv: (kv[0][0] != "full", kv[0][1] or "")):
+            try:
+                part = _download_long(group, cfg, start, threads, settings["history_period"])
+                if len(part):
+                    fresh_parts.append(part)
+            except Exception as exc:
+                failed_groups += 1
+                print("price group failed", kind, start or "full", len(group), str(exc)[:140])
+        if not fresh_parts:
+            raise RuntimeError("no prices downloaded")
+        fresh = _price_frame(pd.concat(fresh_parts, ignore_index=True))
+        # A full download is already the adjusted series, so it is merged even when the
+        # closes differ. Only a short incremental overlap can ask for that full download.
+        full_set = {s for s, item in plan.items() if item["kind"] == "full"}
+        incremental_fresh = fresh[~fresh["ticker"].isin(full_set)] if len(fresh) else fresh
+        full_fresh = fresh[fresh["ticker"].isin(full_set)] if len(fresh) else fresh
+        merged, mismatches = merge_price_rows(cached, incremental_fresh, settings)
+        if len(full_fresh):
+            merged, _ignored = merge_price_rows(merged, full_fresh, settings, hold_back=[])
+        refetched = pd.DataFrame(columns=PRICE_COLS)
+        refetch_failed = False
+        if mismatches:
+            try:
+                refetched = _download_long(mismatches, cfg, None, threads, settings["history_period"])
+                if len(refetched):
+                    merged, _ignored = merge_price_rows(merged, refetched, settings, hold_back=[])
+            except Exception as exc:
+                refetch_failed = True
+                print("adjustment refetch failed", str(exc)[:140])
+        full_symbols = [s for s, item in plan.items() if item["kind"] == "full"] + list(mismatches)
+        got = [p for p in fresh_parts if len(p)]
+        if len(refetched):
+            got.append(refetched)
+        repairs = note_price_repairs(
+            repairs, merged, pd.concat(got, ignore_index=True), full_symbols, settings["repair_below_bars"])
+        merged = _save_prices(path, merged)
+        save_price_repairs(cache, repairs)
+        if refresh_all and failed_groups == 0:
+            STAMPS["prices_full_refresh"] = today
+        last = str(pd.to_datetime(merged["date"]).max().date()) if len(merged) else ""
+        reasons = {}
+        for item in plan.values():
+            reasons[item["reason"]] = reasons.get(item["reason"], 0) + 1
+        note = "incremental %d, full %d (new %d, repair %d, refresh %d), adjustment refetch %d, %d rows, %d at a time" % (
+            reasons.get("update", 0),
+            reasons.get("new", 0) + reasons.get("repair", 0) + reasons.get("refresh", 0),
+            reasons.get("new", 0), reasons.get("repair", 0), reasons.get("refresh", 0),
+            len(mismatches), len(merged), threads,
+        )
+        if failed_groups:
+            note += ", %d groups failed and kept prior bars" % failed_groups
+        if refetch_failed:
+            note += ", adjustment refetch failed and kept prior bars"
+        if refresh_all:
+            note = "weekly full refresh. " + note
+        log("Prices (Yahoo Finance)", "OK", last, note)
+        return merged
     except Exception as exc:
         if len(cached):
             log("Prices (Yahoo Finance)", "CACHED", cached["date"].max(), str(exc)[:160])

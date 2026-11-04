@@ -83,6 +83,7 @@ jobs:
           python tests/test_ma_colors.py
           python tests/test_trading_floor.py
           python tests/test_trading_floor_paper.py
+          python tests/test_incremental_prices.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |
