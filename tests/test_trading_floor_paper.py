@@ -231,6 +231,64 @@ def test_catch_up_after_a_missed_run():
     assert t["entry_date"] == D1 and t["exit_date"] == D2 and t["exit_reason"] == "STOP"
 
 
+def test_missed_full_run_fills_from_saved_bars_and_still_queues_new_buys():
+    """The Nov 3, 2026 BUY calls fill at the Nov 4 open once a later full run finishes.
+
+    Calls from a missed day are not invented. The completing day's new BUY is still
+    queued. A run during the next session does not use that unfinished bar.
+    """
+    days = ["2026-11-03", "2026-11-04", "2026-11-05"]
+    spec = {
+        "LLY": {
+            "2026-11-03": (1399.63, 1437.0, 1393.47, 1409.38),
+            "2026-11-04": (1440.0, 1445.96, 1401.59, 1417.99),
+            "2026-11-05": (1434.0, 1453.0, 1417.93, 1439.0),
+        },
+        "CHD": {
+            "2026-11-03": (109.76, 110.58, 108.99, 109.16),
+            "2026-11-04": (111.0, 113.25, 110.80, 112.03),
+            "2026-11-05": (113.80, 114.23, 113.25, 113.70),
+        },
+        "KO": {},
+    }
+    idx = pd.to_datetime(days)
+    bars = {k: pd.DataFrame(index=idx) for k in ("open", "high", "low", "close")}
+    for tk, rows in spec.items():
+        for j, k in enumerate(("open", "high", "low", "close")):
+            bars[k][tk] = [100.0 if rows.get(d) is None else rows[d][j] for d in days]
+    for k in bars:
+        bars[k]["SPY"] = [754.35, 766.81, 745.85]
+    nov3 = _floor(
+        {"ticker": "LLY", "company": "Lilly (Eli)", "total": 3, "stop": 1318.31, "target1": 1701.05},
+        {"ticker": "CHD", "company": "Church & Dwight", "total": 2, "stop": 102.72, "target1": 132.54},
+    )
+    nov4_cut = {k: v.loc[: pd.Timestamp("2026-11-04")] for k, v in bars.items()}
+    st = tp.update(tp.empty_state(), {k: v.loc[: pd.Timestamp("2026-11-03")] for k, v in bars.items()}, nov3, "2026-11-03", P)
+    # The Nov 4 after-close run never saved a floor. Catch-up still fills from the saved bars.
+    st = tp.update(st, nov4_cut, None, "2026-11-04", P)
+    by_id = st["trades"].set_index("trade_id")
+    lly, chd = by_id.loc["2026-11-03-LLY"], by_id.loc["2026-11-03-CHD"]
+    assert lly["status"] == "OPEN" and lly["entry_date"] == "2026-11-04" and lly["entry_price"] == 1440.0
+    assert chd["status"] == "OPEN" and chd["entry_date"] == "2026-11-04" and chd["entry_price"] == 111.0
+    assert lly["shares"] == round(1000.0 / 1440.0, 4) and chd["shares"] == round(1000.0 / 111.0, 4)
+    assert lly["days_held"] == 1 and chd["days_held"] == 1 and lly["stop"] == 1318.31 and chd["target"] == 132.54
+    assert "2026-11-04-" not in " ".join(st["trades"]["trade_id"].astype(str))
+    assert list(st["equity"]["date"]) == ["2026-11-03", "2026-11-04"]
+    assert st["summary"]["last_bar"] == "2026-11-04" and st["summary"]["last_signal_date"] == "2026-11-04"
+    assert st["summary"]["open_count"] == 2 and st["summary"]["pending_count"] == 0
+    assert st["summary"]["cash"] < 10000.0 and st["summary"]["cash"] > 8000.0
+    # A run while Nov 5 is still in session does not fill or take calls from that bar.
+    mid = tp.update(st, bars, _floor({"ticker": "KO", "stop": 70.0, "target1": 100.0}), "2026-11-05", P, asof_final=False)
+    assert mid["summary"]["last_bar"] == "2026-11-04" and mid["summary"]["last_signal_date"] == "2026-11-04"
+    assert set(mid["trades"]["ticker"]) == {"LLY", "CHD"}
+    # The after-close run of Nov 5 keeps adding that day's new BUY calls.
+    done = tp.update(mid, bars, _floor({"ticker": "KO", "company": "Coca-Cola", "stop": 70.0, "target1": 100.0, "total": 4}), "2026-11-05", P)
+    ko = _trade(done, "KO")
+    assert ko["status"] == "PENDING" and ko["signal_date"] == "2026-11-05" and ko["trade_id"] == "2026-11-05-KO"
+    assert _trade(done, "LLY")["status"] == "OPEN" and _trade(done, "CHD")["status"] == "OPEN"
+    assert done["summary"]["last_signal_date"] == "2026-11-05" and done["summary"]["pending_count"] == 1
+
+
 def test_unfinished_day_is_not_used():
     bars = _bars({"AAA": {D1: (100.0, 102.0, 99.0, 101.0), D2: (99.0, 100.0, 88.0, 89.0)}})
     st = _run(bars, {D0: _floor({})}, [D0, D1])
@@ -286,6 +344,8 @@ def test_page_settings_help_and_wiring():
     assert os.path.exists(os.path.join(ROOT, "docs", "trading_floor_paper_rules.md"))
     wf = open(os.path.join(ROOT, ".github", "workflows", "update.yml"), encoding="utf-8").read()
     assert "python tests/test_trading_floor_paper.py" in wf
+    # The 18:30 full run was cancelled at 60 minutes, inside the backtest, before this step saved.
+    assert "timeout-minutes: 120" in wf and "PYTHONUNBUFFERED" in wf
 
 
 def test_paper_module_makes_no_requests():
