@@ -69,6 +69,7 @@ feature.incremental_prices,True
 feature.twice_daily_schedule,True
 feature.liquid_names,True
 feature.sec_rolling,True
+feature.fast_history_backfill,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
@@ -441,6 +442,8 @@ incremental_prices.chart_concurrency,2
 incremental_prices.repair_below_bars,126
 incremental_prices.history_period,5y
 incremental_prices.backfill_per_run,40
+incremental_prices.fast_backfill_per_run,600
+incremental_prices.fast_backfill_max_runs,4
 liquid_names.min_market_cap,10000000000
 liquid_names.max_stocks,2000
 sec_facts.batch_per_run,120

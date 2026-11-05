@@ -5,6 +5,7 @@ Research screen for stocks. It never places a trade and it never calls a broker.
     python stock_desk.py --full      # prices plus the once-a-day fundamentals
     python stock_desk.py --hourly    # prices only; slow sources stay on today's cache
     python stock_desk.py --offline   # cache only, for tests
+    python stock_desk.py --backfill  # five-year history for names that have none yet
 
 Slow sources (SEC filings, analyst data, 13F, insiders, option chains) are fetched
 at most once per US session. If a source fails, the previous cache is kept and the
@@ -235,12 +236,81 @@ def incremental_price_settings(cfg):
         "chart_concurrency": min(8, max(1, concurrency)),
         "repair_below_bars": max(1, below),
         "history_period": period,
-        "backfill_per_run": max(0, int(raw.get("backfill_per_run", 40) or 0)),
+        "backfill_per_run": _cfg_int(raw, "backfill_per_run", 40, 0, 2500),
+        # Catch-up only (stock_desk.py --backfill). Regular runs keep backfill_per_run.
+        "fast_backfill_per_run": _cfg_int(raw, "fast_backfill_per_run", 600, 0, 2500),
+        "fast_backfill_max_runs": _cfg_int(raw, "fast_backfill_max_runs", 4, 1, 8),
     }
+
+
+def _cfg_int(raw, key, default, lo, hi):
+    try:
+        n = int(raw.get(key, default))
+    except (TypeError, ValueError):
+        n = default
+    return min(hi, max(lo, n))
 
 
 def incremental_prices_on(cfg):
     return bool((cfg.get("features") or {}).get("incremental_prices", True))
+
+
+def fast_history_backfill_on(cfg):
+    """Catch-up switch. On, the manual backfill workflow uses the higher cap."""
+    return bool((cfg.get("features") or {}).get("fast_history_backfill", True))
+
+
+def price_settings_for(cfg, mode):
+    """Regular runs stay on backfill_per_run. The catch-up workflow uses the fast cap.
+
+    chart_concurrency is the same either way (two chart calls at a time).
+    """
+    settings = incremental_price_settings(cfg)
+    if mode == "backfill" and fast_history_backfill_on(cfg) and incremental_prices_on(cfg):
+        settings["backfill_per_run"] = settings["fast_backfill_per_run"]
+    return settings
+
+
+def backfill_symbols(plan):
+    """Names this catch-up chunk should download, and names still left for a later chunk.
+
+    Only a brand-new symbol (no saved bars). An incremental update, a repair, and
+    the weekly refresh are the regular run's job, not this one-time history fill.
+    """
+    new, waiting = [], []
+    for symbol, item in (plan or {}).items():
+        if item.get("kind") == "full" and item.get("reason") == "new":
+            new.append(symbol)
+        elif item.get("reason") == "waiting":
+            waiting.append(symbol)
+    return sorted(new), sorted(waiting)
+
+
+def backfill_should_chain(status, run_index, max_runs):
+    """True when this chunk saved some new histories and names are still waiting.
+
+    run_index is 0 for the run started by hand. A chunk that saves nothing does
+    not chain, so a Yahoo refusal cannot loop. max_runs counts chained runs.
+    """
+    if not status or not int(status.get("enabled") or 0):
+        return False
+    try:
+        waiting = int(status.get("waiting") or 0)
+        fetched = int(status.get("fetched") or 0)
+        index = int(run_index or 0)
+        limit = int(max_runs)
+    except (TypeError, ValueError):
+        return False
+    if waiting <= 0 or fetched <= 0 or limit < 1:
+        return False
+    return index + 1 < limit
+
+
+def emit_backfill_status(status):
+    """One machine line the workflow reads. Values are integers."""
+    keys = ("enabled", "fetched", "waiting", "cap", "concurrency", "universe")
+    parts = ["%s=%d" % (key, int(status.get(key) or 0)) for key in keys]
+    print("BACKFILL " + " ".join(parts), flush=True)
 
 
 def _price_frame(df):
@@ -360,8 +430,9 @@ def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False
         last_day = pd.Timestamp(last[symbol])
         start = (last_day - pd.Timedelta(days=int(settings.get("overlap_days", 5)))).strftime("%Y-%m-%d")
         plan[symbol] = {"kind": "incremental", "start": start, "reason": "update"}
-    # A brand-new name needs five years once. Spread that across runs so one
-    # morning does not download a thousand full histories.
+    # A brand-new name needs five years once. Regular runs pass a small cap so one
+    # morning does not download a thousand full histories. The catch-up workflow
+    # passes a higher cap and chains until the waiting list is empty.
     cap = settings.get("backfill_per_run", 40)
     if enabled and cap is not None:
         waiting = sorted(s for s, item in plan.items() if item["reason"] == "new")
@@ -572,7 +643,7 @@ def load_prices(tickers, cfg, cache, mode):
             return cached
         log("Prices (Yahoo Finance)", "MISSING", "", "offline and no price cache")
         return pd.DataFrame()
-    settings = incremental_price_settings(cfg)
+    settings = price_settings_for(cfg, mode)
     use_merge = incremental_prices_on(cfg) and len(cached) > 0
     if not use_merge:
         try:
@@ -2716,28 +2787,9 @@ def load_trading_floor(buy, frames, close, opn, vol, news, scores, asof, cfg, ca
     return floor
 
 
-def main(argv=None):
-    global ROOT
-    argv = list(sys.argv[1:] if argv is None else argv)
-    mode = "full"
-    if "--offline" in argv:
-        mode = "offline"
-    elif "--hourly" in argv:
-        mode = "hourly"
-    elif "--full" in argv:
-        mode = "full"
-    ROOT = os.environ.get("DESK_ROOT") or os.path.dirname(os.path.abspath(__file__))
-    LOG.clear()
-    STAMPS.clear()
-    cfg = load_cfg()
-    data, cache, inp = paths()
-    load_stamps(cache)
+def build_price_tickers(cfg, cache, mode, hold_tickers, watch_tickers):
+    """Universe symbols plus the sector ETFs, SPY, QQQ, and VIX. First-seen order, no duplicates."""
     features = cfg["features"]
-    holds = holdings_table(cfg, inp)
-    watch = watch_table(cfg, inp)
-    hold_tickers = [str(t).upper() for t in holds["ticker"]] if len(holds) else []
-    watch_tickers = [str(t).upper() for t in watch["ticker"]] if len(watch) else []
-
     switches = index_switches(cfg)
     if features.get("universe", True):
         sp = load_index("sp500", cfg, cache, mode)
@@ -2757,6 +2809,108 @@ def main(argv=None):
     # QQQ is one more name in the same Yahoo batch as SPY. It does not add a request.
     extras = etfs + ["SPY", "QQQ", "^VIX"]
     tickers = list(dict.fromkeys(list(universe["ticker"]) + extras))
+    return universe, tickers
+
+
+def run_history_backfill(cfg=None):
+    """Download five-year daily bars for names that have none, then stop.
+
+    One chunk, capped by fast_backfill_per_run while features.fast_history_backfill
+    is on. Merges into the price cache and does not call Yahoo for profiles,
+    news, filings, or the names that already have bars. Prints a BACKFILL line.
+    Returns 0 when the chunk finished or the switch is off, 1 when Yahoo saved nothing.
+    """
+    cfg = cfg or load_cfg()
+    data, cache, inp = paths()
+    load_stamps(cache)
+    settings = price_settings_for(cfg, "backfill")
+    on = fast_history_backfill_on(cfg) and incremental_prices_on(cfg)
+    status = {
+        "enabled": 1 if on else 0,
+        "fetched": 0,
+        "waiting": 0,
+        "cap": settings["backfill_per_run"],
+        "concurrency": settings["chart_concurrency"],
+        "universe": 0,
+    }
+    if not on:
+        emit_backfill_status(status)
+        print("Fast history backfill is off. No Yahoo calls.", flush=True)
+        return 0
+    holds = holdings_table(cfg, inp)
+    watch = watch_table(cfg, inp)
+    hold_tickers = [str(t).upper() for t in holds["ticker"]] if len(holds) else []
+    watch_tickers = [str(t).upper() for t in watch["ticker"]] if len(watch) else []
+    # Full mode so a stale constituent cache cannot hide the new lists. Wikipedia
+    # and the Nasdaq files are not Yahoo chart calls.
+    universe, tickers = build_price_tickers(cfg, cache, "full", hold_tickers, watch_tickers)
+    status["universe"] = len(universe)
+    save_stamps(cache)
+    path = os.path.join(cache, "ohlcv.csv.gz")
+    cached = read_csv(path) if os.path.exists(path) else pd.DataFrame()
+    plan = classify_price_fetches(tickers, cached, settings, True)
+    new_names, waiting = backfill_symbols(plan)
+    if not new_names:
+        status["waiting"] = len(waiting)
+        emit_backfill_status(status)
+        print("No names are waiting for a first history.", flush=True)
+        return 0
+    try:
+        fresh = _download_long(new_names, cfg, None, settings["chart_concurrency"], settings["history_period"])
+    except Exception as exc:
+        status["waiting"] = len(waiting) + len(new_names)
+        emit_backfill_status(status)
+        print("backfill download failed:", str(exc)[:200], flush=True)
+        return 1
+    got = sorted(set(fresh["ticker"].astype(str))) if len(fresh) else []
+    if not got:
+        status["waiting"] = len(waiting) + len(new_names)
+        emit_backfill_status(status)
+        print("backfill download returned no bars", flush=True)
+        return 1
+    merged, _ignored = merge_price_rows(cached, fresh, settings, hold_back=[])
+    _save_prices(path, merged)
+    missed = [s for s in new_names if s not in set(got)]
+    status["fetched"] = len(got)
+    status["waiting"] = len(waiting) + len(missed)
+    emit_backfill_status(status)
+    print(
+        "Backfill saved %d new histories (%d still waiting, cap %d, %d at a time). Cache only. No profiles, filings, news, or options."
+        % (status["fetched"], status["waiting"], status["cap"], status["concurrency"]),
+        flush=True,
+    )
+    return 0
+
+
+def main(argv=None):
+    global ROOT
+    argv = list(sys.argv[1:] if argv is None else argv)
+    mode = "full"
+    if "--offline" in argv:
+        mode = "offline"
+    elif "--hourly" in argv:
+        mode = "hourly"
+    elif "--backfill" in argv:
+        mode = "backfill"
+    elif "--full" in argv:
+        mode = "full"
+    ROOT = os.environ.get("DESK_ROOT") or os.path.dirname(os.path.abspath(__file__))
+    if mode == "backfill":
+        LOG.clear()
+        STAMPS.clear()
+        return run_history_backfill(load_cfg())
+    LOG.clear()
+    STAMPS.clear()
+    cfg = load_cfg()
+    data, cache, inp = paths()
+    load_stamps(cache)
+    features = cfg["features"]
+    holds = holdings_table(cfg, inp)
+    watch = watch_table(cfg, inp)
+    hold_tickers = [str(t).upper() for t in holds["ticker"]] if len(holds) else []
+    watch_tickers = [str(t).upper() for t in watch["ticker"]] if len(watch) else []
+
+    universe, tickers = build_price_tickers(cfg, cache, mode, hold_tickers, watch_tickers)
     long = load_prices(tickers, cfg, cache, mode)
     close, high, low, vol = wide_from_long(long, "close"), wide_from_long(long, "high"), wide_from_long(long, "low"), wide_from_long(long, "volume")
     price_status = source_status("Prices (Yahoo Finance)")
@@ -3204,4 +3358,6 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    result = main()
+    if isinstance(result, int):
+        sys.exit(result)

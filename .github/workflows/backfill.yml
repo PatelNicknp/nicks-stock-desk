@@ -1,0 +1,88 @@
+name: Fill new price history
+
+# Manual catch-up for stocks that have no saved daily bars yet.
+# Actions -> Fill new price history -> Run workflow. It is not on a schedule,
+# so it adds no Yahoo traffic until someone starts it.
+# One run downloads fast_backfill_per_run (600) five-year charts, two at a time,
+# merges them into cache/ohlcv.csv.gz, and commits. It does not fetch profiles,
+# filings, news, or options. If names are still waiting and this run saved some,
+# it starts the next run, up to fast_backfill_max_runs (4).
+# features.fast_history_backfill turns the whole thing off.
+# It shares the update queue so it cannot write the price file at the same time
+# as the 10:15 or 18:30 job. Those regular runs stay capped at 40 new names.
+on:
+  workflow_dispatch:
+    inputs:
+      run_index:
+        description: "Leave at 0. A chained run sets the next number itself."
+        required: false
+        default: "0"
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nick-stock-desk
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned dependencies
+        run: pip install -r requirements.txt
+      - name: Download five-year history for names that have none
+        id: fill
+        env:
+          BACKFILL_RUN_INDEX: ${{ inputs.run_index }}
+        run: |
+          set -euo pipefail
+          python3 stock_desk.py --backfill | tee /tmp/backfill.log
+          python3 - << 'PY'
+          import os, re, stock_desk as desk
+          line = ""
+          for raw in open("/tmp/backfill.log"):
+              if raw.startswith("BACKFILL "):
+                  line = raw.strip()
+          status = {}
+          for key, value in re.findall(r"([a-z]+)=(-?\d+)", line):
+              status[key] = int(value)
+          if "enabled" not in status:
+              raise SystemExit("no BACKFILL line")
+          settings = desk.incremental_price_settings(desk.load_cfg())
+          chain = desk.backfill_should_chain(
+              status, os.environ.get("BACKFILL_RUN_INDEX"), settings["fast_backfill_max_runs"])
+          path = os.environ.get("GITHUB_OUTPUT")
+          if path:
+              with open(path, "a") as fh:
+                  fh.write("chain=%s\n" % ("true" if chain else "false"))
+                  fh.write("waiting=%s\n" % status.get("waiting", 0))
+                  fh.write("fetched=%s\n" % status.get("fetched", 0))
+          print("chain", chain, "fetched", status.get("fetched"), "waiting", status.get("waiting"))
+          PY
+      - name: Save the price cache
+        run: |
+          set -euo pipefail
+          git config user.name "stock-desk-bot"
+          git config user.email "stock-desk-bot@users.noreply.github.com"
+          git add cache
+          if git diff --cached --quiet; then
+            echo "No price changes."
+          else
+            git commit -m "Backfill new price history $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
+      - name: Start the next chunk if names are still waiting
+        if: steps.fill.outputs.chain == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BACKFILL_RUN_INDEX: ${{ inputs.run_index }}
+        run: python3 watchdog.py chain-backfill

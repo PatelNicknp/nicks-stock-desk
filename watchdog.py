@@ -6,6 +6,7 @@ Never calls Yahoo. Four commands:
     python watchdog.py guard         # first step of the update job
     python watchdog.py keeper        # keeper workflow: sleep to each slot, make it up if it did not run
     python watchdog.py ensure-keeper # end of every update and watchdog run: start a keeper if none is live
+    python watchdog.py chain-backfill # Fill new price history: start the next chunk if the workflow asks
 
 Intended slots are New York time (America/New_York), Monday to Friday:
 hourly at 10:15, 11:15, ... 17:15 and the full run at 18:30. GitHub cron is UTC only,
@@ -507,15 +508,33 @@ def record(level, text):
             pass
 
 
-def _dispatch(workflow, inputs, tries=3):
+def _dispatch(workflow, inputs, tries=3, ref="main"):
     for i in range(tries):
         try:
-            _api("POST", "/actions/workflows/%s/dispatches" % workflow, {"ref": "main", "inputs": inputs})
+            _api("POST", "/actions/workflows/%s/dispatches" % workflow, {"ref": ref or "main", "inputs": inputs})
             return True
         except Exception as e:
             print("dispatch %s failed (%s), try %d of %d" % (workflow, e, i + 1, tries), flush=True)
             time.sleep(20)
     return False
+
+
+def backfill_dispatch_body(ref, run_index):
+    """The next Fill new price history run, on the same branch, one index higher."""
+    try:
+        nxt = int(run_index or 0) + 1
+    except (TypeError, ValueError):
+        nxt = 1
+    return {"ref": ref or "main", "inputs": {"run_index": str(nxt)}}
+
+
+def chain_backfill(env):
+    """Start the next catch-up chunk. The workflow decides whether this should run."""
+    body = backfill_dispatch_body(env.get("GITHUB_REF_NAME"), env.get("BACKFILL_RUN_INDEX"))
+    print("chain-backfill:", body, flush=True)
+    if env.get("DRY_RUN", "").lower() in ("1", "true", "yes"):
+        return True
+    return _dispatch("backfill.yml", body["inputs"], ref=body["ref"])
 
 
 def ensure_keeper(cfg=None, dry=False):
@@ -659,6 +678,9 @@ def main(argv):
     if cmd == "ensure-keeper":
         ensure_keeper(dry=os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes"))
         return 0
+    if cmd == "chain-backfill":
+        ok = chain_backfill(os.environ)
+        return 0 if ok else 1
     if cmd == "guard":
         skip, mode = run_guard(os.environ)
         _out("skip", "true" if skip else "false")
