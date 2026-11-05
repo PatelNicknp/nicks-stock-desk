@@ -74,7 +74,7 @@ TEMPLATE = """<!doctype html>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/desk.css">
-</head>
+{head_extra}</head>
 <body data-page="{pid}">
 <div id="app"></div>
 <script src="vendor/papaparse.min.js"></script>
@@ -86,8 +86,12 @@ TEMPLATE = """<!doctype html>
 """
 
 # Page-only scripts, loaded before pages.js so the page is registered when the desk boots.
+HEAD_EXTRA = {
+    "today": '<link rel="stylesheet" href="css/market_news.css">\n',
+}
 EXTRA = {
     "chartviewer": '<script src="js/viewer.js"></script>\n',
+    "today": '<script src="js/market_news.js"></script>\n',
 }
 
 
@@ -96,7 +100,11 @@ def main():
     for filename, pid, title in PAGES:
         path = os.path.join(root, filename)
         with open(path, "w", encoding="utf-8") as f:
-            f.write(TEMPLATE.format(title=title, pid=pid, extra=EXTRA.get(pid, "")))
+            f.write(TEMPLATE.format(
+                title=title, pid=pid,
+                extra=EXTRA.get(pid, ""),
+                head_extra=HEAD_EXTRA.get(pid, ""),
+            ))
     print(len(PAGES), "pages")
 
 if __name__ == "__main__":

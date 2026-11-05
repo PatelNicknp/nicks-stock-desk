@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
+    "source": "Reuters",
+    "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
+    "published": "2026-11-05T14:00:00Z",
+    "summary": "Broad tech weakness dragged the Nasdaq lower as investors questioned AI spending.",
+    "trusted": true
+  },
+  {
+    "title": "Oil prices firm while investors rotate into consumer staples",
+    "source": "Associated Press",
+    "url": "https://apnews.com/example/oil-staples-rotation",
+    "published": "2026-11-05T13:30:00Z",
+    "summary": "Energy gained and staples held up as risk appetite faded in megacap tech.",
+    "trusted": true
+  },
+  {
+    "title": "Markets digest US midterm results as Washington outlook comes into focus",
+    "source": "Reuters",
+    "url": "https://www.reuters.com/example/midterms-markets",
+    "published": "2026-11-05T12:00:00Z",
+    "summary": "Investors weighed the election split and what it means for spending and regulation.",
+    "trusted": true
+  },
+  {
+    "title": "Federal Reserve officials signal patience on the path of interest rates",
+    "source": "Federal Reserve",
+    "url": "https://www.federalreserve.gov/example/fomc-patience",
+    "published": "2026-11-04T18:00:00Z",
+    "summary": "Fed commentary kept rate-cut hopes in check after recent inflation readings.",
+    "trusted": true
+  },
+  {
+    "title": "Jobless claims stay low ahead of the next employment report",
+    "source": "Bureau of Labor Statistics",
+    "url": "https://www.bls.gov/example/claims",
+    "published": "2026-11-04T12:30:00Z",
+    "summary": "Weekly claims remained contained; markets await the full jobs print.",
+    "trusted": true
+  },
+  {
+    "title": "Why Thomson Reuters Stock Plummeted by Almost 10% Today",
+    "source": "Motley Fool",
+    "url": "https://example.com/single-stock-noise",
+    "published": "2026-11-05T10:00:00Z",
+    "summary": "Single-name story that should be dropped.",
+    "trusted": false
+  },
+  {
+    "title": "NVDA shares surge after a rumor",
+    "source": "Stocktwits",
+    "url": "https://example.com/nvda-rumor",
+    "published": "2026-11-05T09:00:00Z",
+    "summary": "Single ticker chip — must not appear in the market brief.",
+    "trusted": false
+  }
+]

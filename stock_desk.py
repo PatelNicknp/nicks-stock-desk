@@ -3351,6 +3351,49 @@ def main(argv=None):
     }
     with open(os.path.join(data, "meta.json"), "w") as f:
         json.dump(meta, f, indent=1)
+    # Market news reads market_today.csv and sectors.csv from disk, so it runs
+    # after those files are written. Full and hourly fetch free RSS and the
+    # Nasdaq calendar. Offline does not, so the test job stays offline. No Yahoo.
+    mn_on = features.get("market_news", True)
+    if not mn_on:
+        log("Market news brief", "OK", "", "feature off. Research only. No broker.")
+    else:
+        try:
+            import market_news.brief as market_news_brief
+            now_et = pd.Timestamp.now(tz=ET).to_pydatetime()
+            if mode == "full":
+                mn_mode = "full"
+            elif mode == "offline":
+                mn_mode = "offline"
+            else:
+                mn_mode = "hourly"
+            extra = {}
+            if mn_mode == "offline":
+                extra["fetch_calendar"] = lambda: {
+                    "next": None,
+                    "week": [],
+                    "text": "Offline run. Calendar not fetched.",
+                    "source": "offline",
+                }
+            brief = market_news_brief.publish(
+                data_dir=data,
+                cache_dir=cache,
+                mode=mn_mode,
+                now_et=now_et,
+                **extra,
+            )
+            log(
+                "Market news brief",
+                "OK",
+                brief.get("session", ""),
+                "%s · mood %s · %d headlines" % (
+                    brief.get("slot"),
+                    (brief.get("mood") or {}).get("label"),
+                    len(brief.get("headlines") or []),
+                ),
+            )
+        except Exception as ex:
+            log("Market news brief", "CACHED", "", "kept the last market_brief.json. %s" % ex)
     # rewrite updates log now that backtest and the rest have logged
     write_out(pd.DataFrame(LOG), "updates_log", data)
     print("wrote %d files to %s" % (len(files), data))

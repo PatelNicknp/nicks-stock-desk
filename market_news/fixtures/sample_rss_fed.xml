@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Federal Reserve Press Releases</title>
+    <item>
+      <title>Federal Reserve issues FOMC statement</title>
+      <link>https://www.federalreserve.gov/newsevents/pressreleases/monetary20261105a.htm</link>
+      <description>The Committee decided to hold the federal funds rate steady.</description>
+      <pubDate>Wed, 05 Nov 2026 14:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Speech by Governor on the economic outlook</title>
+      <link>https://www.federalreserve.gov/example/speech</link>
+      <description>Remarks on inflation and labor.</description>
+      <pubDate>Tue, 04 Nov 2026 16:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

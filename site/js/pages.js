@@ -327,6 +327,9 @@
         state: { sort: "score", dir: "desc", page: 0 }, pageSize: 8, foot: false, expandable: true,
       });
     }
+    if (window.MarketNews && D.featureOn("feature.market_news")) {
+      MarketNews.mountToday(ctx.page, { featureOn: D.featureOn });
+    }
   }
 
   function renderTop(ctx) {
