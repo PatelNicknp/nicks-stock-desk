@@ -70,7 +70,8 @@
     "incremental_prices": true,
     "twice_daily_schedule": true,
     "liquid_names": true,
-    "sec_rolling": true
+    "sec_rolling": true,
+    "fast_history_backfill": true
   },
   "keeper": {
     "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. At verify_after_min past each slot it checks that the slot's run succeeded and that data/meta.json price_as_of reached that day. A failed slot gets one retry (max_tries 2 means the run plus one retry, never more); a run still going is looked at again every recheck_min minutes. Stale data after a success is recorded in the keeper run, not retried. It only triggers the normal slots and at most one retry of a failed slot, so Yahoo traffic does not grow.",
@@ -408,7 +409,7 @@
     "greed_line": 0.7
   },
   "incremental_prices": {
-    "_note": "Daily prices (features.incremental_prices). On: each run asks Yahoo only for the days since the last saved bar, starting overlap_days calendar days earlier, and merges those bars into cache/ohlcv.csv.gz. Older bars stay, so a short download cannot wipe a stock. The newest bar is not part of the adjustment check, because it is still forming during the day. An older overlap close that moved by more than the wider of adjust_tolerance_dollars and adjust_tolerance_pct percent of the old close (0.05 means 0.05 percent, not 5 percent) is treated as a split or dividend adjustment, and that one symbol is downloaded again for history_period. repair (on) does that full download once for a symbol with fewer than repair_below_bars saved bars, such as a history cut down to a single day, and does not repeat it if the full download is still short. refresh (on) redownloads adjusted history on the after-close run only. refresh_mode weekly does everyone when the last full refresh is at least refresh_every_days old. refresh_mode slice does one of refresh_slices slices each after-close run. The first full run after this is turned on starts the weekly clock and does not redownload five years that day. chart_concurrency is how many chart calls run at once (1 or 2). The same backoff as the rest of the desk still applies. Off: every run downloads history_period for every symbol with the old parallel download and replaces the price file.",
+    "_note": "Daily prices (features.incremental_prices). On: each run asks Yahoo only for the days since the last saved bar, starting overlap_days calendar days earlier, and merges those bars into cache/ohlcv.csv.gz. Older bars stay, so a short download cannot wipe a stock. The newest bar is not part of the adjustment check, because it is still forming during the day. An older overlap close that moved by more than the wider of adjust_tolerance_dollars and adjust_tolerance_pct percent of the old close (0.05 means 0.05 percent, not 5 percent) is treated as a split or dividend adjustment, and that one symbol is downloaded again for history_period. repair (on) does that full download once for a symbol with fewer than repair_below_bars saved bars, such as a history cut down to a single day, and does not repeat it if the full download is still short. refresh (on) redownloads adjusted history on the after-close run only. refresh_mode weekly does everyone when the last full refresh is at least refresh_every_days old. refresh_mode slice does one of refresh_slices slices each after-close run. The first full run after this is turned on starts the weekly clock and does not redownload five years that day. chart_concurrency is how many chart calls run at once (1 or 2). The same backoff as the rest of the desk still applies. backfill_per_run (40) is how many brand-new names a regular 10:15 or 18:30 run downloads in full. features.fast_history_backfill (on) is the one-time catch-up: stock_desk.py --backfill, and the Fill new price history workflow, download fast_backfill_per_run (600) names that have no saved bars, two chart calls at a time, and may chain up to fast_backfill_max_runs (4) runs. That path does not fetch profiles, filings, news, or options, and it does not raise the cap on the regular runs. Turn the switch off after the new names have history. Off: every run downloads history_period for every symbol with the old parallel download and replaces the price file.",
     "repair": true,
     "refresh": true,
     "refresh_mode": "weekly",
@@ -420,7 +421,9 @@
     "chart_concurrency": 2,
     "repair_below_bars": 126,
     "history_period": "5y",
-    "backfill_per_run": 40
+    "backfill_per_run": 40,
+    "fast_backfill_per_run": 600,
+    "fast_backfill_max_runs": 4
   },
   "rate_limit": {
     "sec_user_agent": "NickStockDesk research nicks-stock-desk@example.com",

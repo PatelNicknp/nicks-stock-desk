@@ -85,6 +85,7 @@ jobs:
           python tests/test_trading_floor_paper.py
           python tests/test_incremental_prices.py
           python tests/test_twice_daily_universe.py
+          python tests/test_fast_backfill.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |
