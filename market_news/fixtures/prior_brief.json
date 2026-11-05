@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "feature": "market_news",
+  "session": "2026-11-04",
+  "slot": "evening_close",
+  "why_moved": "The S&P slipped 0.4% (Nasdaq -0.9%), dragged by Technology (-1.2%).",
+  "mood": {
+    "label": "Mixed",
+    "vix": 18.4,
+    "put_call_zone": "Greed",
+    "why": "VIX 18.4, put/call Greed, 260 up / 240 down"
+  },
+  "causes": [
+    {"cause": "election", "label": "Election", "score": 2.5},
+    {"cause": "ai_mood", "label": "AI / Tech mood", "score": 2.0}
+  ],
+  "headlines": [],
+  "stats": {"spy_day_pct": -0.4, "qqq_day_pct": -0.9},
+  "disclaimer": "Research only."
+}

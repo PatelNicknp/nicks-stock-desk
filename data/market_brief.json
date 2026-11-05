@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "feature": "market_news",
+  "session": "2026-11-05",
+  "slot": "morning_open",
+  "updated_pt": "2026-11-05 07:28 PT",
+  "price_as_of": "2026-11-05",
+  "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+  "mood": {
+    "label": "Fear",
+    "vix": 21.98,
+    "put_call_zone": "Greed",
+    "put_call": 0.67,
+    "advancers": 222,
+    "decliners": 299,
+    "why": "VIX 22.0, put/call Greed, 222 up / 299 down"
+  },
+  "headlines": [
+    {
+      "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
+      "published": "2026-11-05T14:00:00Z",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ]
+    },
+    {
+      "title": "Oil prices firm while investors rotate into consumer staples",
+      "source": "Associated Press",
+      "url": "https://apnews.com/example/oil-staples-rotation",
+      "published": "2026-11-05T13:30:00Z",
+      "trusted": true,
+      "causes": [
+        "oil",
+        "ai_mood"
+      ]
+    },
+    {
+      "title": "Markets digest US midterm results as Washington outlook comes into focus",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/example/midterms-markets",
+      "published": "2026-11-05T12:00:00Z",
+      "trusted": true,
+      "causes": [
+        "election"
+      ]
+    },
+    {
+      "title": "Federal Reserve officials signal patience on the path of interest rates",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/example/fomc-patience",
+      "published": "2026-11-04T18:00:00Z",
+      "trusted": true,
+      "causes": [
+        "rates",
+        "inflation"
+      ]
+    },
+    {
+      "title": "Jobless claims stay low ahead of the next employment report",
+      "source": "Bureau of Labor Statistics",
+      "url": "https://www.bls.gov/example/claims",
+      "published": "2026-11-04T12:30:00Z",
+      "trusted": true,
+      "causes": [
+        "jobs"
+      ]
+    }
+  ],
+  "causes": [
+    {
+      "cause": "ai_mood",
+      "label": "AI / Tech mood",
+      "score": 13.5,
+      "headlines": [
+        {
+          "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
+          "published": "2026-11-05T14:00:00Z",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ]
+        },
+        {
+          "title": "Oil prices firm while investors rotate into consumer staples",
+          "source": "Associated Press",
+          "url": "https://apnews.com/example/oil-staples-rotation",
+          "published": "2026-11-05T13:30:00Z",
+          "trusted": true,
+          "causes": [
+            "oil",
+            "ai_mood"
+          ]
+        }
+      ]
+    },
+    {
+      "cause": "oil",
+      "label": "Oil / Energy",
+      "score": 2.98,
+      "headlines": [
+        {
+          "title": "Oil prices firm while investors rotate into consumer staples",
+          "source": "Associated Press",
+          "url": "https://apnews.com/example/oil-staples-rotation",
+          "published": "2026-11-05T13:30:00Z",
+          "trusted": true,
+          "causes": [
+            "oil",
+            "ai_mood"
+          ]
+        }
+      ]
+    }
+  ],
+  "vs_yesterday": {
+    "prior_mood": "Mixed",
+    "prior_session": "2026-11-04",
+    "text": "Mood flipped: was Mixed, now Fear.",
+    "flipped": true,
+    "same_fear": false
+  },
+  "breadth_check": {
+    "aligned": true,
+    "flag": "broad_decline",
+    "text": "Index and breadth agree: a broad down day."
+  },
+  "regime": {
+    "label": "uptrend",
+    "pct_above_50day": 66.9,
+    "pct_above_200day": 63.8,
+    "text": "More than half the desk is still above the 50-day and 200-day."
+  },
+  "calendar": {
+    "next": {
+      "date": "2026-11-06",
+      "time": "08:30",
+      "event": "Initial Jobless Claims",
+      "forecast": "198K",
+      "previous": "194K",
+      "country": "US"
+    },
+    "week": [
+      {
+        "date": "2026-11-06",
+        "time": "08:30",
+        "event": "Initial Jobless Claims",
+        "forecast": "198K",
+        "previous": "194K",
+        "country": "US"
+      },
+      {
+        "date": "2026-11-07",
+        "time": "10:00",
+        "event": "University of Michigan Sentiment",
+        "forecast": "55.0",
+        "previous": "54.2",
+        "country": "US"
+      }
+    ],
+    "text": "Next up: Initial Jobless Claims (2026-11-06 08:30).",
+    "source": "fixture"
+  },
+  "prior_brief": {
+    "session": "2026-11-04",
+    "slot": "evening_close",
+    "why_moved": "The S&P slipped 0.4% (Nasdaq -0.9%), dragged by Technology (-1.2%).",
+    "mood": "Mixed",
+    "causes": [
+      "Election",
+      "AI / Tech mood"
+    ]
+  },
+  "stats": {
+    "spy_price": 745.85,
+    "spy_day_pct": -2.73,
+    "qqq_day_pct": -4.98,
+    "vix": 21.98,
+    "advancers": 222,
+    "decliners": 299,
+    "breadth_sma50": 66.9,
+    "breadth_sma200": 63.8,
+    "put_call": 0.67,
+    "put_call_zone": "Greed",
+    "fred_dgs10": 4.96
+  },
+  "learning": {
+    "stub": {
+      "date": "2026-11-05",
+      "slot": "morning_open",
+      "mood": "Fear",
+      "regime": "uptrend",
+      "causes": [
+        "ai_mood",
+        "oil"
+      ],
+      "sources": [
+        "Associated Press",
+        "Bureau of Labor Statistics",
+        "Federal Reserve",
+        "Reuters"
+      ],
+      "spy_day_pct": -2.73,
+      "qqq_day_pct": -4.98,
+      "next_day_spy_pct": null,
+      "next_day_direction": null
+    },
+    "stats": {
+      "by_cause": {
+        "election": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
+        },
+        "ai_mood": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
+        }
+      },
+      "by_source": {
+        "Reuters": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
+        },
+        "Associated Press": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
+        }
+      },
+      "n_labeled": 1,
+      "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
+    }
+  },
+  "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
+  "data_status": "OK",
+  "watch_next": "Jobless claims tomorrow 5:30 AM PT — expect a jumpy open",
+  "weekly_recap": null
+}

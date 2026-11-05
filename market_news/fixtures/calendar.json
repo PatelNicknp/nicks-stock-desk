@@ -1,0 +1,31 @@
+{
+  "as_of": "2026-11-05",
+  "next": {
+    "date": "2026-11-06",
+    "time": "08:30",
+    "event": "Initial Jobless Claims",
+    "forecast": "198K",
+    "previous": "194K",
+    "country": "US"
+  },
+  "week": [
+    {
+      "date": "2026-11-06",
+      "time": "08:30",
+      "event": "Initial Jobless Claims",
+      "forecast": "198K",
+      "previous": "194K",
+      "country": "US"
+    },
+    {
+      "date": "2026-11-07",
+      "time": "10:00",
+      "event": "University of Michigan Sentiment",
+      "forecast": "55.0",
+      "previous": "54.2",
+      "country": "US"
+    }
+  ],
+  "source": "fixture",
+  "text": "Next up: Initial Jobless Claims (2026-11-06 08:30)."
+}

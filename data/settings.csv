@@ -70,6 +70,7 @@ feature.twice_daily_schedule,True
 feature.liquid_names,True
 feature.sec_rolling,True
 feature.fast_history_backfill,True
+feature.market_news,True
 buy_setups.market_filter,True
 index.sp500,True
 index.sp400,True
