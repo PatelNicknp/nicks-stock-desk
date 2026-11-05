@@ -72,10 +72,10 @@ feature.sec_rolling,True
 feature.fast_history_backfill,True
 buy_setups.market_filter,True
 index.sp500,True
-index.ndx100,True
-index.growth,True
 index.sp400,True
 index.sp600,True
+index.ndx100,True
+index.growth,True
 index.liquid,True
 scoring.flat_band_pct,0.05
 scoring.buy_at,8

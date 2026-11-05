@@ -1,6 +1,6 @@
 ticker,company,price,day_pct,score,verdict,entry_low,entry_high,distance_to_entry_pct,timing,note_input,data_status,note,disclaimer
-AVGO,Broadcom,325.48,-2.0,8,HOLD,325.95,338.95,-3.97,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-LLY,Lilly (Eli),1417.99,0.61,10,BUY,1236.96,1283.46,10.48,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-COST,Costco,1046.47,2.67,12,BUY,973.33,991.97,5.49,Uptrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-CAT,Caterpillar Inc.,591.3,-5.23,3,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-PLTR,Palantir Technologies,171.7,-2.11,4,HOLD,186.84,194.74,-11.83,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+AVGO,Broadcom,301.14,-7.48,8,HOLD,322.36,336.0,-10.38,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+LLY,Lilly (Eli),1439.0,1.48,10,BUY,1249.59,1296.93,10.95,Breakout,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+COST,Costco,1077.76,2.99,10,BUY,978.49,998.53,7.93,Extended,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+CAT,Caterpillar Inc.,560.35,-5.23,3,AVOID,,,,Downtrend,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+PLTR,Palantir Technologies,155.03,-9.71,3,AVOID,,,,Sideways,Growth name to watch,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
