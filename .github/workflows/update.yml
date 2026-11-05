@@ -36,7 +36,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The paper test is saved at the end of the 18:30 ET full run, after the backtest.
+    # A 60-minute cap was cancelling that run inside the backtest, so fills never saved.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       # Scheduled runs: skip unless this cron is a New York-time slot (the other DST twin stops here).
@@ -94,6 +96,8 @@ jobs:
           python tests/test_market_news_watch.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
           set -e
           # A manual run is full, as before. A watchdog or keeper make-up uses the mode of the slot it replaces.
