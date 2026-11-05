@@ -198,6 +198,14 @@ def test_duplicate_guard():
 
 
 def test_run_guard_end_to_end():
+    old = w.TWICE_DAILY
+    try:
+        _run_guard_end_to_end()
+    finally:
+        w.TWICE_DAILY = old
+
+
+def _run_guard_end_to_end():
     def runs():
         return [{"id": 9, "status": "in_progress", "conclusion": None, "created_at": "2026-11-02T14:15:40Z"}]
     skip, mode = w.run_guard({"EVENT_NAME": "schedule", "SCHEDULE": HOURLY, "GITHUB_RUN_ID": "9"}, fetch=runs)

@@ -66,10 +66,16 @@ feature.split_tech_fund,True
 feature.trading_floor,True
 feature.trading_floor_paper,True
 feature.incremental_prices,True
+feature.twice_daily_schedule,True
+feature.liquid_names,True
+feature.sec_rolling,True
 buy_setups.market_filter,True
 index.sp500,True
 index.ndx100,True
 index.growth,True
+index.sp400,True
+index.sp600,True
+index.liquid,True
 scoring.flat_band_pct,0.05
 scoring.buy_at,8
 scoring.hold_at,4
@@ -434,4 +440,10 @@ incremental_prices.adjust_tolerance_dollars,0.02
 incremental_prices.chart_concurrency,2
 incremental_prices.repair_below_bars,126
 incremental_prices.history_period,5y
+incremental_prices.backfill_per_run,40
+liquid_names.min_market_cap,10000000000
+liquid_names.max_stocks,2000
+sec_facts.batch_per_run,120
+sec_facts.refresh_every_days,7
+sec_facts.cik_overrides.XOM,0000034088
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
