@@ -80,9 +80,12 @@ def test_wiki_tables_for_both_indexes():
 
 
 def test_switches_default_on():
-    assert desk.index_switches({}) == {"sp500": True, "ndx100": True, "growth": True}
+    assert desk.index_switches({}) == {
+        "sp500": True, "sp400": True, "sp600": True, "ndx100": True, "growth": True, "liquid": True,
+    }
     assert desk.index_switches({"indexes": {"ndx100": False}})["ndx100"] is False
     assert desk.membership_label("yes", "yes", "yes") == "SP500 / NDX100 / Growth"
+    assert desk.membership_label("no", "no", "no", "yes", "no", "no") == "SP400"
     assert desk.membership_label("no", "no", "no") == "Focus"
 
 

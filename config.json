@@ -67,7 +67,10 @@
     "split_tech_fund": true,
     "trading_floor": true,
     "trading_floor_paper": true,
-    "incremental_prices": true
+    "incremental_prices": true,
+    "twice_daily_schedule": true,
+    "liquid_names": true,
+    "sec_rolling": true
   },
   "keeper": {
     "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. At verify_after_min past each slot it checks that the slot's run succeeded and that data/meta.json price_as_of reached that day. A failed slot gets one retry (max_tries 2 means the run plus one retry, never more); a run still going is looked at again every recheck_min minutes. Stale data after a success is recorded in the keeper run, not retried. It only triggers the normal slots and at most one retry of a failed slot, so Yahoo traffic does not grow.",
@@ -366,8 +369,22 @@
   },
   "indexes": {
     "sp500": true,
+    "sp400": true,
+    "sp600": true,
     "ndx100": true,
-    "growth": true
+    "growth": true,
+    "liquid": true
+  },
+  "liquid_names": {
+    "_note": "Other common stocks (features.liquid_names and indexes.liquid). On the full run the desk reads the Nasdaq stock screener, keeps names with a market cap of at least min_market_cap dollars that the Nasdaq Trader symbol files call a common stock, and adds the ones that are not already on an index until the scored list reaches max_stocks. No Yahoo request. Off leaves the S&P lists, the Nasdaq-100, and the growth names as they are.",
+    "min_market_cap": 10000000000,
+    "max_stocks": 2000
+  },
+  "sec_facts": {
+    "_note": "SEC company facts for the wider list (features.sec_rolling). The S&P 500, Nasdaq-100, growth names, holdings, and watchlist are fetched every full run. Other names are fetched batch_per_run at a time, oldest first, and again after refresh_every_days. cik_overrides replaces a ticker that the SEC ticker file points at the wrong filer. XOM is Exxon Mobil Corporation, CIK 0000034088. HONA, SPCX, and VYLR already point at the companies that own those tickers; they have no 10-K yet, so yearly rows stay blank.",
+    "batch_per_run": 120,
+    "refresh_every_days": 7,
+    "cik_overrides": {"XOM": "0000034088"}
   },
   "scoring": {
     "flat_band_pct": 0.05,
@@ -402,7 +419,8 @@
     "adjust_tolerance_dollars": 0.02,
     "chart_concurrency": 2,
     "repair_below_bars": 126,
-    "history_period": "5y"
+    "history_period": "5y",
+    "backfill_per_run": 40
   },
   "rate_limit": {
     "sec_user_agent": "NickStockDesk research nicks-stock-desk@example.com",

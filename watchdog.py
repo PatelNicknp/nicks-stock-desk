@@ -57,8 +57,13 @@ NY = ZoneInfo("America/New_York")
 WORKFLOW_FILE = "update.yml"
 DATA_STEP = "Update the desk"
 # Intended slots in New York time, Monday to Friday. Same as the old UTC crons during EDT.
+# TWICE_DAILY is off here so the hourly tests keep their nine slots. The commands
+# below turn it on from config.json (features.twice_daily_schedule, default on):
+# then the only slots are 10:15 ET (hourly, incremental) and 18:30 ET (full).
 HOURLY_NY = [(h, 15) for h in range(10, 18)]   # 10:15 .. 17:15
+OPEN_NY = (10, 15)
 FULL_NY = (18, 30)
+TWICE_DAILY = False
 GRACE_MIN = 20
 OVERDUE_MIN = 75
 MAX_LATE_MIN = 180
@@ -90,12 +95,22 @@ def fmt(t):
     return t.astimezone(NY).strftime("%a %H:%M ET")
 
 
-def slots_for_day(day):
+def apply_schedule(cfg):
+    """Read features.twice_daily_schedule. Missing key means on. Returns the flag."""
+    global TWICE_DAILY
+    features = (cfg or {}).get("features") or {}
+    TWICE_DAILY = bool(features.get("twice_daily_schedule", True))
+    return TWICE_DAILY
+
+
+def slots_for_day(day, twice_daily=None):
     """Intended (utc_time, mode) slots for one New York calendar date. Empty on weekends."""
     if day.weekday() >= 5:
         return []
+    use_two = TWICE_DAILY if twice_daily is None else bool(twice_daily)
+    hours = [OPEN_NY] if use_two else list(HOURLY_NY)
     out = []
-    for h, m in HOURLY_NY:
+    for h, m in hours:
         out.append((dt.datetime(day.year, day.month, day.day, h, m, tzinfo=NY).astimezone(UTC), "hourly"))
     out.append((dt.datetime(day.year, day.month, day.day, FULL_NY[0], FULL_NY[1], tzinfo=NY).astimezone(UTC), "full"))
     return out
@@ -522,6 +537,7 @@ def run_keeper(env, now=None, sleep=time.sleep):
     now = now or (lambda: dt.datetime.now(UTC).replace(microsecond=0))
     me = env.get("GITHUB_RUN_ID")
     cfg = live_config()
+    apply_schedule(cfg)
     settings = keeper_settings(cfg)
     started = now()
     deadline = started + dt.timedelta(minutes=settings["chunk_min"])
@@ -545,6 +561,7 @@ def run_keeper(env, now=None, sleep=time.sleep):
             kind, fmt(when), when.strftime("%Y-%m-%d %H:%M"), sleep_seconds(now(), when)), flush=True)
         sleep(sleep_seconds(now(), when))
         cfg = live_config()
+        apply_schedule(cfg)
         if not keeper_on(cfg):
             continue  # top of loop prints and stops
         if kind == "handoff":
@@ -606,6 +623,7 @@ def _out(key, value):
 
 def run_guard(env, fetch=None):
     """Return (skip, mode). Scheduled runs pass the New York check, then the duplicate check."""
+    apply_schedule(read_config())
     fetch = fetch or fetch_runs
     event = env.get("EVENT_NAME", "")
     now = dt.datetime.now(UTC).replace(microsecond=0)
@@ -647,6 +665,7 @@ def main(argv):
         _out("mode", mode)
         return 0
     dry = "--dry-run" in argv or os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+    apply_schedule(read_config())
     enabled = switch_on()
     now = dt.datetime.now(UTC)
     runs = fetch_runs() if enabled else []

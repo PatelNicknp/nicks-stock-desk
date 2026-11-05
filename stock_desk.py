@@ -235,6 +235,7 @@ def incremental_price_settings(cfg):
         "chart_concurrency": min(8, max(1, concurrency)),
         "repair_below_bars": max(1, below),
         "history_period": period,
+        "backfill_per_run": max(0, int(raw.get("backfill_per_run", 40) or 0)),
     }
 
 
@@ -359,6 +360,13 @@ def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False
         last_day = pd.Timestamp(last[symbol])
         start = (last_day - pd.Timedelta(days=int(settings.get("overlap_days", 5)))).strftime("%Y-%m-%d")
         plan[symbol] = {"kind": "incremental", "start": start, "reason": "update"}
+    # A brand-new name needs five years once. Spread that across runs so one
+    # morning does not download a thousand full histories.
+    cap = settings.get("backfill_per_run", 40)
+    if enabled and cap is not None:
+        waiting = sorted(s for s, item in plan.items() if item["reason"] == "new")
+        for symbol in waiting[int(cap):]:
+            plan[symbol] = {"kind": "skip", "start": None, "reason": "waiting"}
     return plan
 
 
@@ -612,6 +620,8 @@ def load_prices(tickers, cfg, cache, mode):
         failed_groups = 0
         threads = settings["chart_concurrency"]
         for (kind, start), group in sorted(groups.items(), key=lambda kv: (kv[0][0] != "full", kv[0][1] or "")):
+            if kind == "skip":
+                continue
             try:
                 part = _download_long(group, cfg, start, threads, settings["history_period"])
                 if len(part):
@@ -654,11 +664,11 @@ def load_prices(tickers, cfg, cache, mode):
         reasons = {}
         for item in plan.values():
             reasons[item["reason"]] = reasons.get(item["reason"], 0) + 1
-        note = "incremental %d, full %d (new %d, repair %d, refresh %d), adjustment refetch %d, %d rows, %d at a time" % (
+        note = "incremental %d, full %d (new %d, repair %d, refresh %d), waiting for backfill %d, adjustment refetch %d, %d rows, %d at a time" % (
             reasons.get("update", 0),
             reasons.get("new", 0) + reasons.get("repair", 0) + reasons.get("refresh", 0),
             reasons.get("new", 0), reasons.get("repair", 0), reasons.get("refresh", 0),
-            len(mismatches), len(merged), threads,
+            reasons.get("waiting", 0), len(mismatches), len(merged), threads,
         )
         if failed_groups:
             note += ", %d groups failed and kept prior bars" % failed_groups
@@ -678,7 +688,7 @@ def load_prices(tickers, cfg, cache, mode):
 
 # ---------------------------------------------------------------- universe
 # One row per stock. A name in more than one list keeps every flag, so Looker can filter.
-FLAGS = ("in_sp500", "in_ndx100", "in_growth")
+FLAGS = ("in_sp500", "in_sp400", "in_sp600", "in_ndx100", "in_growth", "in_liquid")
 INDEX_SOURCES = {
     "sp500": {
         "flag": "in_sp500",
@@ -687,6 +697,22 @@ INDEX_SOURCES = {
         "legacy": "universe.csv",
         "log": "Universe (Wikipedia S&P 500)",
         "stamp": "universe_sp500",
+    },
+    "sp400": {
+        "flag": "in_sp400",
+        "url": "https://en.wikipedia.org/wiki/List_of_S%26P_400_companies",
+        "cache": "sp400.csv",
+        "legacy": None,
+        "log": "Universe (Wikipedia S&P 400)",
+        "stamp": "universe_sp400",
+    },
+    "sp600": {
+        "flag": "in_sp600",
+        "url": "https://en.wikipedia.org/wiki/List_of_S%26P_600_companies",
+        "cache": "sp600.csv",
+        "legacy": None,
+        "log": "Universe (Wikipedia S&P 600)",
+        "stamp": "universe_sp600",
     },
     "ndx100": {
         "flag": "in_ndx100",
@@ -753,20 +779,29 @@ def index_switches(cfg):
     raw = cfg.get("indexes") or {}
     return {
         "sp500": bool(raw.get("sp500", True)),
+        "sp400": bool(raw.get("sp400", True)),
+        "sp600": bool(raw.get("sp600", True)),
         "ndx100": bool(raw.get("ndx100", True)),
         "growth": bool(raw.get("growth", True)),
+        "liquid": bool(raw.get("liquid", True)),
     }
 
 
-def membership_label(in_sp500, in_ndx100, in_growth):
-    """Stable tag: SP500 / NDX100 / Growth. A holding outside those lists is Focus."""
+def membership_label(in_sp500, in_ndx100, in_growth, in_sp400="no", in_sp600="no", in_liquid="no"):
+    """Stable tag: SP500 / SP400 / SP600 / NDX100 / Growth / Liquid. A holding outside those lists is Focus."""
     parts = []
     if in_sp500 == "yes":
         parts.append("SP500")
+    if in_sp400 == "yes":
+        parts.append("SP400")
+    if in_sp600 == "yes":
+        parts.append("SP600")
     if in_ndx100 == "yes":
         parts.append("NDX100")
     if in_growth == "yes":
         parts.append("Growth")
+    if in_liquid == "yes":
+        parts.append("Liquid")
     return " / ".join(parts) if parts else "Focus"
 
 
@@ -826,7 +861,7 @@ def load_index(key, cfg, cache, mode):
         return _blank_flags(df, spec["flag"]) if len(df) else df
 
     switches = index_switches(cfg)
-    switch_on = switches["sp500"] if key == "sp500" else switches["ndx100"]
+    switch_on = switches.get(key, True)
     if not switch_on and len(cached):
         return finish(cached, "OK", "switch is off, used the saved list for tags only", len(cached))
     if not switch_on:
@@ -894,15 +929,17 @@ def combine_indexes(parts, holdings, watch, switches):
     if not frames:
         return pd.DataFrame(columns=cols)
     df = pd.concat(frames, ignore_index=True)
-    df = df.groupby("ticker", as_index=False).agg({
+    agg = {
         "company": lambda s: next((x for x in s if isinstance(x, str) and str(x).strip() and str(x).lower() != "nan"), ""),
         "sector": lambda s: next((x for x in s if isinstance(x, str) and str(x).strip() and str(x).lower() != "nan"), ""),
-        "in_sp500": lambda s: "yes" if (s == "yes").any() else "no",
-        "in_ndx100": lambda s: "yes" if (s == "yes").any() else "no",
-        "in_growth": lambda s: "yes" if (s == "yes").any() else "no",
-    })
+    }
+    for flag in FLAGS:
+        agg[flag] = (lambda s, _flag=flag: "yes" if (s == "yes").any() else "no")
+    df = df.groupby("ticker", as_index=False).agg(agg)
     df["index_membership"] = [
-        membership_label(a, b, c) for a, b, c in zip(df["in_sp500"], df["in_ndx100"], df["in_growth"])
+        membership_label(a, b, c, d, e, f)
+        for a, b, c, d, e, f in zip(
+            df["in_sp500"], df["in_ndx100"], df["in_growth"], df["in_sp400"], df["in_sp600"], df["in_liquid"])
     ]
 
     def keep(row):
@@ -910,13 +947,199 @@ def combine_indexes(parts, holdings, watch, switches):
             return True
         if switches.get("sp500", True) and row["in_sp500"] == "yes":
             return True
+        if switches.get("sp400", True) and row["in_sp400"] == "yes":
+            return True
+        if switches.get("sp600", True) and row["in_sp600"] == "yes":
+            return True
         if switches.get("ndx100", True) and row["in_ndx100"] == "yes":
             return True
         if switches.get("growth", True) and row["in_growth"] == "yes":
             return True
+        if switches.get("liquid", True) and row["in_liquid"] == "yes":
+            return True
         return False
 
     return df[df.apply(keep, axis=1)].reset_index(drop=True)
+
+
+_LISTED_BAD = ("PREFERRED", "WARRANT", "DEPOSITARY", "NOTES", "RIGHT", "UNIT ", "BOND", "DEBENTURE")
+
+
+def _norm_symbol(symbol):
+    return str(symbol or "").upper().replace(".", "-").replace("$", "-").replace("/", "-").strip()
+
+
+def parse_listed_common(nasdaq_text, other_text):
+    """Common stocks from the Nasdaq Trader symbol files. ETFs, tests, and preferreds stay out."""
+    good = set()
+
+    def take(text, sym_i, name_i, etf_i, test_i):
+        for line in (text or "").splitlines()[1:]:
+            if line.startswith("File Creation"):
+                continue
+            parts = line.split("|")
+            if len(parts) <= max(sym_i, name_i, etf_i, test_i):
+                continue
+            if parts[etf_i].strip().upper() == "Y" or parts[test_i].strip().upper() == "Y":
+                continue
+            name = parts[name_i].upper()
+            if any(word in name for word in _LISTED_BAD):
+                continue
+            symbol = _norm_symbol(parts[sym_i])
+            if symbol:
+                good.add(symbol)
+
+    take(nasdaq_text, 0, 1, 6, 3)
+    take(other_text, 0, 1, 4, 6)
+    return good
+
+
+def _market_cap_number(value):
+    text = str(value or "").replace(",", "").replace("$", "").strip()
+    if not text or text.upper() in ("N/A", "NA", "NONE"):
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def select_liquid_names(rows, listed, already, min_market_cap, room):
+    """Screener rows with a large market cap that the symbol file calls a common stock."""
+    if room <= 0:
+        return []
+    listed = set(listed or [])
+    already = {_norm_symbol(t) for t in (already or [])}
+    picked = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        cap = _market_cap_number(row.get("marketCap"))
+        if cap is None or cap < float(min_market_cap):
+            continue
+        symbol = _norm_symbol(row.get("symbol"))
+        if not symbol or symbol in already or symbol not in listed:
+            continue
+        picked.append((cap, symbol))
+    picked.sort(key=lambda item: (-item[0], item[1]))
+    return [symbol for _cap, symbol in picked[:int(room)]]
+
+
+def liquid_settings(cfg):
+    raw = cfg.get("liquid_names") or {}
+    try:
+        floor = float(raw.get("min_market_cap", 10000000000))
+    except (TypeError, ValueError):
+        floor = 10000000000.0
+    try:
+        cap = int(raw.get("max_stocks", 2000))
+    except (TypeError, ValueError):
+        cap = 2000
+    return {
+        "on": bool((cfg.get("features") or {}).get("liquid_names", True)) and bool((cfg.get("indexes") or {}).get("liquid", True)),
+        "min_market_cap": floor,
+        "max_stocks": max(1, cap),
+    }
+
+
+def _read_text(path):
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        return ""
+    try:
+        return open(path, encoding="utf-8", errors="replace").read()
+    except OSError:
+        return ""
+
+
+def load_listed_common(cfg, cache, mode):
+    """Nasdaq Trader symbol files. Hourly and offline reuse the saved copy."""
+    nas_p = os.path.join(cache, "nasdaqlisted.txt")
+    oth_p = os.path.join(cache, "otherlisted.txt")
+    nas, oth = _read_text(nas_p), _read_text(oth_p)
+    fresh = mode == "full" and (STAMPS.get("listed_common") != today_et() or not nas or not oth or "--force-slow" in sys.argv)
+    if fresh:
+        try:
+            headers = session_headers(cfg)
+            nas_r = netutil.http_get(requests, "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt", headers, 40, max_tries=rl(cfg)["max_retries"])
+            oth_r = netutil.http_get(requests, "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt", headers, 40, max_tries=rl(cfg)["max_retries"])
+            nas, oth = nas_r.text, oth_r.text
+            open(nas_p, "w", encoding="utf-8").write(nas)
+            open(oth_p, "w", encoding="utf-8").write(oth)
+            STAMPS["listed_common"] = today_et()
+            log("Listed symbols (Nasdaq Trader)", "OK", today_et(), "nasdaq and other exchanges")
+        except Exception as exc:
+            log("Listed symbols (Nasdaq Trader)", "CACHED" if nas or oth else "MISSING", "", str(exc)[:160])
+    elif nas or oth:
+        log("Listed symbols (Nasdaq Trader)", "OK", STAMPS.get("listed_common", ""), "reused cache")
+    else:
+        log("Listed symbols (Nasdaq Trader)", "MISSING", "", "no cache and this run does not download the symbol files")
+    return parse_listed_common(nas, oth)
+
+
+def load_liquid(cfg, cache, mode, already, listed):
+    """Large common stocks that are not already on an index. One screener pass a day, no Yahoo."""
+    settings = liquid_settings(cfg)
+    path = os.path.join(cache, "liquid_screener.json")
+    rows = None
+    if os.path.exists(path):
+        try:
+            rows = json.load(open(path))
+        except Exception:
+            rows = None
+    if not settings["on"]:
+        log("Liquid names (Nasdaq screener)", "OK", "", "switch is off")
+        return pd.DataFrame()
+    allow = mode == "full" and (STAMPS.get("liquid_names") != today_et() or not rows or "--force-slow" in sys.argv)
+    if allow:
+        try:
+            lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
+            headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+            got = []
+            offset = 0
+            total = None
+            while total is None or offset < total:
+                url = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=1000&offset=%d" % offset
+                r = netutil.http_get(requests, url, headers, 40, limiter=lim, max_tries=rl(cfg)["max_retries"])
+                payload = r.json()
+                table = ((payload.get("data") or {}).get("table") or {})
+                batch = table.get("rows") or []
+                total = int((payload.get("data") or {}).get("totalrecords") or 0)
+                got.extend(batch)
+                if not batch:
+                    break
+                offset += len(batch)
+            rows = [{"symbol": row.get("symbol"), "marketCap": row.get("marketCap")} for row in got]
+            json.dump(rows, open(path, "w"))
+            STAMPS["liquid_names"] = today_et()
+            log("Liquid names (Nasdaq screener)", "OK", today_et(), "%d rows" % len(rows))
+        except Exception as exc:
+            log("Liquid names (Nasdaq screener)", "CACHED" if rows else "MISSING", "", str(exc)[:160])
+    elif rows:
+        log("Liquid names (Nasdaq screener)", "OK", STAMPS.get("liquid_names", ""), "reused cache")
+    else:
+        log("Liquid names (Nasdaq screener)", "MISSING", "", "no cache and this run does not call the screener")
+        return pd.DataFrame()
+    room = settings["max_stocks"] - len(set(already or []))
+    picked = select_liquid_names(rows, listed, already, settings["min_market_cap"], room)
+    if not picked:
+        return pd.DataFrame()
+    return _blank_flags(pd.DataFrame([{"ticker": t, "company": "", "sector": ""} for t in picked]), "in_liquid")
+
+
+def core_tickers(universe, holdings, watch):
+    """Names that keep a daily Yahoo profile and a daily SEC refresh. The wider list does not."""
+    ordered = [str(t).upper() for t in list(holdings or []) + list(watch or [])]
+    always = set(ordered)
+    out = []
+    if universe is not None and len(universe):
+        for _, row in universe.iterrows():
+            ticker = str(row.get("ticker") or "")
+            if ticker in always or row.get("in_sp500") == "yes" or row.get("in_ndx100") == "yes" or row.get("in_growth") == "yes":
+                out.append(ticker)
+    for ticker in ordered:
+        if ticker not in out:
+            out.append(ticker)
+    return list(dict.fromkeys(out))
 
 
 # ---------------------------------------------------------------- slow SEC / yahoo / nasdaq
@@ -953,7 +1176,72 @@ def cik_map(cfg, cache, mode):
         t = str(row.get("ticker", "")).upper().replace(".", "-")
         if t:
             out[t] = str(row.get("cik_str")).zfill(10)
+    return resolve_cik(out, (cfg.get("sec_facts") or {}).get("cik_overrides"))
+
+
+def resolve_cik(ticker_to_cik, overrides):
+    """Company-tickers map, then config overrides. Overrides fix a ticker that points at the wrong filer."""
+    out = dict(ticker_to_cik or {})
+    for ticker, cik in (overrides or {}).items():
+        symbol = str(ticker).upper().replace(".", "-").strip()
+        text = str(cik or "").strip()
+        if symbol and text:
+            out[symbol] = text.zfill(10)
     return out
+
+
+def sec_rolling_settings(cfg):
+    raw = cfg.get("sec_facts") or {}
+    try:
+        batch = int(raw.get("batch_per_run", 120))
+    except (TypeError, ValueError):
+        batch = 120
+    try:
+        every = int(raw.get("refresh_every_days", 7))
+    except (TypeError, ValueError):
+        every = 7
+    return {
+        "on": bool((cfg.get("features") or {}).get("sec_rolling", True)),
+        "batch_per_run": max(1, batch),
+        "refresh_every_days": max(1, every),
+    }
+
+
+def load_sec_cycle(cache):
+    path = os.path.join(cache, "sec_cycle.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_sec_cycle(cache, cycle):
+    with open(os.path.join(cache, "sec_cycle.json"), "w") as f:
+        json.dump(cycle, f, indent=1, sort_keys=True)
+
+
+def rolling_sec_pool(tickers, core, cycle, today, batch, every_days, already_today):
+    """Core names every full run. Everyone else, oldest first, at most `batch` a run."""
+    core = set(core or [])
+    already = set(already_today or [])
+    must = [t for t in tickers if t in core and t not in already]
+    rest = [t for t in tickers if t not in core and t not in already]
+
+    def age(ticker):
+        stamp = cycle.get(ticker)
+        if not stamp:
+            return 10 ** 9
+        try:
+            return (pd.Timestamp(str(today)[:10]) - pd.Timestamp(str(stamp)[:10])).days
+        except (TypeError, ValueError):
+            return 10 ** 9
+
+    due = [t for t in rest if age(t) >= int(every_days)]
+    due.sort(key=lambda t: (-age(t), t))
+    return must + due[:int(batch)]
 
 
 def _need_fetch(name, cache_file, mode):
@@ -1002,7 +1290,7 @@ def _flow_gap(annual):
     return int((rev.notna() & ni.isna()).sum()) >= 80
 
 
-def load_sec(tickers, cik, cfg, cache, mode):
+def load_sec(tickers, cik, cfg, cache, mode, core=None):
     annual_p = os.path.join(cache, "annual.csv")
     quarter_p = os.path.join(cache, "quarters.csv")
     annual, quarters = read_csv(annual_p), read_csv(quarter_p)
@@ -1042,6 +1330,12 @@ def load_sec(tickers, cik, cfg, cache, mode):
         done = set()
     new_a, new_q, fails = [], [], 0
     pool = gaps if gaps else [t for t in tickers if t in cik]
+    rolling = sec_rolling_settings(cfg)
+    cycle = load_sec_cycle(cache)
+    # A blank-sheet repair still walks everyone. Otherwise the S&P 400 and 600
+    # are a daily slice, and the S&P 500, Nasdaq-100, and growth names stay daily.
+    if rolling["on"] and not (sheet_blank or flow_gap):
+        pool = rolling_sec_pool(pool, core, cycle, today_et(), rolling["batch_per_run"], rolling["refresh_every_days"], done)
     todo = [t for t in pool if t not in done]
     if done:
         print("SEC skipping %d names already fetched today" % len(done))
@@ -1069,6 +1363,10 @@ def load_sec(tickers, cik, cfg, cache, mode):
             progress_save(cache, "sec", done)
     annual, quarters = _flush_sec(annual, quarters, new_a, new_q, annual_p, quarter_p)
     progress_save(cache, "sec", done)
+    for t in todo:
+        if t in done:
+            cycle[t] = today_et()
+    save_sec_cycle(cache, cycle)
     fail_rate = fails / max(len(todo), 1)
     if fails == len(todo) and len(todo):
         status = "CACHED" if len(annual) else "MISSING"
@@ -1243,6 +1541,35 @@ def _latest_holder_rows(rows):
     if not kept:
         return []
     return pd.concat(kept, ignore_index=True).to_dict("records")
+
+
+def attach_share_market_cap(info, close, annual, quarters):
+    """Fill a missing market cap from the last price times SEC shares. No new download."""
+    shares = latest_shares_by_ticker(annual, quarters)
+    if not shares or close is None or len(close) == 0:
+        return info
+    last = close.ffill().iloc[-1]
+    rows = info.to_dict("records") if info is not None and len(info) else []
+    by_ticker = {}
+    for row in rows:
+        by_ticker[str(row.get("ticker") or "")] = row
+    for ticker, count in shares.items():
+        try:
+            px = float(last.get(ticker))
+            count_n = float(count)
+        except (TypeError, ValueError):
+            continue
+        if px != px or px <= 0 or count_n != count_n or count_n <= 0:
+            continue
+        cap = px * count_n
+        row = by_ticker.get(ticker)
+        if row is None:
+            row = {"ticker": ticker, "market_cap": cap}
+            rows.append(row)
+            by_ticker[ticker] = row
+        elif scoring._f(row.get("market_cap")) is None:
+            row["market_cap"] = cap
+    return pd.DataFrame(rows) if rows else info
 
 
 def latest_shares_by_ticker(annual, quarters):
@@ -2414,9 +2741,15 @@ def main(argv=None):
     switches = index_switches(cfg)
     if features.get("universe", True):
         sp = load_index("sp500", cfg, cache, mode)
+        mid = load_index("sp400", cfg, cache, mode)
+        small = load_index("sp600", cfg, cache, mode)
         ndx = load_index("ndx100", cfg, cache, mode)
         growth = growth_frame(cfg)
-        universe = combine_indexes([sp, ndx, growth], hold_tickers, watch_tickers, switches)
+        listed = load_listed_common(cfg, cache, mode)
+        base = combine_indexes([sp, mid, small, ndx, growth], hold_tickers, watch_tickers, switches)
+        liquid = load_liquid(cfg, cache, mode, list(base["ticker"]) if len(base) else [], listed)
+        universe = combine_indexes([base, liquid], hold_tickers, watch_tickers, switches)
+        log("Universe size", "OK", len(universe), "%d names after S&P 400, S&P 600, and liquid additions" % len(universe))
     else:
         universe = combine_indexes([], hold_tickers, watch_tickers, switches)
         log("Universe feature", "OK", "", "feature off: scoring the holdings and watchlist only")
@@ -2436,13 +2769,17 @@ def main(argv=None):
         info, earnings = pd.DataFrame(), pd.DataFrame()
         holders, holder_rows = pd.DataFrame(), pd.DataFrame()
     else:
-        annual, quarters = load_sec(list(universe["ticker"]), cik, cfg, cache, mode) if cik else (pd.DataFrame(), pd.DataFrame())
+        daily_names = core_tickers(universe, hold_tickers, watch_tickers)
+        annual, quarters = load_sec(list(universe["ticker"]), cik, cfg, cache, mode, core=daily_names) if cik else (pd.DataFrame(), pd.DataFrame())
         if not cik and score_on:
             log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no CIK map")
-        info, earnings = load_yahoo(list(universe["ticker"]), cfg, cache, mode)
-        holders, holder_rows = load_holders(list(universe["ticker"]), cfg, cache, mode)
+        # Profiles and 13F stay on the original daily list. New names would be a new
+        # Yahoo or Nasdaq call for every symbol, which the call budget does not allow.
+        info, earnings = load_yahoo(daily_names, cfg, cache, mode)
+        holders, holder_rows = load_holders(daily_names, cfg, cache, mode)
     if len(annual) or len(quarters):
         annual, quarters = fund.adjust_pershare_for_splits(annual, quarters)
+    info = attach_share_market_cap(info, close, annual, quarters)
     if len(holders):
         holders = apply_ownership(holders, annual, quarters)
     if len(holder_rows):

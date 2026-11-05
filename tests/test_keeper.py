@@ -232,7 +232,11 @@ class Fake:
         self.t += dt.timedelta(seconds=s)
 
     def config(self, path="config.json"):
-        return self.cfgs.pop(0) if self.cfgs else {"features": {"self_heal_keeper": True}}
+        # The loop tests below were written for the eight hourly slots. The
+        # twice-daily switch defaults on in config.json; these fakes turn it off.
+        return self.cfgs.pop(0) if self.cfgs else {
+            "features": {"self_heal_keeper": True, "twice_daily_schedule": False},
+        }
 
 
 def with_fake(f, fn):
@@ -250,6 +254,7 @@ def with_fake(f, fn):
     finally:
         (w.live_config, w.fetch_keeper_runs, w.fetch_runs, w._dispatch, w.api_did_work,
          w.fetch_price_as_of, w.record) = saved
+        w.TWICE_DAILY = False
 
 
 def test_loop_makes_up_missed_slots_then_hands_off():

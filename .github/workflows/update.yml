@@ -1,11 +1,11 @@
 name: Update Nick's Stock Desk
 
 on:
-  # The schedule is New York market time, Monday to Friday: hourly at 10:15 .. 17:15 ET
-  # (prices refresh, slow sources stay on today's cache) and the full run at 18:30 ET
-  # (fundamentals, 13F, insiders, option chains). Cron is UTC only, so these list the UTC
-  # times for both EDT (UTC-4) and EST (UTC-5). The first step (watchdog.py guard) lets
-  # through only the cron that lands on a New York slot, so there is still one run per slot.
+  # The schedule is New York market time, Monday to Friday. With features.twice_daily_schedule
+  # on (the default), the guard keeps 10:15 ET (incremental prices) and 18:30 ET (the full run)
+  # and skips the other hourly crons. Turn the switch off and 10:15 through 17:15 ET run again.
+  # Cron is UTC only, so these list the UTC times for both EDT (UTC-4) and EST (UTC-5).
+  # The first step (watchdog.py guard) lets through only the cron that lands on a kept slot.
   schedule:
     # Hourly: 14-21 UTC in EDT, 15-22 UTC in EST.
     - cron: "15 14-22 * * 1-5"
@@ -84,6 +84,7 @@ jobs:
           python tests/test_trading_floor.py
           python tests/test_trading_floor_paper.py
           python tests/test_incremental_prices.py
+          python tests/test_twice_daily_universe.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |
