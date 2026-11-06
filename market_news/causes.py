@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -11,7 +12,7 @@ from .schema import CAUSE_TAGS
 CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "rates": (
         "fed ", "federal reserve", "fomc", "interest rate", "rate cut", "rate hike",
-        "treasury yield", "bond yield", "powell", "dot plot", "quantitative",
+        "treasury yield", "bond yield", "yields", "powell", "dot plot", "quantitative",
     ),
     "jobs": (
         "payroll", "jobs report", "unemployment", "jobless", "nonfarm", "labor market",
@@ -22,10 +23,11 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     ),
     "election": (
         "election", "midterm", "ballot", "congress", "senate", "white house",
-        "president", "voting", "electoral",
+        "president", "voting", "electoral", "capitol hill", "tariff",
     ),
     "ai_mood": (
-        "artificial intelligence", " ai ", "ai spending", "ai trade", "chip",
+        "artificial intelligence", " ai ", "ai spending", "ai trade", "ai regulat",
+        "ai build", "data center", "data-center", "chip",
         "semiconductor", "nvidia", "tech selloff", "tech stocks", "big tech",
         "magnificent", "nasdaq", "megacap tech", "mega-cap tech",
     ),
@@ -43,12 +45,32 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     ),
 }
 
-# Sector-day moves that reinforce a cause even without a matching headline.
 SECTOR_CAUSE_HINTS: Tuple[Tuple[str, Tuple[str, ...], float], ...] = (
-    # (cause, name/ticker fragments, min abs day_pct to count)
     ("ai_mood", ("Technology", "XLK", "Information Technology"), 2.0),
     ("oil", ("Energy", "XLE"), 1.0),
     ("rates", ("Financials", "XLF", "Utilities", "XLU", "Real Estate", "XLRE"), 1.5),
+)
+
+# Big-picture importance keywords (overall market only).
+_IMPORTANCE = (
+    ("federal reserve", 4.0),
+    ("fomc", 4.0),
+    ("interest rate", 3.5),
+    ("cpi", 3.5),
+    ("inflation", 3.0),
+    ("payroll", 3.0),
+    ("jobs report", 3.0),
+    ("election", 3.0),
+    ("midterm", 3.0),
+    ("war ", 3.0),
+    ("ukraine", 2.5),
+    ("oil ", 2.5),
+    ("opec", 2.5),
+    ("ai spending", 2.5),
+    ("tech selloff", 2.5),
+    ("nasdaq", 2.0),
+    ("s&p", 2.0),
+    ("wall street", 1.5),
 )
 
 
@@ -84,7 +106,6 @@ def score_causes(
                 scores[t] += trust_bonus
                 buckets[t].append(h)
 
-    # Desk numbers reinforce causes.
     qqq = _f(stats.get("qqq_day_pct"))
     spy = _f(stats.get("spy_day_pct"))
     if qqq is not None and spy is not None and qqq <= spy - 1.5 and qqq <= -2:
@@ -110,7 +131,6 @@ def score_causes(
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))
     top = [(c, s) for c, s in ranked if s > 0][:2]
     if not top:
-        # Fallback: strongest sector move names a cause.
         if qqq is not None and abs(qqq) >= abs(spy or 0):
             top = [("ai_mood", 1.0)]
         else:
@@ -150,62 +170,246 @@ def _f(v: Any) -> Optional[float]:
         return None
 
 
+def _title_key(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (title or "").lower())[:80]
+
+
+def _token_set(title: str) -> set:
+    stop = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "as", "at", "by", "with"}
+    toks = re.findall(r"[a-z0-9]+", (title or "").lower())
+    return {t for t in toks if len(t) > 2 and t not in stop}
+
+
+def _same_tape(a: str, b: str) -> bool:
+    """Same chip-led Nasdaq selloff told twice. A regulation headline is a different story."""
+    def tape(s: str) -> bool:
+        t = " " + (s or "").lower() + " "
+        tech = "nasdaq" in t or " tech " in t or "tech stock" in t
+        chips = " chip" in t or "semiconductor" in t
+        return tech and chips
+    return tape(a) and tape(b)
+
+
+def _near_duplicate(a: str, b: str, thresh: float = 0.72) -> bool:
+    """Token Jaccard — catch the same story from two wires."""
+    ta, tb = _token_set(a), _token_set(b)
+    if not ta or not tb:
+        return False
+    inter = len(ta & tb)
+    union = len(ta | tb)
+    return union > 0 and (inter / union) >= thresh
+
+
+def _importance_score(title: str, summary: str = "") -> float:
+    blob = _norm(title) + _norm(summary)
+    score = 0.0
+    for word, pts in _IMPORTANCE:
+        if word in blob:
+            score += pts
+    return score
+
+
+def _rank_key(h: Dict[str, Any]) -> Tuple:
+    """Higher is better: trusted, importance, has causes, then title for stability."""
+    title = h.get("title") or ""
+    tags = h.get("causes") or []
+    return (
+        1 if h.get("trusted") else 0,
+        _importance_score(title, h.get("summary") or ""),
+        len(tags),
+        title.lower(),
+    )
+
+
+# Market-wrap language ranks above a generic macro headline.
+_WRAP_BITS = (
+    "stocks fell", "stocks fall", "stocks drop", "stocks crater", "stocks slide",
+    "stocks tumble", "stock market", "sell-off", "selloff", "market rout",
+    "worst day", "correction territory", "wall street", "on fears",
+    "as investors", "investors dump", "investors fret", "investors exit",
+    "nasdaq drop", "nasdaq dive", "nasdaq slide", "nasdaq post", "nasdaq enter",
+    "nasdaq lag", "s&p 500", "dow jones", "dow plunge", "tech stocks",
+    "wipes out", "biggest daily drop", "biggest drop", "led lower", "led stocks",
+    "tech stock plunge", "ai trade",
+)
+# A headline can explain the move without saying "stocks fell".
+_DRIVER_BITS = (
+    " ai ", "chip", "semiconductor", "data center", "data-center", "ai regulat",
+    "ai build", "federal reserve", "fomc", "interest rate", "treasury yield",
+    "yields", "jobs report", "payroll", "jobless", "inflation", "cpi", "oil ",
+    "crude", "tariff", "election", "midterm",
+)
+_MARKET_BITS = (
+    "stock", "nasdaq", "s&p", "dow", "wall street", "market", "tech",
+    "chip", "semiconductor", "futures", "investor",
+)
+_OFF_TOPIC = (
+    "first lady", "measles", "tax bracket", "standard deduction", "gift tax",
+    "earnings call transcript", "what you should know", "stock moves",
+    "just fell", "enforcement action", "enforcement actions", "gasoline",
+    "capital gains", "estate and gift",
+)
+
+
+def market_wrap_score(title: str, summary: str = "") -> float:
+    blob = _norm(title) + _norm(summary)
+    score = 0.0
+    for bit in _WRAP_BITS:
+        if bit in blob:
+            score += 5.0
+    if "because" in blob and any(w in blob for w in ("stock", "market", "nasdaq")):
+        score += 4.0
+    if "data center" in blob or "data-center" in blob or "moratorium" in blob:
+        score += 8.0
+    if "ai regulat" in blob or "fears of ai" in blob:
+        score += 4.0
+    return score
+
+
+def _parsed_day(published: str):
+    raw = (published or "").strip()
+    if not raw:
+        return None
+    try:
+        return dt.date.fromisoformat(raw[:10])
+    except ValueError:
+        pass
+    try:
+        from email.utils import parsedate_to_datetime
+        got = parsedate_to_datetime(raw)
+        if got is not None:
+            return got.date()
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return None
+
+
+def _near_session(published: str, session: str) -> bool:
+    """Keep the session day, the day before, and the next UTC date (after-close wraps)."""
+    if not session:
+        return True
+    day = _parsed_day(published)
+    if day is None:
+        return True
+    try:
+        anchor = dt.date.fromisoformat(str(session)[:10])
+    except ValueError:
+        return True
+    return (anchor - dt.timedelta(days=1)) <= day <= (anchor + dt.timedelta(days=1))
+
+
+def explains_the_move(title: str, summary: str = "") -> bool:
+    """True for a market wrap or a headline about why the market moved. Not a side story."""
+    if _looks_single_stock(title):
+        return False
+    blob = _norm(title) + _norm(summary)
+    if any(bit in blob for bit in _OFF_TOPIC):
+        return False
+    if market_wrap_score(title, summary) > 0:
+        return True
+    driver = any(bit in blob for bit in _DRIVER_BITS)
+    market = any(bit in blob for bit in _MARKET_BITS)
+    return driver and market
+
+
 def pick_headlines(
     raw: List[Dict[str, Any]],
-    limit: int = 5,
+    limit: int = 7,
+    session: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    """Keep 3–5 big-picture headlines; prefer trusted; drop duplicates and single-stock noise."""
-    seen = set()
-    kept: List[Dict[str, Any]] = []
-    # Trusted first, then others.
-    ordered = sorted(raw, key=lambda h: (0 if h.get("trusted") else 1, h.get("published") or ""), reverse=False)
-    ordered = sorted(raw, key=lambda h: (0 if h.get("trusted") else 1))
+    """Keep 5–7 big-picture headlines about why the market moved.
 
-    for h in ordered:
+    Market-wrap and "stocks fell because" stories rank first. Side stories
+    (one stock, old wires, politics with no market) are dropped.
+    """
+    limit = max(3, min(int(limit or 7), 7))
+    target = limit
+
+    prepared: List[Dict[str, Any]] = []
+    for h in raw or []:
         title = (h.get("title") or "").strip()
-        if not title or _looks_single_stock(title):
+        summary = h.get("summary") or ""
+        if not title or not explains_the_move(title, summary):
             continue
-        key = re.sub(r"[^a-z0-9]+", "", title.lower())[:80]
-        if key in seen:
+        if session and not _near_session(h.get("published") or "", session):
             continue
-        seen.add(key)
-        tags = h.get("causes") or tag_headline(title, h.get("summary") or "")
-        # Prefer headlines that map to a locked cause; allow 1 untagged trusted wire.
-        if not tags and not h.get("trusted"):
-            continue
+        tags = h.get("causes") or tag_headline(title, summary)
         item = {
             "title": title,
             "source": h.get("source") or "",
             "url": h.get("url") or "",
             "published": h.get("published") or "",
+            "summary": summary,
             "trusted": bool(h.get("trusted")),
             "causes": tags,
+            "via": h.get("via") or "",
+            "wrap": market_wrap_score(title, summary),
         }
-        kept.append(item)
-        if len(kept) >= limit:
+        prepared.append(item)
+
+    def rank_key(h: Dict[str, Any]) -> Tuple:
+        on_day = 1 if session and _parsed_day(h.get("published") or "") and str(_parsed_day(h.get("published") or "")) == str(session)[:10] else 0
+        return (
+            h.get("wrap") or 0.0,
+            on_day,
+            _importance_score(h["title"], h.get("summary") or ""),
+            len(h.get("causes") or []),
+            1 if h.get("trusted") else 0,
+            h["title"].lower(),
+        )
+
+    prepared.sort(key=rank_key, reverse=True)
+
+    seen_keys = set()
+    kept: List[Dict[str, Any]] = []
+    for h in prepared:
+        key = _title_key(h["title"])
+        if key in seen_keys:
+            continue
+        if any(_near_duplicate(h["title"], k["title"]) or _same_tape(h["title"], k["title"]) for k in kept):
+            continue
+        seen_keys.add(key)
+        # Drop summary from the published brief payload (UI uses title/source/url).
+        kept.append({
+            "title": h["title"],
+            "source": h["source"],
+            "url": h["url"],
+            "published": h["published"],
+            "trusted": h["trusted"],
+            "causes": h["causes"],
+            "via": h.get("via") or "",
+            "rank": round(
+                (h.get("wrap") or 0.0)
+                + _importance_score(h["title"], h.get("summary") or "")
+                + 0.5 * len(h["causes"] or []),
+                2,
+            ),
+        })
+        if len(kept) >= target:
             break
 
-    if len(kept) < 3:
-        # Fill with any remaining non-single-stock titles.
-        for h in ordered:
-            if len(kept) >= max(3, limit):
+    # If we asked for 5–7 but only got a few, try a looser fill (still no single-stock).
+    if len(kept) < min(5, target):
+        for h in prepared:
+            if len(kept) >= target:
                 break
-            title = (h.get("title") or "").strip()
-            if not title or _looks_single_stock(title):
+            key = _title_key(h["title"])
+            if key in seen_keys:
                 continue
-            key = re.sub(r"[^a-z0-9]+", "", title.lower())[:80]
-            if key in seen:
+            if any(_near_duplicate(h["title"], k["title"]) or _same_tape(h["title"], k["title"]) for k in kept):
                 continue
-            seen.add(key)
+            seen_keys.add(key)
             kept.append({
-                "title": title,
-                "source": h.get("source") or "",
-                "url": h.get("url") or "",
-                "published": h.get("published") or "",
-                "trusted": bool(h.get("trusted")),
-                "causes": h.get("causes") or tag_headline(title, h.get("summary") or ""),
+                "title": h["title"],
+                "source": h["source"],
+                "url": h["url"],
+                "published": h["published"],
+                "trusted": h["trusted"],
+                "causes": h["causes"],
+                "via": h.get("via") or "",
+                "rank": 0.0,
             })
-    return kept[:limit]
+    return kept[:target]
 
 
 _TICKER_NOISE = re.compile(
@@ -233,6 +437,5 @@ def _looks_single_stock(title: str) -> bool:
     if _TICKER_NOISE.search(t) and _SINGLE_STOCK.search(t):
         return True
     if _TICKER_NOISE.search(t) and not broad:
-        # A title that is mostly one ticker with no market framing.
         return True
     return False

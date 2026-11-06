@@ -30,13 +30,13 @@ def _build():
 def test_sample_brief_shape():
     brief = _build()
     hist = brief.pop("_history")
-    assert brief["schema_version"] == 1
+    assert brief["schema_version"] == 2
     assert brief["feature"] == "market_news"
     assert brief["session"] == "2026-11-05"
     assert brief["slot"] == "morning_open"
     assert brief["mood"]["label"] == "Fear"
     assert "Nasdaq" in brief["why_moved"]
-    assert 3 <= len(brief["headlines"]) <= 5
+    assert 5 <= len(brief["headlines"]) <= 7
     assert len(brief["causes"]) <= 2
     assert brief["causes"][0]["cause"] == "ai_mood"
     assert brief["vs_yesterday"]["flipped"] is True
@@ -91,10 +91,30 @@ def test_pack_sample_file_matches_narrative():
     """The checked-in sample brief is a finished down-tech-day brief."""
     sample = json.load(open(os.path.join(ROOT, "data/market_brief.json")))
     assert sample["session"] == "2026-11-05"
+    assert sample["schema_version"] == 2
     assert sample["mood"]["label"] == "Fear"
     assert "Technology" in sample["why_moved"]
+    assert sample["why_moved_short"]
+    assert sample["tips"] and len(sample["tips"]["lines"]) >= 2
+    assert 5 <= len(sample["headlines"]) <= 7
     assert sample["stats"]["qqq_day_pct"] == -4.98
     assert sample["stats"]["spy_day_pct"] == -2.73
+
+def test_v2_why_detail_and_tips_shape():
+    brief = _build()
+    brief.pop("_history", None)
+    # 2–3 sentences
+    assert brief["why_moved"].count(".") >= 2
+    assert "Biggest driver" in brief["why_moved"] or "AI / Tech" in brief["why_moved"]
+    assert "broad" in brief["why_moved"].lower() or "222" in brief["why_moved"]
+    assert brief["why_moved_short"]
+    assert brief["why_moved"] != brief["why_moved_short"]
+    tips = brief["tips"]
+    assert tips["title"] == "What it means for me"
+    assert 2 <= len(tips["lines"]) <= 3
+    blob = " ".join(tips["lines"]).lower()
+    assert "nvda" not in blob and "aapl" not in blob
+    assert "research" in tips["disclaimer"].lower()
 
 
 if __name__ == "__main__":

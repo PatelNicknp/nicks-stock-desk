@@ -72,7 +72,14 @@
     "liquid_names": true,
     "sec_rolling": true,
     "fast_history_backfill": true,
-    "market_news": true
+    "market_news": true,
+    "market_news_why_detail": true,
+    "market_news_more_headlines": true,
+    "market_news_card_layout": true,
+    "market_news_tips": true,
+    "market_news_indexes": true,
+    "market_news_sectors": true,
+    "market_news_details": true
   },
   "keeper": {
     "_note": "Update keeper (features.self_heal_keeper). One keeper job sleeps until check_after_min minutes past each New York slot (weekdays, NYSE holidays skipped) and starts that slot's update only if it did not run and the last update started over min_gap_min minutes ago. After chunk_min minutes (at most 340; GitHub stops a job at 360) it starts the next keeper. Turn the switch off and the keeper stops at its next wake and does not chain. At verify_after_min past each slot it checks that the slot's run succeeded and that data/meta.json price_as_of reached that day. A failed slot gets one retry (max_tries 2 means the run plus one retry, never more); a run still going is looked at again every recheck_min minutes. Stale data after a success is recorded in the keeper run, not retried. It only triggers the normal slots and at most one retry of a failed slot, so Yahoo traffic does not grow.",

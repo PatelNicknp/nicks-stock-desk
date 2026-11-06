@@ -1,11 +1,112 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "feature": "market_news",
   "session": "2026-11-05",
-  "slot": "morning_open",
+  "slot": "evening_close",
   "updated_pt": "2026-11-05 07:28 PT",
   "price_as_of": "2026-11-05",
-  "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+  "why_moved": "The market fell: S&P -2.7%, Nasdaq -5.0%, Dow-heavy groups (Financials/Industrials) about -1.5%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-6.2%) and Consumer Discretionary (-3.6%); leading sectors Consumer Staples (1.1%) and Energy (1.0%) held up. The move was fairly broad: 299 stocks fell and 222 rose; VIX is firm at 22.0.",
+  "why_moved_short": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+  "story": {
+    "direction": "down",
+    "date_label": "November 5, 2026",
+    "summary": "U.S. closing summary",
+    "clear_cause": true,
+    "cause": "ai_mood",
+    "lead": "AI regulation fears sent stocks lower.",
+    "support": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations.",
+    "support_ref": 1,
+    "bullets": [
+      {
+        "lead": "Technology took the biggest hit.",
+        "rest": "Tech fell 6.2%.",
+        "ref": 1
+      },
+      {
+        "lead": "More stocks fell than rose.",
+        "rest": "299 stocks fell and 222 rose.",
+        "ref": null
+      },
+      {
+        "lead": "Staples held up.",
+        "rest": "Staples rose 1.09%.",
+        "ref": null
+      }
+    ],
+    "sector_label": "Where the selling hit",
+    "chips": [
+      {
+        "name": "Tech",
+        "pct": -6.2,
+        "pct_text": "6.2%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 70
+      },
+      {
+        "name": "Chips",
+        "pct": -8.91,
+        "pct_text": "8.91%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 100
+      },
+      {
+        "name": "7 of 11 sectors down",
+        "pct": null,
+        "pct_text": null,
+        "arrow": "flat",
+        "kind": "summary",
+        "bar": 0
+      }
+    ],
+    "indexes": [
+      {
+        "name": "S&P 500",
+        "pct": -2.73,
+        "pct_text": "2.73%",
+        "arrow": "down",
+        "source": "spy"
+      },
+      {
+        "name": "Nasdaq",
+        "pct": -4.98,
+        "pct_text": "4.98%",
+        "arrow": "down",
+        "source": "qqq"
+      }
+    ],
+    "news": [
+      {
+        "n": 1,
+        "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+        "source": "Reuters",
+        "via": "Investing.com",
+        "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
+      },
+      {
+        "n": 2,
+        "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
+      },
+      {
+        "n": 3,
+        "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
+        "source": "Reuters",
+        "via": "Investing.com",
+        "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
+      }
+    ],
+    "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
+  },
   "mood": {
     "label": "Fear",
     "vix": 21.98,
@@ -17,102 +118,205 @@
   },
   "headlines": [
     {
-      "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
+      "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "ai_mood",
+        "war"
+      ],
+      "via": "",
+      "rank": 28.0
+    },
+    {
+      "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
       "source": "Reuters",
-      "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-      "published": "2026-11-05T14:00:00Z",
+      "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
         "ai_mood"
-      ]
+      ],
+      "via": "Investing.com",
+      "rank": 22.5
     },
     {
-      "title": "Oil prices firm while investors rotate into consumer staples",
-      "source": "Associated Press",
-      "url": "https://apnews.com/example/oil-staples-rotation",
-      "published": "2026-11-05T13:30:00Z",
+      "title": "Dow Jones Futures Fall; Nasdaq Dives 5.5%, Nvidia, Sandisk, CoreWeave, SpaceX Plunge, But Sell-Off Spreads Beyond AI",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%3B.html?.tsrc=rss",
+      "published": "2026-11-06",
       "trusted": true,
       "causes": [
-        "oil",
+        "jobs",
         "ai_mood"
-      ]
+      ],
+      "via": "",
+      "rank": 26.0
     },
     {
-      "title": "Markets digest US midterm results as Washington outlook comes into focus",
+      "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
       "source": "Reuters",
-      "url": "https://www.reuters.com/example/midterms-markets",
-      "published": "2026-11-05T12:00:00Z",
+      "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "Investing.com",
+      "rank": 21.5
+    },
+    {
+      "title": "Crypto Market Today, Nov. 5: Bitcoin Erases Post-Election Rally as Wall Street Suffers Worst Day in 18 Months",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/05/crypto-market-today-nov-5-bitcoin-erases-post-election-rally-as-wall-street-suffers-worst-day-in-18-months/?.tsrc=rss",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
         "election"
-      ]
+      ],
+      "via": "",
+      "rank": 20.0
     },
     {
-      "title": "Federal Reserve officials signal patience on the path of interest rates",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/example/fomc-patience",
-      "published": "2026-11-04T18:00:00Z",
+      "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+      "source": "MarketWatch",
+      "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
-        "rates",
-        "inflation"
-      ]
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 15.5
     },
     {
-      "title": "Jobless claims stay low ahead of the next employment report",
-      "source": "Bureau of Labor Statistics",
-      "url": "https://www.bls.gov/example/claims",
-      "published": "2026-11-04T12:30:00Z",
+      "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+      "source": "Yahoo Finance",
+      "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
-        "jobs"
-      ]
+        "election",
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 17.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 13.5,
+      "score": 19.5,
       "headlines": [
         {
-          "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-          "published": "2026-11-05T14:00:00Z",
+          "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "ai_mood"
-          ]
+            "ai_mood",
+            "war"
+          ],
+          "via": "",
+          "rank": 28.0
         },
         {
-          "title": "Oil prices firm while investors rotate into consumer staples",
-          "source": "Associated Press",
-          "url": "https://apnews.com/example/oil-staples-rotation",
-          "published": "2026-11-05T13:30:00Z",
+          "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
+          "source": "Reuters",
+          "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "oil",
             "ai_mood"
-          ]
+          ],
+          "via": "Investing.com",
+          "rank": 22.5
+        },
+        {
+          "title": "Dow Jones Futures Fall; Nasdaq Dives 5.5%, Nvidia, Sandisk, CoreWeave, SpaceX Plunge, But Sell-Off Spreads Beyond AI",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%3B.html?.tsrc=rss",
+          "published": "2026-11-06",
+          "trusted": true,
+          "causes": [
+            "jobs",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 26.0
+        },
+        {
+          "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+          "source": "Reuters",
+          "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "Investing.com",
+          "rank": 21.5
+        },
+        {
+          "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+          "source": "MarketWatch",
+          "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 15.5
+        },
+        {
+          "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+          "source": "Yahoo Finance",
+          "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "election",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 17.5
         }
       ]
     },
     {
-      "cause": "oil",
-      "label": "Oil / Energy",
-      "score": 2.98,
+      "cause": "election",
+      "label": "Election",
+      "score": 3.0,
       "headlines": [
         {
-          "title": "Oil prices firm while investors rotate into consumer staples",
-          "source": "Associated Press",
-          "url": "https://apnews.com/example/oil-staples-rotation",
-          "published": "2026-11-05T13:30:00Z",
+          "title": "Crypto Market Today, Nov. 5: Bitcoin Erases Post-Election Rally as Wall Street Suffers Worst Day in 18 Months",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/05/crypto-market-today-nov-5-bitcoin-erases-post-election-rally-as-wall-street-suffers-worst-day-in-18-months/?.tsrc=rss",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "oil",
+            "election"
+          ],
+          "via": "",
+          "rank": 20.0
+        },
+        {
+          "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+          "source": "Yahoo Finance",
+          "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "election",
             "ai_mood"
-          ]
+          ],
+          "via": "",
+          "rank": 17.5
         }
       ]
     }
@@ -134,6 +338,15 @@
     "pct_above_50day": 66.9,
     "pct_above_200day": 63.8,
     "text": "More than half the desk is still above the 50-day and 200-day."
+  },
+  "tips": {
+    "title": "What it means for me",
+    "lines": [
+      "Fear is high today. Big swings are more common — go slow with new buys.",
+      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
+      "The bigger trend is still up on the desk's 50-day and 200-day checks — one rough day does not flip that by itself."
+    ],
+    "disclaimer": "Research only. Not advice to buy or sell any stock."
   },
   "calendar": {
     "next": {
@@ -179,6 +392,7 @@
     "spy_price": 745.85,
     "spy_day_pct": -2.73,
     "qqq_day_pct": -4.98,
+    "dia_day_pct": null,
     "vix": 21.98,
     "advancers": 222,
     "decliners": 299,
@@ -191,18 +405,17 @@
   "learning": {
     "stub": {
       "date": "2026-11-05",
-      "slot": "morning_open",
+      "slot": "evening_close",
       "mood": "Fear",
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "oil"
+        "election"
       ],
       "sources": [
-        "Associated Press",
-        "Bureau of Labor Statistics",
-        "Federal Reserve",
-        "Reuters"
+        "MarketWatch",
+        "Reuters",
+        "Yahoo Finance"
       ],
       "spy_day_pct": -2.73,
       "qqq_day_pct": -4.98,
@@ -213,19 +426,25 @@
       "by_cause": {
         "election": {
           "up": 0,
-          "down": 1,
+          "down": 2,
           "flat": 0,
-          "n": 1
+          "n": 2
         },
         "ai_mood": {
           "up": 0,
-          "down": 1,
+          "down": 2,
           "flat": 0,
-          "n": 1
+          "n": 2
         }
       },
       "by_source": {
         "Reuters": {
+          "up": 0,
+          "down": 2,
+          "flat": 0,
+          "n": 2
+        },
+        "Federal Reserve": {
           "up": 0,
           "down": 1,
           "flat": 0,
@@ -238,7 +457,7 @@
           "n": 1
         }
       },
-      "n_labeled": 1,
+      "n_labeled": 2,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },

@@ -14,8 +14,10 @@ from typing import Any, Callable, Dict, List, Optional
 
 from . import calendar_fetch, learning, news_fetch
 from .causes import pick_headlines, score_causes, tag_headline
-from .mood import breadth_vs_price, mood_chip, regime_note, why_moved
-from .schema import DISCLAIMER, FEATURE_FLAG, OUTPUT_FILES
+from .mood import breadth_vs_price, mood_chip, regime_note, why_moved, why_moved_short
+from .schema import DISCLAIMER, FEATURE_FLAG, OUTPUT_FILES, SCHEMA_VERSION
+from .story import build_story
+from .tips import build_tips
 from .watch import watch_next_line, weekly_recap
 
 ET_LABEL = "America/Los_Angeles"  # desk UI shows PT; price_as_of is a New York calendar date
@@ -45,7 +47,6 @@ def write_json(path: str, payload: Any) -> None:
 def _slot_for(now_et_hour: Optional[int] = None) -> str:
     """Morning open brief before 12:00 ET; evening close brief afterward."""
     if now_et_hour is None:
-        # Approximate from local clock; desk hook should pass New York hour.
         now_et_hour = dt.datetime.now().hour
     return "morning_open" if now_et_hour < 12 else "evening_close"
 
@@ -117,51 +118,63 @@ def build_brief(
     slot: Optional[str] = None,
     now_et_hour: Optional[int] = None,
     history_rows: Optional[List[Dict[str, Any]]] = None,
+    headline_limit: int = 7,
 ) -> Dict[str, Any]:
-    """Pure build — no I/O. Safe for unit tests."""
+    """Pure build — no I/O. Safe for unit tests.
+
+    Always writes the full v2 payload. UI feature switches decide what to show:
+      market_news_why_detail, market_news_more_headlines, market_news_card_layout,
+      market_news_tips (all default on).
+    """
     session = str(stats.get("price_as_of") or dt.date.today().isoformat())
     slot = slot or _slot_for(now_et_hour)
     mood = mood_chip(stats)
     regime = regime_note(stats)
     breadth = breadth_vs_price(stats)
-    why = why_moved(stats, sectors)
 
-    # Tag then pick 3–5 big-picture headlines.
+    # Tag then pick 5–7 big-picture headlines (v2). Compact UI may show fewer.
     tagged = []
     for h in headlines_raw:
         h = dict(h)
         h["causes"] = h.get("causes") or tag_headline(h.get("title") or "", h.get("summary") or "")
         tagged.append(h)
-    headlines = pick_headlines(tagged, limit=5)
+    headlines = pick_headlines(tagged, limit=headline_limit, session=session)
     causes = score_causes(headlines, stats, sectors)
-    # Group: only headlines under the ranked causes (plus leftover top headlines list).
-    vs = compare_to_yesterday(mood["label"], prior_brief)
 
-    # Keep prior brief body for on-page compare (not just mood).
+    why_short = why_moved_short(stats, sectors)
+    why_detail = why_moved(stats, sectors, causes=causes)
+    vs = compare_to_yesterday(mood["label"], prior_brief)
+    tips = build_tips(mood, regime, breadth, stats)
+    story = build_story(stats, sectors, headlines, causes, slot=slot)
+
     prior_keep = None
     if prior_brief:
         prior_keep = {
             "session": prior_brief.get("session") or prior_brief.get("price_as_of"),
             "slot": prior_brief.get("slot"),
-            "why_moved": prior_brief.get("why_moved"),
+            "why_moved": prior_brief.get("why_moved_short") or prior_brief.get("why_moved"),
             "mood": (prior_brief.get("mood") or {}).get("label"),
             "causes": [c.get("label") or c.get("cause") for c in (prior_brief.get("causes") or [])],
         }
 
     brief = {
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
         "feature": FEATURE_FLAG,
         "session": session,
         "slot": slot,
         "updated_pt": stats.get("updated_pt") or "",
         "price_as_of": session,
-        "why_moved": why,
+        # why_moved = detailed 2–3 sentences (v2 default). Short kept for compact mode.
+        "why_moved": why_detail,
+        "why_moved_short": why_short,
+        "story": story,
         "mood": mood,
         "headlines": headlines,
         "causes": causes,
         "vs_yesterday": vs,
         "breadth_check": breadth,
         "regime": regime,
+        "tips": tips,
         "calendar": {
             "next": (calendar or {}).get("next"),
             "week": (calendar or {}).get("week") or [],
@@ -173,6 +186,7 @@ def build_brief(
             "spy_price": _num(stats.get("spy_price")),
             "spy_day_pct": _num(stats.get("spy_day_pct")),
             "qqq_day_pct": _num(stats.get("qqq_day_pct")),
+            "dia_day_pct": _num(stats.get("dia_day_pct") or stats.get("dow_day_pct")),
             "vix": _num(stats.get("vix")),
             "advancers": _int(stats.get("advancers")),
             "decliners": _int(stats.get("decliners")),
@@ -182,32 +196,27 @@ def build_brief(
             "put_call_zone": stats.get("put_call_zone") or None,
             "fred_dgs10": _num(stats.get("fred_dgs10")),
         },
-        "learning": None,  # filled below
+        "learning": None,
         "disclaimer": DISCLAIMER,
         "data_status": stats.get("data_status") or "OK",
     }
 
     hist = list(history_rows or [])
-    # Backfill next-day SPY onto prior stubs using today's spy_day_pct.
     hist = learning.backfill_next_day(hist, session, brief["stats"]["spy_day_pct"])
     stub = learning.stub_from_brief(brief)
-    # Replace same session+slot stub if re-run; else append.
     hist = [
         r for r in hist
         if not (r.get("date") == stub["date"] and r.get("slot") == stub["slot"])
     ]
     hist.append(stub)
-    # Cap history length so the file stays small.
     hist = hist[-120:]
     brief["learning"] = {
         "stub": stub,
         "stats": learning.cause_source_stats(hist),
     }
-    # Next session's notable release (Pacific time). None when that day is quiet.
     brief["watch_next"] = watch_next_line(session, calendar)
-    # Friday close only. Stays on the saved brief through the weekend.
     brief["weekly_recap"] = weekly_recap(session, slot, hist)
-    brief["_history"] = hist  # publish() peels this off into the history file
+    brief["_history"] = hist
     return brief
 
 
@@ -220,6 +229,7 @@ def publish(
     fetch_calendar: Optional[Callable[..., Dict[str, Any]]] = None,
     offline_headlines: Optional[List[Dict[str, Any]]] = None,
     offline_calendar: Optional[Dict[str, Any]] = None,
+    headline_limit: int = 7,
 ) -> Dict[str, Any]:
     """Read desk files under data_dir, write market_brief.json + history.
 
@@ -235,6 +245,10 @@ def publish(
     hist_path = os.path.join(data_dir, OUTPUT_FILES["history"].split("/", 1)[-1])
 
     stats = load_stats(market_today_path=mt_path)
+    if _num(stats.get("dia_day_pct") or stats.get("dow_day_pct")) is None:
+        dia = dia_day_pct_from_prices(cache_dir, stats.get("price_as_of"))
+        if dia is not None:
+            stats["dia_day_pct"] = dia
     sectors = load_sectors(sectors_path=sectors_path, sector_perf_path=sector_perf_path)
     prior = read_json(brief_path, default=None)
     history = read_json(hist_path, default=[]) or []
@@ -244,11 +258,9 @@ def publish(
     now_et = now_et or dt.datetime.now()
     slot = _slot_for(now_et.hour)
 
-    # Headlines
     if offline_headlines is not None:
         headlines_raw = news_fetch.headlines_from_fixture(offline_headlines)
     elif mode in ("offline",) or fetch_news is None and mode == "hourly" and prior:
-        # Hourly default: keep prior headlines unless a fetch function is injected.
         headlines_raw = list(prior.get("headlines") or []) if prior else []
         if not headlines_raw and fetch_news:
             headlines_raw = fetch_news()
@@ -259,14 +271,12 @@ def publish(
         except Exception:
             headlines_raw = list((prior or {}).get("headlines") or [])
 
-    # Calendar
     today = dt.date.fromisoformat(str(stats.get("price_as_of") or now_et.date()))
     if offline_calendar is not None:
         calendar = offline_calendar
     else:
-        cal_fn = fetch_calendar or (lambda: calendar_fetch.next_events(today=today))
         try:
-            calendar = cal_fn() if fetch_calendar else calendar_fetch.next_events(today=today)
+            calendar = fetch_calendar() if fetch_calendar else calendar_fetch.next_events(today=today)
         except Exception:
             calendar = (prior or {}).get("calendar") or {
                 "next": None, "week": [], "text": "Calendar feed unavailable.", "source": "error",
@@ -281,11 +291,67 @@ def publish(
         slot=slot,
         now_et_hour=now_et.hour,
         history_rows=history,
+        headline_limit=headline_limit,
     )
     hist = brief.pop("_history", history)
     write_json(brief_path, brief)
-    write_json(hist_path, {"schema_version": 1, "rows": hist, "aggregates": brief.get("learning", {}).get("stats")})
+    write_json(hist_path, {"schema_version": SCHEMA_VERSION, "rows": hist, "aggregates": brief.get("learning", {}).get("stats")})
     return brief
+
+
+def dia_day_pct_from_prices(cache_dir: Optional[str], session: Any) -> Optional[float]:
+    """Dow day change from DIA bars already on disk. No Yahoo call.
+
+    DOW the stock is not the index, so only the DIA ticker counts.
+    """
+    import gzip
+    root = cache_dir or "cache"
+    path = os.path.join(root, "ohlcv.csv.gz")
+    if not os.path.exists(path):
+        alt = os.path.join(os.path.dirname(root), "data", "ohlc", "DIA.csv")
+        return _dia_from_csv(alt, session) if os.path.exists(alt) else None
+    closes = []
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            next(handle, None)
+            for line in handle:
+                parts = line.split(",")
+                if len(parts) < 3 or parts[1] != "DIA":
+                    continue
+                closes.append((parts[0][:10], parts[2]))
+    except OSError:
+        return None
+    return _pct_from_closes(closes, session)
+
+
+def _dia_from_csv(path: str, session: Any) -> Optional[float]:
+    closes = []
+    try:
+        with open(path, newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                day = (row.get("date") or row.get("Date") or "")[:10]
+                px = row.get("close") or row.get("Close") or ""
+                if day and px:
+                    closes.append((day, px))
+    except OSError:
+        return None
+    return _pct_from_closes(closes, session)
+
+
+def _pct_from_closes(closes, session: Any) -> Optional[float]:
+    rows = []
+    for day, px in closes:
+        try:
+            rows.append((day, float(px)))
+        except (TypeError, ValueError):
+            continue
+    rows.sort()
+    if session:
+        cap = str(session)[:10]
+        rows = [r for r in rows if r[0] <= cap]
+    if len(rows) < 2 or rows[-2][1] == 0:
+        return None
+    return (rows[-1][1] / rows[-2][1] - 1.0) * 100.0
 
 
 def _num(v: Any) -> Optional[float]:

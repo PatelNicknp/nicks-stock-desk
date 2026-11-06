@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from market_news.brief import load_sectors, load_stats
-from market_news.mood import breadth_vs_price, mood_chip, regime_note, why_moved
+from market_news.mood import breadth_vs_price, mood_chip, regime_note, why_moved, why_moved_short
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIX = os.path.join(ROOT, "market_news", "fixtures")
@@ -58,10 +58,10 @@ def test_breadth_divergence():
     assert b["flag"] == "index_up_stocks_down"
 
 
-def test_why_moved_mentions_tech_and_staples():
+def test_why_moved_short_mentions_tech_and_staples():
     stats = load_stats(market_today_path=os.path.join(FIX, "market_today.csv"))
     sectors = load_sectors(sectors_path=os.path.join(FIX, "sectors.csv"))
-    text = why_moved(stats, sectors)
+    text = why_moved_short(stats, sectors)
     assert "Nasdaq" in text and "S&P" in text
     assert "Technology" in text
     assert "Consumer Staples" in text or "Health Care" in text
@@ -69,6 +69,20 @@ def test_why_moved_mentions_tech_and_staples():
     assert "VIX" in text
     assert "(222 stocks up, 299 down)" in text
     assert "held up(" not in text  # spacing regression guard
+
+
+def test_why_moved_detail_is_two_to_three_sentences():
+    stats = load_stats(market_today_path=os.path.join(FIX, "market_today.csv"))
+    sectors = load_sectors(sectors_path=os.path.join(FIX, "sectors.csv"))
+    causes = [{"cause": "ai_mood", "label": "AI / Tech mood", "score": 10}]
+    text = why_moved(stats, sectors, causes=causes)
+    assert text.count(".") >= 2
+    assert "S&P" in text and "Nasdaq" in text
+    assert "Biggest driver: AI / Tech mood" in text
+    assert "Technology" in text
+    assert "Consumer Staples" in text or "Health Care" in text
+    assert "broad" in text.lower()
+    assert "VIX" in text
 
 
 def test_why_moved_prefers_spdr_over_industry_etf():

@@ -19,8 +19,10 @@ OUTPUT_FILES = {
 }
 
 # market_today.csv columns used (others ignored).
+# Optional dia_day_pct / dow_day_pct: used in the why line when present; otherwise
+# Dow-heavy sector ETFs (XLF + XLI) stand in — never a new Yahoo fetch.
 MARKET_TODAY_FIELDS = [
-    "spy_price", "spy_day_pct", "qqq_day_pct",
+    "spy_price", "spy_day_pct", "qqq_day_pct", "dia_day_pct", "dow_day_pct",
     "breadth_sma20", "breadth_sma50", "breadth_sma100", "breadth_sma200",
     "breadth_sma50_week_ago", "advancers", "decliners", "universe_n",
     "highs_52w", "lows_52w",
@@ -29,8 +31,14 @@ MARKET_TODAY_FIELDS = [
     "updated_pt", "price_as_of", "data_status",
 ]
 
-# Feature flag name to add in config.json → features.
+# Master switch + one on/off switch per v2 piece (all default on).
 FEATURE_FLAG = "market_news"
+FEATURE_FLAGS_V2 = (
+    "market_news_why_detail",      # (a) 2–3 sentence why line
+    "market_news_more_headlines",  # (b) 5–7 ranked headlines
+    "market_news_card_layout",     # (d) nicer card layout
+    "market_news_tips",            # (e) what-it-means-for-me tips
+)
 
 # Cause tags (locked product list).
 CAUSE_TAGS = (
@@ -59,9 +67,12 @@ TRUSTED_SOURCES = (
     "Associated Press",
     "AP",
     "AP News",
+    "NPR",
 )
 
 DISCLAIMER = (
     "Research only. Not a recommendation to buy or sell. "
     "This desk never places trades. Market-wide news brief only — no single-stock picks."
 )
+
+SCHEMA_VERSION = 2
