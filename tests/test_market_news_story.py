@@ -32,7 +32,7 @@ def test_fixture_story_uses_the_ai_headline_and_desk_numbers():
     story = brief["story"]
     assert story["clear_cause"] is True
     assert story["cause"] == "ai_mood"
-    assert story["lead"] == "Tech led stocks lower."
+    assert story["lead"] == "Chip and tech shares led stocks lower."
     assert "AI and chip stocks sell off" in story["support"]
     assert story["support_ref"] == 1
     assert story["news"][0]["title"] in story["support"]
@@ -50,8 +50,7 @@ def test_fixture_story_uses_the_ai_headline_and_desk_numbers():
     names = [c["name"] for c in story["chips"]]
     assert "Tech" in names
     assert any(c["kind"] == "summary" and c["name"] != "All 11 sectors down" for c in story["chips"])
-    dow = [i for i in story["indexes"] if i["name"] == "Dow"][0]
-    assert dow["pct"] is None and dow["arrow"] == "missing"
+    assert all(i["name"] != "Dow" for i in story["indexes"])
     spy = [i for i in story["indexes"] if i["name"] == "S&P 500"][0]
     assert spy["pct_text"] == "2.73%" and spy["arrow"] == "down"
     blob = json.dumps(story).lower()
@@ -101,6 +100,45 @@ def test_headline_without_a_desk_link_is_not_the_cause():
     assert "Election" not in story["lead"]
     assert "No clear cause" in story["support"]
     assert story["summary"] == "U.S. morning summary"
+
+
+def test_ai_regulation_wrap_is_the_cause_when_chips_led():
+    stats = {
+        "spy_day_pct": -2.73, "qqq_day_pct": -4.98, "vix": 22,
+        "advancers": 222, "decliners": 299, "price_as_of": "2026-11-05",
+    }
+    sectors = [
+        {"ticker": "XLK", "name": "Technology", "day_pct": -6.2},
+        {"ticker": "SMH", "name": "Semiconductors", "day_pct": -8.91},
+        {"ticker": "XLF", "name": "Financials", "day_pct": -0.79},
+        {"ticker": "XLP", "name": "Consumer Staples", "day_pct": 1.09},
+    ]
+    headlines = [
+        {
+            "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+            "source": "Reuters", "via": "Investing.com",
+            "url": "https://www.investing.com/news/stock-market-news/example",
+            "published": "2026-11-05", "trusted": True, "causes": ["ai_mood"], "rank": 20,
+        },
+        {
+            "title": "Federal Reserve issues FOMC statement",
+            "source": "Federal Reserve",
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+            "published": "2026-10-28", "trusted": True, "causes": ["rates"], "rank": 5,
+        },
+    ]
+    causes = [
+        {"cause": "ai_mood", "label": "AI / Tech mood", "score": 8, "headlines": [headlines[0]]},
+        {"cause": "rates", "label": "Rates / Fed", "score": 4, "headlines": [headlines[1]]},
+    ]
+    story = build_story(stats, sectors, headlines, causes, slot="evening_close")
+    assert story["clear_cause"] is True
+    assert story["cause"] == "ai_mood"
+    assert story["lead"] == "AI regulation fears sent stocks lower."
+    assert "AI regulations" in story["support"]
+    assert story["news"][0]["source"] == "Reuters"
+    assert story["news"][0]["via"] == "Investing.com"
+    assert all(i["name"] != "Dow" for i in story["indexes"])
 
 
 def test_fed_headline_and_a_high_vix_are_not_a_rates_cause():

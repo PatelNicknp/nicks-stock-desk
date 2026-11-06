@@ -119,7 +119,7 @@
     var n = h.n < 10 ? "0" + h.n : String(h.n);
     var title = esc(h.title || "");
     var body = '<div><div class="mn-meta"><span class="mn-num">' + esc(n) + "</span><b>" +
-      esc(h.source || "Source") + "</b>" +
+      esc(h.source || "Source") + (h.via ? " via " + esc(h.via) : "") + "</b>" +
       (h.date_label ? "<span>" + esc(h.date_label) + "</span>" : "") +
       '</div><div class="mn-storytitle">' + title + "</div></div>" +
       '<span class="mn-out" aria-hidden="true">↗</span>';
@@ -201,7 +201,7 @@
 
     var indexes = "";
     if (indexesOn && (story.indexes || []).length) {
-      indexes = '<div class="mn-indices" aria-label="Index moves">' +
+      indexes = '<div class="mn-indices mn-cols-' + story.indexes.length + '" aria-label="Index moves">' +
         story.indexes.map(function (row) { return indexHtml(row, anchor); }).join("") +
         "</div>";
     }

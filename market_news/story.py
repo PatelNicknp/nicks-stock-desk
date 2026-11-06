@@ -196,9 +196,16 @@ def _cause_matches_desk(
 
 
 _CAUSE_WORDS = {
-    "ai_mood": ("artificial intelligence", " ai ", "chip", "semiconductor", "nasdaq", "tech"),
+    "ai_mood": (
+        "artificial intelligence", " ai ", "chip", "semiconductor", "nasdaq", "tech",
+        "data center", "data-center", "ai regulat", "ai build", "ai trade",
+    ),
     "oil": ("oil", "crude", "energy"),
     "rates": ("federal reserve", "fomc", "interest rate", " rate", "yield"),
+    "jobs": ("jobs", "payroll", "jobless", "unemployment"),
+    "inflation": ("inflation", "cpi", "ppi"),
+    "election": ("election", "midterm", "tariff"),
+    "war": ("war ", "ukraine", "ceasefire"),
 }
 
 
@@ -211,12 +218,17 @@ def _pick_headline(headlines: List[Dict[str, Any]], cause: str) -> Optional[Dict
     def score(h: Dict[str, Any]) -> Tuple[int, int, float]:
         blob = _blob(h)
         hits = sum(1 for w in words if w in blob)
+        specific = 1 if ("regulat" in blob or "data center" in blob or "data-center" in blob or "fear" in blob) else 0
+        wrap = 1 if any(bit in blob for bit in (
+            "fell", "fall", "drop", "slid", "slide", "crater", "plunge", "selloff",
+            "sell-off", "worst day", "on fears", "correction", "wipes out", "rout",
+        )) else 0
         rank = h.get("rank")
         try:
             rank_n = float(rank) if rank is not None else 0.0
         except (TypeError, ValueError):
             rank_n = 0.0
-        return (hits, 1 if h.get("trusted") else 0, rank_n)
+        return (hits, specific, wrap, rank_n)
 
     best = max(headlines, key=score)
     if words and score(best)[0] == 0:
@@ -255,6 +267,7 @@ def _news_item(h: Dict[str, Any], n: int, session: str) -> Dict[str, Any]:
         "n": n,
         "title": (h.get("title") or "").strip(),
         "source": (h.get("source") or "").strip(),
+        "via": (h.get("via") or "").strip(),
         "url": h.get("url") or "",
         "published": h.get("published") or "",
         "date_label": _short_date(h.get("published") or "", session),
@@ -311,16 +324,7 @@ def _indexes(stats: Dict[str, Any]) -> List[Dict[str, Any]]:
         {"name": "S&P 500", "pct": spy, "pct_text": _pct_text(spy), "arrow": _sign(spy), "source": "spy"},
         {"name": "Nasdaq", "pct": qqq, "pct_text": _pct_text(qqq), "arrow": _sign(qqq), "source": "qqq"},
     ]
-    if dow is None:
-        out.append({
-            "name": "Dow",
-            "pct": None,
-            "pct_text": None,
-            "arrow": "missing",
-            "source": "missing",
-            "note": "No Dow day change in the desk file.",
-        })
-    else:
+    if dow is not None:
         out.append({
             "name": "Dow",
             "pct": dow,
@@ -446,6 +450,42 @@ def _bullets(
     return bullets[:3]
 
 
+def _lead_from_headline(headline: Dict[str, Any], direction: str, cause: str) -> str:
+    """A short reason line. Every word is backed by the headline or the day's direction."""
+    blob = _blob(headline)
+    if direction == "down" and ("data center" in blob or "data-center" in blob) and (
+        " ai " in blob or "chip" in blob
+    ):
+        return "AI data-center fears sent stocks lower."
+    if direction == "down" and " ai " in blob and (
+        "regulat" in blob or "fear" in blob
+    ):
+        return "AI regulation fears sent stocks lower."
+    if direction == "down" and ("chip" in blob or "semiconductor" in blob) and (
+        "nasdaq" in blob or "tech" in blob or "stock" in blob
+    ):
+        return "Chip and tech shares led stocks lower."
+    if direction == "down" and "ai trade" in blob:
+        return "The AI trade led stocks lower."
+    if direction == "up" and (" ai " in blob or "chip" in blob):
+        return "The AI trade led stocks higher."
+    if cause == "oil" and direction == "down":
+        return "Oil was part of the drop."
+    if cause == "oil" and direction == "up":
+        return "Oil was part of the rise."
+    if cause == "rates":
+        return "Rates were part of the move."
+    if cause == "ai_mood" and direction == "down":
+        return "Tech led stocks lower."
+    if cause == "ai_mood" and direction == "up":
+        return "Tech led stocks higher."
+    if direction == "down":
+        return "Stocks fell."
+    if direction == "up":
+        return "Stocks rose."
+    return "The market was little changed."
+
+
 def build_story(
     stats: Dict[str, Any],
     sectors: List[Dict[str, Any]],
@@ -469,14 +509,8 @@ def build_story(
     )
     clear = support_h is not None
 
-    if clear and linked[0].get("cause") == "ai_mood" and direction == "down":
-        lead = "Tech led stocks lower."
-    elif clear and linked[0].get("cause") == "ai_mood" and direction == "up":
-        lead = "Tech led stocks higher."
-    elif clear and linked[0].get("cause") == "oil":
-        lead = "Oil was part of the move."
-    elif clear and linked[0].get("cause") == "rates":
-        lead = "Rates were part of the move."
+    if clear:
+        lead = _lead_from_headline(support_h, direction, linked[0].get("cause") or "")
     else:
         lead = _index_lead(spy, qqq, direction)
 

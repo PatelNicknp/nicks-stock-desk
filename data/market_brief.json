@@ -2,7 +2,7 @@
   "schema_version": 2,
   "feature": "market_news",
   "session": "2026-11-05",
-  "slot": "morning_open",
+  "slot": "evening_close",
   "updated_pt": "2026-11-05 07:28 PT",
   "price_as_of": "2026-11-05",
   "why_moved": "The market fell: S&P -2.7%, Nasdaq -5.0%, Dow-heavy groups (Financials/Industrials) about -1.5%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-6.2%) and Consumer Discretionary (-3.6%); leading sectors Consumer Staples (1.1%) and Energy (1.0%) held up. The move was fairly broad: 299 stocks fell and 222 rose; VIX is firm at 22.0.",
@@ -10,17 +10,17 @@
   "story": {
     "direction": "down",
     "date_label": "November 5, 2026",
-    "summary": "U.S. morning summary",
-    "clear_cause": false,
-    "cause": null,
-    "lead": "The Nasdaq led stocks lower.",
-    "support": "No clear cause in the free headlines. None of them line up with the desk numbers.",
-    "support_ref": null,
+    "summary": "U.S. closing summary",
+    "clear_cause": true,
+    "cause": "ai_mood",
+    "lead": "AI regulation fears sent stocks lower.",
+    "support": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations.",
+    "support_ref": 1,
     "bullets": [
       {
         "lead": "Technology took the biggest hit.",
         "rest": "Tech fell 6.2%.",
-        "ref": null
+        "ref": 1
       },
       {
         "lead": "More stocks fell than rose.",
@@ -74,43 +74,38 @@
         "pct_text": "4.98%",
         "arrow": "down",
         "source": "qqq"
-      },
-      {
-        "name": "Dow",
-        "pct": null,
-        "pct_text": null,
-        "arrow": "missing",
-        "source": "missing",
-        "note": "No Dow day change in the desk file."
       }
     ],
     "news": [
       {
         "n": 1,
-        "title": "Federal Reserve issues FOMC statement",
-        "source": "Federal Reserve",
-        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
-        "published": "Wed, 28 Oct 2026 18:00:00 GMT",
-        "date_label": ""
+        "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+        "source": "Reuters",
+        "via": "Investing.com",
+        "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
       },
       {
         "n": 2,
-        "title": "Does the blue wave mean lower gasoline and diesel prices soon? Don't hold your breath",
-        "source": "NPR",
-        "url": "https://www.npr.org/2026/11/05/nx-s1-6029365/gas-diesel-price-congress-midterms",
-        "published": "Thu, 05 Nov 2026 05:00:00 -0500",
-        "date_label": ""
+        "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
       },
       {
         "n": 3,
-        "title": "First Lady Melania Trump Unites Russia and Ukraine at The White House Following Historic Ceasefire",
-        "source": "White House",
-        "url": "https://www.whitehouse.gov/briefings-statements/2026/11/first-lady-melania-trump-unites-russia-and-ukraine-at-the-white-house-following-historic-ceasefire/",
-        "published": "Thu, 05 Nov 2026 16:31:07 +0000",
-        "date_label": ""
+        "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
+        "source": "Reuters",
+        "via": "Investing.com",
+        "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
       }
     ],
-    "note": "No headline was tied to the move. The bold line is the desk numbers only."
+    "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
     "label": "Fear",
@@ -123,152 +118,205 @@
   },
   "headlines": [
     {
-      "title": "Federal Reserve issues FOMC statement",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
-      "published": "Wed, 28 Oct 2026 18:00:00 GMT",
+      "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
-        "rates"
-      ],
-      "rank": 12.5
-    },
-    {
-      "title": "Does the blue wave mean lower gasoline and diesel prices soon? Don't hold your breath",
-      "source": "NPR",
-      "url": "https://www.npr.org/2026/11/05/nx-s1-6029365/gas-diesel-price-congress-midterms",
-      "published": "Thu, 05 Nov 2026 05:00:00 -0500",
-      "trusted": true,
-      "causes": [
-        "oil",
-        "election",
+        "ai_mood",
         "war"
       ],
-      "rank": 11.0
+      "via": "",
+      "rank": 28.0
     },
     {
-      "title": "First Lady Melania Trump Unites Russia and Ukraine at The White House Following Historic Ceasefire",
-      "source": "White House",
-      "url": "https://www.whitehouse.gov/briefings-statements/2026/11/first-lady-melania-trump-unites-russia-and-ukraine-at-the-white-house-following-historic-ceasefire/",
-      "published": "Thu, 05 Nov 2026 16:31:07 +0000",
+      "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
+      "source": "Reuters",
+      "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "Investing.com",
+      "rank": 22.5
+    },
+    {
+      "title": "Dow Jones Futures Fall; Nasdaq Dives 5.5%, Nvidia, Sandisk, CoreWeave, SpaceX Plunge, But Sell-Off Spreads Beyond AI",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%3B.html?.tsrc=rss",
+      "published": "2026-11-06",
+      "trusted": true,
+      "causes": [
+        "jobs",
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 26.0
+    },
+    {
+      "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+      "source": "Reuters",
+      "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "Investing.com",
+      "rank": 21.5
+    },
+    {
+      "title": "Crypto Market Today, Nov. 5: Bitcoin Erases Post-Election Rally as Wall Street Suffers Worst Day in 18 Months",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/05/crypto-market-today-nov-5-bitcoin-erases-post-election-rally-as-wall-street-suffers-worst-day-in-18-months/?.tsrc=rss",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "election"
+      ],
+      "via": "",
+      "rank": 20.0
+    },
+    {
+      "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+      "source": "MarketWatch",
+      "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+      "published": "2026-11-05",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 15.5
+    },
+    {
+      "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+      "source": "Yahoo Finance",
+      "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+      "published": "2026-11-05",
       "trusted": true,
       "causes": [
         "election",
-        "war"
+        "ai_mood"
       ],
-      "rank": 10.5
-    },
-    {
-      "title": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into the economic condition of American families",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/newsevents/pressreleases/other20261009a.htm",
-      "published": "Fri, 9 Oct 2026 14:00:00 GMT",
-      "trusted": true,
-      "causes": [
-        "rates"
-      ],
-      "rank": 8.5
-    },
-    {
-      "title": "Federal Reserve Board announces termination of enforcement actions with Gardner Bancshares, Inc. and Small Business Bank",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261016a.htm",
-      "published": "Fri, 16 Oct 2026 15:00:00 GMT",
-      "trusted": true,
-      "causes": [
-        "rates"
-      ],
-      "rank": 8.5
-    },
-    {
-      "title": "Federal Reserve Board announces termination of enforcement action with Allegiant United Holdings, LLC, Nano Financial Holdings, Inc., and Nano Banc",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm",
-      "published": "Thu, 5 Nov 2026 16:00:00 GMT",
-      "trusted": true,
-      "causes": [
-        "rates"
-      ],
-      "rank": 8.5
-    },
-    {
-      "title": "Federal Reserve Board announces enforcement action against American Express Company to address, among other things, the firm’s failure to sufficiently detect and report certain suspicious activity related to money laundering",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261008a.htm",
-      "published": "Thu, 8 Oct 2026 20:30:00 GMT",
-      "trusted": true,
-      "causes": [
-        "rates"
-      ],
-      "rank": 8.5
+      "via": "",
+      "rank": 17.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 10.5,
-      "headlines": []
-    },
-    {
-      "cause": "rates",
-      "label": "Rates / Fed",
-      "score": 7.5,
+      "score": 19.5,
       "headlines": [
         {
-          "title": "Federal Reserve issues FOMC statement",
-          "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
-          "published": "Wed, 28 Oct 2026 18:00:00 GMT",
+          "title": "Update: Nasdaq Enters Correction Territory, Dow Plunges Over 1,800 Points as Investors Dump Big Tech",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-enters-correction-territory-dow-223339396.html?.tsrc=rss",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "rates"
+            "ai_mood",
+            "war"
           ],
-          "rank": 12.5
+          "via": "",
+          "rank": 28.0
         },
         {
-          "title": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into the economic condition of American families",
-          "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/newsevents/pressreleases/other20261009a.htm",
-          "published": "Fri, 9 Oct 2026 14:00:00 GMT",
+          "title": "Blue tsunami wipes out $2.5 trillion from Nasdaq, as investors fret about AI trade",
+          "source": "Reuters",
+          "url": "https://www.investing.com/news/stock-market-news/ai-datacenter-stocks-slip-as-democratic-sweep-clouds-expansion-plans-5003196",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "rates"
+            "ai_mood"
           ],
-          "rank": 8.5
+          "via": "Investing.com",
+          "rank": 22.5
         },
         {
-          "title": "Federal Reserve Board announces termination of enforcement actions with Gardner Bancshares, Inc. and Small Business Bank",
-          "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261016a.htm",
-          "published": "Fri, 16 Oct 2026 15:00:00 GMT",
+          "title": "Dow Jones Futures Fall; Nasdaq Dives 5.5%, Nvidia, Sandisk, CoreWeave, SpaceX Plunge, But Sell-Off Spreads Beyond AI",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%3B.html?.tsrc=rss",
+          "published": "2026-11-06",
           "trusted": true,
           "causes": [
-            "rates"
+            "jobs",
+            "ai_mood"
           ],
-          "rank": 8.5
+          "via": "",
+          "rank": 26.0
         },
         {
-          "title": "Federal Reserve Board announces termination of enforcement action with Allegiant United Holdings, LLC, Nano Financial Holdings, Inc., and Nano Banc",
-          "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm",
-          "published": "Thu, 5 Nov 2026 16:00:00 GMT",
+          "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
+          "source": "Reuters",
+          "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "rates"
+            "ai_mood"
           ],
-          "rank": 8.5
+          "via": "Investing.com",
+          "rank": 21.5
         },
         {
-          "title": "Federal Reserve Board announces enforcement action against American Express Company to address, among other things, the firm’s failure to sufficiently detect and report certain suspicious activity related to money laundering",
-          "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261008a.htm",
-          "published": "Thu, 8 Oct 2026 20:30:00 GMT",
+          "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+          "source": "MarketWatch",
+          "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+          "published": "2026-11-05",
           "trusted": true,
           "causes": [
-            "rates"
+            "ai_mood"
           ],
-          "rank": 8.5
+          "via": "",
+          "rank": 15.5
+        },
+        {
+          "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+          "source": "Yahoo Finance",
+          "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "election",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 17.5
+        }
+      ]
+    },
+    {
+      "cause": "election",
+      "label": "Election",
+      "score": 3.0,
+      "headlines": [
+        {
+          "title": "Crypto Market Today, Nov. 5: Bitcoin Erases Post-Election Rally as Wall Street Suffers Worst Day in 18 Months",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/05/crypto-market-today-nov-5-bitcoin-erases-post-election-rally-as-wall-street-suffers-worst-day-in-18-months/?.tsrc=rss",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "election"
+          ],
+          "via": "",
+          "rank": 20.0
+        },
+        {
+          "title": "Stocks crater as midterms spur investor exodus from tech and AI",
+          "source": "Yahoo Finance",
+          "url": "https://www.cbsnews.com/news/stocks-midterm-elections-tech-companies-ai-data-centers/?.tsrc=rss",
+          "published": "2026-11-05",
+          "trusted": true,
+          "causes": [
+            "election",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 17.5
         }
       ]
     }
@@ -357,17 +405,17 @@
   "learning": {
     "stub": {
       "date": "2026-11-05",
-      "slot": "morning_open",
+      "slot": "evening_close",
       "mood": "Fear",
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "rates"
+        "election"
       ],
       "sources": [
-        "Federal Reserve",
-        "NPR",
-        "White House"
+        "MarketWatch",
+        "Reuters",
+        "Yahoo Finance"
       ],
       "spy_day_pct": -2.73,
       "qqq_day_pct": -4.98,

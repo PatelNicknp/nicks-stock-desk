@@ -14,59 +14,19 @@ UA = (
     "research-only"
 )
 
-# Public feeds — no login. Desk already uses Nasdaq + Cboe + Treasury similarly.
-# v2 adds NPR, MarketWatch, Guardian, The Hill for broader big-picture coverage.
+# Market-wrap feeds only. A feed that blocks or moves is skipped.
+# Reuters and AP often refuse a direct RSS; Investing.com carries their wires
+# in <author>, and parse_rss keeps that name.
 FEEDS = (
-    {
-        "url": "https://www.federalreserve.gov/feeds/press_all.xml",
-        "source": "Federal Reserve",
-        "trusted": True,
-    },
-    {
-        "url": "https://www.bls.gov/feed/bls_latest.rss",
-        "source": "Bureau of Labor Statistics",
-        "trusted": True,
-    },
-    {
-        "url": "https://www.whitehouse.gov/news/feed/",
-        "source": "White House",
-        "trusted": True,
-    },
-    {
-        "url": "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best",
-        "source": "Reuters",
-        "trusted": True,
-    },
-    {
-        "url": "https://feeds.npr.org/1006/rss.xml",
-        "source": "NPR",
-        "trusted": True,
-    },
-    {
-        "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
-        "source": "BBC Business",
-        "trusted": False,
-    },
-    {
-        "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
-        "source": "CNBC",
-        "trusted": False,
-    },
-    {
-        "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
-        "source": "MarketWatch",
-        "trusted": False,
-    },
-    {
-        "url": "https://www.theguardian.com/us/business/rss",
-        "source": "Guardian Business",
-        "trusted": False,
-    },
-    {
-        "url": "https://thehill.com/feed/",
-        "source": "The Hill",
-        "trusted": False,
-    },
+    {"url": "https://www.cnbc.com/id/10000664/device/rss/rss.html", "source": "CNBC", "trusted": True},
+    {"url": "https://www.cnbc.com/id/100003114/device/rss/rss.html", "source": "CNBC", "trusted": True},
+    {"url": "https://feeds.marketwatch.com/marketwatch/topstories/", "source": "MarketWatch", "trusted": True},
+    {"url": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC&region=US&lang=en-US", "source": "Yahoo Finance", "trusted": True},
+    {"url": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EIXIC&region=US&lang=en-US", "source": "Yahoo Finance", "trusted": True},
+    {"url": "https://www.investing.com/rss/news_25.rss", "source": "Investing.com", "trusted": True},
+    {"url": "https://www.nasdaq.com/feed/rssoutbound?category=Markets", "source": "Nasdaq", "trusted": True},
+    {"url": "https://www.reuters.com/rssFeed/businessNews", "source": "Reuters", "trusted": True},
+    {"url": "https://apnews.com/hub/business?output=rss", "source": "AP", "trusted": True},
 )
 
 
@@ -106,6 +66,7 @@ def parse_rss(xml_text: str, source: str, trusted: bool) -> List[Dict[str, Any]]
         link = ""
         summary = ""
         published = ""
+        author = ""
         for child in list(node):
             name = _local(child.tag)
             text = (child.text or "").strip()
@@ -119,17 +80,51 @@ def parse_rss(xml_text: str, source: str, trusted: bool) -> List[Dict[str, Any]]
                 summary = re.sub(r"\s+", " ", summary).strip()
             elif name in ("pubDate", "published", "updated", "date"):
                 published = text
+            elif name in ("author", "creator"):
+                author = text
         if not title:
             continue
+        wire, via = _wire_credit(source, author)
         items.append({
             "title": title,
             "url": link,
             "summary": summary[:280],
-            "published": published,
-            "source": source,
-            "trusted": trusted or _is_trusted(source),
+            "published": _iso_day(published),
+            "source": wire,
+            "via": via,
+            "trusted": trusted or _is_trusted(wire),
         })
     return items
+
+
+def _iso_day(published: str) -> str:
+    raw = (published or "").strip()
+    if not raw:
+        return ""
+    if len(raw) >= 10 and raw[4:5] == "-" and raw[7:8] == "-":
+        return raw[:10]
+    try:
+        from email.utils import parsedate_to_datetime
+        got = parsedate_to_datetime(raw)
+        if got is not None:
+            return got.date().isoformat()
+    except (TypeError, ValueError, OverflowError):
+        return raw
+    return raw
+
+
+def _wire_credit(feed_source: str, author: str) -> tuple:
+    """Investing.com and similar feeds name Reuters or AP in the author field."""
+    who = (author or "").strip()
+    low = who.lower()
+    feed = feed_source or ""
+    if "reuters" in low:
+        via = "" if "reuters" in feed.lower() else feed
+        return "Reuters", via
+    if low in ("ap", "associated press") or "associated press" in low:
+        via = "" if feed.lower() in ("ap", "associated press") else feed
+        return "AP", via
+    return feed, ""
 
 
 def _is_trusted(source: str) -> bool:
@@ -166,6 +161,7 @@ def headlines_from_fixture(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "summary": r.get("summary") or "",
             "published": r.get("published") or "",
             "source": source,
+            "via": r.get("via") or "",
             "trusted": bool(r.get("trusted")) if "trusted" in r else _is_trusted(source),
         })
     return [h for h in out if h["title"]]

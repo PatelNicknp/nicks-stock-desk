@@ -138,7 +138,7 @@ def build_brief(
         h = dict(h)
         h["causes"] = h.get("causes") or tag_headline(h.get("title") or "", h.get("summary") or "")
         tagged.append(h)
-    headlines = pick_headlines(tagged, limit=headline_limit)
+    headlines = pick_headlines(tagged, limit=headline_limit, session=session)
     causes = score_causes(headlines, stats, sectors)
 
     why_short = why_moved_short(stats, sectors)
@@ -245,6 +245,10 @@ def publish(
     hist_path = os.path.join(data_dir, OUTPUT_FILES["history"].split("/", 1)[-1])
 
     stats = load_stats(market_today_path=mt_path)
+    if _num(stats.get("dia_day_pct") or stats.get("dow_day_pct")) is None:
+        dia = dia_day_pct_from_prices(cache_dir, stats.get("price_as_of"))
+        if dia is not None:
+            stats["dia_day_pct"] = dia
     sectors = load_sectors(sectors_path=sectors_path, sector_perf_path=sector_perf_path)
     prior = read_json(brief_path, default=None)
     history = read_json(hist_path, default=[]) or []
@@ -293,6 +297,61 @@ def publish(
     write_json(brief_path, brief)
     write_json(hist_path, {"schema_version": SCHEMA_VERSION, "rows": hist, "aggregates": brief.get("learning", {}).get("stats")})
     return brief
+
+
+def dia_day_pct_from_prices(cache_dir: Optional[str], session: Any) -> Optional[float]:
+    """Dow day change from DIA bars already on disk. No Yahoo call.
+
+    DOW the stock is not the index, so only the DIA ticker counts.
+    """
+    import gzip
+    root = cache_dir or "cache"
+    path = os.path.join(root, "ohlcv.csv.gz")
+    if not os.path.exists(path):
+        alt = os.path.join(os.path.dirname(root), "data", "ohlc", "DIA.csv")
+        return _dia_from_csv(alt, session) if os.path.exists(alt) else None
+    closes = []
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            next(handle, None)
+            for line in handle:
+                parts = line.split(",")
+                if len(parts) < 3 or parts[1] != "DIA":
+                    continue
+                closes.append((parts[0][:10], parts[2]))
+    except OSError:
+        return None
+    return _pct_from_closes(closes, session)
+
+
+def _dia_from_csv(path: str, session: Any) -> Optional[float]:
+    closes = []
+    try:
+        with open(path, newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                day = (row.get("date") or row.get("Date") or "")[:10]
+                px = row.get("close") or row.get("Close") or ""
+                if day and px:
+                    closes.append((day, px))
+    except OSError:
+        return None
+    return _pct_from_closes(closes, session)
+
+
+def _pct_from_closes(closes, session: Any) -> Optional[float]:
+    rows = []
+    for day, px in closes:
+        try:
+            rows.append((day, float(px)))
+        except (TypeError, ValueError):
+            continue
+    rows.sort()
+    if session:
+        cap = str(session)[:10]
+        rows = [r for r in rows if r[0] <= cap]
+    if len(rows) < 2 or rows[-2][1] == 0:
+        return None
+    return (rows[-1][1] / rows[-2][1] - 1.0) * 100.0
 
 
 def _num(v: Any) -> Optional[float]:
