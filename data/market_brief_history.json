@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rows": [
     {
       "date": "2026-11-03",
@@ -16,8 +16,8 @@
       ],
       "spy_day_pct": 0.6,
       "qqq_day_pct": 0.9,
-      "next_day_spy_pct": null,
-      "next_day_direction": null
+      "next_day_spy_pct": -2.73,
+      "next_day_direction": "down"
     },
     {
       "date": "2026-11-04",
@@ -44,12 +44,14 @@
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "oil"
+        "inflation"
       ],
       "sources": [
         "Associated Press",
+        "BBC Business",
         "Bureau of Labor Statistics",
         "Federal Reserve",
+        "NPR",
         "Reuters"
       ],
       "spy_day_pct": -2.73,
@@ -62,19 +64,25 @@
     "by_cause": {
       "election": {
         "up": 0,
-        "down": 1,
+        "down": 2,
         "flat": 0,
-        "n": 1
+        "n": 2
       },
       "ai_mood": {
         "up": 0,
-        "down": 1,
+        "down": 2,
         "flat": 0,
-        "n": 1
+        "n": 2
       }
     },
     "by_source": {
       "Reuters": {
+        "up": 0,
+        "down": 2,
+        "flat": 0,
+        "n": 2
+      },
+      "Federal Reserve": {
         "up": 0,
         "down": 1,
         "flat": 0,
@@ -87,7 +95,7 @@
         "n": 1
       }
     },
-    "n_labeled": 1,
+    "n_labeled": 2,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }

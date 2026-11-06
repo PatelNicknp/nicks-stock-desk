@@ -15,6 +15,7 @@ UA = (
 )
 
 # Public feeds — no login. Desk already uses Nasdaq + Cboe + Treasury similarly.
+# v2 adds NPR, MarketWatch, Guardian, The Hill for broader big-picture coverage.
 FEEDS = (
     {
         "url": "https://www.federalreserve.gov/feeds/press_all.xml",
@@ -37,6 +38,11 @@ FEEDS = (
         "trusted": True,
     },
     {
+        "url": "https://feeds.npr.org/1006/rss.xml",
+        "source": "NPR",
+        "trusted": True,
+    },
+    {
         "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
         "source": "BBC Business",
         "trusted": False,
@@ -44,6 +50,21 @@ FEEDS = (
     {
         "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
         "source": "CNBC",
+        "trusted": False,
+    },
+    {
+        "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
+        "source": "MarketWatch",
+        "trusted": False,
+    },
+    {
+        "url": "https://www.theguardian.com/us/business/rss",
+        "source": "Guardian Business",
+        "trusted": False,
+    },
+    {
+        "url": "https://thehill.com/feed/",
+        "source": "The Hill",
         "trusted": False,
     },
 )
@@ -78,7 +99,6 @@ def parse_rss(xml_text: str, source: str, trusted: bool) -> List[Dict[str, Any]]
         return []
 
     items: List[Dict[str, Any]] = []
-    # RSS <item>
     for node in root.iter():
         if _local(node.tag) not in ("item", "entry"):
             continue
@@ -92,7 +112,6 @@ def parse_rss(xml_text: str, source: str, trusted: bool) -> List[Dict[str, Any]]
             if name == "title":
                 title = text
             elif name in ("link",):
-                # Atom link may be an href attribute.
                 href = child.attrib.get("href") if child.attrib else None
                 link = href or text or link
             elif name in ("description", "summary", "content"):
@@ -121,7 +140,7 @@ def _is_trusted(source: str) -> bool:
 def fetch_headlines(
     fetch: Optional[Callable[[str], str]] = None,
     feeds: Optional[tuple] = None,
-    limit_per_feed: int = 8,
+    limit_per_feed: int = 10,
 ) -> List[Dict[str, Any]]:
     """Live fetch. On any feed error, skip that feed (caller keeps prior brief headlines)."""
     fetch = fetch or fetch_text

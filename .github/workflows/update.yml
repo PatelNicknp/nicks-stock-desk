@@ -92,6 +92,8 @@ jobs:
           python tests/test_market_news_learning.py
           python tests/test_market_news_brief.py
           python tests/test_market_news_watch.py
+          python tests/test_market_news_tips.py
+          python tests/test_market_news_story.py
       - name: Update the desk
         if: steps.guard.outputs.skip != 'true'
         run: |

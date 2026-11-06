@@ -8,6 +8,14 @@
     "trusted": true
   },
   {
+    "title": "AI trade wobbles as Nasdaq sinks on chip and megacap tech selling",
+    "source": "CNBC",
+    "url": "https://www.cnbc.com/example/ai-trade-wobbles",
+    "published": "2026-11-05T14:05:00Z",
+    "summary": "Near-duplicate of the Reuters AI/Nasdaq story — should be de-duped.",
+    "trusted": false
+  },
+  {
     "title": "Oil prices firm while investors rotate into consumer staples",
     "source": "Associated Press",
     "url": "https://apnews.com/example/oil-staples-rotation",
@@ -38,6 +46,22 @@
     "published": "2026-11-04T12:30:00Z",
     "summary": "Weekly claims remained contained; markets await the full jobs print.",
     "trusted": true
+  },
+  {
+    "title": "Inflation gauge holds steady as markets await the next CPI print",
+    "source": "NPR",
+    "url": "https://www.npr.org/example/inflation-gauge",
+    "published": "2026-11-04T16:00:00Z",
+    "summary": "Price pressures looked stable; traders stayed focused on the Fed path.",
+    "trusted": true
+  },
+  {
+    "title": "Ukraine conflict keeps geopolitical risk on investors' minds",
+    "source": "BBC Business",
+    "url": "https://www.bbc.com/example/ukraine-markets",
+    "published": "2026-11-05T09:30:00Z",
+    "summary": "War headlines lingered as a background risk for risk assets.",
+    "trusted": false
   },
   {
     "title": "Why Thomson Reuters Stock Plummeted by Almost 10% Today",

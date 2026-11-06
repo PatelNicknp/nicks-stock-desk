@@ -1,8 +1,11 @@
-"""Mood chip, regime, and breadth-vs-price checks from desk numbers only."""
+"""Mood chip, regime, breadth-vs-price, and why-the-market-moved lines.
+
+All from desk numbers only. No Yahoo. No broker.
+"""
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def _f(v: Any) -> Optional[float]:
@@ -70,7 +73,6 @@ def regime_note(stats: Dict[str, Any]) -> Dict[str, Any]:
         return {"label": "unknown", "pct_above_50day": None, "pct_above_200day": None,
                 "text": "Regime unclear — breadth averages missing."}
 
-    # Thresholds: strong majority above = uptrend; weak minority = selloff; else chop.
     above50 = b50 is not None and b50 >= 55
     below50 = b50 is not None and b50 < 40
     above200 = b200 is not None and b200 >= 55
@@ -144,17 +146,8 @@ def breadth_vs_price(stats: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def why_moved(stats: Dict[str, Any], sectors: list) -> str:
-    """One short plain-English sentence from desk numbers."""
-    spy = _f(stats.get("spy_day_pct"))
-    qqq = _f(stats.get("qqq_day_pct"))
-    vix = _f(stats.get("vix"))
-    adv = _i(stats.get("advancers"))
-    dec = _i(stats.get("decliners"))
-
-    # Rank sectors by day_pct. Prefer the 11 SPDR sector ETFs (ticker XL*).
-    # data/sectors.csv also lists industry ETFs (SMH, ITA, …); a bad industry
-    # print must not lead the sentence when the sector ETFs are present.
+def _sector_rows(sectors: list) -> List[Tuple[float, str, str]]:
+    """Rank SPDR sector ETFs (XL*) by day_pct. Falls back to all rows if no XL*."""
     rows = list(sectors or [])
     xl = [row for row in rows if str(row.get("ticker") or "").upper().startswith("XL")]
     if xl:
@@ -165,8 +158,33 @@ def why_moved(stats: Dict[str, Any], sectors: list) -> str:
         name = (row.get("name") or row.get("sector") or row.get("ticker") or "").strip()
         if pct is None or not name:
             continue
-        ranked.append((pct, name, str(row.get("ticker") or "")))
+        ranked.append((pct, name, str(row.get("ticker") or "").upper()))
     ranked.sort(key=lambda x: x[0])
+    return ranked
+
+
+def _dow_pct(stats: Dict[str, Any], ranked: List[Tuple[float, str, str]]) -> Tuple[Optional[float], str]:
+    """Real DIA/Dow day % when the desk has it; else XLF+XLI average (Dow-heavy groups)."""
+    for key in ("dia_day_pct", "dow_day_pct"):
+        n = _f(stats.get(key))
+        if n is not None:
+            return n, "dia"
+    bits = [p for p, _n, t in ranked if t in ("XLF", "XLI")]
+    if len(bits) >= 2:
+        return sum(bits) / len(bits), "proxy"
+    if len(bits) == 1:
+        return bits[0], "proxy"
+    return None, "missing"
+
+
+def why_moved_short(stats: Dict[str, Any], sectors: list) -> str:
+    """v1 one-sentence why line (kept for the compact switch and prior-brief compare)."""
+    spy = _f(stats.get("spy_day_pct"))
+    qqq = _f(stats.get("qqq_day_pct"))
+    vix = _f(stats.get("vix"))
+    adv = _i(stats.get("advancers"))
+    dec = _i(stats.get("decliners"))
+    ranked = _sector_rows(sectors)
 
     weak = [r for r in ranked if r[0] <= -1.0][:2]
     strong = [r for r in ranked if r[0] >= 0.4][-2:]
@@ -221,5 +239,156 @@ def why_moved(stats: Dict[str, Any], sectors: list) -> str:
             sentence += " " + p
     if not sentence.endswith("."):
         sentence += "."
-    # Capitalize first letter only if needed
     return sentence[0].upper() + sentence[1:]
+
+
+def why_moved(
+    stats: Dict[str, Any],
+    sectors: list,
+    causes: Optional[List[Dict[str, Any]]] = None,
+) -> str:
+    """2–3 plain sentences: biggest driver, leaders/laggards, how broad the move was.
+
+    Built only from desk numbers + optional top cause tags. No single-stock names.
+    """
+    spy = _f(stats.get("spy_day_pct"))
+    qqq = _f(stats.get("qqq_day_pct"))
+    vix = _f(stats.get("vix"))
+    adv = _i(stats.get("advancers"))
+    dec = _i(stats.get("decliners"))
+    ranked = _sector_rows(sectors)
+    dow, dow_kind = _dow_pct(stats, ranked)
+
+    # Sentence 1 — indexes
+    s1_bits = []
+    if spy is not None and qqq is not None:
+        if spy < -0.3 or qqq < -0.3:
+            s1_bits.append(
+                "The market fell: S&P %.1f%%, Nasdaq %.1f%%"
+                % (spy, qqq)
+            )
+        elif spy > 0.3 or qqq > 0.3:
+            s1_bits.append(
+                "The market rose: S&P %.1f%%, Nasdaq %.1f%%"
+                % (spy, qqq)
+            )
+        else:
+            s1_bits.append(
+                "The market was quiet: S&P %.1f%%, Nasdaq %.1f%%"
+                % (spy, qqq)
+            )
+    elif spy is not None:
+        s1_bits.append("The S&P moved %.1f%%" % spy)
+    else:
+        s1_bits.append("Desk index numbers are thin today")
+
+    if dow is not None:
+        if dow_kind == "dia":
+            s1_bits.append("Dow %.1f%%" % dow)
+        else:
+            s1_bits.append("Dow-heavy groups (Financials/Industrials) about %.1f%%" % dow)
+
+    s1 = s1_bits[0]
+    if len(s1_bits) > 1:
+        s1 = s1_bits[0] + ", " + ", ".join(s1_bits[1:])
+    if not s1.endswith("."):
+        s1 += "."
+
+    # Sentence 2 — biggest driver + leading / lagging sectors
+    lag = ranked[:2] if ranked else []
+    lead = list(reversed(ranked[-2:])) if ranked else []
+    driver = None
+    if causes:
+        driver = (causes[0].get("label") or causes[0].get("cause") or "").strip() or None
+
+    # Infer driver from tape when no cause tag yet
+    if not driver and qqq is not None and spy is not None and abs(qqq - spy) >= 1.0:
+        driver = "AI / Tech mood" if abs(qqq) >= abs(spy) else None
+    if not driver and lag and abs(lag[0][0]) >= 1.5:
+        # Use the worst sector name as a soft driver hint only for tech/energy
+        name = lag[0][1]
+        if "Tech" in name:
+            driver = "AI / Tech mood"
+        elif "Energy" in name:
+            driver = "Oil / Energy"
+
+    s2_parts = []
+    if driver:
+        s2_parts.append("Biggest driver: %s" % driver)
+    if lag:
+        s2_parts.append(
+            "lagging sectors were "
+            + " and ".join("%s (%.1f%%)" % (n, p) for p, n, _ in lag)
+        )
+    if lead and (not lag or lead[0][2] != lag[0][2]):
+        # Avoid repeating the same names if the whole tape is one-sided
+        lead_clean = [r for r in lead if not lag or r[2] not in {x[2] for x in lag}]
+        if not lead_clean and lead:
+            lead_clean = lead
+        if lead_clean:
+            verb = "held up" if lead_clean[0][0] >= 0 else "were the least weak"
+            s2_parts.append(
+                "leading sectors "
+                + " and ".join("%s (%.1f%%)" % (n, p) for p, n, _ in lead_clean)
+                + " " + verb
+            )
+    if s2_parts:
+        s2 = s2_parts[0]
+        for p in s2_parts[1:]:
+            if p.startswith("lagging") or p.startswith("leading"):
+                s2 += "; " + p
+            else:
+                s2 += ". " + p[0].upper() + p[1:]
+        if not s2.endswith("."):
+            s2 += "."
+        s2 = s2[0].upper() + s2[1:]
+    else:
+        s2 = "Sector moves were mixed."
+
+    # Sentence 3 — breadth + VIX
+    s3_bits = []
+    if adv is not None and dec is not None and (adv + dec) > 0:
+        share_down = dec / float(adv + dec)
+        share_up = adv / float(adv + dec)
+        if dec > adv * 1.15:
+            how = "broad" if share_down >= 0.6 else "fairly broad"
+            s3_bits.append(
+                "The move was %s: %d stocks fell and %d rose"
+                % (how, dec, adv)
+            )
+        elif adv > dec * 1.15:
+            how = "broad" if share_up >= 0.6 else "fairly broad"
+            s3_bits.append(
+                "The move was %s: %d stocks rose and %d fell"
+                % (how, adv, dec)
+            )
+        else:
+            s3_bits.append(
+                "Breadth was mixed (%d up, %d down)" % (adv, dec)
+            )
+    if vix is not None:
+        if vix >= 25:
+            s3_bits.append("VIX is elevated at %.1f" % vix)
+        elif vix >= 20:
+            s3_bits.append("VIX is firm at %.1f" % vix)
+        elif vix < 16:
+            s3_bits.append("VIX is calm at %.1f" % vix)
+
+    if s3_bits:
+        s3 = s3_bits[0]
+        for bit in s3_bits[1:]:
+            # Keep acronyms like VIX intact — only lower a leading lowercase word.
+            s3 += "; " + bit
+        if not s3.endswith("."):
+            s3 += "."
+        s3 = s3[0].upper() + s3[1:]
+    else:
+        s3 = ""
+
+    parts = [s1, s2] + ([s3] if s3 else [])
+    return " ".join(parts)
+
+
+# Back-compat alias used by older call sites that expect one string.
+def why_moved_legacy(stats: Dict[str, Any], sectors: list) -> str:
+    return why_moved_short(stats, sectors)

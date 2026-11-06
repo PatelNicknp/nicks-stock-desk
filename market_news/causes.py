@@ -22,7 +22,7 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     ),
     "election": (
         "election", "midterm", "ballot", "congress", "senate", "white house",
-        "president", "voting", "electoral",
+        "president", "voting", "electoral", "capitol hill",
     ),
     "ai_mood": (
         "artificial intelligence", " ai ", "ai spending", "ai trade", "chip",
@@ -43,12 +43,32 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     ),
 }
 
-# Sector-day moves that reinforce a cause even without a matching headline.
 SECTOR_CAUSE_HINTS: Tuple[Tuple[str, Tuple[str, ...], float], ...] = (
-    # (cause, name/ticker fragments, min abs day_pct to count)
     ("ai_mood", ("Technology", "XLK", "Information Technology"), 2.0),
     ("oil", ("Energy", "XLE"), 1.0),
     ("rates", ("Financials", "XLF", "Utilities", "XLU", "Real Estate", "XLRE"), 1.5),
+)
+
+# Big-picture importance keywords (overall market only).
+_IMPORTANCE = (
+    ("federal reserve", 4.0),
+    ("fomc", 4.0),
+    ("interest rate", 3.5),
+    ("cpi", 3.5),
+    ("inflation", 3.0),
+    ("payroll", 3.0),
+    ("jobs report", 3.0),
+    ("election", 3.0),
+    ("midterm", 3.0),
+    ("war ", 3.0),
+    ("ukraine", 2.5),
+    ("oil ", 2.5),
+    ("opec", 2.5),
+    ("ai spending", 2.5),
+    ("tech selloff", 2.5),
+    ("nasdaq", 2.0),
+    ("s&p", 2.0),
+    ("wall street", 1.5),
 )
 
 
@@ -84,7 +104,6 @@ def score_causes(
                 scores[t] += trust_bonus
                 buckets[t].append(h)
 
-    # Desk numbers reinforce causes.
     qqq = _f(stats.get("qqq_day_pct"))
     spy = _f(stats.get("spy_day_pct"))
     if qqq is not None and spy is not None and qqq <= spy - 1.5 and qqq <= -2:
@@ -110,7 +129,6 @@ def score_causes(
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))
     top = [(c, s) for c, s in ranked if s > 0][:2]
     if not top:
-        # Fallback: strongest sector move names a cause.
         if qqq is not None and abs(qqq) >= abs(spy or 0):
             top = [("ai_mood", 1.0)]
         else:
@@ -150,62 +168,130 @@ def _f(v: Any) -> Optional[float]:
         return None
 
 
+def _title_key(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (title or "").lower())[:80]
+
+
+def _token_set(title: str) -> set:
+    stop = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "as", "at", "by", "with"}
+    toks = re.findall(r"[a-z0-9]+", (title or "").lower())
+    return {t for t in toks if len(t) > 2 and t not in stop}
+
+
+def _near_duplicate(a: str, b: str, thresh: float = 0.72) -> bool:
+    """Token Jaccard — catch the same story from two wires."""
+    ta, tb = _token_set(a), _token_set(b)
+    if not ta or not tb:
+        return False
+    inter = len(ta & tb)
+    union = len(ta | tb)
+    return union > 0 and (inter / union) >= thresh
+
+
+def _importance_score(title: str, summary: str = "") -> float:
+    blob = _norm(title) + _norm(summary)
+    score = 0.0
+    for word, pts in _IMPORTANCE:
+        if word in blob:
+            score += pts
+    return score
+
+
+def _rank_key(h: Dict[str, Any]) -> Tuple:
+    """Higher is better: trusted, importance, has causes, then title for stability."""
+    title = h.get("title") or ""
+    tags = h.get("causes") or []
+    return (
+        1 if h.get("trusted") else 0,
+        _importance_score(title, h.get("summary") or ""),
+        len(tags),
+        title.lower(),
+    )
+
+
 def pick_headlines(
     raw: List[Dict[str, Any]],
-    limit: int = 5,
+    limit: int = 7,
 ) -> List[Dict[str, Any]]:
-    """Keep 3–5 big-picture headlines; prefer trusted; drop duplicates and single-stock noise."""
-    seen = set()
-    kept: List[Dict[str, Any]] = []
-    # Trusted first, then others.
-    ordered = sorted(raw, key=lambda h: (0 if h.get("trusted") else 1, h.get("published") or ""), reverse=False)
-    ordered = sorted(raw, key=lambda h: (0 if h.get("trusted") else 1))
+    """Keep 5–7 big-picture headlines; prefer trusted; drop duplicates and single-stock noise.
 
-    for h in ordered:
+    Ranking: source trust → importance keywords → cause tags.
+    De-dup: exact key + near-duplicate Jaccard on title tokens.
+    """
+    limit = max(3, min(int(limit or 7), 7))
+    # Soft floor of 5 when we have enough good material; hard cap 7.
+    target = limit
+
+    prepared: List[Dict[str, Any]] = []
+    for h in raw or []:
         title = (h.get("title") or "").strip()
         if not title or _looks_single_stock(title):
             continue
-        key = re.sub(r"[^a-z0-9]+", "", title.lower())[:80]
-        if key in seen:
-            continue
-        seen.add(key)
         tags = h.get("causes") or tag_headline(title, h.get("summary") or "")
-        # Prefer headlines that map to a locked cause; allow 1 untagged trusted wire.
-        if not tags and not h.get("trusted"):
-            continue
         item = {
             "title": title,
             "source": h.get("source") or "",
             "url": h.get("url") or "",
             "published": h.get("published") or "",
+            "summary": h.get("summary") or "",
             "trusted": bool(h.get("trusted")),
             "causes": tags,
         }
-        kept.append(item)
-        if len(kept) >= limit:
+        # Prefer headlines that map to a locked cause; allow untagged trusted wires.
+        if not tags and not item["trusted"]:
+            continue
+        prepared.append(item)
+
+    prepared.sort(key=_rank_key, reverse=True)
+
+    seen_keys = set()
+    kept: List[Dict[str, Any]] = []
+    for h in prepared:
+        key = _title_key(h["title"])
+        if key in seen_keys:
+            continue
+        if any(_near_duplicate(h["title"], k["title"]) for k in kept):
+            continue
+        seen_keys.add(key)
+        # Drop summary from the published brief payload (UI uses title/source/url).
+        kept.append({
+            "title": h["title"],
+            "source": h["source"],
+            "url": h["url"],
+            "published": h["published"],
+            "trusted": h["trusted"],
+            "causes": h["causes"],
+            "rank": round(
+                (4.0 if h["trusted"] else 0.0)
+                + _importance_score(h["title"], h.get("summary") or "")
+                + 0.5 * len(h["causes"] or []),
+                2,
+            ),
+        })
+        if len(kept) >= target:
             break
 
-    if len(kept) < 3:
-        # Fill with any remaining non-single-stock titles.
-        for h in ordered:
-            if len(kept) >= max(3, limit):
+    # If we asked for 5–7 but only got a few, try a looser fill (still no single-stock).
+    if len(kept) < min(5, target):
+        for h in prepared:
+            if len(kept) >= target:
                 break
-            title = (h.get("title") or "").strip()
-            if not title or _looks_single_stock(title):
+            key = _title_key(h["title"])
+            if key in seen_keys:
                 continue
-            key = re.sub(r"[^a-z0-9]+", "", title.lower())[:80]
-            if key in seen:
+            if any(_near_duplicate(h["title"], k["title"]) for k in kept):
                 continue
-            seen.add(key)
+            seen_keys.add(key)
             kept.append({
-                "title": title,
-                "source": h.get("source") or "",
-                "url": h.get("url") or "",
-                "published": h.get("published") or "",
-                "trusted": bool(h.get("trusted")),
-                "causes": h.get("causes") or tag_headline(title, h.get("summary") or ""),
+                "title": h["title"],
+                "source": h["source"],
+                "url": h["url"],
+                "published": h["published"],
+                "trusted": h["trusted"],
+                "causes": h["causes"],
+                "rank": 0.0,
             })
-    return kept[:limit]
+    return kept[:target]
 
 
 _TICKER_NOISE = re.compile(
@@ -233,6 +319,5 @@ def _looks_single_stock(title: str) -> bool:
     if _TICKER_NOISE.search(t) and _SINGLE_STOCK.search(t):
         return True
     if _TICKER_NOISE.search(t) and not broad:
-        # A title that is mostly one ticker with no market framing.
         return True
     return False

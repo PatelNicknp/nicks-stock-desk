@@ -1,11 +1,117 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "feature": "market_news",
   "session": "2026-11-05",
   "slot": "morning_open",
   "updated_pt": "2026-11-05 07:28 PT",
   "price_as_of": "2026-11-05",
-  "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+  "why_moved": "The market fell: S&P -2.7%, Nasdaq -5.0%, Dow-heavy groups (Financials/Industrials) about -1.5%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-6.2%) and Consumer Discretionary (-3.6%); leading sectors Consumer Staples (1.1%) and Energy (1.0%) held up. The move was fairly broad: 299 stocks fell and 222 rose; VIX is firm at 22.0.",
+  "why_moved_short": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+  "story": {
+    "direction": "down",
+    "date_label": "November 5, 2026",
+    "summary": "U.S. morning summary",
+    "clear_cause": true,
+    "cause": "ai_mood",
+    "lead": "Tech led stocks lower.",
+    "support": "Nasdaq slides into correction territory as AI and chip stocks sell off.",
+    "support_ref": 1,
+    "bullets": [
+      {
+        "lead": "Technology took the biggest hit.",
+        "rest": "Tech fell 6.2%.",
+        "ref": 1
+      },
+      {
+        "lead": "More stocks fell than rose.",
+        "rest": "299 stocks fell and 222 rose.",
+        "ref": null
+      },
+      {
+        "lead": "Staples held up.",
+        "rest": "Staples rose 1.09%.",
+        "ref": null
+      }
+    ],
+    "sector_label": "Where the selling hit",
+    "chips": [
+      {
+        "name": "Tech",
+        "pct": -6.2,
+        "pct_text": "6.2%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 70
+      },
+      {
+        "name": "Chips",
+        "pct": -8.91,
+        "pct_text": "8.91%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 100
+      },
+      {
+        "name": "7 of 11 sectors down",
+        "pct": null,
+        "pct_text": null,
+        "arrow": "flat",
+        "kind": "summary",
+        "bar": 0
+      }
+    ],
+    "indexes": [
+      {
+        "name": "S&P 500",
+        "pct": -2.73,
+        "pct_text": "2.73%",
+        "arrow": "down",
+        "source": "spy"
+      },
+      {
+        "name": "Nasdaq",
+        "pct": -4.98,
+        "pct_text": "4.98%",
+        "arrow": "down",
+        "source": "qqq"
+      },
+      {
+        "name": "Dow",
+        "pct": null,
+        "pct_text": null,
+        "arrow": "missing",
+        "source": "missing",
+        "note": "No Dow day change in the desk file."
+      }
+    ],
+    "news": [
+      {
+        "n": 1,
+        "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
+        "source": "Reuters",
+        "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
+        "published": "2026-11-05T14:00:00Z",
+        "date_label": "Nov 5"
+      },
+      {
+        "n": 2,
+        "title": "Federal Reserve officials signal patience on the path of interest rates",
+        "source": "Federal Reserve",
+        "url": "https://www.federalreserve.gov/example/fomc-patience",
+        "published": "2026-11-04T18:00:00Z",
+        "date_label": "Nov 4"
+      },
+      {
+        "n": 3,
+        "title": "Inflation gauge holds steady as markets await the next CPI print",
+        "source": "NPR",
+        "url": "https://www.npr.org/example/inflation-gauge",
+        "published": "2026-11-04T16:00:00Z",
+        "date_label": "Nov 4"
+      }
+    ],
+    "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
+  },
   "mood": {
     "label": "Fear",
     "vix": 21.98,
@@ -17,14 +123,39 @@
   },
   "headlines": [
     {
-      "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-      "published": "2026-11-05T14:00:00Z",
+      "title": "Federal Reserve officials signal patience on the path of interest rates",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/example/fomc-patience",
+      "published": "2026-11-04T18:00:00Z",
       "trusted": true,
       "causes": [
-        "ai_mood"
-      ]
+        "rates",
+        "inflation"
+      ],
+      "rank": 12.5
+    },
+    {
+      "title": "Inflation gauge holds steady as markets await the next CPI print",
+      "source": "NPR",
+      "url": "https://www.npr.org/example/inflation-gauge",
+      "published": "2026-11-04T16:00:00Z",
+      "trusted": true,
+      "causes": [
+        "rates",
+        "inflation"
+      ],
+      "rank": 11.5
+    },
+    {
+      "title": "Markets digest US midterm results as Washington outlook comes into focus",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/example/midterms-markets",
+      "published": "2026-11-05T12:00:00Z",
+      "trusted": true,
+      "causes": [
+        "election"
+      ],
+      "rank": 7.5
     },
     {
       "title": "Oil prices firm while investors rotate into consumer staples",
@@ -35,28 +166,19 @@
       "causes": [
         "oil",
         "ai_mood"
-      ]
+      ],
+      "rank": 7.5
     },
     {
-      "title": "Markets digest US midterm results as Washington outlook comes into focus",
+      "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
       "source": "Reuters",
-      "url": "https://www.reuters.com/example/midterms-markets",
-      "published": "2026-11-05T12:00:00Z",
+      "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
+      "published": "2026-11-05T14:00:00Z",
       "trusted": true,
       "causes": [
-        "election"
-      ]
-    },
-    {
-      "title": "Federal Reserve officials signal patience on the path of interest rates",
-      "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/example/fomc-patience",
-      "published": "2026-11-04T18:00:00Z",
-      "trusted": true,
-      "causes": [
-        "rates",
-        "inflation"
-      ]
+        "ai_mood"
+      ],
+      "rank": 6.5
     },
     {
       "title": "Jobless claims stay low ahead of the next employment report",
@@ -66,7 +188,19 @@
       "trusted": true,
       "causes": [
         "jobs"
-      ]
+      ],
+      "rank": 4.5
+    },
+    {
+      "title": "Ukraine conflict keeps geopolitical risk on investors' minds",
+      "source": "BBC Business",
+      "url": "https://www.bbc.com/example/ukraine-markets",
+      "published": "2026-11-05T09:30:00Z",
+      "trusted": false,
+      "causes": [
+        "war"
+      ],
+      "rank": 3.0
     }
   ],
   "causes": [
@@ -76,6 +210,18 @@
       "score": 13.5,
       "headlines": [
         {
+          "title": "Oil prices firm while investors rotate into consumer staples",
+          "source": "Associated Press",
+          "url": "https://apnews.com/example/oil-staples-rotation",
+          "published": "2026-11-05T13:30:00Z",
+          "trusted": true,
+          "causes": [
+            "oil",
+            "ai_mood"
+          ],
+          "rank": 7.5
+        },
+        {
           "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
           "source": "Reuters",
           "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
@@ -83,36 +229,39 @@
           "trusted": true,
           "causes": [
             "ai_mood"
-          ]
-        },
-        {
-          "title": "Oil prices firm while investors rotate into consumer staples",
-          "source": "Associated Press",
-          "url": "https://apnews.com/example/oil-staples-rotation",
-          "published": "2026-11-05T13:30:00Z",
-          "trusted": true,
-          "causes": [
-            "oil",
-            "ai_mood"
-          ]
+          ],
+          "rank": 6.5
         }
       ]
     },
     {
-      "cause": "oil",
-      "label": "Oil / Energy",
-      "score": 2.98,
+      "cause": "inflation",
+      "label": "Inflation",
+      "score": 3.0,
       "headlines": [
         {
-          "title": "Oil prices firm while investors rotate into consumer staples",
-          "source": "Associated Press",
-          "url": "https://apnews.com/example/oil-staples-rotation",
-          "published": "2026-11-05T13:30:00Z",
+          "title": "Federal Reserve officials signal patience on the path of interest rates",
+          "source": "Federal Reserve",
+          "url": "https://www.federalreserve.gov/example/fomc-patience",
+          "published": "2026-11-04T18:00:00Z",
           "trusted": true,
           "causes": [
-            "oil",
-            "ai_mood"
-          ]
+            "rates",
+            "inflation"
+          ],
+          "rank": 12.5
+        },
+        {
+          "title": "Inflation gauge holds steady as markets await the next CPI print",
+          "source": "NPR",
+          "url": "https://www.npr.org/example/inflation-gauge",
+          "published": "2026-11-04T16:00:00Z",
+          "trusted": true,
+          "causes": [
+            "rates",
+            "inflation"
+          ],
+          "rank": 11.5
         }
       ]
     }
@@ -134,6 +283,15 @@
     "pct_above_50day": 66.9,
     "pct_above_200day": 63.8,
     "text": "More than half the desk is still above the 50-day and 200-day."
+  },
+  "tips": {
+    "title": "What it means for me",
+    "lines": [
+      "Fear is high today. Big swings are more common — go slow with new buys.",
+      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
+      "The bigger trend is still up on the desk's 50-day and 200-day checks — one rough day does not flip that by itself."
+    ],
+    "disclaimer": "Research only. Not advice to buy or sell any stock."
   },
   "calendar": {
     "next": {
@@ -179,6 +337,7 @@
     "spy_price": 745.85,
     "spy_day_pct": -2.73,
     "qqq_day_pct": -4.98,
+    "dia_day_pct": null,
     "vix": 21.98,
     "advancers": 222,
     "decliners": 299,
@@ -196,12 +355,14 @@
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "oil"
+        "inflation"
       ],
       "sources": [
         "Associated Press",
+        "BBC Business",
         "Bureau of Labor Statistics",
         "Federal Reserve",
+        "NPR",
         "Reuters"
       ],
       "spy_day_pct": -2.73,
@@ -213,19 +374,25 @@
       "by_cause": {
         "election": {
           "up": 0,
-          "down": 1,
+          "down": 2,
           "flat": 0,
-          "n": 1
+          "n": 2
         },
         "ai_mood": {
           "up": 0,
-          "down": 1,
+          "down": 2,
           "flat": 0,
-          "n": 1
+          "n": 2
         }
       },
       "by_source": {
         "Reuters": {
+          "up": 0,
+          "down": 2,
+          "flat": 0,
+          "n": 2
+        },
+        "Federal Reserve": {
           "up": 0,
           "down": 1,
           "flat": 0,
@@ -238,7 +405,7 @@
           "n": 1
         }
       },
-      "n_labeled": 1,
+      "n_labeled": 2,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },

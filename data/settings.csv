@@ -71,6 +71,13 @@ feature.liquid_names,True
 feature.sec_rolling,True
 feature.fast_history_backfill,True
 feature.market_news,True
+feature.market_news_why_detail,True
+feature.market_news_more_headlines,True
+feature.market_news_card_layout,True
+feature.market_news_tips,True
+feature.market_news_indexes,True
+feature.market_news_sectors,True
+feature.market_news_details,True
 buy_setups.market_filter,True
 index.sp500,True
 index.sp400,True
