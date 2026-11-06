@@ -66,6 +66,7 @@
         "election"
       ],
       "sources": [
+        "CNBC",
         "MarketWatch",
         "Reuters",
         "Yahoo Finance"

@@ -1,0 +1,401 @@
+ticker,company,sector,in_sp500,in_sp400,in_sp600,in_ndx100,in_growth,in_liquid
+AA,Alcoa,Materials,no,yes,no,no,no,no
+AAL,American Airlines Group,Industrials,no,yes,no,no,no,no
+AAON,AAON,Industrials,no,yes,no,no,no,no
+ACI,Albertsons,Consumer Staples,no,yes,no,no,no,no
+ACM,AECOM,Industrials,no,yes,no,no,no,no
+ADC,Agree Realty,Real Estate,no,yes,no,no,no,no
+AEIS,Advanced Energy,Information Technology,no,yes,no,no,no,no
+AFG,American Financial Group,Financials,no,yes,no,no,no,no
+AGCO,AGCO,Industrials,no,yes,no,no,no,no
+AGNC,AGNC Investment,Financials,no,yes,no,no,no,no
+AHR,American Healthcare REIT,Real Estate,no,yes,no,no,no,no
+AIT,Applied Industrial Technologies,Industrials,no,yes,no,no,no,no
+ALGM,Allegro MicroSystems,Information Technology,no,yes,no,no,no,no
+ALK,Alaska Air Group,Industrials,no,yes,no,no,no,no
+ALLY,Ally Financial,Financials,no,yes,no,no,no,no
+ALSN,Allison Transmission,Industrials,no,yes,no,no,no,no
+ALV,Autoliv,Consumer Discretionary,no,yes,no,no,no,no
+AM,Antero Midstream,Energy,no,yes,no,no,no,no
+AMG,Affiliated Managers Group,Financials,no,yes,no,no,no,no
+AMH,American Homes 4 Rent,Real Estate,no,yes,no,no,no,no
+AMKR,Amkor Technology,Information Technology,no,yes,no,no,no,no
+AN,AutoNation,Consumer Discretionary,no,yes,no,no,no,no
+ANF,Abercrombie & Fitch,Consumer Discretionary,no,yes,no,no,no,no
+APG,APi Group,Industrials,no,yes,no,no,no,no
+APPF,AppFolio,Information Technology,no,yes,no,no,no,no
+AR,Antero Resources,Energy,no,yes,no,no,no,no
+ARMK,Aramark,Consumer Discretionary,no,yes,no,no,no,no
+ARW,Arrow Electronics,Information Technology,no,yes,no,no,no,no
+ARWR,Arrowhead Pharmaceuticals,Health Care,no,yes,no,no,no,no
+ASB,Associated Bank,Financials,no,yes,no,no,no,no
+ASH,Ashland Global,Materials,no,yes,no,no,no,no
+ATI,ATI Inc.,Industrials,no,yes,no,no,no,no
+ATR,AptarGroup,Materials,no,yes,no,no,no,no
+AVAV,AeroVironment,Industrials,no,yes,no,no,no,no
+AVNT,Avient,Materials,no,yes,no,no,no,no
+AVT,Avnet,Information Technology,no,yes,no,no,no,no
+AVTR,Avantor,Health Care,no,yes,no,no,no,no
+AXTA,Axalta,Materials,no,yes,no,no,no,no
+AYI,Acuity Brands,Industrials,no,yes,no,no,no,no
+BAH,Booz Allen Hamilton,Industrials,no,yes,no,no,no,no
+BBWI,"Bath & Body Works, Inc.",Consumer Discretionary,no,yes,no,no,no,no
+BC,Brunswick,Consumer Discretionary,no,yes,no,no,no,no
+BCO,Brink's,Industrials,no,yes,no,no,no,no
+BDC,Belden Inc.,Information Technology,no,yes,no,no,no,no
+BHF,Brighthouse Financial,Financials,no,yes,no,no,no,no
+BILL,Bill Holdings,Information Technology,no,yes,no,no,no,no
+BIO,Bio-Rad Laboratories,Health Care,no,yes,no,no,no,no
+BJ,BJ's Wholesale Club,Consumer Staples,no,yes,no,no,no,no
+BKH,Black Hills Corporation,Utilities,no,yes,no,no,no,no
+BMRN,BioMarin Pharmaceutical,Health Care,no,yes,no,no,no,no
+BRKR,Bruker,Health Care,no,yes,no,no,no,no
+BROS,Dutch Bros Inc.,Consumer Discretionary,no,yes,no,no,no,no
+BRX,Brixmor Property Group,Real Estate,no,yes,no,no,no,no
+BSY,Bentley Systems,Information Technology,no,yes,no,no,no,no
+BTSG,BrightSpring Health Services,Health Care,no,yes,no,no,no,no
+BURL,Burlington Stores,Consumer Discretionary,no,yes,no,no,no,no
+BWA,BorgWarner,Consumer Discretionary,no,yes,no,no,no,no
+BWXT,BWX Technologies,Industrials,no,yes,no,no,no,no
+BYD,Boyd Gaming,Consumer Discretionary,no,yes,no,no,no,no
+CACI,CACI International,Industrials,no,yes,no,no,no,no
+CAR,Avis Budget Group,Industrials,no,yes,no,no,no,no
+CART,Maplebear Inc.,Consumer Staples,no,yes,no,no,no,no
+CAVA,Cava Group,Consumer Discretionary,no,yes,no,no,no,no
+CBSH,Commerce Bancshares,Financials,no,yes,no,no,no,no
+CBT,Cabot Corp,Materials,no,yes,no,no,no,no
+CCK,Crown Holdings,Materials,no,yes,no,no,no,no
+CDE,Coeur Mining,Materials,no,yes,no,no,no,no
+CDP,COPT Defense Properties,Real Estate,no,yes,no,no,no,no
+CELH,Celsius Holdings,Consumer Staples,no,yes,no,no,no,no
+CFR,Frost Bank,Financials,no,yes,no,no,no,no
+CG,Carlyle Group (The),Financials,no,yes,no,no,no,no
+CGNX,Cognex,Information Technology,no,yes,no,no,no,no
+CHDN,Churchill Downs Inc.,Consumer Discretionary,no,yes,no,no,no,no
+CHE,Chemed Corp.,Health Care,no,yes,no,no,no,no
+CHH,Choice Hotels,Consumer Discretionary,no,yes,no,no,no,no
+CHRD,Chord Energy,Energy,no,yes,no,no,no,no
+CHWY,Chewy,Consumer Discretionary,no,yes,no,no,no,no
+CLF,Cleveland-Cliffs,Materials,no,yes,no,no,no,no
+CLH,Clean Harbors,Industrials,no,yes,no,no,no,no
+CMC,Commercial Metals,Materials,no,yes,no,no,no,no
+CNH,CNH Industrial,Industrials,no,yes,no,no,no,no
+CNM,Core & Main,Industrials,no,yes,no,no,no,no
+CNO,CNO Financial Group,Financials,no,yes,no,no,no,no
+CNX,CNX Resources,Energy,no,yes,no,no,no,no
+COKE,Coca-Cola Consolidated,Consumer Staples,no,yes,no,no,no,no
+COLB,Columbia Banking System,Financials,no,yes,no,no,no,no
+COLM,Columbia Sportswear,Consumer Discretionary,no,yes,no,no,no,no
+CORT,Corcept Therapeutics,Health Care,no,yes,no,no,no,no
+CR,Crane,Industrials,no,yes,no,no,no,no
+CRBG,Corebridge Financial,Financials,no,yes,no,no,no,no
+CROX,Crocs,Consumer Discretionary,no,yes,no,no,no,no
+CRS,Carpenter Technology,Industrials,no,yes,no,no,no,no
+CRUS,Cirrus Logic,Information Technology,no,yes,no,no,no,no
+CSL,Carlisle Companies,Industrials,no,yes,no,no,no,no
+CTRE,CareTrust REIT,Real Estate,no,yes,no,no,no,no
+CTVA,Corteva,Materials,no,yes,no,no,no,no
+CUBE,CubeSmart,Real Estate,no,yes,no,no,no,no
+CUZ,Cousins Properties,Real Estate,no,yes,no,no,no,no
+CVLT,CommVault Systems,Information Technology,no,yes,no,no,no,no
+CW,Curtiss-Wright,Industrials,no,yes,no,no,no,no
+CXT,Crane NXT,Information Technology,no,yes,no,no,no,no
+CYTK,Cytokinetics,Health Care,no,yes,no,no,no,no
+DAR,Darling Ingredients,Consumer Staples,no,yes,no,no,no,no
+DBX,Dropbox,Information Technology,no,yes,no,no,no,no
+DCI,Donaldson Company,Industrials,no,yes,no,no,no,no
+DINO,HF Sinclair,Energy,no,yes,no,no,no,no
+DKS,Dick's Sporting Goods,Consumer Discretionary,no,yes,no,no,no,no
+DLB,Dolby,Information Technology,no,yes,no,no,no,no
+DOCN,DigitalOcean,Information Technology,no,yes,no,no,no,no
+DOCS,Doximity,Health Care,no,yes,no,no,no,no
+DOCU,Docusign,Information Technology,no,yes,no,no,no,no
+DT,Dynatrace,Information Technology,no,yes,no,no,no,no
+DTM,DT Midstream,Energy,no,yes,no,no,no,no
+DUOL,Duolingo,Consumer Discretionary,no,yes,no,no,no,no
+DY,Dycom Industries,Industrials,no,yes,no,no,no,no
+EAT,Brinker International,Consumer Discretionary,no,yes,no,no,no,no
+EEFT,Euronet Worldwide,Financials,no,yes,no,no,no,no
+EGP,EastGroup Properties,Real Estate,no,yes,no,no,no,no
+EHC,Encompass Health,Health Care,no,yes,no,no,no,no
+ELAN,Elanco,Health Care,no,yes,no,no,no,no
+ELF,e.l.f. Beauty,Consumer Staples,no,yes,no,no,no,no
+ELS,Equity Lifestyle Properties,Real Estate,no,yes,no,no,no,no
+ENS,EnerSys,Industrials,no,yes,no,no,no,no
+ENSG,Ensign Group,Health Care,no,yes,no,no,no,no
+ENTG,Entegris,Information Technology,no,yes,no,no,no,no
+EPR,EPR Properties,Real Estate,no,yes,no,no,no,no
+EQH,Equitable Holdings,Financials,no,yes,no,no,no,no
+ESAB,ESAB,Industrials,no,yes,no,no,no,no
+ESNT,Essent Group Ltd.,Financials,no,yes,no,no,no,no
+EVR,Evercore,Financials,no,yes,no,no,no,no
+EWBC,East West Bancorp,Financials,no,yes,no,no,no,no
+EXEL,Exelixis,Health Care,no,yes,no,no,no,no
+EXLS,EXL Service,Industrials,no,yes,no,no,no,no
+EXP,Eagle Materials,Materials,no,yes,no,no,no,no
+EXPO,"Exponent, Inc.",Industrials,no,yes,no,no,no,no
+FAF,First American Financial Corporation,Financials,no,yes,no,no,no,no
+FBIN,Fortune Brands Innovations,Industrials,no,yes,no,no,no,no
+FCFS,FirstCash,Financials,no,yes,no,no,no,no
+FCN,FTI Consulting,Industrials,no,yes,no,no,no,no
+FFIN,First Financial Bankshares,Financials,no,yes,no,no,no,no
+FHI,Federated Hermes,Financials,no,yes,no,no,no,no
+FHN,First Horizon,Financials,no,yes,no,no,no,no
+FIVE,Five Below,Consumer Discretionary,no,yes,no,no,no,no
+FLG,Flagstar Bank,Financials,no,yes,no,no,no,no
+FLR,Fluor,Industrials,no,yes,no,no,no,no
+FLS,Flowserve,Industrials,no,yes,no,no,no,no
+FN,Fabrinet,Information Technology,no,yes,no,no,no,no
+FNB,FNB Corporation,Financials,no,yes,no,no,no,no
+FND,Floor & Decor,Consumer Discretionary,no,yes,no,no,no,no
+FNF,Fidelity National Financial,Financials,no,yes,no,no,no,no
+FORM,FormFactor,Information Technology,no,yes,no,no,no,no
+FOUR,Shift4,Financials,no,yes,no,no,no,no
+FR,First Industrial Realty Trust,Real Estate,no,yes,no,no,no,no
+FTI,TechnipFMC,Energy,no,yes,no,no,no,no
+G,Genpact,Industrials,no,yes,no,no,no,no
+GAP,Gap Inc.,Consumer Discretionary,no,yes,no,no,no,no
+GATX,GATX,Industrials,no,yes,no,no,no,no
+GBCI,Glacier Bancorp,Financials,no,yes,no,no,no,no
+GEF,"Greif, Inc.",Materials,no,yes,no,no,no,no
+GGG,Graco Inc.,Industrials,no,yes,no,no,no,no
+GHC,Graham Holdings,Consumer Discretionary,no,yes,no,no,no,no
+GKOS,Glaukos,Health Care,no,yes,no,no,no,no
+GLPI,Gaming and Leisure Properties,Real Estate,no,yes,no,no,no,no
+GME,GameStop,Consumer Discretionary,no,yes,no,no,no,no
+GMED,Globus Medical,Health Care,no,yes,no,no,no,no
+GNTX,Gentex,Consumer Discretionary,no,yes,no,no,no,no
+GPK,Graphic Packaging,Materials,no,yes,no,no,no,no
+GWRE,Guidewire Software,Information Technology,no,yes,no,no,no,no
+GXO,GXO Logistics,Industrials,no,yes,no,no,no,no
+H,Hyatt,Consumer Discretionary,no,yes,no,no,no,no
+HAE,Haemonetics,Health Care,no,yes,no,no,no,no
+HALO,Halozyme,Health Care,no,yes,no,no,no,no
+HGV,Hilton Grand Vacations,Consumer Discretionary,no,yes,no,no,no,no
+HIMS,Hims & Hers Health,Health Care,no,yes,no,no,no,no
+HL,Hecla Mining,Materials,no,yes,no,no,no,no
+HLI,Houlihan Lokey,Financials,no,yes,no,no,no,no
+HLNE,Hamilton Lane,Financials,no,yes,no,no,no,no
+HOG,Harley-Davidson,Consumer Discretionary,no,yes,no,no,no,no
+HOMB,Home BancShares,Financials,no,yes,no,no,no,no
+HQY,HealthEquity,Health Care,no,yes,no,no,no,no
+HR,Healthcare Realty Trust,Real Estate,no,yes,no,no,no,no
+HRB,H&R Block,Consumer Discretionary,no,yes,no,no,no,no
+HUBS,HubSpot,Information Technology,no,yes,no,no,no,no
+HWC,Hancock Whitney,Financials,no,yes,no,no,no,no
+HXL,Hexcel,Industrials,no,yes,no,no,no,no
+IBOC,Intl Bancshares Corp,Financials,no,yes,no,no,no,no
+IDA,Idacorp,Utilities,no,yes,no,no,no,no
+IDCC,InterDigital,Information Technology,no,yes,no,no,no,no
+IESC,IES Holdings,Industrials,no,yes,no,no,no,no
+INGR,Ingredion,Consumer Staples,no,yes,no,no,no,no
+IPGP,IPG Photonics,Information Technology,no,yes,no,no,no,no
+IRT,Independence Realty Trust,Real Estate,no,yes,no,no,no,no
+ITT,ITT Inc.,Industrials,no,yes,no,no,no,no
+JAZZ,Jazz Pharmaceuticals,Health Care,no,yes,no,no,no,no
+JEF,Jefferies,Financials,no,yes,no,no,no,no
+JLL,Jones Lang LaSalle,Real Estate,no,yes,no,no,no,no
+KBH,KB Home,Consumer Discretionary,no,yes,no,no,no,no
+KBR,"KBR, Inc.",Industrials,no,yes,no,no,no,no
+KD,Kyndryl,Information Technology,no,yes,no,no,no,no
+KEX,Kirby Corporation,Industrials,no,yes,no,no,no,no
+KNF,Knife River Corporation,Materials,no,yes,no,no,no,no
+KNSL,Kinsale Capital Group,Financials,no,yes,no,no,no,no
+KNX,Knight-Swift,Industrials,no,yes,no,no,no,no
+KRC,Kilroy Realty Corp,Real Estate,no,yes,no,no,no,no
+KRG,Kite Realty Group Trust,Real Estate,no,yes,no,no,no,no
+KRYS,Krystal Biotech,Health Care,no,yes,no,no,no,no
+KTOS,Kratos Defense & Security Solutions,Industrials,no,yes,no,no,no,no
+LAD,Lithia Motors,Consumer Discretionary,no,yes,no,no,no,no
+LAMR,Lamar Advertising Company,Real Estate,no,yes,no,no,no,no
+LEA,Lear,Consumer Discretionary,no,yes,no,no,no,no
+LECO,Lincoln Electric,Industrials,no,yes,no,no,no,no
+LFUS,Littelfuse,Information Technology,no,yes,no,no,no,no
+LIVN,LivaNova,Health Care,no,yes,no,no,no,no
+LNTH,Lantheus Holdings,Health Care,no,yes,no,no,no,no
+LOPE,Grand Canyon Education,Consumer Discretionary,no,yes,no,no,no,no
+LPX,Louisiana-Pacific,Industrials,no,yes,no,no,no,no
+LSCC,Lattice Semiconductor,Information Technology,no,yes,no,no,no,no
+LSTR,Landstar System,Industrials,no,yes,no,no,no,no
+M,Macy's,Consumer Discretionary,no,yes,no,no,no,no
+MANH,Manhattan Associates,Information Technology,no,yes,no,no,no,no
+MAT,Mattel,Consumer Discretionary,no,yes,no,no,no,no
+MEDP,Medpace,Health Care,no,yes,no,no,no,no
+MIDD,Middleby,Industrials,no,yes,no,no,no,no
+MKSI,MKS Instruments,Information Technology,no,yes,no,no,no,no
+MLI,Mueller Industries,Industrials,no,yes,no,no,no,no
+MMS,Maximus Inc.,Industrials,no,yes,no,no,no,no
+MOG-A,Moog Inc.,Industrials,no,yes,no,no,no,no
+MOH,Molina Healthcare,Health Care,no,yes,no,no,no,no
+MORN,"Morningstar, Inc.",Financials,no,yes,no,no,no,no
+MP,MP Materials,Materials,no,yes,no,no,no,no
+MSA,MSA Safety,Industrials,no,yes,no,no,no,no
+MSM,MSC Industrial Direct,Industrials,no,yes,no,no,no,no
+MTDR,Matador Resources,Energy,no,yes,no,no,no,no
+MTG,MGIC Investment Corporation,Financials,no,yes,no,no,no,no
+MTN,Vail Resorts,Consumer Discretionary,no,yes,no,no,no,no
+MTSI,MACOM Technology Solutions,Information Technology,no,yes,no,no,no,no
+MTZ,MasTec,Industrials,no,yes,no,no,no,no
+MUR,Murphy Oil,Energy,no,yes,no,no,no,no
+MUSA,Murphy USA,Consumer Discretionary,no,yes,no,no,no,no
+MZTI,The Marzetti Company,Consumer Staples,no,yes,no,no,no,no
+NBIX,Neurocrine Biosciences,Health Care,no,yes,no,no,no,no
+NEU,NewMarket Corporation,Materials,no,yes,no,no,no,no
+NFG,National Fuel Gas,Utilities,no,yes,no,no,no,no
+NJR,New Jersey Resources,Utilities,no,yes,no,no,no,no
+NLY,Annaly Capital Management,Financials,no,yes,no,no,no,no
+NNN,NNN Reit,Real Estate,no,yes,no,no,no,no
+NOV,NOV Inc.,Energy,no,yes,no,no,no,no
+NOVT,Novanta,Information Technology,no,yes,no,no,no,no
+NTNX,Nutanix,Information Technology,no,yes,no,no,no,no
+NVST,Envista Holdings,Health Care,no,yes,no,no,no,no
+NVT,nVent Electric plc,Industrials,no,yes,no,no,no,no
+NWE,NorthWestern Energy,Utilities,no,yes,no,no,no,no
+NXST,Nexstar Media Group,Communication Services,no,yes,no,no,no,no
+NXT,Nextpower,Industrials,no,yes,no,no,no,no
+NYT,New York Times Company,Communication Services,no,yes,no,no,no,no
+OC,Owens Corning,Industrials,no,yes,no,no,no,no
+OGE,OGE Energy,Utilities,no,yes,no,no,no,no
+OGS,One Gas,Utilities,no,yes,no,no,no,no
+OHI,Omega Healthcare Investors,Real Estate,no,yes,no,no,no,no
+OLED,Universal Display,Information Technology,no,yes,no,no,no,no
+OLLI,Ollie's Bargain Outlet,Consumer Discretionary,no,yes,no,no,no,no
+ONB,Old National Bank,Financials,no,yes,no,no,no,no
+ONTO,Onto Innovation,Information Technology,no,yes,no,no,no,no
+OPCH,Option Care Health,Health Care,no,yes,no,no,no,no
+ORA,Ormat Technologies,Utilities,no,yes,no,no,no,no
+ORI,Old Republic International,Financials,no,yes,no,no,no,no
+OSK,Oshkosh,Industrials,no,yes,no,no,no,no
+OVV,Ovintiv,Energy,no,yes,no,no,no,no
+OZK,Bank OZK,Financials,no,yes,no,no,no,no
+PAG,Penske Automotive Group,Consumer Discretionary,no,yes,no,no,no,no
+PATH,UiPath,Information Technology,no,yes,no,no,no,no
+PB,Prosperity Bancshares,Financials,no,yes,no,no,no,no
+PBF,PBF Energy,Energy,no,yes,no,no,no,no
+PCTY,Paylocity,Industrials,no,yes,no,no,no,no
+PEGA,Pegasystems,Information Technology,no,yes,no,no,no,no
+PEN,"Penumbra, Inc.",Health Care,no,yes,no,no,no,no
+PFGC,Performance Food Group,Consumer Staples,no,yes,no,no,no,no
+PII,Polaris,Consumer Discretionary,no,yes,no,no,no,no
+PINS,Pinterest,Communication Services,no,yes,no,no,no,no
+PK,Park Hotels & Resorts,Real Estate,no,yes,no,no,no,no
+PLNT,Planet Fitness,Consumer Discretionary,no,yes,no,no,no,no
+PNFP,Pinnacle Financial Partners,Financials,no,yes,no,no,no,no
+POR,Portland General Electric,Utilities,no,yes,no,no,no,no
+POST,Post Holdings,Consumer Staples,no,yes,no,no,no,no
+PPC,Pilgrim's Pride,Consumer Staples,no,yes,no,no,no,no
+PR,Permian Resources,Energy,no,yes,no,no,no,no
+PRI,Primerica,Financials,no,yes,no,no,no,no
+PSN,Parsons Corporation,Industrials,no,yes,no,no,no,no
+PVH,PVH Corp.,Consumer Discretionary,no,yes,no,no,no,no
+QLYS,Qualys,Information Technology,no,yes,no,no,no,no
+R,Ryder,Industrials,no,yes,no,no,no,no
+RBA,RB Global,Industrials,no,yes,no,no,no,no
+RBC,RBC Bearings,Industrials,no,yes,no,no,no,no
+REXR,Rexford Industrial Realty,Real Estate,no,yes,no,no,no,no
+RGA,Reinsurance Group of America,Financials,no,yes,no,no,no,no
+RGEN,Repligen,Health Care,no,yes,no,no,no,no
+RGLD,Royal Gold,Materials,no,yes,no,no,no,no
+RH,RH,Consumer Discretionary,no,yes,no,no,no,no
+RLI,RLI Corp.,Financials,no,yes,no,no,no,no
+RMBS,Rambus,Information Technology,no,yes,no,no,no,no
+RNR,RenaissanceRe,Financials,no,yes,no,no,no,no
+ROIV,Roivant Sciences,Health Care,no,yes,no,no,no,no
+ROKU,"Roku, Inc.",Communication Services,no,yes,no,no,no,no
+RPM,RPM International,Materials,no,yes,no,no,no,no
+RRC,Range Resources,Energy,no,yes,no,no,no,no
+RRX,Regal Rexnord,Industrials,no,yes,no,no,no,no
+RS,"Reliance, Inc.",Materials,no,yes,no,no,no,no
+RYAN,Ryan Specialty,Financials,no,yes,no,no,no,no
+RYN,Rayonier,Real Estate,no,yes,no,no,no,no
+SAIA,Saia,Industrials,no,yes,no,no,no,no
+SAIC,Science Applications Intl Corp,Industrials,no,yes,no,no,no,no
+SANM,Sanmina Corporation,Information Technology,no,yes,no,no,no,no
+SARO,StandardAero,Industrials,no,yes,no,no,no,no
+SBRA,Sabra Health Care REIT,Real Estate,no,yes,no,no,no,no
+SCI,Service Corp Intl,Consumer Discretionary,no,yes,no,no,no,no
+SEIC,SEI Investments Company,Financials,no,yes,no,no,no,no
+SF,Stifel,Financials,no,yes,no,no,no,no
+SFM,Sprouts Farmers Market,Consumer Staples,no,yes,no,no,no,no
+SGI,Somnigroup International,Consumer Discretionary,no,yes,no,no,no,no
+SHC,Sotera Health,Health Care,no,yes,no,no,no,no
+SIGI,Selective Insurance Group,Financials,no,yes,no,no,no,no
+SIRI,SiriusXM,Communication Services,no,yes,no,no,no,no
+SITM,SiTime,Information Technology,no,yes,no,no,no,no
+SLAB,Silicon Labs,Information Technology,no,yes,no,no,no,no
+SLGN,Silgan Holdings,Materials,no,yes,no,no,no,no
+SLM,SLM Corp,Financials,no,yes,no,no,no,no
+SMG,Scotts Miracle-Gro Company,Materials,no,yes,no,no,no,no
+SMTC,Semtech,Information Technology,no,yes,no,no,no,no
+SN,SharkNinja,Consumer Discretionary,no,yes,no,no,no,no
+SNX,TD Synnex,Information Technology,no,yes,no,no,no,no
+SOLS,Solstice Advanced Materials,Materials,no,yes,no,no,no,no
+SON,Sonoco,Materials,no,yes,no,no,no,no
+SPXC,SPX Technologies,Industrials,no,yes,no,no,no,no
+SR,Spire,Utilities,no,yes,no,no,no,no
+SSB,South State Bank,Financials,no,yes,no,no,no,no
+SSD,Simpson Manufacturing,Industrials,no,yes,no,no,no,no
+ST,Sensata Technologies,Industrials,no,yes,no,no,no,no
+STAG,STAG Industrial,Real Estate,no,yes,no,no,no,no
+STRL,Sterling Infrastructure,Industrials,no,yes,no,no,no,no
+STWD,Starwood Property Trust,Financials,no,yes,no,no,no,no
+SUI,Sun Communities,Real Estate,no,yes,no,no,no,no
+SWX,Southwest Gas Corp,Utilities,no,yes,no,no,no,no
+SYNA,Synaptics,Information Technology,no,yes,no,no,no,no
+TCBI,Texas Capital Bancshares,Financials,no,yes,no,no,no,no
+TEX,Terex,Industrials,no,yes,no,no,no,no
+THC,Tenet Health,Health Care,no,yes,no,no,no,no
+THG,Hanover Insurance,Financials,no,yes,no,no,no,no
+THO,Thor Industries,Consumer Discretionary,no,yes,no,no,no,no
+TKR,Timken,Industrials,no,yes,no,no,no,no
+TLN,Talen Energy,Utilities,no,yes,no,no,no,no
+TNL,Travel + Leisure Co.,Consumer Discretionary,no,yes,no,no,no,no
+TOL,Toll Brothers,Consumer Discretionary,no,yes,no,no,no,no
+TOST,"Toast, Inc.",Financials,no,yes,no,no,no,no
+TREX,Trex,Industrials,no,yes,no,no,no,no
+TRU,TransUnion,Industrials,no,yes,no,no,no,no
+TTC,Toro,Industrials,no,yes,no,no,no,no
+TTEK,Tetra Tech,Industrials,no,yes,no,no,no,no
+TTMI,TTM Technologies,Information Technology,no,yes,no,no,no,no
+TXNM,TXNM Energy,Utilities,no,yes,no,no,no,no
+TXRH,Texas Roadhouse,Consumer Discretionary,no,yes,no,no,no,no
+UBSI,United Bankshares,Financials,no,yes,no,no,no,no
+UFPI,UFP Industries,Industrials,no,yes,no,no,no,no
+UGI,UGI Corp,Utilities,no,yes,no,no,no,no
+ULS,UL Solutions,Industrials,no,yes,no,no,no,no
+UMBF,UMB Financial Corp.,Financials,no,yes,no,no,no,no
+UNM,Unum,Financials,no,yes,no,no,no,no
+USFD,US Foods,Consumer Staples,no,yes,no,no,no,no
+UTHR,United Therapeutics,Health Care,no,yes,no,no,no,no
+VAL,Valaris,Energy,no,yes,no,no,no,no
+VC,Visteon,Consumer Discretionary,no,yes,no,no,no,no
+VFC,VF Corporation,Consumer Discretionary,no,yes,no,no,no,no
+VIAV,Viavi Solutions,Information Technology,no,yes,no,no,no,no
+VICR,Vicor Corporation,Industrials,no,yes,no,no,no,no
+VLY,Valley Bank,Financials,no,yes,no,no,no,no
+VMI,Valmont Industries,Industrials,no,yes,no,no,no,no
+VNO,Vornado Realty Trust,Real Estate,no,yes,no,no,no,no
+VNOM,Viper Energy,Energy,no,yes,no,no,no,no
+VNT,Vontier,Information Technology,no,yes,no,no,no,no
+VOYA,Voya Financial,Financials,no,yes,no,no,no,no
+VVV,Valvoline,Consumer Discretionary,no,yes,no,no,no,no
+WAL,Western Alliance Bancorporation,Financials,no,yes,no,no,no,no
+WCC,WESCO International,Industrials,no,yes,no,no,no,no
+WEX,WEX Inc.,Financials,no,yes,no,no,no,no
+WFRD,Weatherford International,Energy,no,yes,no,no,no,no
+WH,Wyndham Hotels & Resorts,Consumer Discretionary,no,yes,no,no,no,no
+WHR,Whirlpool Corporation,Consumer Discretionary,no,yes,no,no,no,no
+WING,Wingstop,Consumer Discretionary,no,yes,no,no,no,no
+WLK,Westlake Corporation,Materials,no,yes,no,no,no,no
+WMG,Warner Music Group,Communication Services,no,yes,no,no,no,no
+WMS,Advanced Drainage Systems,Industrials,no,yes,no,no,no,no
+WPC,W. P. Carey,Real Estate,no,yes,no,no,no,no
+WSO,Watsco,Industrials,no,yes,no,no,no,no
+WTFC,Wintrust Financial,Financials,no,yes,no,no,no,no
+WTRG,Essential Utilities,Utilities,no,yes,no,no,no,no
+WTS,Watts Water Technologies,Industrials,no,yes,no,no,no,no
+WWD,"Woodward, Inc.",Industrials,no,yes,no,no,no,no
+XPO,"XPO, Inc.",Industrials,no,yes,no,no,no,no
+XRAY,Dentsply Sirona,Health Care,no,yes,no,no,no,no
+YETI,Yeti Holdings,Consumer Discretionary,no,yes,no,no,no,no
+ZION,Zions Bancorporation,Financials,no,yes,no,no,no,no

@@ -1,0 +1,604 @@
+ticker,company,sector,in_sp500,in_sp400,in_sp600,in_ndx100,in_growth,in_liquid
+AAMI,Acadian Asset Management Inc.,Financials,no,no,yes,no,no,no
+AAP,"Advance Auto Parts, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+AAT,American Assets Trust,Real Estate,no,no,yes,no,no,no
+ABCB,Ameris Bancorp,Financials,no,no,yes,no,no,no
+ABG,Asbury Automotive Group,Consumer Discretionary,no,no,yes,no,no,no
+ABM,"ABM Industries, Inc.",Industrials,no,no,yes,no,no,no
+ABR,Arbor Realty Trust,Financials,no,no,yes,no,no,no
+ACA,"Arcosa, Inc.",Industrials,no,no,yes,no,no,no
+ACAD,Acadia Pharmaceuticals,Health Care,no,no,yes,no,no,no
+ACHC,Acadia Healthcare,Health Care,no,no,yes,no,no,no
+ACIW,ACI Worldwide,Information Technology,no,no,yes,no,no,no
+ACLS,"Axcelis Technologies, Inc.",Information Technology,no,no,yes,no,no,no
+ACMR,"ACM Research, Inc.",Information Technology,no,no,yes,no,no,no
+ACT,"Enact Holdings, Inc.",Financials,no,no,yes,no,no,no
+ADAM,"Adamas Trust, Inc.",Real Estate,no,no,yes,no,no,no
+ADEA,"Adeia, Inc.",Information Technology,no,no,yes,no,no,no
+ADIG,ADI Global Distribution,Information Technology,no,no,yes,no,no,no
+ADMA,"ADMA Biologics, Inc.",Health Care,no,no,yes,no,no,no
+ADNT,Adient,Consumer Discretionary,no,no,yes,no,no,no
+ADT,ADT Inc.,Consumer Discretionary,no,no,yes,no,no,no
+ADUS,Addus HomeCare Corp.,Health Care,no,no,yes,no,no,no
+AEO,American Eagle Outfitters,Consumer Discretionary,no,no,yes,no,no,no
+AESI,"Atlas Energy Solutions, Inc.",Energy,no,no,yes,no,no,no
+AGNT,"eXp World Holdings, Inc.",Real Estate,no,no,yes,no,no,no
+AGO,Assured Guaranty Ltd.,Financials,no,no,yes,no,no,no
+AGX,"Argan, Inc.",Industrials,no,no,yes,no,no,no
+AGYS,"Agilysys, Inc.",Information Technology,no,no,yes,no,no,no
+AHCO,AdaptHealth Corp.,Health Care,no,no,yes,no,no,no
+AIN,Albany International Corp.,Industrials,no,no,yes,no,no,no
+AIR,AAR Corp.,Industrials,no,no,yes,no,no,no
+AKR,Acadia Realty Trust,Real Estate,no,no,yes,no,no,no
+ALG,Alamo Group,Industrials,no,no,yes,no,no,no
+ALGT,Allegiant Travel Company,Industrials,no,no,yes,no,no,no
+ALHC,"Alignment Healthcare, Inc.",Health Care,no,no,yes,no,no,no
+ALKS,Alkermes plc,Health Care,no,no,yes,no,no,no
+ALRM,"Alarm.Com, Inc.",Financials,no,no,yes,no,no,no
+AMN,"Amn Healthcare Services, Inc.",Health Care,no,no,yes,no,no,no
+AMPH,"Amphstar Pharmaceuticals, Inc.",Health Care,no,no,yes,no,no,no
+AMR,"Alpha Metallurgical Resources, Inc.",Materials,no,no,yes,no,no,no
+AMRX,Amneal Pharmaceuticals,Health Care,no,no,yes,no,no,no
+AMSF,"Amerisafe, Inc.",Financials,no,no,yes,no,no,no
+AMTM,Amentum,Industrials,no,no,yes,no,no,no
+ANDE,"The Andersons, Inc.",Consumer Staples,no,no,yes,no,no,no
+ANIP,"ANI Pharmaceuticals, Inc.",Health Care,no,no,yes,no,no,no
+AORT,Artivion,Health Care,no,no,yes,no,no,no
+AOSL,"Alpha and Omega Semiconductor, Ltd.",Information Technology,no,no,yes,no,no,no
+APAM,"Artisan Partners Asset Management, Inc.",Financials,no,no,yes,no,no,no
+APLE,"Apple Hospitality REIT, Inc.",Real Estate,no,no,yes,no,no,no
+APOG,"Apogee Enterprises, Inc.",Industrials,no,no,yes,no,no,no
+ARCB,ArcBest Corp.,Industrials,no,no,yes,no,no,no
+ARLO,Arlo Technologies,Information Technology,no,no,yes,no,no,no
+AROC,"Archrock, Inc.",Energy,no,no,yes,no,no,no
+ARR,Armour Residential REIT,Real Estate,no,no,yes,no,no,no
+ASO,Academy Sports + Outdoors,Consumer Discretionary,no,no,yes,no,no,no
+ASTE,"Astec Industries, Inc.",Industrials,no,no,yes,no,no,no
+ASTH,"Astrana Health, Inc.",Health Care,no,no,yes,no,no,no
+ATEN,"A10 Networks, Inc.",Information Technology,no,no,yes,no,no,no
+ATMU,Atmus Filtration Technologies Inc.,Industrials,no,no,yes,no,no,no
+AUB,"Atlantic Union Bankshares, Corp.",Financials,no,no,yes,no,no,no
+AVA,Avista Corporation,Utilities,no,no,yes,no,no,no
+AWI,"Armstrong World Industries, Inc.",Industrials,no,no,yes,no,no,no
+AWR,American States Water Company,Utilities,no,no,yes,no,no,no
+AX,"Axos Financial, Inc.",Financials,no,no,yes,no,no,no
+AZTA,"Azenta, Inc.",Health Care,no,no,yes,no,no,no
+AZZ,"AZZ, Inc.",Industrials,no,no,yes,no,no,no
+BANC,"Banc Of California, Inc.",Financials,no,no,yes,no,no,no
+BANF,Bancfirst Corp,Financials,no,no,yes,no,no,no
+BANR,Banner Corporation,Financials,no,no,yes,no,no,no
+BBT,Beacon Financial Corp.,Financials,no,no,yes,no,no,no
+BCC,Boise Cascade,Industrials,no,no,yes,no,no,no
+BCPC,Balchem Corporation,Materials,no,no,yes,no,no,no
+BFAM,Bright Horizons Family Solutions Inc.,Consumer Discretionary,no,no,yes,no,no,no
+BFH,"Bread Financial Holdings, Inc.",Financials,no,no,yes,no,no,no
+BFS,"Saul Centers, Inc.",Real Estate,no,no,yes,no,no,no
+BGC,"BGC Group, Inc.",Financials,no,no,yes,no,no,no
+BHE,"Benchmark Electronics, Inc.",Information Technology,no,no,yes,no,no,no
+BJRI,"BJ's Restaurants, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+BKE,"The Buckle, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+BKU,"BankUnited, Inc.",Financials,no,no,yes,no,no,no
+BL,"BlackLine Systems, Inc.",Information Technology,no,no,yes,no,no,no
+BLFS,"BioLife Solutions, Inc.",Health Care,no,no,yes,no,no,no
+BLKB,Blackbaud,Information Technology,no,no,yes,no,no,no
+BMI,"Badger Meter, Inc.",Information Technology,no,no,yes,no,no,no
+BNL,"Broadstone Net Lease, Inc.",Real Estate,no,no,yes,no,no,no
+BOH,Bank of Hawaii,Financials,no,no,yes,no,no,no
+BOOT,"Boot Barn Holdings, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+BOX,"Box, Inc.",Information Technology,no,no,yes,no,no,no
+BRC,Brady Corporation,Industrials,no,no,yes,no,no,no
+BTU,"Peabody Energy, Inc.",Energy,no,no,yes,no,no,no
+BXMT,"Blackstone Mortgage Trust, Inc.",Financials,no,no,yes,no,no,no
+CACC,Credit Acceptance,Financials,no,no,yes,no,no,no
+CAG,Conagra Brands,Consumer Staples,no,no,yes,no,no,no
+CAKE,"The Cheesecake Factory, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+CALM,"Cal-Maine Foods, Inc.",Consumer Staples,no,no,yes,no,no,no
+CALX,Calix,Information Technology,no,no,yes,no,no,no
+CALY,Callaway Golf Company,Consumer Discretionary,no,no,yes,no,no,no
+CARG,CarGurus,Communication Services,no,no,yes,no,no,no
+CASH,"Pathward Financial, Inc.",Financials,no,no,yes,no,no,no
+CATY,Cathay General Bancorp,Financials,no,no,yes,no,no,no
+CBRL,Cracker Barrel,Consumer Discretionary,no,no,yes,no,no,no
+CBU,"Community Bank System, Inc.",Financials,no,no,yes,no,no,no
+CC,Chemours,Materials,no,no,yes,no,no,no
+CCOI,"Cogent Communications Holdings, Inc.",Communication Services,no,no,yes,no,no,no
+CCS,"Century Communities, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+CE,Celanese,Materials,no,no,yes,no,no,no
+CENT,Central Garden & Pet Company,Consumer Staples,no,no,yes,no,no,no
+CENTA,Central Garden & Pet Company (Class A),Consumer Staples,no,no,yes,no,no,no
+CENX,Century Aluminum Company,Materials,no,no,yes,no,no,no
+CERT,"Certara, Inc.",Health Care,no,no,yes,no,no,no
+CFFN,Capitol Federal Savings Bank,Financials,no,no,yes,no,no,no
+CHCO,City Holding Company,Financials,no,no,yes,no,no,no
+CHEF,"Chefs' Warehouse, Inc.",Consumer Staples,no,no,yes,no,no,no
+CLSK,"CleanSpark, Inc.",Information Technology,no,no,yes,no,no,no
+CNK,"Cinemark Holdings, Inc.",Communication Services,no,no,yes,no,no,no
+CNMD,CONMED Corporation,Health Care,no,no,yes,no,no,no
+CNR,"Core Natural Resources, Inc.",Energy,no,no,yes,no,no,no
+CNS,"Cohen & Steers, Inc.",Financials,no,no,yes,no,no,no
+CNXC,Concentrix,Industrials,no,no,yes,no,no,no
+CNXN,"PC Connection, Inc.",Information Technology,no,no,yes,no,no,no
+COCO,The Vita Coco Company,Consumer Staples,no,no,yes,no,no,no
+COHU,"Cohu, Inc.",Information Technology,no,no,yes,no,no,no
+COLL,"Collegium Pharmaceutical, Inc.",Health Care,no,no,yes,no,no,no
+CON,"Concentra Group Holdings Parent, Inc.",Health Care,no,no,yes,no,no,no
+CORT,Corcept Therapeutics Incorporated,Health Care,no,no,yes,no,no,no
+COTY,Coty,Consumer Staples,no,no,yes,no,no,no
+CPB,The Campbell's Company,Consumer Staples,no,no,yes,no,no,no
+CPF,Central Pacific Financial Corp.,Financials,no,no,yes,no,no,no
+CPK,Chesapeake Utilities Corp.,Utilities,no,no,yes,no,no,no
+CRC,California Resources Corporation,Energy,no,no,yes,no,no,no
+CRGY,Crescent Energy Company,Energy,no,no,yes,no,no,no
+CRI,"Carter's, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+CRK,"Comstock Resources, Inc.",Energy,no,no,yes,no,no,no
+CRSR,Corsair Gaming,Information Technology,no,no,yes,no,no,no
+CRVL,CorVel Corporation,Health Care,no,no,yes,no,no,no
+CSR,Centerspace Trust,Real Estate,no,no,yes,no,no,no
+CSW,"CSW Industrials, Inc.",Industrials,no,no,yes,no,no,no
+CTS,CTS Corporation,Information Technology,no,no,yes,no,no,no
+CUBI,"Customers Bancorp, Inc.",Financials,no,no,yes,no,no,no
+CURB,Curbline Properties Corp.,Real Estate,no,no,yes,no,no,no
+CVBF,CVB Financial Corp.,Financials,no,no,yes,no,no,no
+CVCO,"Cavco Industries, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+CVI,"CVR Energy, Inc.",Energy,no,no,yes,no,no,no
+CVSA,Covista Inc.,Consumer Discretionary,no,no,yes,no,no,no
+CWEN,"Clearway Energy, Inc. (Class C)",Utilities,no,no,yes,no,no,no
+CWEN-A,"Clearway Energy, Inc. (Class A)",Utilities,no,no,yes,no,no,no
+CWK,Cushman & Wakefield plc,Real Estate,no,no,yes,no,no,no
+CWST,"Casella Waste Systems, Inc.",Industrials,no,no,yes,no,no,no
+CWT,California Water Service Group,Utilities,no,no,yes,no,no,no
+CXM,"Sprinklr, Inc.",Information Technology,no,no,yes,no,no,no
+CXW,CoreCivic,Industrials,no,no,yes,no,no,no
+CZR,Caesars Entertainment,Consumer Discretionary,no,no,yes,no,no,no
+DAN,Dana Incorporated,Consumer Discretionary,no,no,yes,no,no,no
+DAVE,"Dave, Inc.",Financials,no,no,yes,no,no,no
+DBD,Diebold Nixdorf,Information Technology,no,no,yes,no,no,no
+DCH,Dauch Corporation,Consumer Discretionary,no,no,yes,no,no,no
+DCOM,"Dime Community Bancshares, Inc.",Financials,no,no,yes,no,no,no
+DEA,"Easterly Government Properties, Inc.",Real Estate,no,no,yes,no,no,no
+DEI,Douglas Emmett,Real Estate,no,no,yes,no,no,no
+DFH,"Dream Finders Homes, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+DFIN,"Donnelley Financial Solutions, Inc.",Financials,no,no,yes,no,no,no
+DGII,Digi International Inc.,Information Technology,no,no,yes,no,no,no
+DIOD,Diodes Incorporated,Information Technology,no,no,yes,no,no,no
+DLX,Deluxe Corporation,Industrials,no,no,yes,no,no,no
+DMC,Del Monte Corporation,Consumer Staples,no,no,yes,no,no,no
+DNOW,NOW Inc,Industrials,no,no,yes,no,no,no
+DORM,"Dorman Products, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+DRH,DiamondRock Hospitality Company,Real Estate,no,no,yes,no,no,no
+DV,DoubleVerify Holdings Inc.,Communication Services,no,no,yes,no,no,no
+DXC,DXC Technology,Information Technology,no,no,yes,no,no,no
+DXPE,"DXP Enterprises, Inc.",Industrials,no,no,yes,no,no,no
+EAT,"Brinker International, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+EBC,"Eastern Bankshares, Inc.",Financials,no,no,yes,no,no,no
+ECG,"Everus Construction Group, Inc.",Industrials,no,no,yes,no,no,no
+ECPG,"Encore Capital Group, Inc.",Financials,no,no,yes,no,no,no
+EFC,"Ellington Financial, Inc.",Financials,no,no,yes,no,no,no
+EFOR,Everforth Inc.,Information Technology,no,no,yes,no,no,no
+EGBN,Eagle Bancorp Inc,Financials,no,no,yes,no,no,no
+EIG,"Employers Holdings, Inc.",Financials,no,no,yes,no,no,no
+EMN,Eastman Chemical Company,Materials,no,no,yes,no,no,no
+ENOV,Enovis,Health Care,no,no,yes,no,no,no
+ENPH,Enphase Energy,Information Technology,no,no,yes,no,no,no
+ENR,Energizer,Consumer Staples,no,no,yes,no,no,no
+ENVA,"Enova International, Inc.",Financials,no,no,yes,no,no,no
+EPAC,Enerpac Tool Group,Industrials,no,no,yes,no,no,no
+EPAM,EPAM Systems,Information Technology,no,no,yes,no,no,no
+EPC,Edgewell Personal Care,Consumer Staples,no,no,yes,no,no,no
+EPRT,"Essential Properties Realty Trust, Inc.",Real Estate,no,no,yes,no,no,no
+ESE,ESCO Technologies Inc.,Industrials,no,no,yes,no,no,no
+ESI,Element Solutions,Materials,no,no,yes,no,no,no
+ETSY,Etsy,Consumer Discretionary,no,no,yes,no,no,no
+EVTC,"EVERTEC, Inc.",Financials,no,no,yes,no,no,no
+EXTR,"Extreme Networks, Inc.",Information Technology,no,no,yes,no,no,no
+EYE,National Vision Holdings,Consumer Discretionary,no,no,yes,no,no,no
+EZPW,"EZCORP, Inc.",Financials,no,no,yes,no,no,no
+FA,First Advantage Corporation,Industrials,no,no,yes,no,no,no
+FBK,FB Financial Corp.,Financials,no,no,yes,no,no,no
+FBNC,First Bancorp (Southern Pines NC),Financials,no,no,yes,no,no,no
+FBP,First BanCorp (Puerto Rico),Financials,no,no,yes,no,no,no
+FBRT,"Franklin BSP Realty Trust, Inc.",Real Estate,no,no,yes,no,no,no
+FCF,"First Commonwealth Financial, Corp.",Financials,no,no,yes,no,no,no
+FCPT,"Four Corners Property Trust, Inc.",Real Estate,no,no,yes,no,no,no
+FELE,Franklin Electric,Industrials,no,no,yes,no,no,no
+FFBC,First Financial Bancorp,Financials,no,no,yes,no,no,no
+FG,"F&G Annuities & Life, Inc.",Financials,no,no,yes,no,no,no
+FHB,"First Hawaiian, Inc.",Financials,no,no,yes,no,no,no
+FIBK,"First Interstate BancSystem, Inc.",Financials,no,no,yes,no,no,no
+FIVN,"Five9, Inc.",Information Technology,no,no,yes,no,no,no
+FIZZ,National Beverage Corp.,Consumer Staples,no,no,yes,no,no,no
+FLO,Flowers Foods,Consumer Staples,no,no,yes,no,no,no
+FMC,FMC Corporation,Materials,no,no,yes,no,no,no
+FORM,"FormFactor, Inc.",Information Technology,no,no,yes,no,no,no
+FOXF,Fox Factory,Consumer Discretionary,no,no,yes,no,no,no
+FRPT,Freshpet,Consumer Staples,no,no,yes,no,no,no
+FSS,Federal Signal Corporation,Industrials,no,no,yes,no,no,no
+FTDR,"Frontdoor, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+FTRE,Fortrea,Health Care,no,no,yes,no,no,no
+FUL,H.B. Fuller Company,Materials,no,no,yes,no,no,no
+FULT,Fulton Financial Corporation,Financials,no,no,yes,no,no,no
+FUN,Six Flags,Consumer Discretionary,no,no,yes,no,no,no
+GBX,"The Greenbrier Companies, Inc.",Industrials,no,no,yes,no,no,no
+GEO,"GEO Group, Inc.",Industrials,no,no,yes,no,no,no
+GFF,Griffon Corporation,Industrials,no,no,yes,no,no,no
+GIII,"G-III Apparel Group, Ltd.",Consumer Discretionary,no,no,yes,no,no,no
+GKOS,Glaukos Corp.,Health Care,no,no,yes,no,no,no
+GNL,"Global Net Lease, Inc.",Real Estate,no,no,yes,no,no,no
+GNW,"Genworth Financial, Inc.",Financials,no,no,yes,no,no,no
+GO,Grocery Outlet,Consumer Staples,no,no,yes,no,no,no
+GOLF,Acushnet Company,Consumer Discretionary,no,no,yes,no,no,no
+GPI,"Group 1 Automotive, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+GPOR,Gulfport Energy Corporation,Energy,no,no,yes,no,no,no
+GRBK,"Green Brick Partners, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+GSHD,"Goosehead Insurance, Inc.",Financials,no,no,yes,no,no,no
+GT,Goodyear Tire and Rubber Company,Consumer Discretionary,no,no,yes,no,no,no
+GTES,Gates Corporation,Industrials,no,no,yes,no,no,no
+GTM,ZoomInfo,Communication Services,no,no,yes,no,no,no
+GTY,Getty Realty Corp.,Real Estate,no,no,yes,no,no,no
+GVA,"Granite Construction, Inc.",Industrials,no,no,yes,no,no,no
+HAFC,Hanmi Financial Corporation,Financials,no,no,yes,no,no,no
+HASI,"Hannon Armstrong Sustainable Infrastructure Capital, Inc.",Financials,no,no,yes,no,no,no
+HAYW,"Hayward Holdings, Inc.",Industrials,no,no,yes,no,no,no
+HCC,"Warrior Met Coal, Inc.",Materials,no,no,yes,no,no,no
+HCI,"HCI Group, Inc.",Financials,no,no,yes,no,no,no
+HCSG,"Healthcare Services Group, Inc.",Industrials,no,no,yes,no,no,no
+HE,"Hawaiian Electric Industries, Inc.",Utilities,no,no,yes,no,no,no
+HFWA,Heritage Financial Corporation,Financials,no,no,yes,no,no,no
+HIW,Highwoods Properties,Real Estate,no,no,yes,no,no,no
+HLIT,Harmonic Inc.,Information Technology,no,no,yes,no,no,no
+HLX,"Helix Energy Solutions Group, Inc.",Energy,no,no,yes,no,no,no
+HMN,Horace Mann Educators Corporation,Financials,no,no,yes,no,no,no
+HNI,HNI Corporation,Industrials,no,no,yes,no,no,no
+HOPE,"Hope Bancorp, Inc.",Financials,no,no,yes,no,no,no
+HP,"Helmerich & Payne, Inc.",Energy,no,no,yes,no,no,no
+HRMY,"Harmony Biosciences Holdings, Inc.",Health Care,no,no,yes,no,no,no
+HSTM,"HealthStream, Inc.",Health Care,no,no,yes,no,no,no
+HTH,Hilltop Holdings Inc.,Financials,no,no,yes,no,no,no
+HTLD,"Heartland Express, Inc.",Industrials,no,no,yes,no,no,no
+HTO,H2O America,Utilities,no,no,yes,no,no,no
+HUBG,"Hub Group, Inc.",Industrials,no,no,yes,no,no,no
+HWKN,"Hawkins, Inc.",Materials,no,no,yes,no,no,no
+HZO,"MarineMax, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+IART,Integra Lifesciences Holdings,Health Care,no,no,yes,no,no,no
+IBP,"Installed Building Products, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+ICHR,"Ichor Holdings, Ltd.",Information Technology,no,no,yes,no,no,no
+ICUI,ICU Medical,Health Care,no,no,yes,no,no,no
+IIPR,"Innovative Industrial Properties, Inc.",Real Estate,no,no,yes,no,no,no
+INDB,Independent Bank Corp.,Financials,no,no,yes,no,no,no
+INDV,Indivior,Health Care,no,no,yes,no,no,no
+INSP,"Inspire Medical Systems, Inc.",Health Care,no,no,yes,no,no,no
+INSW,"International Seaways, Inc.",Energy,no,no,yes,no,no,no
+INVA,"Innoviva, Inc.",Health Care,no,no,yes,no,no,no
+INVX,"Innovex International, Inc.",Energy,no,no,yes,no,no,no
+IOSP,"Innospec, Inc.",Materials,no,no,yes,no,no,no
+IPAR,"Inter Parfums, Inc.",Consumer Staples,no,no,yes,no,no,no
+IRDM,Iridium Communications,Communication Services,no,no,yes,no,no,no
+ITGR,Integer Holdings Corporation,Health Care,no,no,yes,no,no,no
+ITRI,"Itron, Inc.",Information Technology,no,no,yes,no,no,no
+IVT,InvenTrust Properties,Real Estate,no,no,yes,no,no,no
+JBGS,JBG Smith,Real Estate,no,no,yes,no,no,no
+JBLU,JetBlue,Industrials,no,no,yes,no,no,no
+JBSS,"John B. Sanfilippo & Son, Inc.",Consumer Staples,no,no,yes,no,no,no
+JBTM,JBT Marel Corporation,Industrials,no,no,yes,no,no,no
+JJSF,J&J Snack Foods Corp.,Consumer Staples,no,no,yes,no,no,no
+JOE,St. Joe Company,Real Estate,no,no,yes,no,no,no
+JXN,"Jackson Financial, Inc.",Financials,no,no,yes,no,no,no
+KAI,Kadant Inc.,Industrials,no,no,yes,no,no,no
+KALU,Kaiser Aluminum Corporation,Materials,no,no,yes,no,no,no
+KFY,Korn/Ferry International,Industrials,no,no,yes,no,no,no
+KGS,"Kodiak Gas Services, Inc.",Energy,no,no,yes,no,no,no
+KLIC,"Kulicke and Soffa Industries, Inc.",Information Technology,no,no,yes,no,no,no
+KMPR,Kemper Corporation,Financials,no,no,yes,no,no,no
+KMT,Kennametal,Industrials,no,no,yes,no,no,no
+KMX,"CarMax, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+KN,Knowles Corporation,Information Technology,no,no,yes,no,no,no
+KNTK,"Kinetik Holdings, Inc.",Energy,no,no,yes,no,no,no
+KOP,"Koppers Holdings, Inc.",Materials,no,no,yes,no,no,no
+KRMN,Karman Holdings,Industrials,no,no,yes,no,no,no
+KSS,Kohl's Corp.,Consumer Discretionary,no,no,yes,no,no,no
+KTB,Kontoor Brands,Consumer Discretionary,no,no,yes,no,no,no
+KWR,Quaker Chemical Corporation,Materials,no,no,yes,no,no,no
+LAUR,"Laureate Education, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+LAZ,Lazard,Financials,no,no,yes,no,no,no
+LBRT,"Liberty Energy, Inc.",Energy,no,no,yes,no,no,no
+LCII,LCI Industries,Consumer Discretionary,no,no,yes,no,no,no
+LEG,Leggett & Platt,Consumer Discretionary,no,no,yes,no,no,no
+LEU,Centrus Energy Corp.,Energy,no,no,yes,no,no,no
+LFST,Lifestance Health,Health Care,no,no,yes,no,no,no
+LGIH,LGI Homes,Consumer Discretionary,no,no,yes,no,no,no
+LIF,Life360,Information Technology,no,no,yes,no,no,no
+LGND,"Ligand Pharmaceuticals, Inc.",Health Care,no,no,yes,no,no,no
+LKFN,Lakeland Financial,Financials,no,no,yes,no,no,no
+LKQ,LKQ Corporation,Consumer Discretionary,no,no,yes,no,no,no
+LMAT,LeMaitre Vascular,Health Care,no,no,yes,no,no,no
+LNC,Lincoln Financial,Financials,no,no,yes,no,no,no
+LNN,Lindsay Corporation,Materials,no,no,yes,no,no,no
+LPG,Dorian LPG Ltd.,Energy,no,no,yes,no,no,no
+LQDA,Liquidia Corporation,Health Care,no,no,yes,no,no,no
+LQDT,"Liquidity Services, Inc.",Industrials,no,no,yes,no,no,no
+LRN,"Stride, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+LTC,"LTC Properties, Inc.",Real Estate,no,no,yes,no,no,no
+LTH,"Life Time Group Holdings, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+LUMN,Lumen Technologies,Communication Services,no,no,yes,no,no,no
+LW,Lamb Weston,Consumer Staples,no,no,yes,no,no,no
+LXP,Lexington Realty Trust,Real Estate,no,no,yes,no,no,no
+LYFT,"Lyft, Inc.",Industrials,no,no,yes,no,no,no
+LZ,"LegalZoom.com, Inc.",Industrials,no,no,yes,no,no,no
+LZB,"La-Z-Boy, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+MAC,Macerich,Real Estate,no,no,yes,no,no,no
+MAN,ManpowerGroup,Industrials,no,no,yes,no,no,no
+MARA,"MARA Holdings, Inc.",Information Technology,no,no,yes,no,no,no
+MATW,Matthews International Corporation,Consumer Discretionary,no,no,yes,no,no,no
+MATX,"Matson, Inc.",Industrials,no,no,yes,no,no,no
+MBC,"MasterBrand, Inc.",Industrials,no,no,yes,no,no,no
+MBGL,"Mobility Global, Inc.",Industrials,no,no,yes,no,no,no
+MBIN,Merchants Bancorp,Financials,no,no,yes,no,no,no
+MC,Moelis & Company,Financials,no,no,yes,no,no,no
+MCRI,"Monarch Casino & Resort, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+MCY,Mercury General,Financials,no,no,yes,no,no,no
+MD,Pediatrix Medical Group,Health Care,no,no,yes,no,no,no
+MDU,"MDU Resources Group, Inc.",Utilities,no,no,yes,no,no,no
+MFP,"Midera Food Processing, Inc.",Industrials,no,no,yes,no,no,no
+MGEE,"MGE Energy, Inc.",Utilities,no,no,yes,no,no,no
+MGY,"Magnolia Oil & Gas, Corp.",Energy,no,no,yes,no,no,no
+MHK,Mohawk Industries,Consumer Discretionary,no,no,yes,no,no,no
+MHO,"M/I Homes, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+MIR,"Mirion Technologies, Inc.",Information Technology,no,no,yes,no,no,no
+MKTX,MarketAxess,Financials,no,no,yes,no,no,no
+MLKN,"MillerKnoll, Inc.",Industrials,no,no,yes,no,no,no
+MMI,"Marcus & Millichap, Inc.",Real Estate,no,no,yes,no,no,no
+MMSI,"Merit Medical Systems, Inc.",Health Care,no,no,yes,no,no,no
+MPT,Medical Properties Trust,Real Estate,no,no,yes,no,no,no
+MRCY,Mercury Systems,Industrials,no,no,yes,no,no,no
+MRP,"Millrose Properties, Inc.",Real Estate,no,no,yes,no,no,no
+MRTN,"Marten Transport, Ltd.",Industrials,no,no,yes,no,no,no
+MSEX,Middlesex Water Company,Utilities,no,no,yes,no,no,no
+MSGS,Madison Square Garden Sports Corp.,Communication Services,no,no,yes,no,no,no
+MTCH,Match Group,Communication Services,no,no,yes,no,no,no
+MTH,Meritage Homes Corporation,Consumer Discretionary,no,no,yes,no,no,no
+MTRN,Materion Corp.,Materials,no,no,yes,no,no,no
+MTUS,Metallus Inc,Materials,no,no,yes,no,no,no
+MTX,Minerals Technologies,Materials,no,no,yes,no,no,no
+MWA,Mueller Water Products,Industrials,no,no,yes,no,no,no
+MXL,"MaxLinear, Inc.",Information Technology,no,no,yes,no,no,no
+MYRG,"MYR Group, Inc.",Industrials,no,no,yes,no,no,no
+NABL,"N-able, Inc.",Information Technology,no,no,yes,no,no,no
+NATL,NCR Atleos,Financials,no,no,yes,no,no,no
+NAVI,Navient,Financials,no,no,yes,no,no,no
+NBHC,National Bank Holdings Corporation,Financials,no,no,yes,no,no,no
+NBTB,"NBT Bancorp, Inc.",Financials,no,no,yes,no,no,no
+NE,Noble Corporation,Energy,no,no,yes,no,no,no
+NEO,"NeoGenomics Laboratories, Inc.",Health Care,no,no,yes,no,no,no
+NEOG,Neogen,Health Care,no,no,yes,no,no,no
+NGVT,"Ingevity, Corp.",Materials,no,no,yes,no,no,no
+NHC,"National Healthcare, Corp.",Health Care,no,no,yes,no,no,no
+NHI,"National Health Investors, Inc.",Real Estate,no,no,yes,no,no,no
+NIC,Nicolet Bankshares,Financials,no,no,yes,no,no,no
+NMIH,"NMI Holdings, Inc.",Financials,no,no,yes,no,no,no
+NOG,"Northern Oil and Gas, Inc.",Energy,no,no,yes,no,no,no
+NPK,"National Presto Industries, Inc.",Industrials,no,no,yes,no,no,no
+NPO,"EnPro Industries, Inc.",Industrials,no,no,yes,no,no,no
+NSIT,"Insight Enterprises, Inc.",Industrials,no,no,yes,no,no,no
+NSP,Insperity,Industrials,no,no,yes,no,no,no
+NSSC,Napco Security Technologies,Information Technology,no,no,yes,no,no,no
+NTCT,"NETSCOUT Systems, Inc.",Information Technology,no,no,yes,no,no,no
+NTST,NETSTREIT Corp.,Real Estate,no,no,yes,no,no,no
+NWBI,"Northwest Bancshares, Inc.",Financials,no,no,yes,no,no,no
+NWL,Newell Brands,Consumer Discretionary,no,no,yes,no,no,no
+NWN,NW Natural,Utilities,no,no,yes,no,no,no
+NX,Quanex Building Products Corporation,Industrials,no,no,yes,no,no,no
+NXRT,"NexPoint Residential Trust, Inc.",Real Estate,no,no,yes,no,no,no
+OFG,OFG Bancorp,Financials,no,no,yes,no,no,no
+OGN,Organon & Co.,Health Care,no,no,yes,no,no,no
+OI,"O-I Glass, Inc.",Materials,no,no,yes,no,no,no
+OII,"Oceaneering International, Inc.",Energy,no,no,yes,no,no,no
+OMCL,Omnicell,Health Care,no,no,yes,no,no,no
+OPLN,"OPENLANE, Inc.",Industrials,no,no,yes,no,no,no
+OSIS,"OSI Systems, Inc.",Information Technology,no,no,yes,no,no,no
+OSW,OneSpaWorld Holdings Limited,Consumer Discretionary,no,no,yes,no,no,no
+OTTR,Otter Tail Corporation,Utilities,no,no,yes,no,no,no
+OUT,Outfront Media,Real Estate,no,no,yes,no,no,no
+PAHC,Phibro Animal Health,Health Care,no,no,yes,no,no,no
+PARR,"Par Pacific Holdings, Inc.",Energy,no,no,yes,no,no,no
+PAYC,Paycom,Industrials,no,no,yes,no,no,no
+PAYO,Payoneer Global Inc.,Financials,no,no,yes,no,no,no
+PATK,"Patrick Industries, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+PBH,Prestige Consumer Healthcare,Health Care,no,no,yes,no,no,no
+PBI,"Pitney Bowes, Inc.",Industrials,no,no,yes,no,no,no
+PCRX,"Pacira BioSciences, Inc.",Health Care,no,no,yes,no,no,no
+PDFS,"PDF Solutions, Inc.",Information Technology,no,no,yes,no,no,no
+PEB,Pebblebrook Hotel Trust,Real Estate,no,no,yes,no,no,no
+PECO,Phillips Edison & Company,Real Estate,no,no,yes,no,no,no
+PENG,"Penguin Solutions, Inc.",Information Technology,no,no,yes,no,no,no
+PENN,Penn Entertainment,Consumer Discretionary,no,no,yes,no,no,no
+PFBC,Preferred Bank,Financials,no,no,yes,no,no,no
+PFS,"Provident Financial Services, Inc.",Financials,no,no,yes,no,no,no
+PGNY,"Progyny, Inc.",Health Care,no,no,yes,no,no,no
+PHIN,"PHINIA, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+PI,"Impinj, Inc.",Information Technology,no,no,yes,no,no,no
+PIPR,Piper Sandler Companies,Financials,no,no,yes,no,no,no
+PJT,"PJT Partners, Inc.",Financials,no,no,yes,no,no,no
+PLAB,"Photronics, Inc.",Information Technology,no,no,yes,no,no,no
+PLMR,"Palomar Holdings, Inc.",Financials,no,no,yes,no,no,no
+PLUS,"ePlus, Inc.",Information Technology,no,no,yes,no,no,no
+PLXS,Plexus Corp.,Information Technology,no,no,yes,no,no,no
+PMT,PennyMac Mortgage Investment Trust,Real Estate,no,no,yes,no,no,no
+POOL,Pool Corporation,Consumer Discretionary,no,no,yes,no,no,no
+POWI,Power Integrations,Information Technology,no,no,yes,no,no,no
+POWL,"Powell Industries, Inc.",Industrials,no,no,yes,no,no,no
+PPLI,People Inc.,Communication Services,no,no,yes,no,no,no
+PRDO,Perdoceo Education Corp.,Consumer Discretionary,no,no,yes,no,no,no
+PRG,"PROG Holdings, Inc.",Financials,no,no,yes,no,no,no
+PRGO,Perrigo,Health Care,no,no,yes,no,no,no
+PRGS,Progress Software Corporation,Information Technology,no,no,yes,no,no,no
+PRIM,Primoris Services Corporation,Industrials,no,no,yes,no,no,no
+PRK,Park National Corp.,Financials,no,no,yes,no,no,no
+PRKS,United Parks & Resorts,Consumer Discretionary,no,no,yes,no,no,no
+PRLB,Protolabs,Industrials,no,no,yes,no,no,no
+PRSU,"Pursuit Attractions & Hospitality, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+PRVA,"Privia Health Group, Inc.",Health Care,no,no,yes,no,no,no
+PSMT,PriceSmart,Consumer Staples,no,no,yes,no,no,no
+PTCT,"PTC Therapeutics, Inc.",Health Care,no,no,yes,no,no,no
+PTEN,"Patterson-UTI Energy, Inc.",Energy,no,no,yes,no,no,no
+PTGX,"Protagonist Therapeutics, Inc.",Health Care,no,no,yes,no,no,no
+PTON,"Peloton Interactive, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+PZZA,Papa John's Pizza,Consumer Discretionary,no,no,yes,no,no,no
+QDEL,QuidelOrtho,Health Care,no,no,yes,no,no,no
+QNST,"QuinStreet, Inc.",Communication Services,no,no,yes,no,no,no
+QRVO,Qorvo,Information Technology,no,no,yes,no,no,no
+QTWO,"Q2 Holdings, Inc.",Information Technology,no,no,yes,no,no,no
+RAMP,"LiveRamp Holdings, Inc.",Information Technology,no,no,yes,no,no,no
+RAL,Ralliant Corp,Information Technology,no,no,yes,no,no,no
+RCUS,"Arcus Biosciences, Inc.",Health Care,no,no,yes,no,no,no
+RDN,"Radian Group, Inc.",Financials,no,no,yes,no,no,no
+RDNT,"RadNet, Inc.",Health Care,no,no,yes,no,no,no
+RELY,Remitly,Financials,no,no,yes,no,no,no
+RES,"RPC, Inc.",Energy,no,no,yes,no,no,no
+REYN,Reynolds Consumer Products,Consumer Staples,no,no,yes,no,no,no
+REX,REX American Resources Corporation,Energy,no,no,yes,no,no,no
+REZI,"Resideo Technologies, Inc.",Industrials,no,no,yes,no,no,no
+RHI,Robert Half,Industrials,no,no,yes,no,no,no
+RHP,Ryman Hospitality Properties,Real Estate,no,no,yes,no,no,no
+RITM,Rithm Capital,Financials,no,no,yes,no,no,no
+RNG,"RingCentral, Inc.",Information Technology,no,no,yes,no,no,no
+RNST,Renasant Corp.,Financials,no,no,yes,no,no,no
+ROAD,"Construction Partners, Inc.",Industrials,no,no,yes,no,no,no
+ROCK,"Gibraltar Industries, Inc.",Industrials,no,no,yes,no,no,no
+ROG,Rogers Corporation,Information Technology,no,no,yes,no,no,no
+RRR,"Red Rock Resorts, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+RSI,"Rush Street Interactive, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+RUN,Sunrun,Industrials,no,no,yes,no,no,no
+RUSHA,Rush Enterprises,Industrials,no,no,yes,no,no,no
+RXO,"RXO, Inc.",Industrials,no,no,yes,no,no,no
+SAFE,"Safehold, Inc.",Real Estate,no,no,yes,no,no,no
+SABR,Sabre,Consumer Discretionary,no,no,yes,no,no,no
+SAFT,"Safety Insurance Group, Inc.",Financials,no,no,yes,no,no,no
+SAH,"Sonic Automotive, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SBCF,Seacoast Banking Corporation of Florida,Financials,no,no,yes,no,no,no
+SBH,"Sally Beauty Holdings, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SBSI,"Southside Bancshares, Inc.",Financials,no,no,yes,no,no,no
+SCHL,Scholastic Corporation,Consumer Discretionary,no,no,yes,no,no,no
+SCL,Stepan Company,Materials,no,no,yes,no,no,no
+SCSC,"ScanSource, Inc.",Information Technology,no,no,yes,no,no,no
+SDGR,"Schrödinger, Inc.",Health Care,no,no,yes,no,no,no
+SEDG,SolarEdge,Information Technology,no,no,yes,no,no,no
+SEI,"Solaris Energy Infrastructure, Inc.",Energy,no,no,yes,no,no,no
+SEZL,Sezzle,Financials,no,no,yes,no,no,no
+SFBS,"ServisFirst Bancshares, Inc.",Financials,no,no,yes,no,no,no
+SFNC,Simmons First National Corporation,Financials,no,no,yes,no,no,no
+SHAK,"Shake Shack, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SHEN,Shenandoah Telecommunications Co,Communication Services,no,no,yes,no,no,no
+SHO,"Sunstone Hotel Investors, Inc.",Real Estate,no,no,yes,no,no,no
+SHOO,"Steven Madden, Ltd.",Consumer Discretionary,no,no,yes,no,no,no
+SIG,Signet Jewelers,Consumer Discretionary,no,no,yes,no,no,no
+SKT,"Tanger Factory Outlet Centers, Inc.",Real Estate,no,no,yes,no,no,no
+SKY,"Champion Homes, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SKYW,"SkyWest, Inc.",Industrials,no,no,yes,no,no,no
+SLG,SL Green Realty,Real Estate,no,no,yes,no,no,no
+SLVM,Sylvamo Corp.,Materials,no,no,yes,no,no,no
+SM,SM Energy Company,Energy,no,no,yes,no,no,no
+SMP,"Standard Motor Products, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SMPL,Simply Good Foods Company,Consumer Staples,no,no,yes,no,no,no
+SNDR,Schneider National,Industrials,no,no,yes,no,no,no
+SNEX,StoneX Group Inc.,Financials,no,no,yes,no,no,no
+SONO,"Sonos, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SPHR,Sphere Entertainment,Communication Services,no,no,yes,no,no,no
+SPNT,SiriusPoint Ltd.,Financials,no,no,yes,no,no,no
+SPSC,"SPS Commerce, Inc.",Information Technology,no,no,yes,no,no,no
+SRPT,Sarepta Therapeutics,Health Care,no,no,yes,no,no,no
+STAA,STAAR Surgical Company,Health Care,no,no,yes,no,no,no
+STBA,"S&T Bancorp, Inc.",Financials,no,no,yes,no,no,no
+STC,Stewart Information Services Corporation,Financials,no,no,yes,no,no,no
+STEP,StepStone Group,Financials,no,no,yes,no,no,no
+STRA,"Strategic Education, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+SUPN,"Supernus Pharmaceuticals, Inc.",Health Care,no,no,yes,no,no,no
+SXI,Standex International Corporation,Industrials,no,no,yes,no,no,no
+SXT,Sensient Technologies,Materials,no,no,yes,no,no,no
+TALO,"Talos Energy, Inc.",Energy,no,no,yes,no,no,no
+TBBK,"The Bancorp, Inc.",Financials,no,no,yes,no,no,no
+TDC,Teradata,Information Technology,no,no,yes,no,no,no
+TDS,"Telephone and Data Systems, Inc.",Communication Services,no,no,yes,no,no,no
+TDW,"Tidewater, Inc.",Energy,no,no,yes,no,no,no
+TFIN,"Triumph Bancorp, Inc.",Financials,no,no,yes,no,no,no
+TFX,Teleflex,Health Care,no,no,yes,no,no,no
+TGTX,"TG Therapeutics, Inc.",Health Care,no,no,yes,no,no,no
+THRM,Gentherm Incorporated,Consumer Discretionary,no,no,yes,no,no,no
+TILE,"Interface, Inc.",Industrials,no,no,yes,no,no,no
+TMDX,"TransMedics Group, Inc.",Health Care,no,no,yes,no,no,no
+TMP,Tompkins Financial Corporation,Financials,no,no,yes,no,no,no
+TNC,Tennant Company,Industrials,no,no,yes,no,no,no
+TNDM,Tandem Diabetes Care,Health Care,no,no,yes,no,no,no
+TPC,Tutor Perini Corporation,Industrials,no,no,yes,no,no,no
+TR,"Tootsie Roll Industries, Inc.",Consumer Staples,no,no,yes,no,no,no
+TRIP,TripAdvisor,Communication Services,no,no,yes,no,no,no
+TRMK,Trustmark Corp.,Financials,no,no,yes,no,no,no
+TRN,"Trinity Industries, Inc.",Industrials,no,no,yes,no,no,no
+TRNO,Terreno Realty Corporation,Real Estate,no,no,yes,no,no,no
+TRST,TrustCo Bank Corp NY,Financials,no,no,yes,no,no,no
+TRUP,Trupanion,Financials,no,no,yes,no,no,no
+UA,Under Armour (Class C),Consumer Discretionary,no,no,yes,no,no,no
+UAA,Under Armour (Class A),Consumer Discretionary,no,no,yes,no,no,no
+UCB,"United Community Banks, Inc.",Financials,no,no,yes,no,no,no
+UCTT,"Ultra Clean Holdings, Inc.",Information Technology,no,no,yes,no,no,no
+UE,Urban Edge Properties,Real Estate,no,no,yes,no,no,no
+UFCS,"United Fire Group, Inc.",Financials,no,no,yes,no,no,no
+UFPT,"UFP Technologies, Inc.",Health Care,no,no,yes,no,no,no
+UNF,UniFirst Corporation,Industrials,no,no,yes,no,no,no
+UNFI,United Natural Foods Inc,Consumer Staples,no,no,yes,no,no,no
+UNIT,Uniti Group,Communication Services,no,no,yes,no,no,no
+UPBD,"Upbound Group, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+UPWK,"Upwork, Inc.",Industrials,no,no,yes,no,no,no
+URBN,"Urban Outfitters, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+USLM,"United States Lime & Minerals, Inc.",Materials,no,no,yes,no,no,no
+USPH,"U.S. Physical Therapy, Inc.",Health Care,no,no,yes,no,no,no
+UTI,Universal Technical Institute,Consumer Discretionary,no,no,yes,no,no,no
+UTL,Unitil Corporation,Utilities,no,no,yes,no,no,no
+UVV,Universal Corporation,Consumer Staples,no,no,yes,no,no,no
+VAC,Marriott Vacations Worldwide,Consumer Discretionary,no,no,yes,no,no,no
+VCEL,Vericel,Health Care,no,no,yes,no,no,no
+VCTR,"Victory Capital Holdings, Inc.",Financials,no,no,yes,no,no,no
+VCYT,"Veracyte, Inc.",Health Care,no,no,yes,no,no,no
+VECO,Veeco Instruments Inc.,Information Technology,no,no,yes,no,no,no
+VGNT,Versigent PLC,Consumer Discretionary,no,no,yes,no,no,no
+VIR,"Vir Biotechnology, Inc.",Health Care,no,no,yes,no,no,no
+VIRT,"Virtu Financial, Inc.",Financials,no,no,yes,no,no,no
+VRRM,Verra Mobility Corporation,Industrials,no,no,yes,no,no,no
+VRTS,"Virtus Investment Partners, Inc.",Financials,no,no,yes,no,no,no
+VSAT,"Viasat, Inc.",Information Technology,no,no,yes,no,no,no
+VSEC,VSE Corporation,Industrials,no,no,yes,no,no,no
+VSH,Vishay Intertechnology,Information Technology,no,no,yes,no,no,no
+VSNT,"Versant Media Group, Inc.",Communication Services,no,no,yes,no,no,no
+VSTS,Vestis,Industrials,no,no,yes,no,no,no
+VSXY,Victoria's Secret,Consumer Discretionary,no,no,yes,no,no,no
+VTOL,Bristow Group Inc.,Energy,no,no,yes,no,no,no
+VVX,"V2X, Inc.",Industrials,no,no,yes,no,no,no
+VYX,NCR Voyix,Information Technology,no,no,yes,no,no,no
+WABC,Westamerica Bank,Financials,no,no,yes,no,no,no
+WAFD,"WaFd, Inc.",Financials,no,no,yes,no,no,no
+WAY,Waystar Holding Corp,Health Care,no,no,yes,no,no,no
+WD,"Walker & Dunlop, Inc.",Financials,no,no,yes,no,no,no
+WDFC,WD-40 Company,Consumer Staples,no,no,yes,no,no,no
+WEN,The Wendy's Company,Consumer Discretionary,no,no,yes,no,no,no
+WERN,Werner Enterprises,Industrials,no,no,yes,no,no,no
+WGO,"Winnebago Industries, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+WHD,"Cactus, Inc.",Energy,no,no,yes,no,no,no
+WINA,Winmark,Consumer Discretionary,no,no,yes,no,no,no
+WKC,World Kinect Corporation,Energy,no,no,yes,no,no,no
+WLY,John Wiley & Sons,Communication Services,no,no,yes,no,no,no
+WOR,Worthington Enterprises,Industrials,no,no,yes,no,no,no
+WRBY,Warby Parker,Consumer Discretionary,no,no,yes,no,no,no
+WRLD,World Acceptance Corporation,Financials,no,no,yes,no,no,no
+WS,Worthington Steel,Materials,no,no,yes,no,no,no
+WSBC,WesBanco,Financials,no,no,yes,no,no,no
+WSC,WillScot Holdings Corp.,Industrials,no,no,yes,no,no,no
+WSFS,WSFS Financial Corporation,Financials,no,no,yes,no,no,no
+WT,"WisdomTree Investments, Inc.",Financials,no,no,yes,no,no,no
+WU,Western Union,Financials,no,no,yes,no,no,no
+WWW,"Wolverine World Wide, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+XHR,"Xenia Hotels & Resorts, Inc.",Real Estate,no,no,yes,no,no,no
+XNCR,Xencor Inc,Health Care,no,no,yes,no,no,no
+XPEL,"XPEL, Inc.",Consumer Discretionary,no,no,yes,no,no,no
+YELP,"Yelp, Inc.",Communication Services,no,no,yes,no,no,no
+YOU,"Clear Secure, Inc.",Information Technology,no,no,yes,no,no,no
+ZD,Ziff Davis,Communication Services,no,no,yes,no,no,no
+ZWS,Zurn Elkay Water Solutions Corp.,Industrials,no,no,yes,no,no,no
