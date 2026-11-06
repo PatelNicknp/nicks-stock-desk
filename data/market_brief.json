@@ -1,58 +1,53 @@
 {
   "schema_version": 2,
   "feature": "market_news",
-  "session": "2026-11-05",
-  "slot": "evening_close",
-  "updated_pt": "2026-11-05 18:26 PT",
-  "price_as_of": "2026-11-05",
-  "why_moved": "The market fell: S&P -2.7%, Nasdaq -5.0%, Dow-heavy groups (Financials/Industrials) about -1.5%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-6.2%) and Consumer Discretionary (-3.6%); leading sectors Consumer Staples (1.1%) and Energy (1.0%) held up. The move was fairly broad: 306 stocks fell and 255 rose; VIX is elevated at 28.2.",
-  "why_moved_short": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (255 stocks up, 306 down); VIX at 28.2.",
+  "session": "2026-11-06",
+  "slot": "morning_open",
+  "updated_pt": "2026-11-06 07:30 PT",
+  "price_as_of": "2026-11-06",
+  "why_moved": "The market rose: S&P 1.0%, Nasdaq 2.0%, Dow-heavy groups (Financials/Industrials) about 0.3%. Biggest driver: AI / Tech mood; lagging sectors were Consumer Staples (-0.9%) and Health Care (-0.1%); leading sectors Technology (2.1%) and Consumer Discretionary (1.0%) held up. Breadth was mixed (294 up, 308 down); VIX is firm at 24.5.",
+  "why_moved_short": "Stocks rose, with Nasdaq (2.0%) leading the S&P (1.0%) higher, while Technology (2.1%) and Consumer Discretionary (1.0%) held up (294 stocks up, 308 down); VIX at 24.5.",
   "story": {
-    "direction": "down",
-    "date_label": "November 5, 2026",
-    "summary": "U.S. closing summary",
+    "direction": "up",
+    "date_label": "November 6, 2026",
+    "summary": "U.S. morning summary",
     "clear_cause": true,
     "cause": "ai_mood",
-    "lead": "AI regulation fears sent stocks lower.",
+    "lead": "The AI trade led stocks higher.",
     "support": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations.",
     "support_ref": 1,
     "bullets": [
       {
-        "lead": "Technology took the biggest hit.",
-        "rest": "Tech fell 6.2%.",
+        "lead": "Tech led the gain.",
+        "rest": "Tech rose 2.06%.",
         "ref": 1
       },
       {
         "lead": "More stocks fell than rose.",
-        "rest": "306 stocks fell and 255 rose.",
-        "ref": null
-      },
-      {
-        "lead": "Staples held up.",
-        "rest": "Staples rose 1.09%.",
+        "rest": "308 stocks fell and 294 rose.",
         "ref": null
       }
     ],
-    "sector_label": "Where the selling hit",
+    "sector_label": "Where the buying was",
     "chips": [
       {
         "name": "Tech",
-        "pct": -6.2,
-        "pct_text": "6.2%",
-        "arrow": "down",
+        "pct": 2.06,
+        "pct_text": "2.06%",
+        "arrow": "up",
         "kind": "move",
-        "bar": 70
+        "bar": 53
       },
       {
         "name": "Chips",
-        "pct": -8.91,
-        "pct_text": "8.91%",
-        "arrow": "down",
+        "pct": 3.88,
+        "pct_text": "3.88%",
+        "arrow": "up",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "7 of 11 sectors down",
+        "name": "8 of 11 sectors up",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -63,16 +58,16 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": -2.73,
-        "pct_text": "2.73%",
-        "arrow": "down",
+        "pct": 1.02,
+        "pct_text": "1.02%",
+        "arrow": "up",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": -4.98,
-        "pct_text": "4.98%",
-        "arrow": "down",
+        "pct": 2.03,
+        "pct_text": "2.03%",
+        "arrow": "up",
         "source": "qqq"
       }
     ],
@@ -88,85 +83,35 @@
       },
       {
         "n": 2,
-        "title": "Trump blames Democrats for Wall Street selloff after historic midterm election win",
+        "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/trump-blames-democrats-wall-street-010352357.html?.tsrc=rss",
+        "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
         "published": "2026-11-06",
         "date_label": "Nov 6"
       },
       {
         "n": 3,
-        "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
-        "source": "Yahoo Finance",
+        "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
+        "source": "MarketWatch",
         "via": "",
-        "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
-        "published": "2026-11-06",
-        "date_label": "Nov 6"
+        "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
+        "published": "2026-11-05",
+        "date_label": "Nov 5"
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
-    "label": "Fear",
-    "vix": 28.18,
+    "label": "Mixed",
+    "vix": 24.54,
     "put_call_zone": "Greed",
     "put_call": 0.44,
-    "advancers": 255,
-    "decliners": 306,
-    "why": "VIX 28.2, put/call Greed, 255 up / 306 down"
+    "advancers": 294,
+    "decliners": 308,
+    "why": "VIX 24.5, put/call Greed, 294 up / 308 down"
   },
   "headlines": [
-    {
-      "title": "Trump blames Democrats for Wall Street selloff after historic midterm election win",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/trump-blames-democrats-wall-street-010352357.html?.tsrc=rss",
-      "published": "2026-11-06",
-      "trusted": true,
-      "causes": [
-        "election"
-      ],
-      "via": "",
-      "rank": 28.0
-    },
-    {
-      "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
-      "published": "2026-11-06",
-      "trusted": true,
-      "causes": [
-        "jobs",
-        "ai_mood"
-      ],
-      "via": "",
-      "rank": 26.0
-    },
-    {
-      "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
-      "source": "Yahoo Finance",
-      "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
-      "published": "2026-11-06",
-      "trusted": true,
-      "causes": [
-        "election",
-        "ai_mood"
-      ],
-      "via": "",
-      "rank": 25.5
-    },
-    {
-      "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
-      "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
-      "published": "2026-11-06",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "rank": 24.0
-    },
     {
       "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
       "source": "Reuters",
@@ -178,6 +123,18 @@
       ],
       "via": "Investing.com",
       "rank": 21.5
+    },
+    {
+      "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+      "source": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
+      "published": "2026-11-06",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 19.5
     },
     {
       "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
@@ -192,62 +149,62 @@
       "rank": 15.5
     },
     {
-      "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+      "title": "Trump blames Democrats for Wall Street selloff after historic midterm election win",
       "source": "Yahoo Finance",
-      "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/trump-blames-democrats-wall-street-010352357.html?.tsrc=rss",
+      "published": "2026-11-06",
+      "trusted": true,
+      "causes": [
+        "election"
+      ],
+      "via": "",
+      "rank": 18.0
+    },
+    {
+      "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
+      "published": "2026-11-06",
+      "trusted": true,
+      "causes": [
+        "jobs",
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 13.0
+    },
+    {
+      "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
+      "source": "Yahoo Finance",
+      "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
+      "published": "2026-11-06",
+      "trusted": true,
+      "causes": [
+        "election",
+        "ai_mood"
+      ],
+      "via": "",
+      "rank": 11.0
+    },
+    {
+      "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
+      "source": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
       "published": "2026-11-06",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
       "via": "",
-      "rank": 19.5
+      "rank": 7.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 20.0,
+      "score": 13.48,
       "headlines": [
-        {
-          "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
-          "published": "2026-11-06",
-          "trusted": true,
-          "causes": [
-            "jobs",
-            "ai_mood"
-          ],
-          "via": "",
-          "rank": 26.0
-        },
-        {
-          "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
-          "source": "Yahoo Finance",
-          "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
-          "published": "2026-11-06",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "rank": 25.5
-        },
-        {
-          "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
-          "published": "2026-11-06",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "rank": 24.0
-        },
         {
           "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
           "source": "Reuters",
@@ -259,6 +216,18 @@
           ],
           "via": "Investing.com",
           "rank": 21.5
+        },
+        {
+          "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+          "source": "Yahoo Finance",
+          "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
+          "published": "2026-11-06",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 19.5
         },
         {
           "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
@@ -273,16 +242,42 @@
           "rank": 15.5
         },
         {
-          "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+          "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
           "source": "Yahoo Finance",
-          "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
+          "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
+          "published": "2026-11-06",
+          "trusted": true,
+          "causes": [
+            "jobs",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 13.0
+        },
+        {
+          "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
+          "source": "Yahoo Finance",
+          "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
+          "published": "2026-11-06",
+          "trusted": true,
+          "causes": [
+            "election",
+            "ai_mood"
+          ],
+          "via": "",
+          "rank": 11.0
+        },
+        {
+          "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
           "published": "2026-11-06",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "rank": 19.5
+          "rank": 7.5
         }
       ]
     },
@@ -301,7 +296,7 @@
             "election"
           ],
           "via": "",
-          "rank": 28.0
+          "rank": 18.0
         },
         {
           "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
@@ -314,7 +309,7 @@
             "ai_mood"
           ],
           "via": "",
-          "rank": 25.5
+          "rank": 11.0
         }
       ]
     }
@@ -322,26 +317,26 @@
   "vs_yesterday": {
     "prior_mood": "Fear",
     "prior_session": "2026-11-05",
-    "text": "Fear again — same mood chip as the last brief.",
-    "flipped": false,
-    "same_fear": true
+    "text": "Mood flipped: was Fear, now Mixed.",
+    "flipped": true,
+    "same_fear": false
   },
   "breadth_check": {
     "aligned": true,
-    "flag": "broad_decline",
-    "text": "Index and breadth agree: a broad down day."
+    "flag": "flat_or_mixed",
+    "text": "Index and breadth are roughly in line."
   },
   "regime": {
     "label": "uptrend",
-    "pct_above_50day": 66.9,
-    "pct_above_200day": 63.8,
+    "pct_above_50day": 61.7,
+    "pct_above_200day": 57.8,
     "text": "More than half the desk is still above the 50-day and 200-day."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
-      "Fear is high today. Big swings are more common — go slow with new buys.",
-      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
+      "The market is jumpy (VIX is firm). Small moves are normal; be patient with new buys.",
+      "Index and breadth are mixed. Wait for a clearer day before sizing up.",
       "The bigger trend is still up on the desk's 50-day and 200-day checks — one rough day does not flip that by itself."
     ],
     "disclaimer": "Research only. Not advice to buy or sell any stock."
@@ -355,7 +350,7 @@
   "prior_brief": {
     "session": "2026-11-05",
     "slot": "evening_close",
-    "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (222 stocks up, 299 down); VIX at 22.0.",
+    "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (255 stocks up, 306 down); VIX at 28.2.",
     "mood": "Fear",
     "causes": [
       "AI / Tech mood",
@@ -363,24 +358,24 @@
     ]
   },
   "stats": {
-    "spy_price": 745.85,
-    "spy_day_pct": -2.73,
-    "qqq_day_pct": -4.98,
+    "spy_price": 740.49,
+    "spy_day_pct": 1.02,
+    "qqq_day_pct": 2.03,
     "dia_day_pct": null,
-    "vix": 28.18,
-    "advancers": 255,
-    "decliners": 306,
-    "breadth_sma50": 66.9,
-    "breadth_sma200": 63.8,
+    "vix": 24.54,
+    "advancers": 294,
+    "decliners": 308,
+    "breadth_sma50": 61.7,
+    "breadth_sma200": 57.8,
     "put_call": 0.44,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
-      "date": "2026-11-05",
-      "slot": "evening_close",
-      "mood": "Fear",
+      "date": "2026-11-06",
+      "slot": "morning_open",
+      "mood": "Mixed",
       "regime": "uptrend",
       "causes": [
         "ai_mood",
@@ -392,32 +387,32 @@
         "Reuters",
         "Yahoo Finance"
       ],
-      "spy_day_pct": -2.73,
-      "qqq_day_pct": -4.98,
+      "spy_day_pct": 1.02,
+      "qqq_day_pct": 2.03,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
     "stats": {
       "by_cause": {
         "election": {
-          "up": 0,
+          "up": 1,
           "down": 2,
           "flat": 0,
-          "n": 2
+          "n": 3
         },
         "ai_mood": {
-          "up": 0,
+          "up": 1,
           "down": 2,
           "flat": 0,
-          "n": 2
+          "n": 3
         }
       },
       "by_source": {
         "Reuters": {
-          "up": 0,
+          "up": 1,
           "down": 2,
           "flat": 0,
-          "n": 2
+          "n": 3
         },
         "Federal Reserve": {
           "up": 0,
@@ -430,9 +425,27 @@
           "down": 1,
           "flat": 0,
           "n": 1
+        },
+        "CNBC": {
+          "up": 1,
+          "down": 0,
+          "flat": 0,
+          "n": 1
+        },
+        "MarketWatch": {
+          "up": 1,
+          "down": 0,
+          "flat": 0,
+          "n": 1
+        },
+        "Yahoo Finance": {
+          "up": 1,
+          "down": 0,
+          "flat": 0,
+          "n": 1
         }
       },
-      "n_labeled": 2,
+      "n_labeled": 3,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },

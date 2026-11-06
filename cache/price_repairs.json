@@ -1,4 +1,7 @@
 {
+ "A": {
+  "bars": 1257
+ },
  "AA": {
   "bars": 1253
  },
@@ -14,8 +17,14 @@
  "AAP": {
   "bars": 1253
  },
+ "AAPL": {
+  "bars": 1257
+ },
  "AAT": {
   "bars": 1253
+ },
+ "ABBV": {
+  "bars": 1257
  },
  "ABCB": {
   "bars": 1253
@@ -26,14 +35,23 @@
  "ABM": {
   "bars": 1253
  },
+ "ABNB": {
+  "bars": 1257
+ },
  "ABR": {
   "bars": 1253
+ },
+ "ABT": {
+  "bars": 1257
  },
  "ACA": {
   "bars": 69
  },
  "ACAD": {
   "bars": 1253
+ },
+ "ACGL": {
+  "bars": 1257
  },
  "ACHC": {
   "bars": 1253
@@ -53,11 +71,17 @@
  "ACMR": {
   "bars": 1253
  },
+ "ACN": {
+  "bars": 1257
+ },
  "ACT": {
   "bars": 1253
  },
  "ADAM": {
   "bars": 1253
+ },
+ "ADBE": {
+  "bars": 1257
  },
  "ADC": {
   "bars": 1253
@@ -65,8 +89,14 @@
  "ADEA": {
   "bars": 1253
  },
+ "ADI": {
+  "bars": 1257
+ },
  "ADIG": {
   "bars": 69
+ },
+ "ADM": {
+  "bars": 1257
  },
  "ADMA": {
   "bars": 1253
@@ -74,11 +104,20 @@
  "ADNT": {
   "bars": 1253
  },
+ "ADP": {
+  "bars": 1257
+ },
+ "ADSK": {
+  "bars": 1257
+ },
  "ADT": {
   "bars": 1253
  },
  "ADUS": {
   "bars": 1253
+ },
+ "AEE": {
+  "bars": 1257
  },
  "AEG": {
   "bars": 1253
@@ -92,14 +131,23 @@
  "AEO": {
   "bars": 1253
  },
+ "AEP": {
+  "bars": 1257
+ },
  "AER": {
   "bars": 1253
+ },
+ "AES": {
+  "bars": 1257
  },
  "AESI": {
   "bars": 919
  },
  "AFG": {
   "bars": 1253
+ },
+ "AFL": {
+  "bars": 1257
  },
  "AFRM": {
   "bars": 1253
@@ -119,22 +167,1681 @@
  "AGO": {
   "bars": 1253
  },
+ "AGX": {
+  "bars": 1255
+ },
+ "AGYS": {
+  "bars": 1255
+ },
+ "AHCO": {
+  "bars": 1255
+ },
+ "AHR": {
+  "bars": 691
+ },
+ "AIG": {
+  "bars": 1257
+ },
+ "AIN": {
+  "bars": 1255
+ },
+ "AIR": {
+  "bars": 1255
+ },
+ "AIT": {
+  "bars": 1255
+ },
+ "AIZ": {
+  "bars": 1257
+ },
+ "AJG": {
+  "bars": 1257
+ },
+ "AKAM": {
+  "bars": 1257
+ },
+ "AKR": {
+  "bars": 1255
+ },
+ "ALAB": {
+  "bars": 662
+ },
+ "ALB": {
+  "bars": 1257
+ },
+ "ALC": {
+  "bars": 1255
+ },
+ "ALG": {
+  "bars": 1255
+ },
+ "ALGM": {
+  "bars": 1255
+ },
+ "ALGN": {
+  "bars": 1257
+ },
+ "ALGT": {
+  "bars": 1255
+ },
+ "ALHC": {
+  "bars": 1255
+ },
+ "ALK": {
+  "bars": 1255
+ },
+ "ALKS": {
+  "bars": 1255
+ },
+ "ALL": {
+  "bars": 1257
+ },
+ "ALLE": {
+  "bars": 1257
+ },
+ "ALLY": {
+  "bars": 1255
+ },
+ "ALNY": {
+  "bars": 1257
+ },
+ "ALRM": {
+  "bars": 1255
+ },
+ "ALSN": {
+  "bars": 1255
+ },
+ "ALV": {
+  "bars": 1255
+ },
+ "AM": {
+  "bars": 1255
+ },
+ "AMAT": {
+  "bars": 1257
+ },
+ "AMCR": {
+  "bars": 1257
+ },
+ "AMD": {
+  "bars": 1257
+ },
+ "AME": {
+  "bars": 1257
+ },
+ "AMG": {
+  "bars": 1255
+ },
+ "AMGN": {
+  "bars": 1257
+ },
+ "AMH": {
+  "bars": 1255
+ },
+ "AMKR": {
+  "bars": 1255
+ },
+ "AMN": {
+  "bars": 1255
+ },
+ "AMP": {
+  "bars": 1257
+ },
+ "AMPH": {
+  "bars": 1255
+ },
+ "AMR": {
+  "bars": 1255
+ },
+ "AMRX": {
+  "bars": 1255
+ },
+ "AMRZ": {
+  "bars": 348
+ },
+ "AMSF": {
+  "bars": 1255
+ },
+ "AMT": {
+  "bars": 1257
+ },
+ "AMTM": {
+  "bars": 533
+ },
+ "AMZN": {
+  "bars": 1257
+ },
+ "AN": {
+  "bars": 1255
+ },
+ "ANDE": {
+  "bars": 1255
+ },
+ "ANET": {
+  "bars": 1257
+ },
+ "ANF": {
+  "bars": 1255
+ },
+ "ANIP": {
+  "bars": 1255
+ },
+ "AON": {
+  "bars": 1257
+ },
+ "AORT": {
+  "bars": 1255
+ },
+ "AOS": {
+  "bars": 1257
+ },
+ "AOSL": {
+  "bars": 1255
+ },
+ "APA": {
+  "bars": 1257
+ },
+ "APAM": {
+  "bars": 1255
+ },
+ "APD": {
+  "bars": 1257
+ },
+ "APG": {
+  "bars": 1255
+ },
+ "APH": {
+  "bars": 1257
+ },
+ "APLE": {
+  "bars": 1255
+ },
+ "APO": {
+  "bars": 1257
+ },
+ "APOG": {
+  "bars": 1255
+ },
+ "APP": {
+  "bars": 1257
+ },
+ "APTV": {
+  "bars": 1257
+ },
+ "ARE": {
+  "bars": 1257
+ },
+ "ARES": {
+  "bars": 1257
+ },
+ "ARM": {
+  "bars": 791
+ },
+ "ASML": {
+  "bars": 1257
+ },
+ "ATO": {
+  "bars": 1257
+ },
+ "AVGO": {
+  "bars": 1257
+ },
+ "AVY": {
+  "bars": 1257
+ },
+ "AWK": {
+  "bars": 1257
+ },
+ "AXON": {
+  "bars": 1257
+ },
+ "AXP": {
+  "bars": 1257
+ },
+ "AZO": {
+  "bars": 1257
+ },
+ "BA": {
+  "bars": 1257
+ },
+ "BAC": {
+  "bars": 1257
+ },
+ "BALL": {
+  "bars": 1257
+ },
+ "BAX": {
+  "bars": 1257
+ },
+ "BBY": {
+  "bars": 1257
+ },
+ "BDX": {
+  "bars": 1257
+ },
+ "BE": {
+  "bars": 1257
+ },
+ "BEN": {
+  "bars": 1257
+ },
+ "BF-B": {
+  "bars": 1257
+ },
+ "BG": {
+  "bars": 1257
+ },
+ "BIIB": {
+  "bars": 1257
+ },
+ "BKNG": {
+  "bars": 1257
+ },
+ "BKR": {
+  "bars": 1257
+ },
+ "BLK": {
+  "bars": 1257
+ },
+ "BMY": {
+  "bars": 1257
+ },
+ "BNY": {
+  "bars": 1257
+ },
+ "BRK-B": {
+  "bars": 1257
+ },
  "BRO": {
-  "bars": 1256
+  "bars": 1257
+ },
+ "BSX": {
+  "bars": 1257
+ },
+ "BX": {
+  "bars": 1257
+ },
+ "BXP": {
+  "bars": 1257
+ },
+ "C": {
+  "bars": 1257
+ },
+ "CAH": {
+  "bars": 1257
+ },
+ "CARR": {
+  "bars": 1257
+ },
+ "CASY": {
+  "bars": 1257
+ },
+ "CAT": {
+  "bars": 1257
+ },
+ "CB": {
+  "bars": 1257
+ },
+ "CBOE": {
+  "bars": 1257
+ },
+ "CBRE": {
+  "bars": 1257
+ },
+ "CCEP": {
+  "bars": 1257
+ },
+ "CCI": {
+  "bars": 1257
+ },
+ "CCL": {
+  "bars": 1257
+ },
+ "CDNS": {
+  "bars": 1257
+ },
+ "CDW": {
+  "bars": 1257
+ },
+ "CEG": {
+  "bars": 1206
+ },
+ "CF": {
+  "bars": 1257
+ },
+ "CFG": {
+  "bars": 1257
+ },
+ "CHD": {
+  "bars": 1257
+ },
+ "CHRW": {
+  "bars": 1257
+ },
+ "CHTR": {
+  "bars": 1257
+ },
+ "CI": {
+  "bars": 1257
+ },
+ "CIEN": {
+  "bars": 1257
+ },
+ "CINF": {
+  "bars": 1257
+ },
+ "CL": {
+  "bars": 1257
+ },
+ "CLX": {
+  "bars": 1257
+ },
+ "CMCSA": {
+  "bars": 1257
+ },
+ "CME": {
+  "bars": 1257
+ },
+ "CMG": {
+  "bars": 1257
+ },
+ "CMI": {
+  "bars": 1257
+ },
+ "CMS": {
+  "bars": 1257
+ },
+ "CNC": {
+  "bars": 1257
+ },
+ "CNP": {
+  "bars": 1257
+ },
+ "COF": {
+  "bars": 1257
+ },
+ "COHR": {
+  "bars": 1257
+ },
+ "COIN": {
+  "bars": 1257
+ },
+ "COO": {
+  "bars": 1257
+ },
+ "COP": {
+  "bars": 1257
+ },
+ "COR": {
+  "bars": 1257
+ },
+ "COST": {
+  "bars": 1257
+ },
+ "CPAY": {
+  "bars": 1257
+ },
+ "CPRT": {
+  "bars": 1257
+ },
+ "CPT": {
+  "bars": 1257
+ },
+ "CRH": {
+  "bars": 1257
+ },
+ "CRL": {
+  "bars": 1257
+ },
+ "CRM": {
+  "bars": 1257
+ },
+ "CRWD": {
+  "bars": 1257
+ },
+ "CRWV": {
+  "bars": 406
+ },
+ "CSCO": {
+  "bars": 1257
+ },
+ "CSGP": {
+  "bars": 1257
+ },
+ "CSX": {
+  "bars": 1257
+ },
+ "CTAS": {
+  "bars": 1257
+ },
+ "CTSH": {
+  "bars": 1257
+ },
+ "CVNA": {
+  "bars": 1257
+ },
+ "CVS": {
+  "bars": 1257
+ },
+ "CVX": {
+  "bars": 1257
+ },
+ "D": {
+  "bars": 1257
+ },
+ "DASH": {
+  "bars": 1257
+ },
+ "DD": {
+  "bars": 1257
+ },
+ "DDOG": {
+  "bars": 1257
+ },
+ "DE": {
+  "bars": 1257
+ },
+ "DECK": {
+  "bars": 1257
+ },
+ "DELL": {
+  "bars": 1257
+ },
+ "DG": {
+  "bars": 1257
+ },
+ "DGX": {
+  "bars": 1257
+ },
+ "DHR": {
+  "bars": 1257
+ },
+ "DIS": {
+  "bars": 1257
+ },
+ "DLR": {
+  "bars": 1257
+ },
+ "DLTR": {
+  "bars": 1257
+ },
+ "DOC": {
+  "bars": 1257
+ },
+ "DOV": {
+  "bars": 1257
+ },
+ "DOW": {
+  "bars": 1257
+ },
+ "DPZ": {
+  "bars": 1257
+ },
+ "DRI": {
+  "bars": 1257
+ },
+ "DTE": {
+  "bars": 1257
+ },
+ "DUK": {
+  "bars": 1257
+ },
+ "DVA": {
+  "bars": 1257
+ },
+ "DVN": {
+  "bars": 1257
+ },
+ "DXCM": {
+  "bars": 1257
+ },
+ "EBAY": {
+  "bars": 1257
+ },
+ "ECHO": {
+  "bars": 1257
+ },
+ "ECL": {
+  "bars": 1257
+ },
+ "ED": {
+  "bars": 1257
+ },
+ "EFX": {
+  "bars": 1257
+ },
+ "EG": {
+  "bars": 1257
+ },
+ "EIX": {
+  "bars": 1257
+ },
+ "EL": {
+  "bars": 1257
+ },
+ "ELV": {
+  "bars": 1257
+ },
+ "EME": {
+  "bars": 1257
+ },
+ "EMR": {
+  "bars": 1257
+ },
+ "EOG": {
+  "bars": 1257
+ },
+ "EQIX": {
+  "bars": 1257
  },
  "EQT": {
-  "bars": 1256
+  "bars": 1257
+ },
+ "ERIE": {
+  "bars": 1257
+ },
+ "ES": {
+  "bars": 1257
+ },
+ "ESS": {
+  "bars": 1257
+ },
+ "ETN": {
+  "bars": 1257
+ },
+ "ETR": {
+  "bars": 1257
+ },
+ "EVRG": {
+  "bars": 1257
+ },
+ "EW": {
+  "bars": 1257
+ },
+ "EXC": {
+  "bars": 1257
+ },
+ "EXE": {
+  "bars": 1257
+ },
+ "EXPD": {
+  "bars": 1257
+ },
+ "EXPE": {
+  "bars": 1257
+ },
+ "EXR": {
+  "bars": 1257
+ },
+ "F": {
+  "bars": 1257
+ },
+ "FANG": {
+  "bars": 1257
+ },
+ "FAST": {
+  "bars": 1257
+ },
+ "FCX": {
+  "bars": 1257
+ },
+ "FDS": {
+  "bars": 1257
+ },
+ "FDX": {
+  "bars": 1257
  },
  "FDXF": {
-  "bars": 113
+  "bars": 115
+ },
+ "FE": {
+  "bars": 1257
+ },
+ "FER": {
+  "bars": 1257
+ },
+ "FERG": {
+  "bars": 1257
+ },
+ "FFIV": {
+  "bars": 1257
+ },
+ "FICO": {
+  "bars": 1257
+ },
+ "FIS": {
+  "bars": 1257
+ },
+ "FISV": {
+  "bars": 1257
+ },
+ "FITB": {
+  "bars": 1257
+ },
+ "FIX": {
+  "bars": 1257
+ },
+ "FLEX": {
+  "bars": 1257
+ },
+ "FOX": {
+  "bars": 1257
+ },
+ "FOXA": {
+  "bars": 1257
+ },
+ "FRT": {
+  "bars": 1257
+ },
+ "FSLR": {
+  "bars": 1257
+ },
+ "FTNT": {
+  "bars": 1257
+ },
+ "FTV": {
+  "bars": 1257
+ },
+ "GD": {
+  "bars": 1257
+ },
+ "GDDY": {
+  "bars": 1257
+ },
+ "GE": {
+  "bars": 1257
+ },
+ "GEHC": {
+  "bars": 977
+ },
+ "GEN": {
+  "bars": 1257
+ },
+ "GEV": {
+  "bars": 657
+ },
+ "GILD": {
+  "bars": 1257
+ },
+ "GIS": {
+  "bars": 1257
+ },
+ "GL": {
+  "bars": 1257
+ },
+ "GLW": {
+  "bars": 1257
+ },
+ "GM": {
+  "bars": 1257
+ },
+ "GNRC": {
+  "bars": 1257
+ },
+ "GOOG": {
+  "bars": 1257
+ },
+ "GOOGL": {
+  "bars": 1257
+ },
+ "GPC": {
+  "bars": 1257
+ },
+ "GPN": {
+  "bars": 1257
+ },
+ "GRMN": {
+  "bars": 1257
+ },
+ "GS": {
+  "bars": 1257
+ },
+ "GWW": {
+  "bars": 1257
+ },
+ "HAL": {
+  "bars": 1257
+ },
+ "HAS": {
+  "bars": 1257
+ },
+ "HBAN": {
+  "bars": 1257
+ },
+ "HCA": {
+  "bars": 1257
+ },
+ "HD": {
+  "bars": 1257
+ },
+ "HIG": {
+  "bars": 1257
+ },
+ "HII": {
+  "bars": 1257
+ },
+ "HLT": {
+  "bars": 1257
+ },
+ "HON": {
+  "bars": 1257
  },
  "HONA": {
-  "bars": 100
+  "bars": 102
+ },
+ "HOOD": {
+  "bars": 1257
+ },
+ "HPE": {
+  "bars": 1257
+ },
+ "HPQ": {
+  "bars": 1257
+ },
+ "HRL": {
+  "bars": 1257
+ },
+ "HSIC": {
+  "bars": 1257
+ },
+ "HST": {
+  "bars": 1257
+ },
+ "HUBB": {
+  "bars": 1257
+ },
+ "HUM": {
+  "bars": 1257
+ },
+ "HWM": {
+  "bars": 1257
+ },
+ "IBKR": {
+  "bars": 1257
+ },
+ "IBM": {
+  "bars": 1257
+ },
+ "ICE": {
+  "bars": 1257
+ },
+ "IDXX": {
+  "bars": 1257
+ },
+ "IEX": {
+  "bars": 1257
+ },
+ "IFF": {
+  "bars": 1257
+ },
+ "ILMN": {
+  "bars": 1257
+ },
+ "INCY": {
+  "bars": 1257
+ },
+ "INTC": {
+  "bars": 1257
+ },
+ "INVH": {
+  "bars": 1257
+ },
+ "IONQ": {
+  "bars": 1257
+ },
+ "IP": {
+  "bars": 1257
+ },
+ "IQV": {
+  "bars": 1257
+ },
+ "IR": {
+  "bars": 1257
+ },
+ "IRM": {
+  "bars": 1257
+ },
+ "ISRG": {
+  "bars": 1257
+ },
+ "IT": {
+  "bars": 1257
+ },
+ "ITA": {
+  "bars": 1257
+ },
+ "ITW": {
+  "bars": 1257
+ },
+ "IVZ": {
+  "bars": 1257
+ },
+ "J": {
+  "bars": 1257
+ },
+ "JBHT": {
+  "bars": 1257
+ },
+ "JBL": {
+  "bars": 1257
+ },
+ "JCI": {
+  "bars": 1257
+ },
+ "JKHY": {
+  "bars": 1257
+ },
+ "JNJ": {
+  "bars": 1257
+ },
+ "JPM": {
+  "bars": 1257
+ },
+ "KDP": {
+  "bars": 1257
+ },
+ "KEY": {
+  "bars": 1257
+ },
+ "KEYS": {
+  "bars": 1257
+ },
+ "KHC": {
+  "bars": 1257
+ },
+ "KIM": {
+  "bars": 1257
+ },
+ "KKR": {
+  "bars": 1257
+ },
+ "KLAC": {
+  "bars": 1257
+ },
+ "KMB": {
+  "bars": 1257
+ },
+ "KMI": {
+  "bars": 1257
+ },
+ "KO": {
+  "bars": 1257
+ },
+ "KR": {
+  "bars": 1257
+ },
+ "KRE": {
+  "bars": 1257
+ },
+ "L": {
+  "bars": 1257
+ },
+ "LDOS": {
+  "bars": 1257
+ },
+ "LEN": {
+  "bars": 1257
+ },
+ "LH": {
+  "bars": 1257
+ },
+ "LHX": {
+  "bars": 1257
+ },
+ "LII": {
+  "bars": 1257
+ },
+ "LIN": {
+  "bars": 1257
+ },
+ "LITE": {
+  "bars": 1257
+ },
+ "LLY": {
+  "bars": 1257
+ },
+ "LMT": {
+  "bars": 1257
+ },
+ "LNT": {
+  "bars": 1257
+ },
+ "LOW": {
+  "bars": 1257
+ },
+ "LRCX": {
+  "bars": 1257
+ },
+ "LULU": {
+  "bars": 1257
+ },
+ "LUV": {
+  "bars": 1257
+ },
+ "LVS": {
+  "bars": 1257
+ },
+ "LYB": {
+  "bars": 1257
+ },
+ "LYV": {
+  "bars": 1257
+ },
+ "MA": {
+  "bars": 1257
+ },
+ "MAA": {
+  "bars": 1257
+ },
+ "MAR": {
+  "bars": 1257
+ },
+ "MAS": {
+  "bars": 1257
+ },
+ "MCD": {
+  "bars": 1257
+ },
+ "MCHP": {
+  "bars": 1257
+ },
+ "MCK": {
+  "bars": 1257
+ },
+ "MCO": {
+  "bars": 1257
+ },
+ "MDLZ": {
+  "bars": 1257
+ },
+ "MDT": {
+  "bars": 1257
+ },
+ "MELI": {
+  "bars": 1257
+ },
+ "MET": {
+  "bars": 1257
+ },
+ "META": {
+  "bars": 1257
+ },
+ "MGM": {
+  "bars": 1257
+ },
+ "MKC": {
+  "bars": 1257
+ },
+ "MLM": {
+  "bars": 1257
+ },
+ "MMM": {
+  "bars": 1257
+ },
+ "MNST": {
+  "bars": 1257
+ },
+ "MO": {
+  "bars": 1257
+ },
+ "MOS": {
+  "bars": 1257
+ },
+ "MPC": {
+  "bars": 1257
+ },
+ "MPWR": {
+  "bars": 1257
+ },
+ "MRK": {
+  "bars": 1257
+ },
+ "MRNA": {
+  "bars": 1257
+ },
+ "MRSH": {
+  "bars": 1257
+ },
+ "MRVL": {
+  "bars": 1257
+ },
+ "MS": {
+  "bars": 1257
+ },
+ "MSCI": {
+  "bars": 1257
+ },
+ "MSFT": {
+  "bars": 1257
+ },
+ "MSI": {
+  "bars": 1257
+ },
+ "MSTR": {
+  "bars": 1257
+ },
+ "MTB": {
+  "bars": 1257
+ },
+ "MTD": {
+  "bars": 1257
+ },
+ "MU": {
+  "bars": 1257
+ },
+ "NBIS": {
+  "bars": 514
+ },
+ "NCLH": {
+  "bars": 1257
+ },
+ "NDAQ": {
+  "bars": 1257
+ },
+ "NDSN": {
+  "bars": 1257
+ },
+ "NEE": {
+  "bars": 1257
+ },
+ "NEM": {
+  "bars": 1257
+ },
+ "NET": {
+  "bars": 1257
+ },
+ "NFLX": {
+  "bars": 1257
+ },
+ "NI": {
+  "bars": 1257
+ },
+ "NKE": {
+  "bars": 1257
+ },
+ "NOC": {
+  "bars": 1257
+ },
+ "NOW": {
+  "bars": 1257
+ },
+ "NRG": {
+  "bars": 1257
+ },
+ "NSC": {
+  "bars": 1257
+ },
+ "NTAP": {
+  "bars": 1257
+ },
+ "NTRS": {
+  "bars": 1257
+ },
+ "NU": {
+  "bars": 1233
+ },
+ "NUE": {
+  "bars": 1257
+ },
+ "NVDA": {
+  "bars": 1257
+ },
+ "NVR": {
+  "bars": 1257
+ },
+ "NWS": {
+  "bars": 1257
+ },
+ "NWSA": {
+  "bars": 1257
+ },
+ "NXPI": {
+  "bars": 1257
+ },
+ "O": {
+  "bars": 1257
+ },
+ "ODFL": {
+  "bars": 1257
+ },
+ "OKE": {
+  "bars": 1257
+ },
+ "OMC": {
+  "bars": 1257
+ },
+ "ON": {
+  "bars": 1257
+ },
+ "ORCL": {
+  "bars": 1257
+ },
+ "ORLY": {
+  "bars": 1257
+ },
+ "OTIS": {
+  "bars": 1257
+ },
+ "OXY": {
+  "bars": 1257
+ },
+ "P": {
+  "bars": 1257
+ },
+ "PANW": {
+  "bars": 1257
+ },
+ "PAYX": {
+  "bars": 1257
+ },
+ "PCAR": {
+  "bars": 1257
+ },
+ "PCG": {
+  "bars": 1257
+ },
+ "PDD": {
+  "bars": 1257
+ },
+ "PEG": {
+  "bars": 1257
+ },
+ "PEP": {
+  "bars": 1257
+ },
+ "PFE": {
+  "bars": 1257
+ },
+ "PFG": {
+  "bars": 1257
+ },
+ "PG": {
+  "bars": 1257
+ },
+ "PGR": {
+  "bars": 1257
+ },
+ "PH": {
+  "bars": 1257
+ },
+ "PHM": {
+  "bars": 1257
+ },
+ "PKG": {
+  "bars": 1257
+ },
+ "PLD": {
+  "bars": 1257
+ },
+ "PM": {
+  "bars": 1257
+ },
+ "PNC": {
+  "bars": 1257
+ },
+ "PNR": {
+  "bars": 1257
+ },
+ "PNW": {
+  "bars": 1257
+ },
+ "PODD": {
+  "bars": 1257
+ },
+ "PPG": {
+  "bars": 1257
+ },
+ "PPL": {
+  "bars": 1257
+ },
+ "PRU": {
+  "bars": 1257
+ },
+ "PSA": {
+  "bars": 1257
+ },
+ "PSX": {
+  "bars": 1257
+ },
+ "PTC": {
+  "bars": 1257
+ },
+ "PWR": {
+  "bars": 1257
+ },
+ "PYPL": {
+  "bars": 1257
+ },
+ "Q": {
+  "bars": 260
+ },
+ "QCOM": {
+  "bars": 1257
+ },
+ "QQQ": {
+  "bars": 1257
+ },
+ "RCL": {
+  "bars": 1257
+ },
+ "RDDT": {
+  "bars": 661
+ },
+ "REG": {
+  "bars": 1257
+ },
+ "REGN": {
+  "bars": 1257
+ },
+ "RF": {
+  "bars": 1257
+ },
+ "RJF": {
+  "bars": 1257
+ },
+ "RKLB": {
+  "bars": 1257
+ },
+ "RL": {
+  "bars": 1257
+ },
+ "RMD": {
+  "bars": 1257
+ },
+ "ROK": {
+  "bars": 1257
+ },
+ "ROL": {
+  "bars": 1257
+ },
+ "ROP": {
+  "bars": 1257
+ },
+ "ROST": {
+  "bars": 1257
+ },
+ "RSG": {
+  "bars": 1257
+ },
+ "RTX": {
+  "bars": 1257
+ },
+ "RVTY": {
+  "bars": 1257
+ },
+ "SBAC": {
+  "bars": 1257
+ },
+ "SBUX": {
+  "bars": 1257
+ },
+ "SCHW": {
+  "bars": 1257
+ },
+ "SE": {
+  "bars": 1257
+ },
+ "SHOP": {
+  "bars": 1257
+ },
+ "SHW": {
+  "bars": 1257
+ },
+ "SJM": {
+  "bars": 1257
+ },
+ "SKYD": {
+  "bars": 1257
+ },
+ "SLB": {
+  "bars": 1257
+ },
+ "SMCI": {
+  "bars": 1257
+ },
+ "SMH": {
+  "bars": 1257
+ },
+ "SNA": {
+  "bars": 1257
+ },
+ "SNDK": {
+  "bars": 436
+ },
+ "SNOW": {
+  "bars": 1257
+ },
+ "SNPS": {
+  "bars": 1257
+ },
+ "SO": {
+  "bars": 1257
+ },
+ "SOLV": {
+  "bars": 658
  },
  "SPCX": {
-  "bars": 101
+  "bars": 103
+ },
+ "SPG": {
+  "bars": 1257
+ },
+ "SPGI": {
+  "bars": 1257
+ },
+ "SPY": {
+  "bars": 1257
+ },
+ "SRE": {
+  "bars": 1257
+ },
+ "STE": {
+  "bars": 1257
+ },
+ "STLD": {
+  "bars": 1257
+ },
+ "STT": {
+  "bars": 1257
+ },
+ "STX": {
+  "bars": 1257
+ },
+ "STZ": {
+  "bars": 1257
+ },
+ "SW": {
+  "bars": 1257
+ },
+ "SWK": {
+  "bars": 1257
+ },
+ "SWKS": {
+  "bars": 1257
+ },
+ "SYF": {
+  "bars": 1257
+ },
+ "SYK": {
+  "bars": 1257
+ },
+ "SYY": {
+  "bars": 1257
+ },
+ "T": {
+  "bars": 1257
+ },
+ "TDG": {
+  "bars": 1257
+ },
+ "TDY": {
+  "bars": 1257
+ },
+ "TECH": {
+  "bars": 1257
+ },
+ "TEL": {
+  "bars": 1257
+ },
+ "TER": {
+  "bars": 1257
+ },
+ "TFC": {
+  "bars": 1257
+ },
+ "TGT": {
+  "bars": 1257
+ },
+ "TJX": {
+  "bars": 1257
+ },
+ "TKO": {
+  "bars": 1257
+ },
+ "TMO": {
+  "bars": 1257
+ },
+ "TMUS": {
+  "bars": 1257
+ },
+ "TPL": {
+  "bars": 1257
+ },
+ "TPR": {
+  "bars": 1257
+ },
+ "TRGP": {
+  "bars": 1257
+ },
+ "TRI": {
+  "bars": 1257
+ },
+ "TRMB": {
+  "bars": 1257
+ },
+ "TROW": {
+  "bars": 1257
+ },
+ "TRV": {
+  "bars": 1257
+ },
+ "TSCO": {
+  "bars": 1257
+ },
+ "TSLA": {
+  "bars": 1257
+ },
+ "TSN": {
+  "bars": 1257
+ },
+ "TT": {
+  "bars": 1257
+ },
+ "TTWO": {
+  "bars": 1257
+ },
+ "TWLO": {
+  "bars": 1257
+ },
+ "TXN": {
+  "bars": 1257
+ },
+ "TXT": {
+  "bars": 1257
+ },
+ "TYL": {
+  "bars": 1257
+ },
+ "UAL": {
+  "bars": 1257
+ },
+ "UBER": {
+  "bars": 1257
+ },
+ "UDR": {
+  "bars": 1257
+ },
+ "UHS": {
+  "bars": 1257
+ },
+ "ULTA": {
+  "bars": 1257
+ },
+ "UNH": {
+  "bars": 1257
+ },
+ "UNP": {
+  "bars": 1257
+ },
+ "UPS": {
+  "bars": 1257
+ },
+ "URI": {
+  "bars": 1257
+ },
+ "USB": {
+  "bars": 1257
+ },
+ "V": {
+  "bars": 1257
+ },
+ "VEEV": {
+  "bars": 1257
+ },
+ "VICI": {
+  "bars": 1257
+ },
+ "VLO": {
+  "bars": 1257
+ },
+ "VLTO": {
+  "bars": 777
+ },
+ "VMC": {
+  "bars": 1257
+ },
+ "VMRK": {
+  "bars": 1257
+ },
+ "VRSK": {
+  "bars": 1257
+ },
+ "VRSN": {
+  "bars": 1257
+ },
+ "VRTX": {
+  "bars": 1257
+ },
+ "VST": {
+  "bars": 1257
+ },
+ "VTR": {
+  "bars": 1257
+ },
+ "VTRS": {
+  "bars": 1257
  },
  "VYLR": {
-  "bars": 25
+  "bars": 27
+ },
+ "VZ": {
+  "bars": 1257
+ },
+ "WAB": {
+  "bars": 1257
+ },
+ "WAT": {
+  "bars": 1257
+ },
+ "WDAY": {
+  "bars": 1257
+ },
+ "WDC": {
+  "bars": 1257
+ },
+ "WEC": {
+  "bars": 1257
+ },
+ "WELL": {
+  "bars": 1257
+ },
+ "WFC": {
+  "bars": 1257
+ },
+ "WM": {
+  "bars": 1257
+ },
+ "WMB": {
+  "bars": 1257
+ },
+ "WMT": {
+  "bars": 1257
+ },
+ "WRB": {
+  "bars": 1257
+ },
+ "WSM": {
+  "bars": 1257
+ },
+ "WST": {
+  "bars": 1257
+ },
+ "WTW": {
+  "bars": 1257
+ },
+ "WY": {
+  "bars": 1257
+ },
+ "WYNN": {
+  "bars": 1257
+ },
+ "XBI": {
+  "bars": 1257
+ },
+ "XEL": {
+  "bars": 1257
+ },
+ "XHB": {
+  "bars": 1257
+ },
+ "XLB": {
+  "bars": 1257
+ },
+ "XLE": {
+  "bars": 1257
+ },
+ "XLF": {
+  "bars": 1257
+ },
+ "XLI": {
+  "bars": 1257
+ },
+ "XLK": {
+  "bars": 1257
+ },
+ "XLP": {
+  "bars": 1257
+ },
+ "XLRE": {
+  "bars": 1257
+ },
+ "XLU": {
+  "bars": 1257
+ },
+ "XLV": {
+  "bars": 1257
+ },
+ "XLY": {
+  "bars": 1257
+ },
+ "XME": {
+  "bars": 1257
+ },
+ "XOM": {
+  "bars": 1257
+ },
+ "XOP": {
+  "bars": 1257
+ },
+ "XRT": {
+  "bars": 1257
+ },
+ "XYL": {
+  "bars": 1257
+ },
+ "XYZ": {
+  "bars": 1257
+ },
+ "YUM": {
+  "bars": 1257
+ },
+ "ZBH": {
+  "bars": 1257
+ },
+ "ZBRA": {
+  "bars": 1257
+ },
+ "ZTS": {
+  "bars": 1257
  }
 }
