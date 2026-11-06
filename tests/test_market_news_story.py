@@ -103,6 +103,32 @@ def test_headline_without_a_desk_link_is_not_the_cause():
     assert story["summary"] == "U.S. morning summary"
 
 
+def test_fed_headline_and_a_high_vix_are_not_a_rates_cause():
+    stats = {
+        "spy_day_pct": -2.73, "qqq_day_pct": -4.98, "vix": 22,
+        "advancers": 222, "decliners": 299, "price_as_of": "2026-11-05",
+    }
+    sectors = [
+        {"ticker": "XLK", "name": "Technology", "day_pct": -6.2},
+        {"ticker": "XLF", "name": "Financials", "day_pct": -0.79},
+        {"ticker": "XLP", "name": "Consumer Staples", "day_pct": 1.09},
+    ]
+    headlines = [{
+        "title": "Federal Reserve issues FOMC statement",
+        "source": "Federal Reserve",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+        "published": "2026-10-28T18:00:00Z",
+        "trusted": True,
+        "causes": ["rates"],
+    }]
+    causes = [{"cause": "rates", "label": "Rates / Fed", "score": 4, "headlines": headlines}]
+    story = build_story(stats, sectors, headlines, causes, slot="morning_open")
+    assert story["clear_cause"] is False
+    assert story["lead"] == "The Nasdaq led stocks lower."
+    assert "Rates were part" not in story["lead"]
+    assert "No clear cause" in story["support"]
+
+
 def test_dow_prints_when_the_desk_has_one():
     stats = {"spy_day_pct": 0.4, "qqq_day_pct": 0.5, "dia_day_pct": 0.22, "price_as_of": "2026-11-05"}
     story = build_story(stats, [], [], [], slot="evening_close")

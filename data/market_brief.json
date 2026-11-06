@@ -11,16 +11,16 @@
     "direction": "down",
     "date_label": "November 5, 2026",
     "summary": "U.S. morning summary",
-    "clear_cause": true,
-    "cause": "ai_mood",
-    "lead": "Tech led stocks lower.",
-    "support": "Nasdaq slides into correction territory as AI and chip stocks sell off.",
-    "support_ref": 1,
+    "clear_cause": false,
+    "cause": null,
+    "lead": "The Nasdaq led stocks lower.",
+    "support": "No clear cause in the free headlines. None of them line up with the desk numbers.",
+    "support_ref": null,
     "bullets": [
       {
         "lead": "Technology took the biggest hit.",
         "rest": "Tech fell 6.2%.",
-        "ref": 1
+        "ref": null
       },
       {
         "lead": "More stocks fell than rose.",
@@ -87,30 +87,30 @@
     "news": [
       {
         "n": 1,
-        "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
-        "source": "Reuters",
-        "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-        "published": "2026-11-05T14:00:00Z",
-        "date_label": "Nov 5"
+        "title": "Federal Reserve issues FOMC statement",
+        "source": "Federal Reserve",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+        "published": "Wed, 28 Oct 2026 18:00:00 GMT",
+        "date_label": ""
       },
       {
         "n": 2,
-        "title": "Federal Reserve officials signal patience on the path of interest rates",
-        "source": "Federal Reserve",
-        "url": "https://www.federalreserve.gov/example/fomc-patience",
-        "published": "2026-11-04T18:00:00Z",
-        "date_label": "Nov 4"
+        "title": "Does the blue wave mean lower gasoline and diesel prices soon? Don't hold your breath",
+        "source": "NPR",
+        "url": "https://www.npr.org/2026/11/05/nx-s1-6029365/gas-diesel-price-congress-midterms",
+        "published": "Thu, 05 Nov 2026 05:00:00 -0500",
+        "date_label": ""
       },
       {
         "n": 3,
-        "title": "Inflation gauge holds steady as markets await the next CPI print",
-        "source": "NPR",
-        "url": "https://www.npr.org/example/inflation-gauge",
-        "published": "2026-11-04T16:00:00Z",
-        "date_label": "Nov 4"
+        "title": "First Lady Melania Trump Unites Russia and Ukraine at The White House Following Historic Ceasefire",
+        "source": "White House",
+        "url": "https://www.whitehouse.gov/briefings-statements/2026/11/first-lady-melania-trump-unites-russia-and-ukraine-at-the-white-house-following-historic-ceasefire/",
+        "published": "Thu, 05 Nov 2026 16:31:07 +0000",
+        "date_label": ""
       }
     ],
-    "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
+    "note": "No headline was tied to the move. The bold line is the desk numbers only."
   },
   "mood": {
     "label": "Fear",
@@ -123,145 +123,152 @@
   },
   "headlines": [
     {
-      "title": "Federal Reserve officials signal patience on the path of interest rates",
+      "title": "Federal Reserve issues FOMC statement",
       "source": "Federal Reserve",
-      "url": "https://www.federalreserve.gov/example/fomc-patience",
-      "published": "2026-11-04T18:00:00Z",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+      "published": "Wed, 28 Oct 2026 18:00:00 GMT",
       "trusted": true,
       "causes": [
-        "rates",
-        "inflation"
+        "rates"
       ],
       "rank": 12.5
     },
     {
-      "title": "Inflation gauge holds steady as markets await the next CPI print",
+      "title": "Does the blue wave mean lower gasoline and diesel prices soon? Don't hold your breath",
       "source": "NPR",
-      "url": "https://www.npr.org/example/inflation-gauge",
-      "published": "2026-11-04T16:00:00Z",
-      "trusted": true,
-      "causes": [
-        "rates",
-        "inflation"
-      ],
-      "rank": 11.5
-    },
-    {
-      "title": "Markets digest US midterm results as Washington outlook comes into focus",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/example/midterms-markets",
-      "published": "2026-11-05T12:00:00Z",
-      "trusted": true,
-      "causes": [
-        "election"
-      ],
-      "rank": 7.5
-    },
-    {
-      "title": "Oil prices firm while investors rotate into consumer staples",
-      "source": "Associated Press",
-      "url": "https://apnews.com/example/oil-staples-rotation",
-      "published": "2026-11-05T13:30:00Z",
+      "url": "https://www.npr.org/2026/11/05/nx-s1-6029365/gas-diesel-price-congress-midterms",
+      "published": "Thu, 05 Nov 2026 05:00:00 -0500",
       "trusted": true,
       "causes": [
         "oil",
-        "ai_mood"
-      ],
-      "rank": 7.5
-    },
-    {
-      "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-      "published": "2026-11-05T14:00:00Z",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "rank": 6.5
-    },
-    {
-      "title": "Jobless claims stay low ahead of the next employment report",
-      "source": "Bureau of Labor Statistics",
-      "url": "https://www.bls.gov/example/claims",
-      "published": "2026-11-04T12:30:00Z",
-      "trusted": true,
-      "causes": [
-        "jobs"
-      ],
-      "rank": 4.5
-    },
-    {
-      "title": "Ukraine conflict keeps geopolitical risk on investors' minds",
-      "source": "BBC Business",
-      "url": "https://www.bbc.com/example/ukraine-markets",
-      "published": "2026-11-05T09:30:00Z",
-      "trusted": false,
-      "causes": [
+        "election",
         "war"
       ],
-      "rank": 3.0
+      "rank": 11.0
+    },
+    {
+      "title": "First Lady Melania Trump Unites Russia and Ukraine at The White House Following Historic Ceasefire",
+      "source": "White House",
+      "url": "https://www.whitehouse.gov/briefings-statements/2026/11/first-lady-melania-trump-unites-russia-and-ukraine-at-the-white-house-following-historic-ceasefire/",
+      "published": "Thu, 05 Nov 2026 16:31:07 +0000",
+      "trusted": true,
+      "causes": [
+        "election",
+        "war"
+      ],
+      "rank": 10.5
+    },
+    {
+      "title": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into the economic condition of American families",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/other20261009a.htm",
+      "published": "Fri, 9 Oct 2026 14:00:00 GMT",
+      "trusted": true,
+      "causes": [
+        "rates"
+      ],
+      "rank": 8.5
+    },
+    {
+      "title": "Federal Reserve Board announces termination of enforcement actions with Gardner Bancshares, Inc. and Small Business Bank",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261016a.htm",
+      "published": "Fri, 16 Oct 2026 15:00:00 GMT",
+      "trusted": true,
+      "causes": [
+        "rates"
+      ],
+      "rank": 8.5
+    },
+    {
+      "title": "Federal Reserve Board announces termination of enforcement action with Allegiant United Holdings, LLC, Nano Financial Holdings, Inc., and Nano Banc",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm",
+      "published": "Thu, 5 Nov 2026 16:00:00 GMT",
+      "trusted": true,
+      "causes": [
+        "rates"
+      ],
+      "rank": 8.5
+    },
+    {
+      "title": "Federal Reserve Board announces enforcement action against American Express Company to address, among other things, the firm’s failure to sufficiently detect and report certain suspicious activity related to money laundering",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261008a.htm",
+      "published": "Thu, 8 Oct 2026 20:30:00 GMT",
+      "trusted": true,
+      "causes": [
+        "rates"
+      ],
+      "rank": 8.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 13.5,
-      "headlines": [
-        {
-          "title": "Oil prices firm while investors rotate into consumer staples",
-          "source": "Associated Press",
-          "url": "https://apnews.com/example/oil-staples-rotation",
-          "published": "2026-11-05T13:30:00Z",
-          "trusted": true,
-          "causes": [
-            "oil",
-            "ai_mood"
-          ],
-          "rank": 7.5
-        },
-        {
-          "title": "Nasdaq slides into correction territory as AI and chip stocks sell off",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/example/nasdaq-correction-ai-selloff",
-          "published": "2026-11-05T14:00:00Z",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "rank": 6.5
-        }
-      ]
+      "score": 10.5,
+      "headlines": []
     },
     {
-      "cause": "inflation",
-      "label": "Inflation",
-      "score": 3.0,
+      "cause": "rates",
+      "label": "Rates / Fed",
+      "score": 7.5,
       "headlines": [
         {
-          "title": "Federal Reserve officials signal patience on the path of interest rates",
+          "title": "Federal Reserve issues FOMC statement",
           "source": "Federal Reserve",
-          "url": "https://www.federalreserve.gov/example/fomc-patience",
-          "published": "2026-11-04T18:00:00Z",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm",
+          "published": "Wed, 28 Oct 2026 18:00:00 GMT",
           "trusted": true,
           "causes": [
-            "rates",
-            "inflation"
+            "rates"
           ],
           "rank": 12.5
         },
         {
-          "title": "Inflation gauge holds steady as markets await the next CPI print",
-          "source": "NPR",
-          "url": "https://www.npr.org/example/inflation-gauge",
-          "published": "2026-11-04T16:00:00Z",
+          "title": "Federal Reserve Board releases results of the 2025 Survey of Consumer Finances, which provides the public and policymakers with detailed insights into the economic condition of American families",
+          "source": "Federal Reserve",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/other20261009a.htm",
+          "published": "Fri, 9 Oct 2026 14:00:00 GMT",
           "trusted": true,
           "causes": [
-            "rates",
-            "inflation"
+            "rates"
           ],
-          "rank": 11.5
+          "rank": 8.5
+        },
+        {
+          "title": "Federal Reserve Board announces termination of enforcement actions with Gardner Bancshares, Inc. and Small Business Bank",
+          "source": "Federal Reserve",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261016a.htm",
+          "published": "Fri, 16 Oct 2026 15:00:00 GMT",
+          "trusted": true,
+          "causes": [
+            "rates"
+          ],
+          "rank": 8.5
+        },
+        {
+          "title": "Federal Reserve Board announces termination of enforcement action with Allegiant United Holdings, LLC, Nano Financial Holdings, Inc., and Nano Banc",
+          "source": "Federal Reserve",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm",
+          "published": "Thu, 5 Nov 2026 16:00:00 GMT",
+          "trusted": true,
+          "causes": [
+            "rates"
+          ],
+          "rank": 8.5
+        },
+        {
+          "title": "Federal Reserve Board announces enforcement action against American Express Company to address, among other things, the firm’s failure to sufficiently detect and report certain suspicious activity related to money laundering",
+          "source": "Federal Reserve",
+          "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261008a.htm",
+          "published": "Thu, 8 Oct 2026 20:30:00 GMT",
+          "trusted": true,
+          "causes": [
+            "rates"
+          ],
+          "rank": 8.5
         }
       ]
     }
@@ -355,15 +362,12 @@
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "inflation"
+        "rates"
       ],
       "sources": [
-        "Associated Press",
-        "BBC Business",
-        "Bureau of Labor Statistics",
         "Federal Reserve",
         "NPR",
-        "Reuters"
+        "White House"
       ],
       "spy_day_pct": -2.73,
       "qqq_day_pct": -4.98,

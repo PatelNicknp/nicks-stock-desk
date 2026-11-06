@@ -164,7 +164,6 @@ def _cause_matches_desk(
     """True only when a desk number lines up with this cause. A headline alone is not enough."""
     spy = _f(stats.get("spy_day_pct"))
     qqq = _f(stats.get("qqq_day_pct"))
-    vix = _f(stats.get("vix"))
     xl = _xl_rows(sectors)
     tech = next((r for r in xl if r[2] == "XLK" or "Tech" in r[1]), None)
     energy = next((r for r in xl if r[2] == "XLE" or r[1] == "Energy"), None)
@@ -179,11 +178,18 @@ def _cause_matches_desk(
             return True
         return False
     if cause == "oil":
-        return energy is not None and abs(energy[0]) >= 0.4
+        # Energy has to be a real part of the day's move, not a small offset.
+        return energy is not None and abs(energy[0]) >= 1.0 and (
+            direction == "flat" or _sign(energy[0]) == direction or abs(energy[0]) >= 1.5
+        )
     if cause == "rates":
-        if vix is not None and vix >= 20:
-            return True
-        return financials is not None and abs(financials[0]) >= 0.4
+        # A Fed headline plus a high VIX is not enough. Financials have to move with the day.
+        return (
+            financials is not None
+            and direction in ("down", "up")
+            and _sign(financials[0]) == direction
+            and abs(financials[0]) >= 1.0
+        )
     # Jobs, inflation, elections, war, and earnings season have no matching
     # number on this desk, so they are not treated as the cause of the move.
     return False
