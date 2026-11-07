@@ -47,25 +47,12 @@ jobs:
           set -euo pipefail
           python3 stock_desk.py --backfill | tee /tmp/backfill.log
           python3 - << 'PY'
-          import os, re, stock_desk as desk
-          line = ""
-          for raw in open("/tmp/backfill.log"):
-              if raw.startswith("BACKFILL "):
-                  line = raw.strip()
-          status = {}
-          for key, value in re.findall(r"([a-z]+)=(-?\d+)", line):
-              status[key] = int(value)
-          if "enabled" not in status:
-              raise SystemExit("no BACKFILL line")
-          settings = desk.incremental_price_settings(desk.load_cfg())
-          chain = desk.backfill_should_chain(
-              status, os.environ.get("BACKFILL_RUN_INDEX"), settings["fast_backfill_max_runs"])
-          path = os.environ.get("GITHUB_OUTPUT")
-          if path:
-              with open(path, "a") as fh:
-                  fh.write("chain=%s\n" % ("true" if chain else "false"))
-                  fh.write("waiting=%s\n" % status.get("waiting", 0))
-                  fh.write("fetched=%s\n" % status.get("fetched", 0))
+          import os, stock_desk as desk
+          chain, status = desk.write_backfill_followup(
+              "/tmp/backfill.log",
+              os.environ.get("BACKFILL_RUN_INDEX"),
+              os.environ.get("GITHUB_OUTPUT"),
+          )
           print("chain", chain, "fetched", status.get("fetched"), "waiting", status.get("waiting"))
           PY
       - name: Save the price cache
