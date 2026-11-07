@@ -150,6 +150,7 @@
       intraday: "Intraday",
       delayed: "Delayed",
       stale: "Stale",
+      open_print: "Not the close",
       unknown: "Unknown",
     }[status] || "Unknown";
   }

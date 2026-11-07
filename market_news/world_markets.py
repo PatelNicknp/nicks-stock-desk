@@ -422,6 +422,22 @@ def row_from_nse(
     return _with_cause(row, spec, headlines or [])
 
 
+def _desk_clock(text: str) -> Optional[dt.datetime]:
+    """Desk stamps look like '2026-11-06 07:30 PT'. The zone is Pacific, not the bar date alone."""
+    raw = (text or "").strip()
+    if len(raw) < 16:
+        return None
+    try:
+        day = dt.date.fromisoformat(raw[:10])
+        hour = int(raw[11:13])
+        minute = int(raw[14:16])
+    except ValueError:
+        return None
+    if "PT" not in raw.upper():
+        return None
+    return dt.datetime(day.year, day.month, day.day, hour, minute, tzinfo=_zone("America/Los_Angeles"))
+
+
 def row_from_desk_proxy(
     spec: Dict[str, Any],
     stats: Dict[str, Any],
@@ -438,7 +454,18 @@ def row_from_desk_proxy(
         )
         row["name"] = spec["name"]
         return _with_cause(row, spec, headlines or [])
+    stamp = _desk_clock(str(stats.get("updated_pt") or ""))
     status = session_status(session, None, now, spec["tz"], spec["open_min"], spec["close_min"])
+    note = "%s is an ETF proxy for %s, not the index. Day change already stored by the desk. No new price request." % (
+        spec["name"], spec["stands_for"],
+    )
+    quote_at = ""
+    if stamp is not None:
+        quote_at = stamp.isoformat()
+        local = stamp.astimezone(_zone(spec["tz"]))
+        if local.date() == session and (local.hour * 60 + local.minute) < spec["close_min"]:
+            status = "open_print"
+            note += " The desk stamp is before that market's close, so this percent is not a closing return."
     row = {
         "id": spec["id"],
         "name": spec["name"],
@@ -447,13 +474,11 @@ def row_from_desk_proxy(
         "pct": round(pct, 2),
         "verified": True,
         "session_date": session.isoformat(),
-        "quote_at": "",
+        "quote_at": quote_at,
         "status": status,
         "source": "Desk price file",
         "source_url": "",
-        "note": "%s is an ETF proxy for %s, not the index. Day change already stored by the desk. No new price request." % (
-            spec["name"], spec["stands_for"],
-        ),
+        "note": note,
         "cause": "",
         "cause_source": "",
         "cause_url": "",

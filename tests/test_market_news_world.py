@@ -76,6 +76,19 @@ def test_proxy_does_not_fill_the_index_and_breadth_stays_unknown():
     assert spx["pct"] is None and spx["kind"] == "index" and spx["cause"] == ""
     assert spy["pct"] == 1.02 and spy["kind"] == "etf_proxy"
     assert spy["status"] == "prior_local_close"
+    stamped = build_world_moves(
+        stats={
+            "spy_day_pct": 1.02, "price_as_of": "2026-11-06",
+            "updated_pt": "2026-11-06 07:30 PT",
+        },
+        quotes={},
+        now=SAT,
+    )
+    morning = _idx(stamped["rows"], "SPY")
+    assert morning["pct"] == 1.02
+    assert morning["status"] == "open_print"
+    assert morning["session_date"] == "2026-11-06"
+    assert "not a closing return" in morning["note"]
     assert spy["session_date"] == "2026-11-06"
     assert "ETF proxy" in spy["note"]
     assert spy["cause_url"] == "https://example.com/spx"
