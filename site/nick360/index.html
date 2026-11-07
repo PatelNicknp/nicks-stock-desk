@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nick 360 · Nick's Stock Desk</title>
+<link rel="stylesheet" href="nick360.css">
+</head>
+<body style="margin:0;background:#0d0f14">
+<div id="n360">
+  <header>
+    <a class="brand" href="../index.html"><span class="mark">N</span><span><b>Nick 360</b><small>Nick's US Stock Box · our version</small></span></a>
+    <nav aria-label="Nick 360">
+      <button type="button" data-act="page" data-page="dashboard">Dashboard</button>
+      <button type="button" data-act="page" data-page="charting">Charting</button>
+      <button type="button" data-act="page" data-page="focus">Focus List</button>
+      <button type="button" data-act="page" data-page="grader">Grader</button>
+      <button type="button" data-act="page" data-page="analytics">Analytics</button>
+    </nav>
+    <span class="pill">STORED DESK DATA · NOT A LIVE FEED</span>
+    <button type="button" class="back" data-act="defs" style="background:none;border:0">Definitions</button>
+    <a class="back" href="../index.html">Back to Stock Box</a>
+  </header>
+  <div id="status"></div>
+  <div id="view" class="view"></div>
+  <footer id="foot"></footer>
+  <div id="menu" hidden></div>
+  <div id="modal" hidden></div>
+</div>
+<script src="../vendor/papaparse.min.js"></script>
+<script src="engine.js"></script>
+<script src="chart.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
