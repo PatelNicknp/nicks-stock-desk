@@ -4,9 +4,11 @@ name: Fill new price history
 # Actions -> Fill new price history -> Run workflow. It is not on a schedule,
 # so it adds no Yahoo traffic until someone starts it.
 # One run downloads fast_backfill_per_run (600) five-year charts, two at a time,
-# merges them into cache/ohlcv.csv.gz, and commits. It does not fetch profiles,
-# filings, news, or options. If names are still waiting and this run saved some,
-# it starts the next run, up to fast_backfill_max_runs (4).
+# merges them into cache/ohlcv.csv.gz, exports scores and candle files from that
+# cache, and commits. It does not fetch profiles, filings, news, or options.
+# A chunk that saved histories and still has names waiting starts the next run.
+# A transient failure does too, up to fast_backfill_max_runs (4). A symbol with
+# no daily bars is recorded and is not retried on the next chunk.
 # features.fast_history_backfill turns the whole thing off.
 # It shares the update queue so it cannot write the price file at the same time
 # as the 10:15 or 18:30 job. Those regular runs stay capped at 40 new names.
@@ -44,8 +46,10 @@ jobs:
         env:
           BACKFILL_RUN_INDEX: ${{ inputs.run_index }}
         run: |
-          set -euo pipefail
+          set +e
           python3 stock_desk.py --backfill | tee /tmp/backfill.log
+          code=$?
+          set -e
           python3 - << 'PY'
           import os, stock_desk as desk
           chain, status = desk.write_backfill_followup(
@@ -55,12 +59,20 @@ jobs:
           )
           print("chain", chain, "fetched", status.get("fetched"), "waiting", status.get("waiting"))
           PY
-      - name: Save the price cache
+          echo "backfill_exit=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -gt 2 ]; then
+            exit "$code"
+          fi
+      - name: Export scored candles from the saved cache
+        if: always()
+        run: python3 -c "import stock_desk as desk; print(desk.export_cached_scores())"
+      - name: Save the price cache and exported candles
+        if: always()
         run: |
           set -euo pipefail
           git config user.name "stock-desk-bot"
           git config user.email "stock-desk-bot@users.noreply.github.com"
-          git add cache
+          git add cache data/scores.csv data/ohlc
           if git diff --cached --quiet; then
             echo "No price changes."
           else
@@ -68,8 +80,19 @@ jobs:
             git push
           fi
       - name: Start the next chunk if names are still waiting
-        if: steps.fill.outputs.chain == 'true'
+        if: always() && steps.fill.outputs.chain == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BACKFILL_RUN_INDEX: ${{ inputs.run_index }}
-        run: python3 watchdog.py chain-backfill
+        run: |
+          set -euo pipefail
+          cooldown="${{ steps.fill.outputs.cooldown }}"
+          if [ -n "$cooldown" ] && [ "$cooldown" != "0" ]; then
+            sleep "$cooldown"
+          fi
+          python3 watchdog.py chain-backfill
+      - name: Keep a degraded chunk visible
+        if: always() && steps.fill.outputs.degraded == 'true'
+        run: |
+          echo "This chunk saved what it could and is not a clean finish."
+          exit 1

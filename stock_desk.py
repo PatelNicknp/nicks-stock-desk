@@ -199,6 +199,10 @@ def _normalize_index(df):
 
 
 PRICE_COLS = ["date", "ticker", "close", "high", "low", "volume", "open"]
+# Same bar count market_features requires before a name can be scored.
+MIN_HISTORY_BARS = 30
+GAP_UNAVAILABLE_DAYS = 14
+GAP_SHORT_DAYS = 7
 
 
 def incremental_price_settings(cfg):
@@ -299,10 +303,12 @@ def backfill_symbols(plan):
 
 
 def backfill_should_chain(status, run_index, max_runs):
-    """True when this chunk saved some new histories and names are still waiting.
+    """True when another bounded chunk should start.
 
-    run_index is 0 for the run started by hand. A chunk that saves nothing does
-    not chain, so a Yahoo refusal cannot loop. max_runs counts chained runs.
+    A clean chunk chains only when it saved histories and names are still waiting.
+    A transient failure may chain until max_runs, including a chunk that saved
+    nothing, so a short outage can resume. Auth and an unavailable-only chunk
+    do not chain. run_index is 0 for the run started by hand.
     """
     if not status or not int(status.get("enabled") or 0):
         return False
@@ -311,16 +317,23 @@ def backfill_should_chain(status, run_index, max_runs):
         fetched = int(status.get("fetched") or 0)
         index = int(run_index or 0)
         limit = int(max_runs)
+        outcome = int(status.get("outcome") or 0)
     except (TypeError, ValueError):
         return False
-    if waiting <= 0 or fetched <= 0 or limit < 1:
+    if limit < 1 or index + 1 >= limit:
         return False
-    return index + 1 < limit
+    if outcome == 2 or outcome == 3:
+        return False
+    if outcome == 1:
+        return True
+    if waiting <= 0 or fetched <= 0:
+        return False
+    return True
 
 
 def emit_backfill_status(status):
     """One machine line the workflow reads. Values are integers."""
-    keys = ("enabled", "fetched", "waiting", "cap", "concurrency", "universe")
+    keys = ("enabled", "fetched", "waiting", "cap", "concurrency", "universe", "outcome", "unavailable", "incomplete", "transient")
     parts = ["%s=%d" % (key, int(status.get(key) or 0)) for key in keys]
     print("BACKFILL " + " ".join(parts), flush=True)
 
@@ -350,9 +363,14 @@ def write_backfill_followup(log_path, run_index, output_path=None):
         raise SystemExit("no BACKFILL line")
     settings = incremental_price_settings(load_cfg())
     chain = backfill_should_chain(status, run_index, settings["fast_backfill_max_runs"])
+    outcome = int(status.get("outcome") or 0)
+    degraded = outcome in (1, 2)
+    cooldown = 60 if outcome == 1 and int(status.get("fetched") or 0) == 0 else 0
     if output_path:
         with open(output_path, "a", encoding="utf-8") as handle:
             handle.write("chain=%s\n" % ("true" if chain else "false"))
+            handle.write("degraded=%s\n" % ("true" if degraded else "false"))
+            handle.write("cooldown=%s\n" % cooldown)
             handle.write("waiting=%s\n" % status.get("waiting", 0))
             handle.write("fetched=%s\n" % status.get("fetched", 0))
     return chain, status
@@ -440,7 +458,51 @@ def _repair_already_done(repairs, ticker, bars):
     return bars >= recorded
 
 
-def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False, slice_index=None, repairs=None):
+def load_price_gaps(cache):
+    path = os.path.join(cache, "price_gaps.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_price_gaps(cache, gaps):
+    path = os.path.join(cache, "price_gaps.json")
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as handle:
+        json.dump(gaps or {}, handle, indent=1, sort_keys=True)
+    os.replace(tmp, path)
+
+
+def gap_is_open(row, today):
+    """True while a recorded gap should not be requested again."""
+    if not row:
+        return False
+    return str(row.get("recheck_after") or "") > str(today)[:10]
+
+
+def remember_price_gap(gaps, symbol, kind, detail, today, days):
+    """Record why a symbol has no usable history, and when it may be tried again."""
+    prior = (gaps or {}).get(symbol) or {}
+    try:
+        attempts = int(prior.get("attempts") or 0) + 1
+    except (TypeError, ValueError):
+        attempts = 1
+    day = pd.Timestamp(str(today)[:10])
+    gaps[symbol] = {
+        "kind": kind,
+        "reason": detail[:180],
+        "checked": str(day.date()),
+        "recheck_after": str((day + pd.Timedelta(days=int(days))).date()),
+        "attempts": attempts,
+    }
+    return gaps
+
+
+def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False, slice_index=None, repairs=None, gaps=None, today=None):
     """How to fetch each symbol. No clock and no network.
 
     enabled False: every symbol is a full download (the old run).
@@ -451,6 +513,7 @@ def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False
     """
     settings = settings or {}
     counts, last = _cached_price_stats(cached)
+    today_s = str(today or today_et())[:10]
     plan = {}
     for ticker in tickers:
         symbol = str(ticker).upper().replace(".", "-")
@@ -458,6 +521,10 @@ def classify_price_fetches(tickers, cached, settings, enabled, refresh_all=False
             plan[symbol] = {"kind": "full", "start": None, "reason": "switched_off"}
             continue
         bars = int(counts.get(symbol, 0))
+        gap = (gaps or {}).get(symbol) or {}
+        if bars <= 0 and gap_is_open(gap, today_s) and gap.get("kind") == "unavailable":
+            plan[symbol] = {"kind": "skip", "start": None, "reason": "unavailable"}
+            continue
         if bars <= 0:
             plan[symbol] = {"kind": "full", "start": None, "reason": "new"}
             continue
@@ -586,7 +653,33 @@ def note_price_repairs(repairs, merged, fresh, tickers, min_bars):
     return out
 
 
-def download_prices(tickers, cfg, start=None, threads=True, period=None):
+def failure_kind(exc):
+    """Split a download error into unavailable, auth, or transient.
+
+    Unavailable is only a positive no-bars answer. Rate limits, timeouts, and
+    auth problems stay transient or auth so they are not stored as missing data.
+    """
+    if isinstance(exc, netutil.PermanentError):
+        return "unavailable"
+    msg = str(exc).lower()
+    if any(s in msg for s in ("429", "rate limit", "too many requests", "timeout", "timed out", "connection reset", "connection aborted", "temporarily")):
+        return "transient"
+    if any(s in msg for s in ("401", "403", "unauthorized", "forbidden", "invalid crumb", "permission")):
+        return "auth"
+    if netutil.is_permanent_message(exc):
+        return "unavailable"
+    return "transient"
+
+
+def _whole_chunk_failure(kind, exc):
+    """True when retrying each symbol would just repeat the same block."""
+    if kind == "auth":
+        return True
+    msg = str(exc).lower()
+    return kind == "transient" and any(s in msg for s in ("429", "rate limit", "too many requests", "timeout", "timed out"))
+
+
+def download_prices(tickers, cfg, start=None, threads=True, period=None, outcomes=None):
     import yfinance as yf
     batch = int(rl(cfg)["yahoo_batch_size"])
     pause = float(rl(cfg)["yahoo_batch_pause_seconds"])
@@ -604,11 +697,20 @@ def download_prices(tickers, cfg, start=None, threads=True, period=None):
                 df = yf.download(chunk, period="5y", **common)
             got = frames_from_download(df)
             if got is None or got[0] is None or got[0].dropna(how="all").empty:
+                if len(chunk) == 1:
+                    raise netutil.PermanentError("no daily bars returned")
                 raise netutil.RetryableError("empty price batch (%d names)" % len(chunk))
             return got
         try:
             return netutil.call_with_retry(once, max_tries=rl(cfg)["max_retries"], delays=tuple(rl(cfg)["backoff_seconds"]))
-        except Exception:
+        except Exception as exc:
+            kind = failure_kind(exc)
+            if outcomes is not None and (len(chunk) == 1 or _whole_chunk_failure(kind, exc)):
+                targets = list(chunk) if len(chunk) > 1 else [chunk[0]]
+                recorded = "unavailable" if kind == "unavailable" else kind
+                for symbol in targets:
+                    outcomes.append({"symbol": str(symbol), "kind": recorded, "detail": str(exc)[:180]})
+                return None
             if len(chunk) == 1:
                 return None
             mid = len(chunk) // 2
@@ -666,16 +768,19 @@ def wide_from_long(df, col):
     return w
 
 
-def _download_long(tickers, cfg, start, threads, period):
+def _download_long(tickers, cfg, start, threads, period, outcomes=None):
     if not tickers:
         return pd.DataFrame(columns=PRICE_COLS)
-    frames = download_prices(tickers, cfg, start=start, threads=threads, period=period)
+    frames = download_prices(tickers, cfg, start=start, threads=threads, period=period, outcomes=outcomes)
     return _price_frame(ohlcv_long(*frames))
 
 
 def _save_prices(path, frame):
+    """Replace the price cache in one step so a crash cannot leave a half-written file."""
     out = _price_frame(frame)
-    out.to_csv(path, index=False, compression="gzip")
+    tmp = path + ".tmp"
+    out.to_csv(tmp, index=False, compression="gzip")
+    os.replace(tmp, path)
     return out
 
 
@@ -2899,13 +3004,25 @@ def build_price_tickers(cfg, cache, mode, hold_tickers, watch_tickers):
     return universe, tickers
 
 
-def run_history_backfill(cfg=None):
+def _backfill_chunk(plan):
+    fetch = sorted(
+        s for s, item in plan.items()
+        if item.get("kind") == "full" and item.get("reason") in ("new", "short")
+    )
+    waiting = sorted(s for s, item in plan.items() if item.get("reason") in ("waiting", "short_later"))
+    return fetch, waiting
+
+
+def run_history_backfill(cfg=None, fetcher=None, today=None):
     """Download five-year daily bars for names that have none, then stop.
 
     One chunk, capped by fast_backfill_per_run while features.fast_history_backfill
     is on. Merges into the price cache and does not call Yahoo for profiles,
     news, filings, or the names that already have bars. Prints a BACKFILL line.
-    Returns 0 when the chunk finished or the switch is off, 1 when Yahoo saved nothing.
+    Returns 0 when the chunk finished, the switch is off, or every remaining
+    name has no bars. Returns 2 when a transient failure left work unfinished
+    after any good bars were saved. Returns 1 when the failure needs a person
+    (auth) or the download died before a per-symbol result.
     """
     cfg = cfg or load_cfg()
     data, cache, inp = paths()
@@ -2919,6 +3036,10 @@ def run_history_backfill(cfg=None):
         "cap": settings["backfill_per_run"],
         "concurrency": settings["chart_concurrency"],
         "universe": 0,
+        "outcome": 0,
+        "unavailable": 0,
+        "incomplete": 0,
+        "transient": 0,
     }
     if not on:
         emit_backfill_status(status)
@@ -2935,38 +3056,222 @@ def run_history_backfill(cfg=None):
     save_stamps(cache)
     path = os.path.join(cache, "ohlcv.csv.gz")
     cached = read_csv(path) if os.path.exists(path) else pd.DataFrame()
-    plan = classify_price_fetches(tickers, cached, settings, True)
-    new_names, waiting = backfill_symbols(plan)
-    if not new_names:
-        status["waiting"] = len(waiting)
+    today_s = str(today or today_et())[:10]
+    gaps = load_price_gaps(cache)
+    plan = classify_price_fetches(tickers, cached, settings, True, gaps=gaps, today=today_s)
+    fetch, waiting = _backfill_chunk(plan)
+    counts, _last = _cached_price_stats(cached)
+    wanted = {str(t).upper().replace(".", "-") for t in tickers}
+    short = []
+    for symbol, bars in sorted(counts.items()):
+        symbol = str(symbol).upper()
+        if symbol not in wanted or int(bars) <= 0 or int(bars) >= MIN_HISTORY_BARS:
+            continue
+        gap = gaps.get(symbol) or {}
+        if gap_is_open(gap, today_s) and gap.get("kind") == "short":
+            continue
+        short.append(symbol)
+    room = max(0, int(settings["backfill_per_run"]) - len(fetch))
+    deferred_short = short[room:]
+    fetch = list(fetch) + short[:room]
+    status["waiting"] = len(waiting) + len(deferred_short)
+    status["incomplete"] = sum(
+        1 for symbol, bars in counts.items()
+        if str(symbol).upper() in wanted and 0 < int(bars) < MIN_HISTORY_BARS
+    )
+    if not fetch:
+        status["unavailable"] = sum(1 for item in plan.values() if item.get("reason") == "unavailable")
+        status["outcome"] = 3 if status["unavailable"] else 0
         emit_backfill_status(status)
         print("No names are waiting for a first history.", flush=True)
         return 0
+
+    def default_fetcher(symbols):
+        outcomes = []
+        try:
+            frame = _download_long(
+                symbols, cfg, None, settings["chart_concurrency"], settings["history_period"], outcomes=outcomes,
+            )
+        except Exception as exc:
+            if outcomes:
+                return pd.DataFrame(columns=PRICE_COLS), outcomes
+            raise
+        return frame, outcomes
+
+    fetcher = fetcher or default_fetcher
     try:
-        fresh = _download_long(new_names, cfg, None, settings["chart_concurrency"], settings["history_period"])
+        fetched = fetcher(fetch)
+        fresh, outcomes = fetched if isinstance(fetched, tuple) else (fetched, [])
     except Exception as exc:
-        status["waiting"] = len(waiting) + len(new_names)
+        kind = failure_kind(exc)
+        status["outcome"] = 2 if kind == "auth" else 1
+        status["transient"] = 0 if kind == "auth" else len(fetch)
+        status["waiting"] = len(waiting) + (0 if kind == "auth" else len(fetch))
         emit_backfill_status(status)
         print("backfill download failed:", str(exc)[:200], flush=True)
-        return 1
-    got = sorted(set(fresh["ticker"].astype(str))) if len(fresh) else []
-    if not got:
-        status["waiting"] = len(waiting) + len(new_names)
-        emit_backfill_status(status)
-        print("backfill download returned no bars", flush=True)
-        return 1
-    merged, _ignored = merge_price_rows(cached, fresh, settings, hold_back=[])
-    _save_prices(path, merged)
-    missed = [s for s in new_names if s not in set(got)]
+        return 1 if kind == "auth" else 2
+
+    outcomes = list(outcomes or [])
+    unavailable = [row for row in outcomes if row.get("kind") == "unavailable"]
+    transient = [row for row in outcomes if row.get("kind") == "transient"]
+    auth = [row for row in outcomes if row.get("kind") == "auth"]
+    for row in unavailable:
+        remember_price_gap(
+            gaps, row.get("symbol"), "unavailable", row.get("detail") or "no daily bars returned",
+            today_s, GAP_UNAVAILABLE_DAYS,
+        )
+    got = []
+    if fresh is not None and len(fresh):
+        merged, _ignored = merge_price_rows(cached, fresh, settings, hold_back=[])
+        merged = _save_prices(path, merged)
+        counts = merged.groupby(merged["ticker"].astype(str)).size()
+        got = sorted(set(fresh["ticker"].astype(str)))
+        for symbol in got:
+            if symbol in counts.index and int(counts[symbol]) < MIN_HISTORY_BARS:
+                remember_price_gap(
+                    gaps, symbol, "short", "fewer than %d daily bars" % MIN_HISTORY_BARS,
+                    today_s, GAP_SHORT_DAYS,
+                )
+    if unavailable or any(row.get("kind") == "short" for row in []):
+        save_price_gaps(cache, gaps)
+    elif fresh is not None and len(fresh):
+        save_price_gaps(cache, gaps)
     status["fetched"] = len(got)
-    status["waiting"] = len(waiting) + len(missed)
+    status["unavailable"] = len(unavailable)
+    status["transient"] = len(transient)
+    status["waiting"] = len(waiting) + len(transient)
+    if auth:
+        status["outcome"] = 2
+    elif transient:
+        status["outcome"] = 1
+    elif not got and unavailable:
+        status["outcome"] = 3
+    else:
+        status["outcome"] = 0
     emit_backfill_status(status)
+    if unavailable:
+        print("No daily bars for: %s. Recorded as missing data, not delisted. Recheck after %d days." % (
+            ", ".join(sorted(row.get("symbol") or "" for row in unavailable)), GAP_UNAVAILABLE_DAYS,
+        ), flush=True)
+    if auth:
+        print("backfill stopped for access: %s" % auth[0].get("detail", "")[:200], flush=True)
+        return 1
+    if transient:
+        print("backfill paused after a transient price error (%d names). Saved bars were kept." % len(transient), flush=True)
+        return 2
     print(
         "Backfill saved %d new histories (%d still waiting, cap %d, %d at a time). Cache only. No profiles, filings, news, or options."
         % (status["fetched"], status["waiting"], status["cap"], status["concurrency"]),
         flush=True,
     )
     return 0
+
+
+def export_cached_scores(data_dir=None, cache_dir=None, cfg=None):
+    """Write scores and candle files from the price cache already on disk.
+
+    Does not download prices and does not rewrite the price cache. A name with
+    fewer than 30 bars is left out. An existing score row is kept when its
+    price and session date still match the cache, so this export does not
+    invent a newer session.
+    """
+    cfg = cfg or load_cfg()
+    data_dir = data_dir or os.path.join(root(), "data")
+    cache_dir = cache_dir or os.path.join(root(), "cache")
+    cache_path = os.path.join(cache_dir, "ohlcv.csv.gz")
+    before = None
+    if os.path.exists(cache_path):
+        before = (os.path.getsize(cache_path), open(cache_path, "rb").read(64))
+    prices = read_csv(cache_path) if os.path.exists(cache_path) else pd.DataFrame()
+    universe = read_csv(os.path.join(data_dir, "universe.csv"))
+    existing = read_csv(os.path.join(data_dir, "scores.csv"))
+    report = {
+        "scored": 0,
+        "kept": 0,
+        "recomputed": 0,
+        "short": 0,
+        "absent": 0,
+        "price_as_of": "",
+    }
+    if len(prices) == 0 or len(universe) == 0 or "ticker" not in prices.columns:
+        return report
+    prices = prices.copy()
+    prices["ticker"] = prices["ticker"].astype(str).str.upper()
+    prices["date"] = pd.to_datetime(prices["date"], errors="coerce")
+    prices = prices.dropna(subset=["date"])
+    prices["close"] = pd.to_numeric(prices["close"], errors="coerce")
+    prices = prices.dropna(subset=["close"])
+    counts = prices.groupby("ticker").size()
+    last = prices.sort_values("date").groupby("ticker", as_index=False).tail(1).set_index("ticker")
+    have = {}
+    if len(existing) and "ticker" in existing.columns:
+        have = {str(row["ticker"]).upper(): row for _, row in existing.iterrows()}
+    keep_rows = []
+    recompute = []
+    for _, row in universe.iterrows():
+        ticker = str(row.get("ticker") or "").upper()
+        if not ticker:
+            continue
+        bars = int(counts[ticker]) if ticker in counts.index else 0
+        if bars <= 0:
+            report["absent"] += 1
+            continue
+        if bars < MIN_HISTORY_BARS:
+            report["short"] += 1
+            continue
+        session = str(pd.Timestamp(last.loc[ticker, "date"]).date())
+        close_px = round(float(last.loc[ticker, "close"]), 2)
+        old = have.get(ticker)
+        old_px = None
+        try:
+            old_px = round(float(old["price"]), 2) if old is not None and old.get("price") not in ("", None) else None
+        except (TypeError, ValueError, KeyError):
+            old_px = None
+        old_day = str(old.get("price_as_of") or "")[:10] if old is not None else ""
+        if old is not None and old_px == close_px and old_day == session:
+            keep_rows.append(old)
+        else:
+            recompute.append(ticker)
+    fresh = pd.DataFrame()
+    if recompute:
+        subset = universe[universe["ticker"].astype(str).str.upper().isin(recompute)].copy()
+        subset["ticker"] = subset["ticker"].astype(str).str.upper()
+        close = wide_from_long(prices, "close")
+        high = wide_from_long(prices, "high")
+        low = wide_from_long(prices, "low")
+        vol = wide_from_long(prices, "volume")
+        annual = read_csv(os.path.join(cache_dir, "annual.csv"))
+        quarters = read_csv(os.path.join(cache_dir, "quarters.csv"))
+        info = read_csv(os.path.join(cache_dir, "yahoo_info.csv"))
+        holders = read_csv(os.path.join(cache_dir, "holders.csv"))
+        earnings = read_csv(os.path.join(cache_dir, "earnings.csv"))
+        fresh, _prepared = build_scores(subset, close, high, low, vol, annual, quarters, info, holders, earnings, cfg)
+        if len(fresh):
+            fresh = fresh.drop(columns=["prepared"], errors="ignore")
+            fresh = attach_status(fresh, "OK", "CACHED", "CACHED", "CACHED")
+            fresh["note"] = "Price history from the saved cache. This export did not download prices."
+    frames = []
+    if keep_rows:
+        frames.append(pd.DataFrame(keep_rows))
+    if len(fresh):
+        frames.append(fresh)
+    if not frames:
+        return report
+    scores = pd.concat(frames, ignore_index=True)
+    scores = assign_ranks(scores)
+    write_out(gated(scores, "scores", True, "No scores."), "scores", data_dir)
+    candles = candle_file(prices, list(scores["ticker"].astype(str)))
+    write_candle_files(candles, os.path.join(data_dir, "ohlc"))
+    if before is not None and os.path.exists(cache_path):
+        after = (os.path.getsize(cache_path), open(cache_path, "rb").read(64))
+        if after != before:
+            raise RuntimeError("export changed the price cache")
+    report["kept"] = len(keep_rows)
+    report["recomputed"] = 0 if len(fresh) == 0 else int(fresh["ticker"].nunique())
+    report["scored"] = int(scores["ticker"].nunique())
+    if "price_as_of" in scores.columns and len(scores):
+        report["price_as_of"] = str(scores["price_as_of"].astype(str).str.slice(0, 10).max())
+    return report
 
 
 def main(argv=None):
