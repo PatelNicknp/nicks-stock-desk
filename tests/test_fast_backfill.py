@@ -108,7 +108,7 @@ def test_chunk_downloads_only_the_capped_new_names():
     def _fake_universe(cfg, cache, mode, hold, watch):
         return pd.DataFrame({"ticker": ["AAA", "BBB", "CCC"]}), ["AAA", "BBB", "CCC"]
 
-    def _fake_download(tickers, cfg, start, threads, period):
+    def _fake_download(tickers, cfg, start, threads, period, outcomes=None):
         seen["tickers"] = list(tickers)
         seen["start"] = start
         seen["threads"] = threads
@@ -258,6 +258,185 @@ def test_unset_root_uses_desk_root_before_the_repo():
         shutil.rmtree(tmp)
 
 
+def _bars(ticker, close, n=40):
+    import pandas as pd
+    rows = []
+    for i in range(n):
+        rows.append({
+            "date": str(pd.Timestamp("2024-01-02") + pd.Timedelta(days=i))[:10],
+            "ticker": ticker, "close": close, "high": close + 1, "low": close - 1, "volume": 100, "open": close,
+        })
+    return rows
+
+
+def test_unavailable_symbol_is_recorded_and_not_retried():
+    import pandas as pd
+    tmp = tempfile.mkdtemp()
+    old_root = desk.ROOT
+    desk.ROOT = tmp
+    desk.STAMPS.clear()
+    os.makedirs(os.path.join(tmp, "cache"))
+    os.makedirs(os.path.join(tmp, "data"))
+    pd.DataFrame(_bars("AAA", 10)).to_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"), index=False, compression="gzip")
+    before = open(os.path.join(tmp, "cache", "ohlcv.csv.gz"), "rb").read()
+    calls = []
+
+    def _fetch(symbols):
+        calls.append(list(symbols))
+        outcomes = [{"symbol": "NOPE", "kind": "unavailable", "detail": "no daily bars returned"}]
+        return pd.DataFrame(columns=["date", "ticker", "close", "high", "low", "volume", "open"]), outcomes
+
+    cfg = {
+        "features": {"fast_history_backfill": True, "incremental_prices": True, "universe": True},
+        "incremental_prices": {"fast_backfill_per_run": 5, "chart_concurrency": 2, "history_period": "5y", "repair_below_bars": 126},
+    }
+
+    def _universe(cfg, cache, mode, hold, watch):
+        return pd.DataFrame({"ticker": ["AAA", "NOPE"]}), ["AAA", "NOPE"]
+
+    old_build = desk.build_price_tickers
+    desk.build_price_tickers = _universe
+    try:
+        code = desk.run_history_backfill(cfg, fetcher=_fetch, today="2026-11-07")
+        assert code == 0
+        assert calls == [["NOPE"]]
+        assert open(os.path.join(tmp, "cache", "ohlcv.csv.gz"), "rb").read() == before
+        gaps = json.load(open(os.path.join(tmp, "cache", "price_gaps.json")))
+        assert gaps["NOPE"]["kind"] == "unavailable"
+        assert "delisted" not in gaps["NOPE"]["reason"]
+        assert gaps["NOPE"]["recheck_after"] > "2026-11-07"
+        calls.clear()
+        code = desk.run_history_backfill(cfg, fetcher=_fetch, today="2026-11-08")
+        assert code == 0 and calls == []
+    finally:
+        desk.build_price_tickers = old_build
+        desk.ROOT = old_root
+        desk.STAMPS.clear()
+        shutil.rmtree(tmp)
+
+
+def test_rate_limit_keeps_saved_bars_and_does_not_mark_unavailable():
+    import pandas as pd
+    tmp = tempfile.mkdtemp()
+    old_root = desk.ROOT
+    desk.ROOT = tmp
+    desk.STAMPS.clear()
+    os.makedirs(os.path.join(tmp, "cache"))
+    pd.DataFrame(_bars("AAA", 10, 40)).to_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"), index=False, compression="gzip")
+
+    def _fetch(symbols):
+        frames = []
+        outcomes = []
+        for symbol in symbols:
+            if symbol == "WAIT":
+                outcomes.append({"symbol": symbol, "kind": "transient", "detail": "429 too many requests"})
+            else:
+                frames.append(pd.DataFrame(_bars(symbol, 5, 40)))
+        fresh = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+        return fresh, outcomes
+
+    cfg = {
+        "features": {"fast_history_backfill": True, "incremental_prices": True, "universe": True},
+        "incremental_prices": {"fast_backfill_per_run": 5, "chart_concurrency": 2, "history_period": "5y", "repair_below_bars": 126},
+    }
+
+    def _universe(cfg, cache, mode, hold, watch):
+        return pd.DataFrame({"ticker": ["AAA", "BBB", "WAIT"]}), ["AAA", "BBB", "WAIT"]
+
+    old_build = desk.build_price_tickers
+    desk.build_price_tickers = _universe
+    try:
+        code = desk.run_history_backfill(cfg, fetcher=_fetch, today="2026-11-07")
+        assert code == 2
+        saved = pd.read_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"))
+        assert set(saved["ticker"]) >= {"AAA", "BBB"}
+        assert "WAIT" not in set(saved["ticker"])
+        assert float(saved.loc[saved["ticker"] == "AAA", "close"].iloc[0]) == 10
+        assert not os.path.exists(os.path.join(tmp, "cache", "price_gaps.json")) or "WAIT" not in json.load(open(os.path.join(tmp, "cache", "price_gaps.json")))
+        status = {"enabled": 1, "fetched": 1, "waiting": 1, "outcome": 1}
+        assert desk.backfill_should_chain(status, 0, 4)
+        assert not desk.backfill_should_chain({"enabled": 1, "fetched": 0, "waiting": 1, "outcome": 2}, 0, 4)
+        assert not desk.backfill_should_chain({"enabled": 1, "fetched": 0, "waiting": 0, "outcome": 3}, 0, 4)
+    finally:
+        desk.build_price_tickers = old_build
+        desk.ROOT = old_root
+        desk.STAMPS.clear()
+        shutil.rmtree(tmp)
+
+
+def test_restart_downloads_only_what_is_still_missing():
+    import pandas as pd
+    tmp = tempfile.mkdtemp()
+    old_root = desk.ROOT
+    desk.ROOT = tmp
+    desk.STAMPS.clear()
+    os.makedirs(os.path.join(tmp, "cache"))
+    pd.DataFrame(_bars("AAA", 10, 40)).to_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"), index=False, compression="gzip")
+    seen = []
+
+    def _fetch(symbols):
+        seen.append(list(symbols))
+        return pd.DataFrame(_bars(symbols[0], 7, 40)), []
+
+    cfg = {
+        "features": {"fast_history_backfill": True, "incremental_prices": True, "universe": True},
+        "incremental_prices": {"fast_backfill_per_run": 1, "chart_concurrency": 2, "history_period": "5y", "repair_below_bars": 126},
+    }
+
+    def _universe(cfg, cache, mode, hold, watch):
+        return pd.DataFrame({"ticker": ["AAA", "BBB", "CCC"]}), ["AAA", "BBB", "CCC"]
+
+    old_build = desk.build_price_tickers
+    desk.build_price_tickers = _universe
+    try:
+        assert desk.run_history_backfill(cfg, fetcher=_fetch, today="2026-11-07") == 0
+        assert seen == [["BBB"]]
+        assert desk.run_history_backfill(cfg, fetcher=_fetch, today="2026-11-07") == 0
+        assert seen[1] == ["CCC"]
+        saved = pd.read_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"))
+        assert set(saved["ticker"]) == {"AAA", "BBB", "CCC"}
+        assert float(saved.loc[saved["ticker"] == "AAA", "close"].iloc[0]) == 10
+    finally:
+        desk.build_price_tickers = old_build
+        desk.ROOT = old_root
+        desk.STAMPS.clear()
+        shutil.rmtree(tmp)
+
+
+def test_export_uses_cache_dates_and_skips_short_history():
+    import pandas as pd
+    tmp = tempfile.mkdtemp()
+    old_root = desk.ROOT
+    desk.ROOT = tmp
+    os.makedirs(os.path.join(tmp, "cache"))
+    os.makedirs(os.path.join(tmp, "data"))
+    rows = _bars("LONG", 12, 40) + _bars("SHORT", 3, 4) + _bars("SPY", 20, 80)
+    pd.DataFrame(rows).to_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"), index=False, compression="gzip")
+    pd.DataFrame([
+        {"ticker": "LONG", "company": "Long Co", "sector": "Health Care", "index_membership": "SP500",
+         "in_sp500": "yes", "in_sp400": "no", "in_sp600": "no", "in_ndx100": "no", "in_growth": "no", "in_liquid": "no"},
+        {"ticker": "SHORT", "company": "Short Co", "sector": "Health Care", "index_membership": "SP500",
+         "in_sp500": "yes", "in_sp400": "no", "in_sp600": "no", "in_ndx100": "no", "in_growth": "no", "in_liquid": "no"},
+    ]).to_csv(os.path.join(tmp, "data", "universe.csv"), index=False)
+    cache_bytes = open(os.path.join(tmp, "cache", "ohlcv.csv.gz"), "rb").read()
+    cfg = json.load(open(os.path.join(ROOT, "config.json")))
+    try:
+        report = desk.export_cached_scores(os.path.join(tmp, "data"), os.path.join(tmp, "cache"), cfg)
+        assert report["scored"] == 1
+        assert report["short"] == 1
+        assert report["kept"] == 0
+        assert open(os.path.join(tmp, "cache", "ohlcv.csv.gz"), "rb").read() == cache_bytes
+        scores = pd.read_csv(os.path.join(tmp, "data", "scores.csv"))
+        assert list(scores["ticker"]) == ["LONG"]
+        assert str(scores["price_as_of"].iloc[0])[:10] == report["price_as_of"]
+        candles = pd.read_csv(os.path.join(tmp, "data", "ohlc", "LONG.csv"))
+        assert str(candles["date"].iloc[-1])[:10] == str(scores["price_as_of"].iloc[0])[:10]
+        assert not os.path.exists(os.path.join(tmp, "data", "ohlc", "SHORT.csv"))
+    finally:
+        desk.ROOT = old_root
+        shutil.rmtree(tmp)
+
+
 def test_settings_and_help():
     with open(os.path.join(ROOT, "config.json")) as fh:
         cfg = json.load(fh)
@@ -293,5 +472,9 @@ if __name__ == "__main__":
     test_followup_loads_config_without_calling_main()
     test_followup_does_not_chain_a_failed_or_final_chunk()
     test_unset_root_uses_desk_root_before_the_repo()
+    test_unavailable_symbol_is_recorded_and_not_retried()
+    test_rate_limit_keeps_saved_bars_and_does_not_mark_unavailable()
+    test_restart_downloads_only_what_is_still_missing()
+    test_export_uses_cache_dates_and_skips_short_history()
     test_settings_and_help()
     print("fast backfill ok")
