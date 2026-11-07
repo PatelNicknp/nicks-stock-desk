@@ -2684,6 +2684,48 @@ def candle_file(long_df, tickers, bars=CANDLE_BARS):
     return out[cols]
 
 
+INDEX_SERIES = (
+    ("SPY", "SPY", False),
+    ("QQQ", "QQQ", False),
+    ("^VIX", "VIX", True),
+)
+
+
+def write_index_proxy_files(long_df, out_dir):
+    """Copy index and ETF series that are already in the price frame.
+
+    This does not download anything. SPY and QQQ stay labeled as files, not as
+    the indexes. A VIX volume of 0 is written blank so a later test cannot
+    treat it as a real share-volume print. A symbol that is absent is skipped
+    and any older file is left in place.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    if long_df is None or len(long_df) == 0 or "ticker" not in getattr(long_df, "columns", []):
+        return []
+    frame = long_df.copy()
+    frame["ticker"] = frame["ticker"].astype(str)
+    written = []
+    for src, name, blank_zero in INDEX_SERIES:
+        g = frame[frame["ticker"] == src]
+        if not len(g):
+            continue
+        g = g.sort_values("date").copy()
+        out = pd.DataFrame({
+            "date": pd.to_datetime(g["date"]).dt.strftime("%Y-%m-%d"),
+            "open": pd.to_numeric(g["open"], errors="coerce").round(2),
+            "high": pd.to_numeric(g["high"], errors="coerce").round(2),
+            "low": pd.to_numeric(g["low"], errors="coerce").round(2),
+            "close": pd.to_numeric(g["close"], errors="coerce").round(2),
+        })
+        vol = pd.to_numeric(g["volume"], errors="coerce")
+        if blank_zero:
+            vol = vol.where(vol > 0)
+        out["volume"] = vol.round(0).astype("Int64")
+        out.to_csv(os.path.join(out_dir, name + ".csv"), index=False, na_rep="")
+        written.append(name)
+    return written
+
+
 def write_candle_files(frame, out_dir):
     """One compact CSV per ticker. Returns how many files were written."""
     os.makedirs(out_dir, exist_ok=True)
@@ -3058,6 +3100,9 @@ def main(argv=None):
             if "open" not in long.columns or not pd.to_numeric(long["open"], errors="coerce").notna().any():
                 note += " Open is blank until the next full price download."
             log("Price candles", "OK", asof, note)
+        wrote = write_index_proxy_files(long, os.path.join(data, "index_ohlc"))
+        if wrote:
+            log("Index series", "OK", asof, "%s copied from the price frame already downloaded. No new request." % ", ".join(wrote))
     news_out = news_rows(news, scores) if len(scores) else pd.DataFrame()
     headlines = news_out[news_out["kind"] == "headline"] if len(news_out) and "kind" in news_out.columns else pd.DataFrame()
     details = tables.score_details(scores) if len(scores) else pd.DataFrame()

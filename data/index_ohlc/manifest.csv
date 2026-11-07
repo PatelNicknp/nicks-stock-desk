@@ -1,0 +1,9 @@
+symbol,role,name,source,volume,note
+SPY,etf_proxy,SPDR S&P 500 ETF,"existing price cache, symbol SPY",share volume,Not the S&P 500 index. Index symbol ^GSPC is not in the cache and was not downloaded.
+QQQ,etf_proxy,Invesco QQQ Trust,"existing price cache, symbol QQQ",share volume,Not the Nasdaq-100 index and not the Nasdaq Composite. ^NDX and ^IXIC were not downloaded.
+VIX,volatility_index,Cboe VIX as stored,"existing price cache, symbol ^VIX",blank,Stored volume was 0 and is left blank. It is not used as share volume. This file is not a republished Cboe history file.
+GSPC,unavailable,S&P 500 index,,,No OHLC in the cache. FRED close is not used. SPY is only the ETF proxy.
+IXIC,unavailable,Nasdaq Composite,,,No OHLC in the cache. QQQ is not a substitute.
+NDX,unavailable,Nasdaq-100 index,,,"No OHLC in the cache. QQQ is the ETF proxy, labeled separately."
+DJI,unavailable,Dow Jones Industrial Average,,,No OHLC in the cache. DIA was not in the cache and was not downloaded.
+RUT,unavailable,Russell 2000,,,No OHLC in the cache. IWM was not in the cache and was not downloaded.
