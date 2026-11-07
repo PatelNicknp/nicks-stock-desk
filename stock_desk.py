@@ -59,7 +59,19 @@ ECON_SPECS = [
 
 
 def root():
-    return ROOT
+    """Directory that holds config.json.
+
+    main() sets ROOT, including from DESK_ROOT, so tests can point at a temp
+    folder. The backfill workflow's follow-up process imports this module and
+    never calls main(), which used to leave ROOT as None and crash before the
+    new price cache could be committed.
+    """
+    if ROOT:
+        return ROOT
+    env = os.environ.get("DESK_ROOT")
+    if env:
+        return env
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def log(source, status, latest="", note=""):
@@ -311,6 +323,39 @@ def emit_backfill_status(status):
     keys = ("enabled", "fetched", "waiting", "cap", "concurrency", "universe")
     parts = ["%s=%d" % (key, int(status.get(key) or 0)) for key in keys]
     print("BACKFILL " + " ".join(parts), flush=True)
+
+
+def backfill_status_from_log(text):
+    """Parse the last BACKFILL line. Missing keys stay absent."""
+    line = ""
+    for raw in (text or "").splitlines():
+        if raw.startswith("BACKFILL "):
+            line = raw.strip()
+    status = {}
+    for key, value in re.findall(r"([a-z]+)=(-?\d+)", line):
+        status[key] = int(value)
+    return status
+
+
+def write_backfill_followup(log_path, run_index, output_path=None):
+    """Decide whether the catch-up workflow should start another chunk.
+
+    This is the process that runs after stock_desk.py --backfill. It only
+    reads the log and config.json. It does not download prices and it does
+    not rewrite the price cache.
+    """
+    with open(log_path, encoding="utf-8") as handle:
+        status = backfill_status_from_log(handle.read())
+    if "enabled" not in status:
+        raise SystemExit("no BACKFILL line")
+    settings = incremental_price_settings(load_cfg())
+    chain = backfill_should_chain(status, run_index, settings["fast_backfill_max_runs"])
+    if output_path:
+        with open(output_path, "a", encoding="utf-8") as handle:
+            handle.write("chain=%s\n" % ("true" if chain else "false"))
+            handle.write("waiting=%s\n" % status.get("waiting", 0))
+            handle.write("fetched=%s\n" % status.get("fetched", 0))
+    return chain, status
 
 
 def _price_frame(df):

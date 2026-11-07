@@ -2,6 +2,7 @@
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -131,11 +132,129 @@ def test_chunk_downloads_only_the_capped_new_names():
         assert seen["threads"] == 2 and seen["period"] == "5y" and seen["start"] is None
         saved = pd.read_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"))
         assert set(saved["ticker"]) == {"AAA", "BBB"}
+        assert float(saved.loc[saved["ticker"] == "AAA", "close"].iloc[0]) == 10
+        code = desk.run_history_backfill(cfg)
+        assert code == 0
+        assert seen["tickers"] == ["CCC"]
+        saved = pd.read_csv(os.path.join(tmp, "cache", "ohlcv.csv.gz"))
+        assert set(saved["ticker"]) == {"AAA", "BBB", "CCC"}
+        assert float(saved.loc[saved["ticker"] == "AAA", "close"].iloc[0]) == 10
     finally:
         desk.build_price_tickers = old_build
         desk._download_long = old_dl
         desk.ROOT = old_root
         desk.STAMPS.clear()
+        shutil.rmtree(tmp)
+
+
+NOV5_LOG = (
+    "HTTP Error 404: Quote not found for symbol: CWEN-A\n"
+    "[OK] Universe size 1720 1720 names after S&P 400, S&P 600, and liquid additions\n"
+    "BACKFILL enabled=1 fetched=599 waiting=598 cap=600 concurrency=2 universe=1720\n"
+    "Backfill saved 599 new histories (598 still waiting, cap 600, 2 at a time). "
+    "Cache only. No profiles, filings, news, or options.\n"
+)
+
+
+def _followup_child(log_path, output_path, run_index):
+    """The workflow's second process: a fresh interpreter, ROOT still None."""
+    env = os.environ.copy()
+    env.pop("DESK_ROOT", None)
+    env["BACKFILL_RUN_INDEX"] = str(run_index)
+    env["GITHUB_OUTPUT"] = output_path
+    script = (
+        "import os, stock_desk as desk\n"
+        "assert desk.ROOT is None\n"
+        "chain, status = desk.write_backfill_followup(\n"
+        "    %r, os.environ.get('BACKFILL_RUN_INDEX'), os.environ.get('GITHUB_OUTPUT'))\n"
+        "print('chain', chain, 'fetched', status.get('fetched'), 'waiting', status.get('waiting'))\n"
+    ) % log_path
+    return subprocess.run(
+        [sys.executable, "-c", script], cwd=ROOT, env=env, capture_output=True, text=True,
+    )
+
+
+def test_followup_loads_config_without_calling_main():
+    """The Nov 5 job saved histories, then crashed here and never committed them."""
+    tmp = tempfile.mkdtemp()
+    try:
+        log_path = os.path.join(tmp, "backfill.log")
+        out_path = os.path.join(tmp, "github_output.txt")
+        cache_path = os.path.join(tmp, "ohlcv.csv.gz")
+        with open(log_path, "w", encoding="utf-8") as handle:
+            handle.write(NOV5_LOG)
+        with open(cache_path, "wb") as handle:
+            handle.write(b"cached-bytes-must-stay")
+        before = open(cache_path, "rb").read()
+        done = _followup_child(log_path, out_path, 0)
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert "ROOT None" not in done.stderr
+        assert open(cache_path, "rb").read() == before
+        text = open(out_path, encoding="utf-8").read()
+        assert "chain=true\n" in text
+        assert "waiting=598\n" in text
+        assert "fetched=599\n" in text
+        assert "chain True fetched 599 waiting 598" in done.stdout
+    finally:
+        shutil.rmtree(tmp)
+
+
+def test_followup_does_not_chain_a_failed_or_final_chunk():
+    tmp = tempfile.mkdtemp()
+    old = desk.ROOT
+    old_env = os.environ.get("DESK_ROOT")
+    desk.ROOT = None
+    os.environ.pop("DESK_ROOT", None)
+    try:
+        stuck = os.path.join(tmp, "stuck.log")
+        with open(stuck, "w", encoding="utf-8") as handle:
+            handle.write("BACKFILL enabled=1 fetched=0 waiting=1122 cap=600 concurrency=2 universe=1725\n")
+        out = os.path.join(tmp, "out.txt")
+        chain, status = desk.write_backfill_followup(stuck, "0", out)
+        assert chain is False and status["fetched"] == 0 and status["waiting"] == 1122
+        assert "chain=false\n" in open(out, encoding="utf-8").read()
+        last = os.path.join(tmp, "last.log")
+        with open(last, "w", encoding="utf-8") as handle:
+            handle.write("BACKFILL enabled=1 fetched=522 waiting=1 cap=600 concurrency=2 universe=1725\n")
+        chain, _status = desk.write_backfill_followup(last, "3", None)
+        assert chain is False
+        missing = os.path.join(tmp, "empty.log")
+        with open(missing, "w", encoding="utf-8") as handle:
+            handle.write("no status line\n")
+        try:
+            desk.write_backfill_followup(missing, "0", None)
+        except SystemExit as exc:
+            assert "no BACKFILL line" in str(exc)
+        else:
+            raise AssertionError("missing BACKFILL line should stop the step")
+    finally:
+        desk.ROOT = old
+        if old_env is None:
+            os.environ.pop("DESK_ROOT", None)
+        else:
+            os.environ["DESK_ROOT"] = old_env
+        shutil.rmtree(tmp)
+
+
+def test_unset_root_uses_desk_root_before_the_repo():
+    tmp = tempfile.mkdtemp()
+    old_root = desk.ROOT
+    old_env = os.environ.get("DESK_ROOT")
+    desk.ROOT = None
+    try:
+        with open(os.path.join(tmp, "config.json"), "w", encoding="utf-8") as handle:
+            json.dump({"incremental_prices": {"fast_backfill_max_runs": 7, "fast_backfill_per_run": 600}}, handle)
+        os.environ["DESK_ROOT"] = tmp
+        assert desk.root() == tmp
+        settings = desk.incremental_price_settings(desk.load_cfg())
+        assert settings["fast_backfill_max_runs"] == 7
+        assert settings["fast_backfill_per_run"] == 600
+    finally:
+        desk.ROOT = old_root
+        if old_env is None:
+            os.environ.pop("DESK_ROOT", None)
+        else:
+            os.environ["DESK_ROOT"] = old_env
         shutil.rmtree(tmp)
 
 
@@ -171,5 +290,8 @@ if __name__ == "__main__":
     test_chain_stops_when_done_stuck_or_out_of_runs()
     test_switch_off_makes_no_download()
     test_chunk_downloads_only_the_capped_new_names()
+    test_followup_loads_config_without_calling_main()
+    test_followup_does_not_chain_a_failed_or_final_chunk()
+    test_unset_root_uses_desk_root_before_the_repo()
     test_settings_and_help()
     print("fast backfill ok")
