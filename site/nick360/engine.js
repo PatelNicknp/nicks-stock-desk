@@ -56,7 +56,7 @@
       let h = Number(r.h != null ? r.h : r.high);
       let l = Number(r.l != null ? r.l : r.low);
       const v0 = r.v != null ? r.v : r.volume;
-      const v = v0 == null || v0 === "" ? null : Number(v0);
+      const v = v0 == null || String(v0).trim() === "" ? null : Number(v0);
       if (!pos(o)) o = c;
       if (!pos(h)) h = Math.max(o, c);
       if (!pos(l)) l = Math.min(o, c);
@@ -556,7 +556,183 @@
     return { state: ok ? "match" : "no", pivot: pivot, rel: s.relVol[i] };
   }
 
-  function buildDesk(records, meta) {
+  function indexTrend(s) {
+    if (!s || s.last < 0) return { status: "unavailable", reason: "No stored bars." };
+    const i = s.last;
+    const prev = i > 0 ? s.bars[i - 1].c : null;
+    const vol = s.bars[i].v;
+    const priorVol = i > 0 ? s.bars[i - 1].v : null;
+    return {
+      status: "ok",
+      day: pos(prev) ? s.bars[i].c / prev - 1 : null,
+      above50: pos(s.sma[50][i]) ? s.bars[i].c > s.sma[50][i] : null,
+      above200: pos(s.sma[200][i]) ? s.bars[i].c > s.sma[200][i] : null,
+      volume: finite(vol) ? vol : null,
+      higherVolume: finite(vol) && finite(priorVol) ? vol > priorVol : null,
+      reason: finite(vol) ? "Share volume is stored." : "Volume is blank. It is not treated as zero.",
+    };
+  }
+
+  function daySpan(a, b) {
+    const da = Date.parse(String(a) + "T00:00:00Z");
+    const db = Date.parse(String(b) + "T00:00:00Z");
+    if (!finite(da) || !finite(db)) return null;
+    return Math.round((db - da) / 86400000);
+  }
+
+  function modeDate(stocks) {
+    const counts = {};
+    stocks.forEach((s) => {
+      if (!s.bars.length) return;
+      const d = s.bars[0].d;
+      counts[d] = (counts[d] || 0) + 1;
+    });
+    let best = "";
+    let n = 0;
+    Object.keys(counts).forEach((d) => { if (counts[d] > n) { n = counts[d]; best = d; } });
+    return best;
+  }
+
+  function listingCoverage(firstBar, offerDate, cacheStart) {
+    if (!offerDate || !firstBar) return "unknown";
+    const gap = daySpan(offerDate, firstBar);
+    if (gap == null) return "unknown";
+    const near = gap >= -5 && gap <= 10;
+    const truncated = !!(cacheStart && firstBar === cacheStart && daySpan(offerDate, cacheStart) > 15);
+    if (near && !truncated) return "covers";
+    return "truncated";
+  }
+
+  function attachListings(stocks, listings, cacheStart) {
+    const list = listings || {};
+    stocks.forEach((s) => {
+      const row = list[s.ticker] || null;
+      const first = s.bars.length ? s.bars[0].d : "";
+      const last = s.bars.length ? s.bars[s.bars.length - 1].d : "";
+      const offer = row && row.offerDate ? String(row.offerDate).slice(0, 10) : "";
+      const coverage = offer ? listingCoverage(first, offer, cacheStart) : "unknown";
+      s.listing = {
+        coverage: coverage,
+        offerDate: offer,
+        name: row && row.name || "",
+        adr: row && row.adr != null && row.adr !== "" ? Number(row.adr) : null,
+        firstBar: first,
+        cacheStart: cacheStart || "",
+        source: row && row.source || "",
+        dateKind: row && row.dateKind || "",
+        note: row && row.note || "",
+        sessionsAfter: offer ? s.bars.filter((b) => b.d >= offer).length : null,
+        ageDays: offer && last ? daySpan(offer, last) : null,
+      };
+    });
+  }
+
+  function meanVol(bars, a, b) {
+    if (a < 0 || b < a) return null;
+    let sum = 0;
+    for (let k = a; k <= b; k++) {
+      if (!finite(bars[k].v)) return null;
+      sum += bars[k].v;
+    }
+    return sum / (b - a + 1);
+  }
+
+  function powerPlayAt(bars, i) {
+    if (!bars || i < 90) return { state: "skip", reason: "Needs 90 stored sessions so an 8-week pole has a 50-session volume baseline." };
+    let hole = false;
+    for (let len = 10; len <= 30; len++) {
+      const j = i - len;
+      const poleStart = j - 39;
+      const baseStart = poleStart - 50;
+      if (baseStart < 0) continue;
+      let mn = Infinity;
+      let mx = -Infinity;
+      let mnAt = -1;
+      let mxAt = -1;
+      let ok = true;
+      for (let k = poleStart; k <= j; k++) {
+        if (!pos(bars[k].c)) { ok = false; hole = true; break; }
+        if (bars[k].c < mn) { mn = bars[k].c; mnAt = k; }
+        if (bars[k].c > mx) { mx = bars[k].c; mxAt = k; }
+      }
+      if (!ok) continue;
+      const gain = mx / mn - 1;
+      if (!(gain >= 1) || !(mxAt > mnAt)) continue;
+      let upV = 0;
+      let upN = 0;
+      for (let k = poleStart + 1; k <= j; k++) {
+        if (!finite(bars[k].v)) { ok = false; hole = true; break; }
+        if (bars[k].c > bars[k - 1].c) { upV += bars[k].v; upN += 1; }
+      }
+      const baseAvg = meanVol(bars, baseStart, poleStart - 1);
+      if (!ok || upN === 0 || baseAvg == null || !(baseAvg > 0)) continue;
+      const upAvg = upV / upN;
+      if (!(upAvg >= 1.5 * baseAvg)) continue;
+      let hi = -Infinity;
+      let lo = Infinity;
+      for (let k = j + 1; k <= i; k++) {
+        if (!pos(bars[k].h) || !pos(bars[k].l)) { ok = false; break; }
+        if (bars[k].h > hi) hi = bars[k].h;
+        if (bars[k].l < lo) lo = bars[k].l;
+      }
+      if (!ok || !(hi > 0)) continue;
+      const depth = (hi - lo) / hi;
+      const cap = bars[i].c < 10 ? 0.25 : 0.20;
+      if (!(depth <= cap)) continue;
+      if (depth > 0.10) {
+        const flagAvg = meanVol(bars, j + 1, i);
+        if (flagAvg == null || !(flagAvg < upAvg)) continue;
+      }
+      return {
+        state: "match", gain: gain, depth: depth, flagSessions: len,
+        reason: "Own version of the published 100% in eight weeks, then a 10 to 30 session flag. Huge volume is our 1.5 times baseline, not a number from the book.",
+      };
+    }
+    if (hole) return { state: "skip", reason: "A pole window had a missing close or volume, so the scan did not guess." };
+    return { state: "no", reason: "No qualifying 100% pole and 10 to 30 session flag." };
+  }
+
+  function cheatCandidateAt(s, i) {
+    if (!s || i < 188) return { state: "skip", reason: "Needs 189 sessions: a 63-session prior advance plus a base of at least 35 sessions and a 200-day average." };
+    const s200 = s.sma[200][i];
+    const prev = s.sma[200][i - 21];
+    if (!pos(s200) || !pos(prev)) return { state: "skip", reason: "200-day average is missing." };
+    if (!(s.bars[i].c > s200 && s200 > prev)) return { state: "no", reason: "Close is not above a rising 200-day average." };
+    for (let len = 35; len <= 125; len++) {
+      const start = i - len + 1;
+      const prior = start - 63;
+      if (prior < 0 || !pos(s.bars[prior].c) || !pos(s.bars[start].c)) continue;
+      const advance = s.bars[start].c / s.bars[prior].c - 1;
+      if (!(advance >= 0.25)) continue;
+      let hi = -Infinity;
+      let lo = Infinity;
+      for (let k = start; k <= i; k++) {
+        if (s.bars[k].h > hi) hi = s.bars[k].h;
+        if (s.bars[k].l < lo) lo = s.bars[k].l;
+      }
+      if (!(hi > 0)) continue;
+      const depth = (hi - lo) / hi;
+      if (depth < 0.15 || depth > 0.35) continue;
+      let chi = -Infinity;
+      let clo = Infinity;
+      for (let k = i - 14; k <= i; k++) {
+        if (s.bars[k].h > chi) chi = s.bars[k].h;
+        if (s.bars[k].l < clo) clo = s.bars[k].l;
+      }
+      if (!(chi > 0) || (chi - clo) / chi > 0.10) continue;
+      const recent = meanVol(s.bars, i - 14, i);
+      const before = meanVol(s.bars, i - 29, i - 15);
+      if (recent == null || before == null) return { state: "skip", reason: "Cheat volume is missing." };
+      if (!(recent < before)) continue;
+      return {
+        state: "match", depth: depth, advance: advance, len: len,
+        reason: "Own-version cup-completion cheat candidate. The book paraphrase gives wide ranges. These bounds are one explicit choice inside that paraphrase, not a certified 3C.",
+      };
+    }
+    return { state: "no", reason: "No base in the 35 to 125 session band met the depth, plateau, advance, and volume checks." };
+  }
+
+  function buildDesk(records, meta, listings) {
     const stocks = (records || []).map((r) => {
       const parsed = parseBars(r.bars || r.rows || []);
       const s = analyzeBars(parsed.bars);
@@ -570,6 +746,11 @@
     const dates = calendar(stocks, 252);
     rankDates(stocks, dates);
     stocks.forEach((s) => finalizeStock(s, meta || {}));
+    attachListings(stocks, listings, modeDate(stocks));
+    stocks.forEach((s) => {
+      s.powerPlay = s.last >= 0 ? powerPlayAt(s.bars, s.last) : { state: "skip", reason: "No bars." };
+      s.cheat = s.last >= 0 ? cheatCandidateAt(s, s.last) : { state: "skip", reason: "No bars." };
+    });
     const screens = SCREEN_DEFS.map((def) => evaluateScreen(def, stocks));
     return { stocks: stocks, dates: dates, screens: screens, coverage: COVERAGE };
   }
@@ -644,16 +825,16 @@
       formula: "Close is above the 50-day and at most 8% above it.",
       data: "50-day average.",
       match: (s) => { const risk = s.last >= 0 ? s.risk[s.last] : null; return risk ? (risk.color === "green" ? "match" : "no") : "skip"; } },
-    { id: "ipo", ref: "IPOs (Stocks)", ourName: "IPOs", status: "unavailable",
-      evidence: "No listing date is stored. The first bar in a file is the cache start, not an IPO.",
-      formula: "Not computed. A short file is not treated as an IPO.",
-      data: "Listing date, which this desk does not publish.",
-      match: () => "skip" },
-    { id: "powerIpo", ref: "Power IPO", ourName: "Power IPO", status: "unavailable",
-      evidence: "Power Play thresholds were not verified, and listing dates are not stored.",
-      formula: "Not computed. Not claimed as a copy.",
-      data: "Listing date and a verified power-play rule.",
-      match: () => "skip" },
+    { id: "ipo", ref: "IPOs (Stocks)", ourName: "Recent offer, chart covers it", status: "enabled",
+      evidence: "Offer dates are the Field-Ritter file, not the first stored bar. The file's own note says an offer date is sometimes the first trade and sometimes the day before, and that direct listings are included without a separate flag. De-SPAC mergers are excluded by that file. SPAC IPOs may still be in it. A ticker can have been reused; the latest offer date is kept.",
+      formula: "ADR flag is not 2. The first stored bar is within 5 days before through 10 days after the offer date, and that first bar is not the common cache-start date unless the offer itself is within 15 days of the cache start. The offer is within 3 years of the last bar and at least 15 sessions are on or after the offer date.",
+      data: "Field-Ritter IPO-age.xlsx offer date, plus stored daily bars.",
+      match: (s) => ipoState(s) },
+    { id: "powerIpo", ref: "Power IPO", ourName: "Power IPO candidate", status: "enabled",
+      evidence: "No single public Power IPO formula was found. This is our filter on top of the offer-date rule. It is not a Minervini screen.",
+      formula: "Passes the recent-offer rule, has at least 25 sessions on or after the offer date and the offer is still inside the 3-year window, last close at least $10, 20-session average volume at least 100,000, and either the last 15 sessions' range is at most 15% of the midpoint or the close is within 5% under the prior 20-session high.",
+      data: "The same offer date and stored bars. A missing volume skips the name.",
+      match: (s) => powerIpoState(s) },
     { id: "top5", ref: "Top 5% RPR", ourName: "Top 5% rank", status: "enabled",
       evidence: "Our rank, scaled 1 to 99. Ranks 95 through 99 are the top slice.",
       formula: "12-month rank at least 95.",
@@ -742,7 +923,51 @@
       formula: "Close is under that high by at most 3% and still above the 50-day.",
       data: "20 prior highs and the 50-day average.",
       match: (s) => s.patterns.near.state === "match" ? "match" : s.patterns.near.state },
+    { id: "powerPlay", ref: "Power Play", ourName: "Power Play candidate", status: "enabled",
+      evidence: "Secondary quotations of Minervini's book state 100% or more in less than eight weeks, then a sideways range of not more than 20% (25% mentioned for some lower-priced stocks) over about 3 to 6 weeks, sometimes 10 or 12 days. 'Huge volume' is not given as a number. The 40% and 55% run-up examples are not used.",
+      formula: "Own version: a 40-session pole gains at least 100% from its lowest close to a later highest close, up-day volume averages at least 1.5 times the 50 sessions before the pole, then 10 to 30 sessions correct at most 20% (25% only if the close is under $10). If that correction is deeper than 10%, flag volume must average below the pole's up-day volume. A candidate, not a certified pattern.",
+      data: "Stored daily bars. A missing close or volume in a tested window skips that window.",
+      match: (s) => s.powerPlay ? s.powerPlay.state : "skip" },
+    { id: "cheat3c", ref: "3C / cup completion cheat", ourName: "Cup-completion cheat candidate", status: "enabled",
+      evidence: "ChartMill says the cheat is the 3C, Cup Completion Cheat, in Trade Like a Stock Market Wizard from page 243. A secondary paraphrase gives wide ranges (prior gain at least 25%, base from 3 to 45 weeks, correction from about 15% to as much as 50%, cheat plateau 5% to 10%). Those ranges are not one rule. This scan picks one explicit point inside the paraphrase and does not claim a visual cup.",
+      formula: "Own version: close above a 200-day average that is higher than 21 sessions ago; a base of 35 to 125 sessions whose high-to-low depth is 15% to 35%; the close at the base start is at least 25% above the close 63 sessions earlier; the last 15 sessions range at most 10% of their high; average volume of those 15 sessions is below the 15 sessions before them.",
+      data: "Stored daily bars and the 200-day average. Missing volume skips the name.",
+      match: (s) => s.cheat ? s.cheat.state : "skip" },
   ];
+
+  function ipoState(s) {
+    const L = s.listing;
+    if (!L || !L.offerDate) return "skip";
+    if (L.adr === 2) return "no";
+    if (L.coverage !== "covers") return "no";
+    if (L.ageDays == null || L.sessionsAfter == null) return "skip";
+    if (L.sessionsAfter < 15) return "skip";
+    if (L.ageDays < 0 || L.ageDays > 365 * 3) return "no";
+    return "match";
+  }
+
+  function powerIpoState(s) {
+    const base = ipoState(s);
+    if (base !== "match") return base;
+    const i = s.last;
+    const L = s.listing;
+    if (i < 19 || !pos(s.close) || L.sessionsAfter == null) return "skip";
+    if (L.sessionsAfter < 25 || L.ageDays > 365 * 3) return "no";
+    const avg = meanVol(s.bars, i - 19, i);
+    if (avg == null) return "skip";
+    if (!(s.close >= 10) || !(avg >= 100000)) return "no";
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let k = i - 14; k <= i; k++) {
+      hi = Math.max(hi, s.bars[k].h);
+      lo = Math.min(lo, s.bars[k].l);
+    }
+    const mid = (hi + lo) / 2;
+    const tight = pos(mid) && (hi - lo) / mid <= 0.15;
+    const pivot = priorHigh(s.bars, i, 20);
+    const near = pos(pivot) && s.close <= pivot && (pivot - s.close) / pivot <= 0.05;
+    return tight || near ? "match" : "no";
+  }
 
   const COVERAGE = SCREEN_DEFS.map((d) => ({
     ref: d.ref,
@@ -762,7 +987,7 @@
     { ref: "Relative volume", ourName: "Relative volume", id: "relvol", status: "enabled", evidence: "Our volume reading. Separate from dry-up and from pressure.", formula: "Today's volume divided by the average of the 50 sessions before today. Today is not in the baseline. A later session is not used. A missing or non-numeric volume in the baseline leaves the ratio blank. A zero baseline is blank.", data: "51 volume sessions.", tested: true },
     { ref: "Volume contraction", ourName: "Dry-up ratio", id: "dryratio", status: "enabled", evidence: "Our windows, chosen so the recent 10 sessions are not inside their own baseline.", formula: "Average volume of the last 10 sessions, including today, divided by the average of the 50 sessions before those 10.", data: "60 volume sessions.", tested: true },
     { ref: "SPY 25 / QQQ 33 / STEM", ourName: "Desk regime", id: "regime", status: "enabled", evidence: "Those timing models are not published and are not computed. SPY and QQQ daily bars are not in the published per-ticker files.", formula: "UPTREND when the stored share of names above the 50-day is at least 60%, the share above the 200-day is at least 55%, and advancers are at least decliners when both counts exist. DEFENSIVE when either breadth share is under 40%. Otherwise MIXED. Missing breadth leaves the regime unavailable.", data: "market_today.csv breadth and advancer counts. Not index OHLC.", tested: true },
-    { ref: "Power Play / 3C", ourName: "Not copied", id: "powerplay", status: "unavailable", evidence: "Thresholds were not verified. No screen claims those names.", formula: "Not implemented.", data: "A verified rule, which we do not have.", tested: false },
+    { ref: "Index OHLC", ourName: "Stored SPY, QQQ, and VIX only", id: "indexes", status: "partial", evidence: "SPY and QQQ in the existing price cache are ETF proxies, not the S&P 500 or Nasdaq-100 indexes. ^VIX in that cache is the volatility index series already stored; its volume is 0 and is kept blank. ^GSPC, ^IXIC, ^NDX, ^DJI, and ^RUT are not in the cache. FRED close is not used as OHLC. No new price download was added.", formula: "Charts and a simple close-versus-average reading use only those three stored series. A blank volume is not treated as zero in a volume test.", data: "data/index_ohlc from rows already in the price cache.", tested: true },
     { ref: "Quarterly sales", ourName: "Sales", id: "sales", status: "unavailable", evidence: "earnings_history.csv has EPS, not quarterly sales. Annual revenue on company_financials is not a quarterly sales series.", formula: "Shown as unavailable. EPS is shown only where an actual is stored.", data: "Quarterly sales feed.", tested: false },
     { ref: "SBE", ourName: "Partial sale to cover stop risk", id: "sbe", status: "enabled", evidence: "The idea is public. The exact product formula was not published. This is our algebra.", formula: "Fraction sold f = (entry - stop) / (sale - stop - fee). Sale must be above entry, stop below entry. Assumes the remaining shares are stopped exactly at the stop, with no gap.", data: "User entry, stop, sale, fee.", tested: true },
     { ref: "RBAF", ourName: "Scenario trade count", id: "rbaf", status: "enabled", evidence: "A quoted book example works out to about 60 trades on the linear form. Compounding the same inputs does not. Neither number is a forecast.", formula: "Edge = win rate times average gain minus loss rate times average loss, minus fee. Portfolio edge = position size times that edge. Linear trades = target divided by portfolio edge. Compound trades = ln(1+target) / ln(1+portfolio edge). Non-positive edge returns no trade count.", data: "User scenario inputs.", tested: true },
@@ -803,7 +1028,7 @@
       spyPrice: num(row && row.spy_price),
       asOf: row && row.price_as_of || "",
       b50: b50, b200: b200, adv: adv, dec: dec,
-      note: "This regime uses stored breadth. It is not a SPY 25 model, a QQQ 33 model, or STEM. Daily SPY and QQQ bars are not in the published OHLC files, so those models are not computed.",
+      note: "This regime uses stored breadth. It is not a SPY 25 model, a QQQ 33 model, or STEM. SPY and QQQ candles, when shown above, are ETF proxies and are not this model.",
     };
     if (b50 == null || b200 == null) {
       return Object.assign(base, { status: "unavailable", label: "Unavailable", reason: "Breadth percentages are missing from market_today.csv." });
@@ -1318,6 +1543,10 @@
     netOf: netOf,
     finalizeStock: finalizeStock,
     buildDesk: buildDesk,
+    listingCoverage: listingCoverage,
+    powerPlayAt: powerPlayAt,
+    cheatCandidateAt: cheatCandidateAt,
+    indexTrend: indexTrend,
     regimeFromMarket: regimeFromMarket,
     summarize: summarize,
     toWeekly: toWeekly,

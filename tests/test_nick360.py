@@ -56,6 +56,26 @@ def test_no_new_price_requests_or_job_edits():
         assert "nick360" not in _read(name).lower()
 
 
+def test_index_proxy_writer_blanks_zero_volume_and_does_not_fetch():
+    import inspect
+    import pandas as pd
+    import stock_desk
+    src = inspect.getsource(stock_desk.write_index_proxy_files)
+    assert "yfinance" not in src and "yahoo" not in src.lower()
+    rows = []
+    for i, px in enumerate((10, 11, 12)):
+        rows.append({"date": "2024-01-%02d" % (i + 2), "ticker": "^VIX", "open": px, "high": px + 1, "low": px - 1, "close": px, "volume": 0})
+        rows.append({"date": "2024-01-%02d" % (i + 2), "ticker": "SPY", "open": px, "high": px + 1, "low": px - 1, "close": px, "volume": 1000 + i})
+    import tempfile
+    folder = tempfile.mkdtemp()
+    wrote = stock_desk.write_index_proxy_files(pd.DataFrame(rows), folder)
+    assert wrote == ["SPY", "VIX"]
+    vix = open(os.path.join(folder, "VIX.csv"), encoding="utf-8").read().splitlines()
+    assert vix[1].endswith(",")
+    spy = open(os.path.join(folder, "SPY.csv"), encoding="utf-8").read()
+    assert ",1000" in spy or ",1001" in spy or ",1002" in spy
+
+
 def test_formula_file_matches_the_engine_and_marks_gaps():
     doc = _read("site", "nick360", "FORMULAS.md")
     for phrase in (

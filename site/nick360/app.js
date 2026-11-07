@@ -100,7 +100,7 @@
     return n;
   }
   function uid() { return "n" + Math.random().toString(36).slice(2, 10); }
-  function current() { return state.by.get(state.symbol) || null; }
+  function current() { return state.by.get(state.symbol) || (state.indexes && state.indexes.get(state.symbol)) || null; }
   function prices() {
     const out = {};
     state.by.forEach((s, t) => { if (E.finite(s.close)) out[t] = s.close; });
@@ -275,7 +275,13 @@
 
   function screensHtml() {
     const screens = (state.desk && state.desk.screens) || [];
-    const head = '<div class="ph">Screens <input id="qsym" aria-label="Filter symbols" placeholder="Filter" value="' + esc(state.query) + '"></div>' +
+    const mans = state.manifest || [];
+    const live = mans.filter((r) => r.role && r.role !== "unavailable");
+    const gaps = mans.filter((r) => r.role === "unavailable");
+    const indexBox = '<div class="pad"><div class="ph" style="padding:0 0 6px">Index series</div>' +
+      live.map((r) => '<button type="button" class="scr' + (state.symbol === r.symbol ? " open" : "") + '" data-act="pick" data-ticker="' + esc(r.symbol) + '">' + esc(r.symbol) + " · " + esc(r.name) + "</button>").join("") +
+      '<p class="note">' + gaps.map((r) => esc(r.symbol) + " unavailable. " + esc(r.note)).join(" ") + "</p></div>";
+    const head = indexBox + '<div class="ph">Screens <input id="qsym" aria-label="Filter symbols" placeholder="Filter" value="' + esc(state.query) + '"></div>' +
       '<div class="legend">Rank is our 1–99 twelve-month score. Grade is our A–D checklist. Neither is a third-party rating. A screen with missing inputs is counted as not evaluated, not as a miss.</div>' +
       '<div class="cols"><button type="button" data-act="sort" data-key="ticker">Symbol</button><button type="button" data-act="sort" data-key="chg">Chg %</button><button type="button" data-act="sort" data-key="last">Last</button><button type="button" data-act="sort" data-key="rank">Rank</button><button type="button" data-act="sort" data-key="grade">Grade</button><button type="button" data-act="sort" data-key="off">% off high</button></div>';
     const body = screens.map((screen) => {
@@ -404,8 +410,9 @@
   }
   function summaryHtml(s) {
     const sum = E.summarize(s);
+    const role = s.role ? "<p class=\"note\">" + esc(s.company) + ". " + esc(s.role) + ". " + esc(s.note || "") + " Stock screens do not apply. This is not a SPY 25, QQQ 33, or STEM reading.</p>" : "";
     const today = s.recent.length ? s.recent[s.recent.length - 1] : null;
-    return '<h3>' + esc(s.ticker) + " summary</h3><p class=\"note\">Computed from stored bars through " + esc(s.date) + ". Not a language model.</p><div class=\"story\"><p>" + esc(sum.text) + "</p>" +
+    return '<h3>' + esc(s.ticker) + " summary</h3><p class=\"note\">Computed from stored bars through " + esc(s.date) + ". Not a language model.</p>" + role + '<div class="story"><p>' + esc(sum.text) + "</p>" +
       (today ? "<p>" + chips(today.events) + "</p>" : "") + planHtml(s) + "</div>";
   }
   function newsHtml(s) {
@@ -460,6 +467,23 @@
     if (fills.length) notes.push("Your paper log has " + fills.length + " fill(s) on the price date.");
     return notes;
   }
+  function indexCards() {
+    const mans = state.manifest || [];
+    const gaps = mans.filter((r) => r.role === "unavailable");
+    let cards = "";
+    if (state.indexes) state.indexes.forEach((s) => {
+      const t = s.indexTrend || E.indexTrend(s);
+      cards += '<section class="card"><h3>' + esc(s.ticker) + " <small>" + esc(s.role) + '</small></h3><div class="big">' + px(s.close) + "</div><p class=\"note\">" +
+        (t.day == null ? "Day —" : pct(t.day, 2)) + " · 50-day " + (t.above50 == null ? "—" : t.above50 ? "above" : "below") +
+        " · 200-day " + (t.above200 == null ? "—" : t.above200 ? "above" : "below") +
+        (t.higherVolume == null ? " · volume blank, not zero" : " · volume " + (t.higherVolume ? "above" : "not above") + " the prior day") +
+        "</p><p class=\"note\">" + esc(s.note || "") + "</p></section>";
+    });
+    const gap = gaps.length ? '<section class="card"><h3>Index gaps</h3><p class="note">' + gaps.map((r) => "<b>" + esc(r.symbol) + "</b> " + esc(r.note)).join(" ") + "</p></section>" : "";
+    if (!cards && !gap) return "";
+    return '<div class="dash">' + cards + gap + "</div>";
+  }
+
   function dashHtml() {
     const regime = E.regimeFromMarket(state.market || {});
     const hint = stats().stopHint;
@@ -479,7 +503,7 @@
           "</td><td>" + bag.pos.length + " / " + bag.neg.length + "</td></tr>";
       }).join("");
     }).join("");
-    return '<div class="page"><div class="dash"><section class="card"><h3>Market status <small>Our regime</small></h3><div class="big ' + (regime.label === "DEFENSIVE" ? "dn" : regime.label === "UPTREND" ? "up" : "") + '">' + esc(regime.label) + "</div><p class=\"note\">" + esc(regime.reason || regime.note) + "</p><p class=\"note\">" + esc(regime.note) + "</p></section>" +
+    return '<div class="page">' + indexCards() + '<div class="dash"><section class="card"><h3>Market status <small>Our regime</small></h3><div class="big ' + (regime.label === "DEFENSIVE" ? "dn" : regime.label === "UPTREND" ? "up" : "") + '">' + esc(regime.label) + "</div><p class=\"note\">" + esc(regime.reason || regime.note) + "</p><p class=\"note\">" + esc(regime.note) + "</p></section>" +
       '<section class="card"><h3>From your paper log <small>not a universal stop</small></h3>' + (hint.available ? '<div class="big">' + pct(hint.pct, 1) + "</div>" : '<div class="big mut">—</div>') + '<p class="note">' + esc(hint.reason) + "</p></section>" +
       '<section class="card"><h3>Desk notes <small>stored facts</small></h3>' + noteList().map((n) => '<p class="note">' + esc(n) + "</p>").join("") + "</section></div>" +
       '<div class="split2"><section class="card"><h3>Paper portfolio <small>this browser only</small></h3>' + (port ? '<div class="scroll"><table><thead><tr><th>Symbol</th><th>Chg</th><th>Last</th><th>Rank</th><th>Grade</th><th>Entry</th><th>Avg cost</th><th>Stop</th><th>Stop %</th><th>P&amp;L %</th><th>R</th><th>Alerts</th></tr></thead><tbody>' + port + "</tbody></table></div>" : '<p class="note">No paper positions yet. Groups appear when a fill is marked full, half, or quarter. Unmarked fills stay under Unclassified. No stop is filled in for you.</p>') +
@@ -683,6 +707,8 @@
     try {
       const packed = await Promise.all([
         loadCsv("scores.csv"),
+        loadCsv("nick360/listings.csv").catch(() => []),
+        loadCsv("index_ohlc/manifest.csv").catch(() => []),
         fetch(csvUrl("meta.json")).then((r) => r.json()),
         loadCsv("market_today.csv"),
         loadCsv("news.csv"),
@@ -690,19 +716,23 @@
         loadCsv("earnings_calendar.csv"),
       ]);
       const scores = packed[0];
-      state.meta = packed[1] || {};
-      state.market = (packed[2] && packed[2][0]) || {};
-      state.news = packed[3] || [];
-      (packed[4] || []).forEach((row) => {
+      const listings = packed[1] || [];
+      const manifest = packed[2] || [];
+      state.meta = packed[3] || {};
+      state.market = (packed[4] && packed[4][0]) || {};
+      state.news = packed[5] || [];
+      (packed[6] || []).forEach((row) => {
         const t = String(row.ticker || "").toUpperCase();
         if (!t) return;
         if (!state.earnings[t]) state.earnings[t] = [];
         state.earnings[t].push(row);
       });
-      (packed[5] || []).forEach((row) => {
+      (packed[7] || []).forEach((row) => {
         const t = String(row.ticker || "").toUpperCase();
         if (t) state.calendar[t] = row;
       });
+      state.manifest = manifest;
+      state.listingRows = listings;
       const scoreBy = new Map();
       scores.forEach((row) => {
         const t = String(row.ticker || "").toUpperCase();
@@ -739,7 +769,31 @@
       state.progress = 1;
       render();
       await delay(20);
-      const desk = E.buildDesk(records, state.meta);
+      const listingMap = {};
+      listings.forEach((row) => {
+        const t = String(row.ticker || "").toUpperCase();
+        if (!t) return;
+        listingMap[t] = { offerDate: row.offer_date, name: row.ipo_name, adr: row.adr, source: row.source, dateKind: row.date_kind, note: row.note };
+      });
+      const desk = E.buildDesk(records, state.meta, listingMap);
+      state.indexes = new Map();
+      for (let i = 0; i < manifest.length; i++) {
+        const row = manifest[i];
+        if (!row.symbol || row.role === "unavailable") continue;
+        try {
+          const res = await fetch(csvUrl("index_ohlc/" + row.symbol + ".csv"));
+          if (!res.ok) continue;
+          const parsed = E.parseBars(parseOhlc(await res.text()));
+          const series = E.analyzeBars(parsed.bars);
+          E.finalizeStock(series, state.meta);
+          series.ticker = row.symbol;
+          series.company = row.name || row.symbol;
+          series.role = row.role;
+          series.note = row.note || "";
+          series.indexTrend = E.indexTrend(series);
+          state.indexes.set(row.symbol, series);
+        } catch (err) { /* one series missing does not stop the desk */ }
+      }
       if (!records.length) throw new Error("None of the published OHLC files could be read.");
       state.desk = desk;
       desk.stocks.forEach((s) => state.by.set(s.ticker, s));

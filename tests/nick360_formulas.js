@@ -150,8 +150,9 @@ check("missing inputs do not become screen matches", () => {
   });
   const ipo = desk.screens.find((s) => s.id === "ipo");
   const power = desk.screens.find((s) => s.id === "powerIpo");
-  assert.strictEqual(ipo.status, "unavailable");
-  assert.strictEqual(power.status, "unavailable");
+  assert.strictEqual(ipo.status, "enabled");
+  assert.strictEqual(ipo.matches.length, 0);
+  assert.strictEqual(power.matches.length, 0);
 });
 
 check("a real trend can pass the template only when every input exists", () => {
@@ -272,13 +273,57 @@ check("summary quotes only computed fields", () => {
   assert.ok(!/Minervini|RPR|TPR|Fab 5/.test(text));
 });
 
-check("coverage lists every reference screen and marks IPO unavailable", () => {
+check("coverage lists every reference screen and keeps sales unavailable", () => {
   const ids = E.COVERAGE.map((c) => c.id);
-  ["bread", "gradeA", "gradeAB", "gradeUp", "tight", "rank89", "lead5", "riskGreen", "ipo", "powerIpo", "top5", "newTop5", "momentum", "trendQual", "gradeJump", "gradeDtoB", "gradeD200", "stage2", "template", "vcp", "dry", "breakout", "near", "powerplay", "sales"].forEach((id) => {
+  ["bread", "gradeA", "gradeAB", "gradeUp", "tight", "rank89", "lead5", "riskGreen", "ipo", "powerIpo", "top5", "newTop5", "momentum", "trendQual", "gradeJump", "gradeDtoB", "gradeD200", "stage2", "template", "vcp", "dry", "breakout", "near", "powerPlay", "cheat3c", "indexes", "sales"].forEach((id) => {
     assert.ok(ids.indexOf(id) >= 0, id);
   });
-  assert.strictEqual(E.COVERAGE.find((c) => c.id === "ipo").status, "unavailable");
-  assert.strictEqual(E.COVERAGE.find((c) => c.id === "powerplay").tested, false);
+  assert.strictEqual(E.COVERAGE.find((c) => c.id === "ipo").status, "enabled");
+  assert.strictEqual(E.COVERAGE.find((c) => c.id === "sales").status, "unavailable");
+  assert.strictEqual(E.COVERAGE.find((c) => c.id === "indexes").status, "partial");
+});
+
+check("offer-date coverage never treats the cache start as an IPO", () => {
+  assert.strictEqual(E.listingCoverage("2021-11-04", "2018-05-01", "2021-11-04"), "truncated");
+  assert.strictEqual(E.listingCoverage("2024-03-21", "2024-03-21", "2021-11-04"), "covers");
+  assert.strictEqual(E.listingCoverage("2024-03-26", "2024-03-21", "2021-11-04"), "covers");
+  assert.strictEqual(E.listingCoverage("2024-04-20", "2024-03-21", "2021-11-04"), "truncated");
+  const bars = barsFrom(ramp(40, 20, 0.1));
+  const desk = E.buildDesk([{ ticker: "NEW", bars: bars }], {}, {
+    NEW: { offerDate: "2019-01-02", adr: 1 },
+  });
+  const ipo = desk.screens.find((s) => s.id === "ipo");
+  assert.strictEqual(ipo.matches.length, 0);
+  assert.strictEqual(desk.stocks[0].listing.coverage, "truncated");
+});
+
+check("power play boundaries and no lookahead", () => {
+  const closes = [];
+  const volume = [];
+  for (let i = 0; i < 50; i++) { closes.push(10); volume.push(100); }
+  for (let i = 0; i < 40; i++) { closes.push(10 + i * 0.3); volume.push(200); }
+  for (let i = 0; i < 12; i++) { closes.push(21.5); volume.push(40); }
+  const bars = barsFrom(closes, { volume: volume, high: 1.01, low: 0.995 });
+  const hit = E.powerPlayAt(bars, bars.length - 1);
+  assert.strictEqual(hit.state, "match", hit.reason);
+  const early = E.powerPlayAt(bars, bars.length - 5);
+  closes[closes.length - 1] = 40;
+  const again = E.powerPlayAt(barsFrom(closes, { volume: volume, high: 1.01, low: 0.995 }), bars.length - 5);
+  assert.strictEqual(again.state, early.state);
+  const shy = closes.slice();
+  for (let i = 50; i < 90; i++) shy[i] = 10 + (i - 50) * 0.15;
+  const miss = E.powerPlayAt(barsFrom(shy, { volume: volume, high: 1.01, low: 0.995 }), shy.length - 1);
+  assert.notStrictEqual(miss.state, "match");
+});
+
+check("blank index volume is not a higher-volume day", () => {
+  const bars = barsFrom([10, 11, 12], { volume: [0, 0, 0] });
+  bars.forEach((b) => { b.v = null; });
+  const s = E.analyzeBars(bars);
+  s.last = bars.length - 1;
+  const trend = E.indexTrend(s);
+  assert.strictEqual(trend.volume, null);
+  assert.strictEqual(trend.higherVolume, null);
 });
 
 if (failed) {
