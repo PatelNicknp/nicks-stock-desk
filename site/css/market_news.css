@@ -121,6 +121,22 @@ html[data-theme="light"] .mn-card {
 .mn-num { color: var(--mn-accent); }
 .mn-storytitle { font-size: 13px; line-height: 1.5; font-weight: 600; color: var(--mn-text); }
 .mn-why { margin-top: 4px; font-size: 11px; line-height: 1.4; font-weight: 450; color: var(--mn-muted); }
+.mn-world { margin: 4px 0 22px; }
+.mn-worldsum, .mn-worldmiss { margin: 0 0 8px; font-size: 12px; line-height: 1.45; color: var(--mn-muted); }
+.mn-worldrow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.mn-wchip {
+  min-width: 108px; padding: 8px 10px; border: 1px solid var(--mn-line); border-radius: 8px; background: var(--mn-surface);
+}
+.mn-wchip span, .mn-wchip small { display: block; color: var(--mn-muted); }
+.mn-wchip span { font-size: 10px; font-weight: 650; }
+.mn-wchip b { display: block; margin: 2px 0; font-size: 16px; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+.mn-wchip small { font-size: 10px; }
+.mn-wchip.mn-up b { color: var(--mn-up); }
+.mn-wchip.mn-down b { color: var(--mn-red); }
+.mn-wscroll { overflow-x: auto; margin: 0 0 10px; }
+.mn-wtable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.mn-wtable th, .mn-wtable td { text-align: left; padding: 4px 8px 4px 0; vertical-align: top; border-bottom: 1px solid var(--mn-line); }
+.mn-wtable a { color: inherit; }
 .mn-out { font-size: 15px; color: var(--mn-faint); padding-top: 20px; }
 .mn-details { border-top: 1px solid var(--mn-line); margin-top: 2px; }
 .mn-details summary {

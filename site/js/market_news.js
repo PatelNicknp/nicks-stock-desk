@@ -133,6 +133,72 @@
     return '<div class="mn-story" id="mn-src-' + h.n + '">' + body + "</div>";
   }
 
+  function signedPct(pct) {
+    if (pct == null || pct === "") return "";
+    var n = Number(pct);
+    if (!isFinite(n)) return "";
+    var body = Math.abs(n).toFixed(2) + "%";
+    if (n > 0) return "+" + body;
+    if (n < 0) return "−" + body;
+    return body;
+  }
+
+  function statusLabel(status) {
+    return {
+      closed: "Closed",
+      prior_local_close: "Prior local close",
+      intraday: "Intraday",
+      delayed: "Delayed",
+      stale: "Stale",
+      unknown: "Unknown",
+    }[status] || "Unknown";
+  }
+
+  function worldStrip(brief) {
+    var world = brief.world_moves;
+    if (!world || !(world.rows || []).length) return "";
+    var strip = world.strip || [];
+    var chips = strip.map(function (row) {
+      var cls = row.pct > 0 ? "mn-up" : row.pct < 0 ? "mn-down" : "mn-flatv";
+      var kind = row.kind === "etf_proxy" ? "ETF" : "Index";
+      return '<div class="mn-wchip ' + cls + '"><span>' + esc(row.name) +
+        " · " + esc(kind) + "</span><b>" + esc(signedPct(row.pct)) + "</b><small>" +
+        esc(row.session_date || "") + " · " + esc(statusLabel(row.status)) + "</small></div>";
+    }).join("");
+    var missing = (world.missing || []).join(", ");
+    return '<section class="mn-world" aria-label="Major markets">' +
+      '<p class="mn-label">Major markets</p>' +
+      '<p class="mn-worldsum">' + esc(world.summary || "") + "</p>" +
+      (chips ? '<div class="mn-worldrow">' + chips + "</div>" : "") +
+      (missing ? '<p class="mn-worldmiss">No verified index close for ' + esc(missing) +
+        ". The chips above stay the desk's stored ETF readings.</p>" : "") +
+      "</section>";
+  }
+
+  function worldTable(brief) {
+    var world = brief.world_moves;
+    if (!world || !(world.rows || []).length) return "";
+    var body = world.rows.map(function (row) {
+      var link = row.source_url
+        ? '<a href="' + esc(row.source_url) + '" target="_blank" rel="noopener noreferrer">' + esc(row.source || "Source") + "</a>"
+        : esc(row.source || "");
+      var cause = row.cause
+        ? esc(row.cause) + (row.cause_url
+          ? ' <a href="' + esc(row.cause_url) + '" target="_blank" rel="noopener noreferrer">Link</a>'
+          : "")
+        : "No sourced cause." + (row.note ? " " + esc(row.note) : "");
+      var kind = row.kind === "etf_proxy" ? "ETF proxy" : "Index";
+      return "<tr><td>" + esc(row.name) + "</td><td>" + esc(kind) + "</td><td>" +
+        esc(row.session_date || "—") + "</td><td>" + esc(statusLabel(row.status)) + "</td><td>" +
+        esc(row.pct == null ? "Unknown" : signedPct(row.pct)) + "</td><td>" + link + "</td><td>" +
+        cause + "</td></tr>";
+    }).join("");
+    return '<p><strong>Major markets.</strong> ' + esc(world.summary || "") + "</p>" +
+      '<div class="mn-wscroll"><table class="mn-wtable"><thead><tr>' +
+      "<th>Benchmark</th><th>Kind</th><th>Session</th><th>Status</th><th>Change</th><th>Source</th><th>Cause</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table></div>";
+  }
+
   function detailParagraphs(brief, opts) {
     var story = brief.story || {};
     var bits = [];
@@ -168,6 +234,7 @@
     }
     var dow = (story.indexes || []).filter(function (r) { return r.name === "Dow" && r.arrow === "missing"; })[0];
     if (dow && dow.note) bits.push("<p><strong>Dow.</strong> " + esc(dow.note) + "</p>");
+    bits.push(worldTable(brief));
     if (brief.disclaimer) bits.push("<p>" + esc(brief.disclaimer) + "</p>");
     return bits.join("");
   }
@@ -259,7 +326,7 @@
       '<div class="mn-eyebrowrow"><p class="mn-eyebrow">Market news</p>' + mkt + "</div>" +
       '<h2 class="mn-title" id="mn-title">Why the market moved today</h2>' +
       (date ? '<p class="mn-date">' + esc(date) + "</p>" : "") +
-      indexes + reason + sectors + sources +
+      indexes + reason + worldStrip(brief) + sectors + sources +
       "</div>" + details + "</article>" +
       '<p class="mn-note">Sources linked above. Research only. This desk never places a trade.</p>';
   }

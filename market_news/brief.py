@@ -12,7 +12,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Optional
 
-from . import calendar_fetch, learning, news_fetch
+from . import calendar_fetch, learning, news_fetch, world_markets
 from .causes import pick_headlines, score_causes, tag_headline
 from .mood import breadth_vs_price, mood_chip, regime_note, why_moved, why_moved_short
 from .schema import DISCLAIMER, FEATURE_FLAG, OUTPUT_FILES, SCHEMA_VERSION
@@ -120,6 +120,7 @@ def build_brief(
     history_rows: Optional[List[Dict[str, Any]]] = None,
     headline_limit: int = 7,
     now: Optional[dt.datetime] = None,
+    world_moves: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Pure build — no I/O. Safe for unit tests.
 
@@ -201,6 +202,8 @@ def build_brief(
         "disclaimer": DISCLAIMER,
         "data_status": stats.get("data_status") or "OK",
     }
+    if world_moves is not None:
+        brief["world_moves"] = world_moves
 
     hist = list(history_rows or [])
     hist = learning.backfill_next_day(hist, session, brief["stats"]["spy_day_pct"])
@@ -231,6 +234,7 @@ def publish(
     offline_headlines: Optional[List[Dict[str, Any]]] = None,
     offline_calendar: Optional[Dict[str, Any]] = None,
     headline_limit: int = 7,
+    fetch_world: Optional[Callable[..., Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Read desk files under data_dir, write market_brief.json + history.
 
@@ -283,6 +287,22 @@ def publish(
                 "next": None, "week": [], "text": "Calendar feed unavailable.", "source": "error",
             }
 
+    if mode == "offline":
+        quotes = {}
+    else:
+        try:
+            if fetch_world:
+                quotes = fetch_world(cache_dir=cache_dir, now=now_et)
+            else:
+                quotes = world_markets.fetch_quotes(cache_dir=cache_dir, now=now_et)
+        except Exception:
+            quotes = {}
+    world = world_markets.build_world_moves(
+        stats=stats,
+        quotes=quotes if isinstance(quotes, dict) else {},
+        now=now_et,
+        headlines=headlines_raw,
+    )
     brief = build_brief(
         stats=stats,
         sectors=sectors,
@@ -294,6 +314,7 @@ def publish(
         history_rows=history,
         headline_limit=headline_limit,
         now=now_et,
+        world_moves=world,
     )
     hist = brief.pop("_history", history)
     write_json(brief_path, brief)
