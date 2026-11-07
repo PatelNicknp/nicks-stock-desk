@@ -62,12 +62,32 @@ def _is_watch(event_name: str) -> bool:
     return any(w.lower() in e.lower() for w in WATCH_NAMES)
 
 
+# Major economies whose prints can move global stock markets. Not every country on the feed.
+WATCH_COUNTRIES = {
+    "United States": "US",
+    "US": "US",
+    "USA": "US",
+    "Euro Area": "Europe",
+    "Eurozone": "Europe",
+    "European Union": "Europe",
+    "EU": "Europe",
+    "Germany": "Europe",
+    "France": "Europe",
+    "United Kingdom": "UK",
+    "UK": "UK",
+    "China": "China",
+    "Japan": "Japan",
+    "India": "India",
+}
+
+
 def parse_day_payload(payload: Dict[str, Any], day: dt.date) -> List[Dict[str, Any]]:
     rows = ((payload or {}).get("data") or {}).get("rows") or []
     out = []
     for item in rows:
         country = (item.get("country") or "").strip()
-        if country not in ("United States", "US", "USA"):
+        label = WATCH_COUNTRIES.get(country)
+        if not label:
             continue
         name = (item.get("eventName") or "").strip()
         if not name or not _is_watch(name):
@@ -78,7 +98,7 @@ def parse_day_payload(payload: Dict[str, Any], day: dt.date) -> List[Dict[str, A
             "event": name,
             "forecast": item.get("consensus"),
             "previous": item.get("previous"),
-            "country": "US",
+            "country": label,
         })
     return out
 
@@ -134,9 +154,12 @@ def next_events(
 
 def _text(nxt: Optional[Dict[str, Any]]) -> str:
     if not nxt:
-        return "No big US macro print on the free calendar for the next few sessions."
+        return "No major macro print on the free calendar for the next few sessions."
     when = nxt.get("date") or ""
     time = nxt.get("time") or ""
-    event = nxt.get("event") or "US macro release"
+    event = nxt.get("event") or "Macro release"
+    place = nxt.get("country") or ""
+    if place and place not in event:
+        event = "%s %s" % (place, event)
     bit = when + ((" " + time) if time else "")
     return "Next up: %s (%s)." % (event, bit.strip())

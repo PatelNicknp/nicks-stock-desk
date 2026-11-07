@@ -42,8 +42,11 @@ def test_calendar_payload_parser():
         }
     }
     rows = calendar_fetch.parse_day_payload(payload, dt.date(2026, 11, 10))
-    assert len(rows) == 1
+    assert len(rows) == 2
+    assert rows[0]["country"] == "US"
+    assert rows[1]["country"] == "Europe"
     assert rows[0]["event"].startswith("CPI")
+    assert all("Minor" not in r["event"] for r in rows)
 
 
 if __name__ == "__main__":

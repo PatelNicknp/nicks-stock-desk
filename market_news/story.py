@@ -270,7 +270,11 @@ def _news_item(h: Dict[str, Any], n: int, session: str) -> Dict[str, Any]:
         "via": (h.get("via") or "").strip(),
         "url": h.get("url") or "",
         "published": h.get("published") or "",
-        "date_label": _short_date(h.get("published") or "", session),
+        "published_at": h.get("published_at") or "",
+        "date_label": h.get("published_pt") or _short_date(h.get("published") or "", session),
+        "age_label": h.get("age_label") or "",
+        "region": h.get("region") or "",
+        "why": h.get("why") or "",
     }
 
 
@@ -524,7 +528,8 @@ def build_story(
             support = "No clear cause. The free feeds had no big-picture headline, so this is the desk numbers only."
         cause = None
 
-    # Cited headline first, then the other ranked headlines, 3 max.
+    # Cited headline first, then the other ranked headlines. The card shows five.
+    # Anything past that stays in the brief for More details.
     ordered: List[Dict[str, Any]] = []
     if support_h:
         ordered.append(support_h)
@@ -532,9 +537,9 @@ def build_story(
         if any(_same_story(h, have) for have in ordered):
             continue
         ordered.append(h)
-        if len(ordered) >= 3:
+        if len(ordered) >= 7:
             break
-    ordered = ordered[:3]
+    ordered = ordered[:7]
     news = [_news_item(h, i + 1, session) for i, h in enumerate(ordered)]
     support_ref = 1 if clear and news else None
 

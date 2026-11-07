@@ -120,8 +120,11 @@
     var title = esc(h.title || "");
     var body = '<div><div class="mn-meta"><span class="mn-num">' + esc(n) + "</span><b>" +
       esc(h.source || "Source") + (h.via ? " via " + esc(h.via) : "") + "</b>" +
+      (h.region ? "<span>" + esc(h.region) + "</span>" : "") +
       (h.date_label ? "<span>" + esc(h.date_label) + "</span>" : "") +
-      '</div><div class="mn-storytitle">' + title + "</div></div>" +
+      (h.age_label ? "<span>" + esc(h.age_label) + "</span>" : "") +
+      '</div><div class="mn-storytitle">' + title + "</div>" +
+      (h.why ? '<div class="mn-why">' + esc(h.why) + "</div>" : "") + "</div>" +
       '<span class="mn-out" aria-hidden="true">↗</span>';
     if (h.url) {
       return '<a class="mn-story" id="mn-src-' + h.n + '" href="' + esc(h.url) +
@@ -190,7 +193,7 @@
     var indexesOn = flagOn(featureOn, "feature.market_news_indexes");
     var sectorsOn = flagOn(featureOn, "feature.market_news_sectors");
     var detailsOn = flagOn(featureOn, "feature.market_news_details");
-    var news = (story.news || []).slice(0, more ? 3 : 2);
+    var news = (story.news || []).slice(0, more ? 5 : 2);
     var shown = {};
     news.forEach(function (h) { shown[h.n] = true; });
     var anchor = story.support_ref && shown[story.support_ref] ? "#mn-src-" + story.support_ref : "";

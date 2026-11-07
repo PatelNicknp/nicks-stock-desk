@@ -13,6 +13,8 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "rates": (
         "fed ", "federal reserve", "fomc", "interest rate", "rate cut", "rate hike",
         "treasury yield", "bond yield", "yields", "powell", "dot plot", "quantitative",
+        "ecb", "european central bank", "lagarde", "bank of england", " bank of japan",
+        "boj", "pboc", "people's bank of china", "reserve bank of india", "central bank",
     ),
     "jobs": (
         "payroll", "jobs report", "unemployment", "jobless", "nonfarm", "labor market",
@@ -23,7 +25,8 @@ CAUSE_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     ),
     "election": (
         "election", "midterm", "ballot", "congress", "senate", "white house",
-        "president", "voting", "electoral", "capitol hill", "tariff",
+        "president", "voting", "electoral", "capitol hill", "tariff", "sanction",
+        "trade war", "trade deal",
     ),
     "ai_mood": (
         "artificial intelligence", " ai ", "ai spending", "ai trade", "ai regulat",
@@ -237,7 +240,9 @@ _DRIVER_BITS = (
     " ai ", "chip", "semiconductor", "data center", "data-center", "ai regulat",
     "ai build", "federal reserve", "fomc", "interest rate", "treasury yield",
     "yields", "jobs report", "payroll", "jobless", "inflation", "cpi", "oil ",
-    "crude", "tariff", "election", "midterm",
+    "crude", "tariff", "sanction", "election", "midterm",
+    "ecb", "bank of england", "bank of japan", "pboc", "reserve bank",
+    "eurozone", "sterling", "yen ", "yuan", "rupee",
 )
 _MARKET_BITS = (
     "stock", "nasdaq", "s&p", "dow", "wall street", "market", "tech",
@@ -298,8 +303,17 @@ def _near_session(published: str, session: str) -> bool:
     return (anchor - dt.timedelta(days=1)) <= day <= (anchor + dt.timedelta(days=1))
 
 
+_TRANSMISSION = (
+    "stock", "market", "yield", "bond", "futures", "investor", "risk",
+    "currency", "yen", "yuan", "rupee", "euro", "sterling", "dollar",
+    "oil", "crude", "brent", "wti", "opec",
+    "ecb", "bank of england", "bank of japan", "federal reserve", "pboc",
+    "reserve bank", "tariff", "sanction", "central bank",
+)
+
+
 def explains_the_move(title: str, summary: str = "") -> bool:
-    """True for a market wrap or a headline about why the market moved. Not a side story."""
+    """True for a market wrap or a macro event that can move markets. Not a side story."""
     if _looks_single_stock(title):
         return False
     blob = _norm(title) + _norm(summary)
@@ -307,15 +321,129 @@ def explains_the_move(title: str, summary: str = "") -> bool:
         return False
     if market_wrap_score(title, summary) > 0:
         return True
-    driver = any(bit in blob for bit in _DRIVER_BITS)
+    driver = any(bit in blob for bit in _DRIVER_BITS) or bool(tag_headline(title, summary))
     market = any(bit in blob for bit in _MARKET_BITS)
-    return driver and market
+    if driver and market:
+        return True
+    # A rates, inflation, jobs, oil, war, or trade shock can matter without the word "stocks".
+    return bool(tag_headline(title, summary)) and any(bit in blob for bit in _TRANSMISSION)
+
+
+def region_of(title: str, summary: str = "", source: str = "") -> str:
+    """One region label. A non-US name wins when the headline is about that place."""
+    blob = _norm(title) + _norm(summary) + _norm(source)
+    checks = (
+        ("UK", ("bank of england", " britain", " uk ", "sterling", "ftse")),
+        ("Europe", ("ecb", "eurozone", "euro area", "lagarde", "european central", "stoxx")),
+        ("China", ("china", "pboc", "beijing", "yuan", "shanghai")),
+        ("Japan", ("japan", "bank of japan", " nikkei", " yen")),
+        ("India", ("india", "reserve bank of india", " rupee", "sensex", "nifty")),
+        ("Emerging", ("emerging market", "brazil", "mexico", "south africa")),
+        ("US", ("federal reserve", "fomc", "wall street", "s&p", "nasdaq", "dow ", "payroll")),
+    )
+    hits = [name for name, words in checks if any(w in blob for w in words)]
+    if not hits:
+        return "Global"
+    for name in hits:
+        if name != "US":
+            return name
+    return "US"
+
+
+def why_it_matters(tags: List[str], region: str) -> str:
+    """A possible path into markets. Not a claim that this story caused the move."""
+    lead = {
+        "rates": "policy rates can move bond yields and equity valuations",
+        "inflation": "an inflation print can shift rate expectations",
+        "jobs": "a jobs print can shift rate expectations and risk appetite",
+        "oil": "an oil move can change inflation and energy-sector results",
+        "war": "a conflict can move energy prices and global risk appetite",
+        "election": "an election or a tariff can change the growth outlook",
+        "ai_mood": "a shift in technology spending can move the major indexes",
+        "earnings_season": "a wave of results can reset index earnings expectations",
+    }
+    place = "" if region in ("", "Global", "US") else " from " + region
+    bit = lead.get((tags or [""])[0], "this is a market-wide development")
+    return "Possible transmission" + place + ": " + bit + ". This is not proof it caused the day's move."
+
+
+def _compact(h: Dict[str, Any], rank: float) -> Dict[str, Any]:
+    return {
+        "title": h["title"],
+        "source": h["source"],
+        "url": h["url"],
+        "published": h["published"],
+        "published_at": h.get("published_at") or "",
+        "trusted": h["trusted"],
+        "causes": h["causes"],
+        "via": h.get("via") or "",
+        "region": h.get("region") or "Global",
+        "why": h.get("why") or "",
+        "published_pt": h.get("published_pt") or "",
+        "age_label": h.get("age_label") or "",
+        "wrap": h.get("wrap") or 0.0,
+        "rank": rank,
+    }
+
+
+def _balance_regions(kept: List[Dict[str, Any]], prepared: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """If one region fills the top of the list, swap in another material story.
+
+    A session that is mostly market-wrap headlines is left alone. That tape is the story.
+    """
+    if len(kept) < 4:
+        return kept
+    window = kept[:5]
+    if sum(1 for h in window if (h.get("wrap") or 0) >= 5) >= 3:
+        return kept
+    counts: Dict[str, int] = {}
+    for h in window:
+        region = h.get("region") or "Global"
+        counts[region] = counts.get(region, 0) + 1
+    top_region = max(counts, key=lambda k: counts[k])
+    if counts[top_region] < 4:
+        return kept
+    for h in prepared:
+        region = h.get("region") or "Global"
+        if region == top_region:
+            continue
+        if any(_near_duplicate(h["title"], k["title"]) or _same_tape(h["title"], k["title"]) for k in kept):
+            continue
+        for i in range(min(5, len(kept)) - 1, 0, -1):
+            if (kept[i].get("region") or "Global") == top_region and (kept[i].get("wrap") or 0) < 5:
+                kept[i] = _compact(h, h.get("wrap") or 0.0)
+                return kept
+    return kept
+
+
+def _age_label(published_at: str, now: Optional[dt.datetime]) -> str:
+    """Age from the article time to the brief time. Blank when either clock is missing."""
+    if not published_at or now is None:
+        return ""
+    try:
+        then = dt.datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if then.tzinfo is None:
+        then = then.replace(tzinfo=dt.timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=dt.timezone.utc)
+    seconds = (now - then).total_seconds()
+    if seconds < 0:
+        return ""
+    hours = int(seconds // 3600)
+    if hours < 1:
+        return "just now"
+    if hours < 48:
+        return "%dh ago" % hours
+    return "%dd ago" % (hours // 24)
 
 
 def pick_headlines(
     raw: List[Dict[str, Any]],
     limit: int = 7,
     session: Optional[str] = None,
+    now: Optional[dt.datetime] = None,
 ) -> List[Dict[str, Any]]:
     """Keep 5–7 big-picture headlines about why the market moved.
 
@@ -334,16 +462,27 @@ def pick_headlines(
         if session and not _near_session(h.get("published") or "", session):
             continue
         tags = h.get("causes") or tag_headline(title, summary)
+        url = h.get("url") or ""
+        try:
+            from .news_fetch import safe_url
+            url = safe_url(url)
+        except Exception:
+            url = url if url.startswith("http://") or url.startswith("https://") else ""
         item = {
             "title": title,
             "source": h.get("source") or "",
-            "url": h.get("url") or "",
+            "url": url,
             "published": h.get("published") or "",
+            "published_at": h.get("published_at") or "",
             "summary": summary,
             "trusted": bool(h.get("trusted")),
             "causes": tags,
             "via": h.get("via") or "",
             "wrap": market_wrap_score(title, summary),
+            "region": region_of(title, summary, h.get("source") or ""),
+            "why": why_it_matters(tags, region_of(title, summary, h.get("source") or "")),
+            "published_pt": h.get("published_pt") or "",
+            "age_label": _age_label(h.get("published_at") or "", now),
         }
         prepared.append(item)
 
@@ -369,22 +508,12 @@ def pick_headlines(
         if any(_near_duplicate(h["title"], k["title"]) or _same_tape(h["title"], k["title"]) for k in kept):
             continue
         seen_keys.add(key)
-        # Drop summary from the published brief payload (UI uses title/source/url).
-        kept.append({
-            "title": h["title"],
-            "source": h["source"],
-            "url": h["url"],
-            "published": h["published"],
-            "trusted": h["trusted"],
-            "causes": h["causes"],
-            "via": h.get("via") or "",
-            "rank": round(
-                (h.get("wrap") or 0.0)
-                + _importance_score(h["title"], h.get("summary") or "")
-                + 0.5 * len(h["causes"] or []),
-                2,
-            ),
-        })
+        kept.append(_compact(h, round(
+            (h.get("wrap") or 0.0)
+            + _importance_score(h["title"], h.get("summary") or "")
+            + 0.5 * len(h["causes"] or []),
+            2,
+        )))
         if len(kept) >= target:
             break
 
@@ -399,17 +528,8 @@ def pick_headlines(
             if any(_near_duplicate(h["title"], k["title"]) or _same_tape(h["title"], k["title"]) for k in kept):
                 continue
             seen_keys.add(key)
-            kept.append({
-                "title": h["title"],
-                "source": h["source"],
-                "url": h["url"],
-                "published": h["published"],
-                "trusted": h["trusted"],
-                "causes": h["causes"],
-                "via": h.get("via") or "",
-                "rank": 0.0,
-            })
-    return kept[:target]
+            kept.append(_compact(h, 0.0))
+    return _balance_regions(kept, prepared)[:target]
 
 
 _TICKER_NOISE = re.compile(

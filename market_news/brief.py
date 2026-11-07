@@ -119,6 +119,7 @@ def build_brief(
     now_et_hour: Optional[int] = None,
     history_rows: Optional[List[Dict[str, Any]]] = None,
     headline_limit: int = 7,
+    now: Optional[dt.datetime] = None,
 ) -> Dict[str, Any]:
     """Pure build — no I/O. Safe for unit tests.
 
@@ -138,7 +139,7 @@ def build_brief(
         h = dict(h)
         h["causes"] = h.get("causes") or tag_headline(h.get("title") or "", h.get("summary") or "")
         tagged.append(h)
-    headlines = pick_headlines(tagged, limit=headline_limit, session=session)
+    headlines = pick_headlines(tagged, limit=headline_limit, session=session, now=now)
     causes = score_causes(headlines, stats, sectors)
 
     why_short = why_moved_short(stats, sectors)
@@ -292,6 +293,7 @@ def publish(
         now_et_hour=now_et.hour,
         history_rows=history,
         headline_limit=headline_limit,
+        now=now_et,
     )
     hist = brief.pop("_history", history)
     write_json(brief_path, brief)

@@ -120,6 +120,7 @@ html[data-theme="light"] .mn-card {
 .mn-meta b { font-weight: 650; color: var(--mn-text); }
 .mn-num { color: var(--mn-accent); }
 .mn-storytitle { font-size: 13px; line-height: 1.5; font-weight: 600; color: var(--mn-text); }
+.mn-why { margin-top: 4px; font-size: 11px; line-height: 1.4; font-weight: 450; color: var(--mn-muted); }
 .mn-out { font-size: 15px; color: var(--mn-faint); padding-top: 20px; }
 .mn-details { border-top: 1px solid var(--mn-line); margin-top: 2px; }
 .mn-details summary {
