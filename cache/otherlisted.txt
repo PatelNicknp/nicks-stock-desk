@@ -6099,9 +6099,7 @@ SJT|San Juan Basin Royalty Trust Common Stock|N|SJT|N|100|N|SJT
 SK|Corgi SK hynix 2x Daily ETF|Z|SK|Y|100|N|SK
 SKE|Skeena Resources Limited Common Shares|N|SKE|N|100|N|SKE
 SKF|ProShares UltraShort Financials|P|SKF|Y|100|N|SKF
-SKHA|Tradr 2X Long SK hynix Daily ETF|Z|SKHA|Y|100|N|SKHA
 SKHL|Direxion Daily SK Hynix Bull 2X ETF|P|SKHL|Y|100|N|SKHL
-SKHN|Tradr 2X Short SK hynix Daily ETF|Z|SKHN|Y|100|N|SKHN
 SKHQ|Leverage Shares 2X Short Sk Hynix Daily ETF|Z|SKHQ|Y|100|N|SKHQ
 SKHU|ProShares Ultra SK hynix|P|SKHU|Y|100|N|SKHU
 SKHX|Leverage Shares 2X Long SK Hynix Daily ETF|Z|SKHX|Y|100|N|SKHX
@@ -6968,7 +6966,6 @@ USCA|Xtrackers MSCI USA Climate Action Equity ETF|P|USCA|Y|100|N|USCA
 USCI|United States Commodity Index Fund ETV|P|USCI|Y|100|N|USCI
 USD|ProShares Ultra Semiconductors|P|USD|Y|100|N|USD
 USDU|WisdomTree Bloomberg U.S. Dollar Bullish Fund|P|USDU|Y|100|N|USDU
-USE|USCF Energy Commodity Strategy Absolute Return Fund|P|USE|Y|100|N|USE
 USEP|Innovator U.S. Equity Ultra Buffer ETF - September|Z|USEP|Y|100|N|USEP
 USEW|Cambria US EW ETF|Z|USEW|Y|100|N|USEW
 USFD|US Foods Holding Corp. Common Stock|N|USFD|N|100|N|USFD
@@ -7346,7 +7343,6 @@ WT|WisdomTree, Inc. Common Stock|N|WT|N|100|N|WT
 WTAI|WisdomTree Artificial Intelligence and Innovation Fund|Z|WTAI|Y|100|N|WTAI
 WTAL|WisdomTree Global Alpha Fund|F|WTAL|Y|100|N|WTAL
 WTI|W&T Offshore, Inc. Common Stock|N|WTI|N|100|N|WTI
-WTIB|USCF Oil Plus Bitcoin Strategy Fund|P|WTIB|Y|100|N|WTIB
 WTID|MicroSectors Energy 3X Inverse Leveraged ETNs|P|WTID|Y|100|N|WTID
 WTIU|MicroSectors Energy 3X Leveraged ETNs|P|WTIU|Y|100|N|WTIU
 WTLS|WisdomTree Efficient Long/Short U.S. Equity Fund|Z|WTLS|Y|100|N|WTLS
@@ -7669,4 +7665,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1105202618:01||||||
+File Creation Time: 1106202621:31||||||

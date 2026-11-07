@@ -232,9 +232,6 @@ AKTX|Akari Therapeutics Plc - American Depositary Shares|S|N|N|100|N|N
 ALAB|Astera Labs, Inc. - Common Stock|Q|N|N|40|N|N
 ALAR|Alarum Technologies Ltd. - American Depositary Shares|S|N|N|100|N|N
 ALCO|Alico, Inc. - Common Stock|Q|N|N|100|N|N
-ALDF|Aldel Financial II Inc. - Class A Ordinary Shares|G|N|D|100|N|N
-ALDFU|Aldel Financial II Inc. - Units|G|N|N|100|N|N
-ALDFW|Aldel Financial II Inc. - Warrants|G|N|N|100|N|N
 ALDX|Aldeyra Therapeutics, Inc. - Common Stock|S|N|N|100|N|N
 ALEC|Alector, Inc. - Common Stock|Q|N|N|100|N|N
 ALF|Centurion Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
@@ -647,7 +644,7 @@ BGL|Blue Gold Limited - Class A ordinary shares|G|N|D|100|N|N
 BGLC|BioNexus Gene Lab Corp - Common stock|S|N|N|100|N|N
 BGLWW|Blue Gold Limited - Warrant|S|N|N|100|N|N
 BGM|BGM Group Ltd. - Class A Ordinary Shares|S|N|N|100|N|N
-BGMS|Bio Green Med Solution, Inc. - Common Stock|S|N|N|100|N|N
+BGMS|Bio Green Med Solution, Inc. - Common Stock|S|N|D|100|N|N
 BGRN|iShares USD Green Bond ETF|G|N|N|100|Y|N
 BGRO|iShares Large Cap Growth Active ETF|G|N|N|100|Y|N
 BGUS|Baillie Gifford U.S. Equity Growth ETF|G|N|N|100|Y|N
@@ -1992,7 +1989,7 @@ FV|First Trust Dorsey Wright Focus 5 ETF|G|N|N|100|Y|N
 FVAV|Fortress Value Acquisition Corp. V - Class A Ordinary Shares|G|N|N|100|N|N
 FVC|First Trust Dorsey Wright Dynamic Focus 5 ETF|G|N|N|100|Y|N
 FVCB|FVCBankcorp, Inc. - Common Stock|S|N|N|100|N|N
-FVN|Future Vision II Acquisition Corporation - Ordinary Shares|S|N|D|100|N|N
+FVN|Future Vision II Acquisition Corporation - Ordinary Shares|S|N|N|100|N|N
 FVNNR|Future Vision II Acquisition Corporation - Right|S|N|N|100|N|N
 FVNNU|Future Vision II Acquisition Corporation - Units|S|N|N|100|N|N
 FWAC|Futurewave Acquisition Corporation - Ordinary Shares|S|N|N|100|N|N
@@ -2879,7 +2876,9 @@ LDRX|SGI Enhanced Market Leaders ETF|G|N|N|100|Y|N
 LDSF|First Trust Low Duration Strategic Focus ETF|G|N|N|100|Y|N
 LE|Lands' End, Inc. - Common Stock|S|N|N|100|N|N
 LECO|Lincoln Electric Holdings, Inc. - Common Shares|Q|N|N|40|N|N
+LEDR|Leader's Advantage Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 LEDRU|Leader's Advantage Acquisition Corp. - Units|G|N|N|100|N|N
+LEDRW|Leader's Advantage Acquisition Corp. - Warrants|G|N|N|100|N|N
 LEDS|SemiLEDS Corporation - Common Stock|S|N|N|100|N|N
 LEE|Lee Enterprises, Incorporated - Common Stock|Q|N|N|100|N|N
 LEGH|Legacy Housing Corporation - Common Stock|Q|N|N|100|N|N
@@ -4258,9 +4257,9 @@ RGTIW|Rigetti Computing, Inc.  - Redeemable warrants, each whole warrant exercis
 RGTX|Defiance Daily Target 2X Long RGTI ETF|G|N|N|100|Y|N
 RGTZ|Defiance Daily Target 2x Short RGTI ETF|G|N|N|100|Y|N
 RGYY|GraniteShares YieldBoost RGTI ETF|G|N|N|100|Y|N
-RIBB|Ribbon Acquisition Corp - Class A Ordinary Shares|S|N|N|100|N|N
-RIBBR|Ribbon Acquisition Corp - Rights|S|N|N|100|N|N
-RIBBU|Ribbon Acquisition Corp - Unit|S|N|N|100|N|N
+RIBB|Ribbon Acquisition Corp - Class A Ordinary Shares|S|N|D|100|N|N
+RIBBR|Ribbon Acquisition Corp - Rights|S|N|D|100|N|N
+RIBBU|Ribbon Acquisition Corp - Unit|S|N|D|100|N|N
 RICK|RCI Hospitality Holdings, Inc. - Common Stock|G|N|N|100|N|N
 RIFR|Russell Investments Global Infrastructure ETF|G|N|N|100|Y|N
 RIGL|Rigel Pharmaceuticals, Inc. - Common Stock|Q|N|N|100|N|N
@@ -5157,7 +5156,7 @@ USDEW|StablecoinX Inc. - Warrants|S|N|N|100|N|N
 USDX|SGI Enhanced Core ETF|G|N|N|100|Y|N
 USEA|United Maritime Corporation - Common Stock|S|N|N|100|N|N
 USGG|Leverage Shares 2X Long USAR Daily ETF|G|N|N|100|Y|N
-USGO|U.S. GoldMining Inc. - Common stock|S|N|D|100|N|N
+USGO|U.S. GoldMining Inc. - Common stock|S|N|N|100|N|N
 USIG|iShares Broad USD Investment Grade Corporate Bond ETF|G|N|N|100|Y|N
 USIN|WisdomTree 7-10 Year Laddered Treasury Fund|G|N|N|100|Y|N
 USIO|Usio, Inc. - Common Stock|G|N|N|100|N|N
@@ -5383,7 +5382,7 @@ WHLRL|Wheeler Real Estate Investment Trust, Inc. - 7.00% Senior Subordinated Con
 WHLRP|Wheeler Real Estate Investment Trust, Inc. - Series B Preferred Stock|S|N|N|100|N|N
 WHWK|Whitehawk Therapeutics, Inc. - Common Stock|S|N|N|100|N|N
 WIMA|WisdomTree International Adaptive Moving Average Fund|G|N|N|100|Y|N
-WIMI|WiMi Hologram Cloud Inc. - Class B Ordinary Shares|G|N|N|100|N|N
+WIMI|WiMi Hologram Cloud Inc. - Class B Ordinary Shares|G|N|D|100|N|N
 WINA|Winmark Corporation - Common Stock|G|N|N|40|N|N
 WING|Wingstop Inc. - Common Stock|Q|N|N|100|N|N
 WISE|Themes Generative Artificial Intelligence ETF|G|N|N|100|Y|N
@@ -5605,9 +5604,9 @@ ZUMZ|Zumiez Inc. - Common Stock|Q|N|N|100|N|N
 ZURA|Zura Bio Limited - Class A Ordinary shares|S|N|N|100|N|N
 ZVRA|Zevra Therapeutics, Inc.  - Common Stock|Q|N|N|100|N|N
 ZVZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
-ZWZZT|NASDAQ TEST STOCK|S|Y|N|100|N|N
+ZWZZT|NASDAQ TEST STOCK NC|S|Y|N|100|N|N
 ZXYZ.A|Nasdaq Symbology Test Common Stock|Q|Y|N|100|N|N
 ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
-File Creation Time: 1105202618:01|||||||
+File Creation Time: 1106202621:31|||||||

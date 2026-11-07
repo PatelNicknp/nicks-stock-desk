@@ -1,6 +1,6 @@
 {
- "universe_sp500": "2026-11-05",
- "universe_ndx100": "2026-11-05",
+ "universe_sp500": "2026-11-07",
+ "universe_ndx100": "2026-11-07",
  "cik_map": "2026-11-05",
  "sec_facts": "2026-11-05",
  "yahoo_slow": "2026-11-05",
@@ -10,10 +10,10 @@
  "pcr": "2026-11-05",
  "econ": "2026-11-05",
  "options_chains": "2026-11-06-am",
- "universe_sp400": "2026-11-05",
- "universe_sp600": "2026-11-05",
- "listed_common": "2026-11-05",
- "liquid_names": "2026-11-05",
+ "universe_sp400": "2026-11-07",
+ "universe_sp600": "2026-11-07",
+ "listed_common": "2026-11-07",
+ "liquid_names": "2026-11-07",
  "prices_full_refresh": "2026-11-05",
  "trading_floor_news": "2026-11-05"
 }
