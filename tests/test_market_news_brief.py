@@ -1,4 +1,5 @@
 """End-to-end offline brief build + learning stubs."""
+import csv
 import json
 import os
 import sys
@@ -88,17 +89,37 @@ def test_publish_offline_roundtrip():
 
 
 def test_pack_sample_file_matches_narrative():
-    """The checked-in sample brief is a finished down-tech-day brief."""
-    sample = json.load(open(os.path.join(ROOT, "data/market_brief.json")))
-    assert sample["session"] == "2026-11-05"
+    """Down-tech-day narrative is built from the fixture as-of, not the live brief.
+
+    The desk overwrites data/market_brief.json. This check uses market_today.csv
+    in the fixture, whose price_as_of is 2026-11-05, and the same headlines.
+    """
+    with open(os.path.join(FIX, "market_today.csv"), newline="", encoding="utf-8") as handle:
+        as_of = next(csv.DictReader(handle))
+    sample = _build()
+    sample.pop("_history", None)
+    assert as_of["price_as_of"] == "2026-11-05"
+    assert sample["session"] == as_of["price_as_of"]
     assert sample["schema_version"] == 2
     assert sample["mood"]["label"] == "Fear"
     assert "Technology" in sample["why_moved"]
     assert sample["why_moved_short"]
     assert sample["tips"] and len(sample["tips"]["lines"]) >= 2
     assert 5 <= len(sample["headlines"]) <= 7
-    assert sample["stats"]["qqq_day_pct"] == -4.98
-    assert sample["stats"]["spy_day_pct"] == -2.73
+    assert sample["stats"]["qqq_day_pct"] == float(as_of["qqq_day_pct"]) == -4.98
+    assert sample["stats"]["spy_day_pct"] == float(as_of["spy_day_pct"]) == -2.73
+
+
+def test_published_brief_tracks_the_desk_as_of():
+    """The committed brief follows the desk file. It is not the fixture narrative."""
+    live = json.load(open(os.path.join(ROOT, "data/market_brief.json")))
+    with open(os.path.join(ROOT, "data/market_today.csv"), newline="", encoding="utf-8") as handle:
+        desk = next(csv.DictReader(handle))
+    assert live["session"] == desk["price_as_of"]
+    assert live["price_as_of"] == desk["price_as_of"]
+    assert live["stats"]["spy_day_pct"] == float(desk["spy_day_pct"])
+    assert live["stats"]["qqq_day_pct"] == float(desk["qqq_day_pct"])
+    assert "25030.35" not in json.dumps(live)
 
 def test_v2_why_detail_and_tips_shape():
     brief = _build()

@@ -68,6 +68,12 @@ TRUSTED_SOURCES = (
     "AP",
     "AP News",
     "NPR",
+    "BBC",
+    "The Guardian",
+    "European Central Bank",
+    "ECB",
+    "Bank of England",
+    "Bank of Japan",
 )
 
 DISCLAIMER = (
