@@ -370,8 +370,11 @@ def verify_decide(slot, mode, runs, price_as_of=None, did_work=None, max_tries=2
     if not failed:
         return "none", "no finished run for slot %s" % fmt(slot)
     if len(mine) >= max_tries:
-        return "gave_up", "slot %s failed %d times (runs %s); not retrying again" % (
-            fmt(slot), len(mine), ", ".join(str(r.get("id")) for r in mine))
+        return "gave_up", (
+            "slot %s failed %d times (runs %s); the desk was not updated. "
+            "The test step stops the price update, so the saved files stay on the last good session. "
+            "not retrying again."
+        ) % (fmt(slot), len(mine), ", ".join(str(r.get("id")) for r in mine))
     return "retry", "run %s for slot %s ended %s; one retry" % (failed[-1].get("id"), fmt(slot), failed[-1].get("conclusion"))
 
 

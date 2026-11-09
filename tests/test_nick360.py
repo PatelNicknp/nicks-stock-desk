@@ -74,6 +74,13 @@ def test_index_proxy_writer_blanks_zero_volume_and_does_not_fetch():
     assert vix[1].endswith(",")
     spy = open(os.path.join(folder, "SPY.csv"), encoding="utf-8").read()
     assert ",1000" in spy or ",1001" in spy or ",1002" in spy
+    blank = pd.DataFrame([
+        {"date": "2024-01-02", "ticker": "SPY", "close": 10, "high": 11, "low": 9, "volume": 1000},
+    ])
+    wrote = stock_desk.write_index_proxy_files(blank, folder)
+    assert wrote == ["SPY"]
+    text = open(os.path.join(folder, "SPY.csv"), encoding="utf-8").read()
+    assert text.splitlines()[1].startswith("2024-01-02,,")
 
 
 def test_formula_file_matches_the_engine_and_marks_gaps():
