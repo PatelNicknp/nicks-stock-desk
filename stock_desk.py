@@ -2860,12 +2860,18 @@ def write_index_proxy_files(long_df, out_dir):
         if not len(g):
             continue
         g = g.sort_values("date").copy()
+        # Older caches have no open column. Leave it blank, the same way candle files do.
+        # A missing open is not a zero and must not stop the desk update.
+        def _px(col):
+            if col not in g.columns:
+                return pd.Series([pd.NA] * len(g), index=g.index, dtype="Float64")
+            return pd.to_numeric(g[col], errors="coerce").round(2)
         out = pd.DataFrame({
             "date": pd.to_datetime(g["date"]).dt.strftime("%Y-%m-%d"),
-            "open": pd.to_numeric(g["open"], errors="coerce").round(2),
-            "high": pd.to_numeric(g["high"], errors="coerce").round(2),
-            "low": pd.to_numeric(g["low"], errors="coerce").round(2),
-            "close": pd.to_numeric(g["close"], errors="coerce").round(2),
+            "open": _px("open"),
+            "high": _px("high"),
+            "low": _px("low"),
+            "close": _px("close"),
         })
         vol = pd.to_numeric(g["volume"], errors="coerce")
         if blank_zero:
