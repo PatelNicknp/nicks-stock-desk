@@ -1,3 +1,14 @@
 trade_id,ticker,company,signal_date,signal_total,status,entry_date,entry_price,shares,cost,stop,target,last_date,last_close,days_held,exit_date,exit_price,exit_reason,exit_words,pnl,pnl_pct,market_value,note
-2026-11-03-LLY,LLY,Lilly (Eli),2026-11-03,3.0,OPEN,2026-11-04,1440.0,0.6944,999.94,1318.31,1701.05,2026-11-06,1354.0,3,,,,,-59.72,-5.97,940.22,Bought at the open on 2026-11-04.
-2026-11-03-CHD,CHD,Church & Dwight,2026-11-03,2.0,OPEN,2026-11-04,111.0,9.009,1000.0,102.72,132.54,2026-11-06,109.33,3,,,,,-15.05,-1.5,984.95,Bought at the open on 2026-11-04.
+2026-11-03-LLY,LLY,Lilly (Eli),2026-11-03,3.0,OPEN,2026-11-04,1440.0,0.6944,999.94,1318.31,1701.05,2026-11-09,1411.95,4.0,,,,,-19.48,-1.95,980.46,Bought at the open on 2026-11-04.
+2026-11-03-CHD,CHD,Church & Dwight,2026-11-03,2.0,OPEN,2026-11-04,111.0,9.009,1000.0,102.72,132.54,2026-11-09,111.31,4.0,,,,,2.79,0.28,1002.79,Bought at the open on 2026-11-04.
+2026-11-09-AIZ,AIZ,Assurant,2026-11-09,4.0,PENDING,,,,,295.01,380.65,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-AAPL,AAPL,Apple Inc.,2026-11-09,3.0,PENDING,,,,,326.14,420.83,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-LLY,LLY,Lilly (Eli),2026-11-09,3.0,SKIPPED,,,,,1318.73,1701.59,,,,,,,,,,,Already held.
+2026-11-09-MET,MET,MetLife,2026-11-09,3.0,PENDING,,,,,95.75,123.55,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-MSFT,MSFT,Microsoft,2026-11-09,3.0,PENDING,,,,,516.89,666.96,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-KO,KO,Coca-Cola Company (The),2026-11-09,2.0,PENDING,,,,,89.31,115.24,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-ICE,ICE,Intercontinental Exchange,2026-11-09,2.0,PENDING,,,,,162.68,209.9,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-CHD,CHD,Church & Dwight,2026-11-09,2.0,SKIPPED,,,,,104.19,134.44,,,,,,,,,,,Already held.
+2026-11-09-WAT,WAT,Waters Corporation,2026-11-09,2.0,PENDING,,,,,446.47,576.08,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-WELL,WELL,Welltower,2026-11-09,2.0,PENDING,,,,,233.54,301.34,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-XEL,XEL,Xcel Energy,2026-11-09,2.0,SKIPPED,,,,,76.04,98.11,,,,,,,,,,,No free slot (max 10 open).

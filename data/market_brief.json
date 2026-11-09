@@ -3,10 +3,10 @@
   "feature": "market_news",
   "session": "2026-11-09",
   "slot": "evening_close",
-  "updated_pt": "2026-11-09 11:46 PT",
+  "updated_pt": "2026-11-09 15:52 PT",
   "price_as_of": "2026-11-09",
-  "why_moved": "The market rose: S&P 2.4%, Nasdaq 3.2%, Dow-heavy groups (Financials/Industrials) about 2.8%. Biggest driver: AI / Tech mood; lagging sectors were Energy (0.4%) and Consumer Staples (0.9%); leading sectors Industrials (3.9%) and Technology (3.4%) held up. The move was broad: 1513 stocks rose and 196 fell; VIX is firm at 20.3.",
-  "why_moved_short": "Stocks rose, with Nasdaq (3.2%) leading the S&P (2.4%) higher, while Industrials (3.9%) and Technology (3.4%) held up (1513 stocks up, 196 down); VIX at 20.3.",
+  "why_moved": "The market rose: S&P 2.4%, Nasdaq 3.5%, Dow-heavy groups (Financials/Industrials) about 2.6%. Biggest driver: AI / Tech mood; lagging sectors were Energy (0.5%) and Consumer Staples (0.9%); leading sectors Industrials (3.8%) and Technology (3.7%) held up. The move was broad: 1467 stocks rose and 237 fell.",
+  "why_moved_short": "Stocks rose, with Nasdaq (3.5%) leading the S&P (2.4%) higher, while Industrials (3.8%) and Technology (3.7%) held up (1467 stocks up, 237 down).",
   "story": {
     "direction": "up",
     "date_label": "November 9, 2026",
@@ -14,17 +14,17 @@
     "clear_cause": true,
     "cause": "ai_mood",
     "lead": "Tech led stocks higher.",
-    "support": "This beaten-down data center stock could be worth a look, says Mike Khouw.",
+    "support": "Stock Market Today, Nov. 9: Markets Rally as Semiconductor Gains Lift Nasdaq.",
     "support_ref": 1,
     "bullets": [
       {
         "lead": "Industrials led the gain.",
-        "rest": "Industrials rose 3.88%.",
+        "rest": "Industrials rose 3.82%.",
         "ref": null
       },
       {
         "lead": "More stocks rose than fell.",
-        "rest": "1513 stocks rose and 196 fell.",
+        "rest": "1467 stocks rose and 237 fell.",
         "ref": null
       }
     ],
@@ -32,16 +32,16 @@
     "chips": [
       {
         "name": "Industrials",
-        "pct": 3.88,
-        "pct_text": "3.88%",
+        "pct": 3.82,
+        "pct_text": "3.82%",
         "arrow": "up",
         "kind": "move",
-        "bar": 87
+        "bar": 76
       },
       {
         "name": "Chips",
-        "pct": 4.48,
-        "pct_text": "4.48%",
+        "pct": 5.05,
+        "pct_text": "5.05%",
         "arrow": "up",
         "kind": "move",
         "bar": 100
@@ -58,15 +58,15 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": 2.35,
-        "pct_text": "2.35%",
+        "pct": 2.37,
+        "pct_text": "2.37%",
         "arrow": "up",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": 3.23,
-        "pct_text": "3.23%",
+        "pct": 3.54,
+        "pct_text": "3.54%",
         "arrow": "up",
         "source": "qqq"
       }
@@ -74,58 +74,71 @@
     "news": [
       {
         "n": 1,
-        "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
-        "source": "CNBC",
+        "title": "Stock Market Today, Nov. 9: Markets Rally as Semiconductor Gains Lift Nasdaq",
+        "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-markets-rally-as-semiconductor-gains-lift-nasdaq/?.tsrc=rss",
         "published": "2026-11-09",
-        "published_at": "2026-11-09T19:23:57+00:00",
-        "date_label": "Nov 9, 11:23 AM PT",
-        "age_label": "just now",
-        "region": "Global",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+        "published_at": "2026-11-09T22:23:39+00:00",
+        "date_label": "Nov 9, 2:23 PM PT",
+        "age_label": "1h ago",
+        "region": "US",
+        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 2,
-        "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
+        "title": "Stock Market Today, Nov. 9: AMD Jumps on Oppenheimer Upgrade and Google Cloud Chip Selection",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-amd-jumps-on-oppenheimer-upgrade-and-google-cloud-chip-selection/?.tsrc=rss",
         "published": "2026-11-09",
-        "published_at": "2026-11-09T17:15:22+00:00",
-        "date_label": "Nov 9, 9:15 AM PT",
+        "published_at": "2026-11-09T22:30:02+00:00",
+        "date_label": "Nov 9, 2:30 PM PT",
+        "age_label": "1h ago",
+        "region": "Global",
+        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
+      },
+      {
+        "n": 3,
+        "title": "Why Micron Technology Stock Gained On Monday",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://www.fool.com/investing/2026/11/09/why-micron-technology-stock-gained-on-monday/?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T23:07:02+00:00",
+        "date_label": "Nov 9, 3:07 PM PT",
+        "age_label": "just now",
+        "region": "Global",
+        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
+      },
+      {
+        "n": 4,
+        "title": "Update: Wall Street Rebounds From Last Week's Sell-Off; Nvidia Tumbles",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-rebounds-last-week-215121889.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T21:51:21+00:00",
+        "date_label": "Nov 9, 1:51 PM PT",
         "age_label": "2h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
-        "n": 3,
-        "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
+        "n": 5,
+        "title": "Nvidia stock falls after investigation into CEO, bucking market rally",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
+        "url": "https://www.cnn.com/2026/11/09/investing/nvidia-stock-huang-investigation?.tsrc=rss",
         "published": "2026-11-09",
-        "published_at": "2026-11-09T18:14:37+00:00",
-        "date_label": "Nov 9, 10:14 AM PT",
+        "published_at": "2026-11-09T22:35:30+00:00",
+        "date_label": "Nov 9, 2:35 PM PT",
         "age_label": "1h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
-        "n": 4,
-        "title": "Pan American Silver (PAAS): A Low-Beta Silver Miner Turning Metal Prices Into Shareholder Cash",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/pan-american-silver-paas-low-180408104.html?.tsrc=rss",
-        "published": "2026-11-09",
-        "published_at": "2026-11-09T18:04:08+00:00",
-        "date_label": "Nov 9, 10:04 AM PT",
-        "age_label": "1h ago",
-        "region": "US",
-        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
-      },
-      {
-        "n": 5,
+        "n": 6,
         "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
         "source": "CNBC",
         "via": "",
@@ -133,33 +146,20 @@
         "published": "2026-11-09",
         "published_at": "2026-11-09T18:14:47+00:00",
         "date_label": "Nov 9, 10:14 AM PT",
-        "age_label": "1h ago",
+        "age_label": "5h ago",
         "region": "Global",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
-        "n": 6,
-        "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
-        "published": "2026-11-09",
-        "published_at": "2026-11-09T17:25:08+00:00",
-        "date_label": "Nov 9, 9:25 AM PT",
-        "age_label": "2h ago",
-        "region": "US",
-        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
-      },
-      {
         "n": 7,
-        "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
+        "title": "Dow Jones Soars 1,132 Points As Amazon, Tesla Rally, But Nvidia Dives; CPI Inflation Report Next",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
+        "url": "https://finance.yahoo.com/m/db2f6d95-b7a5-3274-8193-c767d2b681c1/dow-jones-soars-1%2C132-points.html?.tsrc=rss",
         "published": "2026-11-09",
-        "published_at": "2026-11-09T17:17:33+00:00",
-        "date_label": "Nov 9, 9:17 AM PT",
-        "age_label": "2h ago",
+        "published_at": "2026-11-09T23:27:00+00:00",
+        "date_label": "Nov 9, 3:27 PM PT",
+        "age_label": "just now",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
@@ -168,86 +168,87 @@
   },
   "mood": {
     "label": "Mixed",
-    "vix": 20.33,
+    "vix": 19.92,
     "put_call_zone": "Greed",
     "put_call": 0.59,
-    "advancers": 1513,
-    "decliners": 196,
-    "why": "VIX 20.3, put/call Greed, 1513 up / 196 down"
+    "advancers": 1467,
+    "decliners": 237,
+    "why": "VIX 19.9, put/call Greed, 1467 up / 237 down"
   },
   "headlines": [
     {
-      "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
+      "title": "Stock Market Today, Nov. 9: AMD Jumps on Oppenheimer Upgrade and Google Cloud Chip Selection",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-amd-jumps-on-oppenheimer-upgrade-and-google-cloud-chip-selection/?.tsrc=rss",
       "published": "2026-11-09",
-      "published_at": "2026-11-09T17:15:22+00:00",
+      "published_at": "2026-11-09T22:30:02+00:00",
       "trusted": true,
       "causes": [
-        "ai_mood",
-        "inflation"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 9:15 AM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 16.5
-    },
-    {
-      "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
-      "published": "2026-11-09",
-      "published_at": "2026-11-09T18:14:37+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 10:14 AM PT",
-      "age_label": "1h ago",
-      "wrap": 10.0,
-      "rank": 14.5
-    },
-    {
-      "title": "Pan American Silver (PAAS): A Low-Beta Silver Miner Turning Metal Prices Into Shareholder Cash",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/pan-american-silver-paas-low-180408104.html?.tsrc=rss",
-      "published": "2026-11-09",
-      "published_at": "2026-11-09T18:04:08+00:00",
-      "trusted": true,
-      "causes": [
-        "election"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 10:04 AM PT",
-      "age_label": "1h ago",
-      "wrap": 10.0,
-      "rank": 12.5
-    },
-    {
-      "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
-      "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
-      "published": "2026-11-09",
-      "published_at": "2026-11-09T19:23:57+00:00",
-      "trusted": true,
-      "causes": [
+        "election",
         "ai_mood"
       ],
       "via": "",
       "region": "Global",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 11:23 AM PT",
+      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 2:30 PM PT",
+      "age_label": "1h ago",
+      "wrap": 18.0,
+      "rank": 22.0
+    },
+    {
+      "title": "Why Micron Technology Stock Gained On Monday",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/09/why-micron-technology-stock-gained-on-monday/?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T23:07:02+00:00",
+      "trusted": true,
+      "causes": [
+        "election",
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "Global",
+      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 3:07 PM PT",
       "age_label": "just now",
-      "wrap": 8.0,
-      "rank": 8.5
+      "wrap": 13.0,
+      "rank": 17.0
+    },
+    {
+      "title": "Update: Wall Street Rebounds From Last Week's Sell-Off; Nvidia Tumbles",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-rebounds-last-week-215121889.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T21:51:21+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 1:51 PM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 12.0
+    },
+    {
+      "title": "Nvidia stock falls after investigation into CEO, bucking market rally",
+      "source": "Yahoo Finance",
+      "url": "https://www.cnn.com/2026/11/09/investing/nvidia-stock-huang-investigation?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T22:35:30+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 2:35 PM PT",
+      "age_label": "1h ago",
+      "wrap": 10.0,
+      "rank": 12.0
     },
     {
       "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
@@ -263,108 +264,128 @@
       "region": "Global",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
       "published_pt": "Nov 9, 10:14 AM PT",
-      "age_label": "1h ago",
+      "age_label": "5h ago",
       "wrap": 8.0,
       "rank": 8.5
     },
     {
-      "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
+      "title": "Dow Jones Soars 1,132 Points As Amazon, Tesla Rally, But Nvidia Dives; CPI Inflation Report Next",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
+      "url": "https://finance.yahoo.com/m/db2f6d95-b7a5-3274-8193-c767d2b681c1/dow-jones-soars-1%2C132-points.html?.tsrc=rss",
       "published": "2026-11-09",
-      "published_at": "2026-11-09T17:25:08+00:00",
+      "published_at": "2026-11-09T23:27:00+00:00",
       "trusted": true,
       "causes": [
-        "election",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 9:25 AM PT",
-      "age_label": "2h ago",
-      "wrap": 5.0,
-      "rank": 10.5
-    },
-    {
-      "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
-      "published": "2026-11-09",
-      "published_at": "2026-11-09T17:17:33+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
+        "ai_mood",
+        "inflation"
       ],
       "via": "",
       "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 9, 9:17 AM PT",
-      "age_label": "2h ago",
+      "published_pt": "Nov 9, 3:27 PM PT",
+      "age_label": "just now",
       "wrap": 5.0,
-      "rank": 9.0
+      "rank": 12.5
+    },
+    {
+      "title": "Stock Market Today, Nov. 9: Markets Rally as Semiconductor Gains Lift Nasdaq",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-markets-rally-as-semiconductor-gains-lift-nasdaq/?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T22:23:39+00:00",
+      "trusted": true,
+      "causes": [
+        "rates",
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 2:23 PM PT",
+      "age_label": "1h ago",
+      "wrap": 5.0,
+      "rank": 8.0
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 13.61,
+      "score": 15.43,
       "headlines": [
         {
-          "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
+          "title": "Stock Market Today, Nov. 9: AMD Jumps on Oppenheimer Upgrade and Google Cloud Chip Selection",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-amd-jumps-on-oppenheimer-upgrade-and-google-cloud-chip-selection/?.tsrc=rss",
           "published": "2026-11-09",
-          "published_at": "2026-11-09T17:15:22+00:00",
+          "published_at": "2026-11-09T22:30:02+00:00",
           "trusted": true,
           "causes": [
-            "ai_mood",
-            "inflation"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 9, 9:15 AM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 16.5
-        },
-        {
-          "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
-          "published": "2026-11-09",
-          "published_at": "2026-11-09T18:14:37+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 9, 10:14 AM PT",
-          "age_label": "1h ago",
-          "wrap": 10.0,
-          "rank": 14.5
-        },
-        {
-          "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
-          "published": "2026-11-09",
-          "published_at": "2026-11-09T19:23:57+00:00",
-          "trusted": true,
-          "causes": [
+            "election",
             "ai_mood"
           ],
           "via": "",
           "region": "Global",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 9, 11:23 AM PT",
+          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 2:30 PM PT",
+          "age_label": "1h ago",
+          "wrap": 18.0,
+          "rank": 22.0
+        },
+        {
+          "title": "Why Micron Technology Stock Gained On Monday",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/investing/2026/11/09/why-micron-technology-stock-gained-on-monday/?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T23:07:02+00:00",
+          "trusted": true,
+          "causes": [
+            "election",
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "Global",
+          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 3:07 PM PT",
           "age_label": "just now",
-          "wrap": 8.0,
-          "rank": 8.5
+          "wrap": 13.0,
+          "rank": 17.0
+        },
+        {
+          "title": "Update: Wall Street Rebounds From Last Week's Sell-Off; Nvidia Tumbles",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-rebounds-last-week-215121889.html?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T21:51:21+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 1:51 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 12.0
+        },
+        {
+          "title": "Nvidia stock falls after investigation into CEO, bucking market rally",
+          "source": "Yahoo Finance",
+          "url": "https://www.cnn.com/2026/11/09/investing/nvidia-stock-huang-investigation?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T22:35:30+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 2:35 PM PT",
+          "age_label": "1h ago",
+          "wrap": 10.0,
+          "rank": 12.0
         },
         {
           "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
@@ -380,59 +401,80 @@
           "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
           "published_pt": "Nov 9, 10:14 AM PT",
-          "age_label": "1h ago",
+          "age_label": "5h ago",
           "wrap": 8.0,
           "rank": 8.5
         },
         {
-          "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
+          "title": "Dow Jones Soars 1,132 Points As Amazon, Tesla Rally, But Nvidia Dives; CPI Inflation Report Next",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
+          "url": "https://finance.yahoo.com/m/db2f6d95-b7a5-3274-8193-c767d2b681c1/dow-jones-soars-1%2C132-points.html?.tsrc=rss",
           "published": "2026-11-09",
-          "published_at": "2026-11-09T17:25:08+00:00",
+          "published_at": "2026-11-09T23:27:00+00:00",
           "trusted": true,
           "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 9, 9:25 AM PT",
-          "age_label": "2h ago",
-          "wrap": 5.0,
-          "rank": 10.5
-        },
-        {
-          "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
-          "published": "2026-11-09",
-          "published_at": "2026-11-09T17:17:33+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
+            "ai_mood",
+            "inflation"
           ],
           "via": "",
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 9, 9:17 AM PT",
-          "age_label": "2h ago",
+          "published_pt": "Nov 9, 3:27 PM PT",
+          "age_label": "just now",
           "wrap": 5.0,
-          "rank": 9.0
+          "rank": 12.5
+        },
+        {
+          "title": "Stock Market Today, Nov. 9: Markets Rally as Semiconductor Gains Lift Nasdaq",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-markets-rally-as-semiconductor-gains-lift-nasdaq/?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T22:23:39+00:00",
+          "trusted": true,
+          "causes": [
+            "rates",
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 2:23 PM PT",
+          "age_label": "1h ago",
+          "wrap": 5.0,
+          "rank": 8.0
         }
       ]
     },
     {
       "cause": "rates",
       "label": "Rates / Fed",
-      "score": 6.68,
-      "headlines": []
+      "score": 4.59,
+      "headlines": [
+        {
+          "title": "Stock Market Today, Nov. 9: Markets Rally as Semiconductor Gains Lift Nasdaq",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/09/stock-market-today-nov-9-markets-rally-as-semiconductor-gains-lift-nasdaq/?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T22:23:39+00:00",
+          "trusted": true,
+          "causes": [
+            "rates",
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 2:23 PM PT",
+          "age_label": "1h ago",
+          "wrap": 5.0,
+          "rank": 8.0
+        }
+      ]
     }
   ],
   "vs_yesterday": {
     "prior_mood": "Mixed",
-    "prior_session": "2026-11-06",
+    "prior_session": "2026-11-09",
     "text": "Mood steady versus last brief (Mixed).",
     "flipped": false,
     "same_fear": false
@@ -444,14 +486,14 @@
   },
   "regime": {
     "label": "uptrend",
-    "pct_above_50day": 63.1,
-    "pct_above_200day": 60.3,
+    "pct_above_50day": 63.0,
+    "pct_above_200day": 59.6,
     "text": "More than half the desk is still above the 50-day and 200-day."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
-      "The market is jumpy (VIX is firm). Small moves are normal; be patient with new buys.",
+      "Choppy day, small moves are normal; be patient with new buys.",
       "Most stocks rose with the indexes. Strength is shared, not just a few names.",
       "The bigger trend is still up on the desk's 50-day and 200-day checks — one rough day does not flip that by itself."
     ],
@@ -464,25 +506,25 @@
     "source": "nasdaq_economicevents"
   },
   "prior_brief": {
-    "session": "2026-11-06",
-    "slot": "morning_open",
-    "why_moved": "Stocks rose, with Nasdaq (2.0%) leading the S&P (1.0%) higher, while Technology (2.1%) and Consumer Discretionary (1.0%) held up (294 stocks up, 308 down); VIX at 24.5.",
+    "session": "2026-11-09",
+    "slot": "evening_close",
+    "why_moved": "Stocks rose, with Nasdaq (3.2%) leading the S&P (2.4%) higher, while Industrials (3.9%) and Technology (3.4%) held up (1513 stocks up, 196 down); VIX at 20.3.",
     "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
-      "Election"
+      "Rates / Fed"
     ]
   },
   "stats": {
-    "spy_price": 752.57,
-    "spy_day_pct": 2.35,
-    "qqq_day_pct": 3.23,
+    "spy_price": 752.69,
+    "spy_day_pct": 2.37,
+    "qqq_day_pct": 3.54,
     "dia_day_pct": null,
-    "vix": 20.33,
-    "advancers": 1513,
-    "decliners": 196,
-    "breadth_sma50": 63.1,
-    "breadth_sma200": 60.3,
+    "vix": 19.92,
+    "advancers": 1467,
+    "decliners": 237,
+    "breadth_sma50": 63.0,
+    "breadth_sma200": 59.6,
     "put_call": 0.59,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
@@ -501,8 +543,8 @@
         "CNBC",
         "Yahoo Finance"
       ],
-      "spy_day_pct": 2.35,
-      "qqq_day_pct": 3.23,
+      "spy_day_pct": 2.37,
+      "qqq_day_pct": 3.54,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
@@ -515,10 +557,16 @@
           "n": 4
         },
         "ai_mood": {
-          "up": 2,
+          "up": 3,
           "down": 2,
           "flat": 0,
-          "n": 4
+          "n": 5
+        },
+        "rates": {
+          "up": 1,
+          "down": 0,
+          "flat": 0,
+          "n": 1
         }
       },
       "by_source": {
@@ -529,14 +577,26 @@
           "n": 4
         },
         "Federal Reserve": {
+          "up": 1,
+          "down": 1,
+          "flat": 0,
+          "n": 2
+        },
+        "Associated Press": {
           "up": 0,
           "down": 1,
           "flat": 0,
           "n": 1
         },
-        "Associated Press": {
-          "up": 0,
-          "down": 1,
+        "NPR": {
+          "up": 1,
+          "down": 0,
+          "flat": 0,
+          "n": 1
+        },
+        "White House": {
+          "up": 1,
+          "down": 0,
           "flat": 0,
           "n": 1
         },
@@ -559,14 +619,14 @@
           "n": 2
         }
       },
-      "n_labeled": 4,
+      "n_labeled": 5,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-09T19:49:39.414302+00:00",
+    "retrieved_at": "2026-11-09T23:55:49.248784+00:00",
     "summary": "Verified indexes on file finished higher. Blank markets are not part of that.",
     "breadth": "higher",
     "missing": [
@@ -581,17 +641,17 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": 2.35,
+        "pct": 2.37,
         "verified": true,
         "session_date": "2026-11-09",
-        "quote_at": "2026-11-09T11:46:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-09T15:52:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
-        "cause": "Possible context from Yahoo Finance: Here’s Why William Blair Upgraded Appian (APPN) Stock. Not proof this caused the percent.",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
+        "cause": "Possible context from Yahoo Finance: Nvidia is about 6% of the S&P 500. If Jensen Huang is ousted, there’s no clear successor — could chaos hit portfolios?. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss"
+        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/nvidia-6-p-500-jensen-230000817.html?.tsrc=rss"
       },
       {
         "id": "sxxp",
@@ -602,7 +662,7 @@
         "verified": true,
         "session_date": "2026-11-09",
         "quote_at": "2026-11-09T20:50:23+01:00",
-        "status": "closed",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
         "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
         "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
@@ -672,7 +732,7 @@
         "verified": true,
         "session_date": "2026-11-09",
         "quote_at": "2026-11-09T20:50:23+01:00",
-        "status": "closed",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
         "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
         "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
@@ -689,7 +749,7 @@
         "verified": true,
         "session_date": "2026-11-09",
         "quote_at": "2026-11-09T20:52:15+01:00",
-        "status": "closed",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
         "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
         "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
@@ -787,31 +847,31 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": 2.35,
+        "pct": 2.37,
         "verified": true,
         "session_date": "2026-11-09",
-        "quote_at": "2026-11-09T11:46:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-09T15:52:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
-        "cause": "Possible context from Yahoo Finance: Here’s Why William Blair Upgraded Appian (APPN) Stock. Not proof this caused the percent.",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
+        "cause": "Possible context from Yahoo Finance: Nvidia is about 6% of the S&P 500. If Jensen Huang is ousted, there’s no clear successor — could chaos hit portfolios?. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss"
+        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/nvidia-6-p-500-jensen-230000817.html?.tsrc=rss"
       },
       {
         "id": "qqq",
         "name": "QQQ",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": 3.23,
+        "pct": 3.54,
         "verified": true,
         "session_date": "2026-11-09",
-        "quote_at": "2026-11-09T11:46:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-09T15:52:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""

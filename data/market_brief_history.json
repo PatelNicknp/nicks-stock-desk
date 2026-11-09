@@ -53,8 +53,8 @@
       ],
       "spy_day_pct": -2.73,
       "qqq_day_pct": -4.98,
-      "next_day_spy_pct": null,
-      "next_day_direction": null
+      "next_day_spy_pct": 2.37,
+      "next_day_direction": "up"
     },
     {
       "date": "2026-11-05",
@@ -109,8 +109,8 @@
         "CNBC",
         "Yahoo Finance"
       ],
-      "spy_day_pct": 2.35,
-      "qqq_day_pct": 3.23,
+      "spy_day_pct": 2.37,
+      "qqq_day_pct": 3.54,
       "next_day_spy_pct": null,
       "next_day_direction": null
     }
@@ -124,10 +124,16 @@
         "n": 4
       },
       "ai_mood": {
-        "up": 2,
+        "up": 3,
         "down": 2,
         "flat": 0,
-        "n": 4
+        "n": 5
+      },
+      "rates": {
+        "up": 1,
+        "down": 0,
+        "flat": 0,
+        "n": 1
       }
     },
     "by_source": {
@@ -138,14 +144,26 @@
         "n": 4
       },
       "Federal Reserve": {
+        "up": 1,
+        "down": 1,
+        "flat": 0,
+        "n": 2
+      },
+      "Associated Press": {
         "up": 0,
         "down": 1,
         "flat": 0,
         "n": 1
       },
-      "Associated Press": {
-        "up": 0,
-        "down": 1,
+      "NPR": {
+        "up": 1,
+        "down": 0,
+        "flat": 0,
+        "n": 1
+      },
+      "White House": {
+        "up": 1,
+        "down": 0,
         "flat": 0,
         "n": 1
       },
@@ -168,7 +186,7 @@
         "n": 2
       }
     },
-    "n_labeled": 4,
+    "n_labeled": 5,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }

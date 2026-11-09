@@ -1,33 +1,33 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,503 names,2026-11-09 10:39 PT
-Universe (Wikipedia S&P 400),OK,400,400 names,2026-11-09 10:39 PT
-Universe (Wikipedia S&P 600),OK,603,603 names,2026-11-09 10:39 PT
-Universe (Wikipedia Nasdaq-100),OK,101,101 names,2026-11-09 10:39 PT
-Listed symbols (Nasdaq Trader),OK,2026-11-09,nasdaq and other exchanges,2026-11-09 10:39 PT
-Liquid names (Nasdaq screener),OK,2026-11-09,7127 rows,2026-11-09 10:39 PT
-Universe size,OK,1724,"1724 names after S&P 400, S&P 600, and liquid additions",2026-11-09 10:39 PT
-Prices (Yahoo Finance),OK,2026-11-09,"incremental 1727, full 19 (new 8, repair 11, refresh 0), waiting for backfill 0, adjustment refetch 602, 2125905 rows, 2 at a time",2026-11-09 10:44 PT
-SEC company tickers,OK,2026-11-09,10419 companies,2026-11-09 10:44 PT
-Fundamentals (SEC EDGAR company facts),OK,2026-11-09,"751 names, 1 failed and kept prior rows",2026-11-09 10:48 PT
-Analyst and profile (Yahoo Finance),OK,2026-11-09,"524 names, 0 failed",2026-11-09 10:55 PT
-Earnings dates (Yahoo Finance),OK,2026-11-09,12777 rows,2026-11-09 10:55 PT
-Institutional 13F and insider (Nasdaq),OK,2026-11-09,"524 names, 0 failed",2026-11-09 11:39 PT
-News headlines (Yahoo Finance),OK,2026-11-09,"136 headlines, 0 names failed",2026-11-09 11:40 PT
-Option walls (Yahoo option chain),OK,2026-11-09,"8340 rows, 0 names failed",2026-11-09 11:43 PT
-Put/call (CBOE),OK,2026-11-06,2 days refreshed,2026-11-09 11:43 PT
-FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-09 11:43 PT
-Economic calendar (Nasdaq),OK,2026-11-06,33 matched releases,2026-11-09 11:44 PT
-Backtest,OK,2026-11-09,monthly point-in-time test,2026-11-09 11:46 PT
-Price candles,OK,2026-11-09,"1715 tickers, up to 1258 cached sessions. No new download.",2026-11-09 11:47 PT
-Index series,OK,2026-11-09,"SPY, QQQ, VIX copied from the price frame already downloaded. No new request.",2026-11-09 11:47 PT
-Episodic pivot,OK,2026-11-09,"EP rows 46. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-09 11:48 PT
-Pattern scanners,OK,2026-11-09,"VCP 322, CANSLIM 805, box 224, breakdown 0, flag 21, Qullamaggie 82, Marios 83, high volume 56, leaders 593, 52-week 1723 names over 1007 sessions. No new downloads.",2026-11-09 11:49 PT
-Gap up,OK,2026-11-09,Gap up rows 171. Cached daily bars only. No new downloads.,2026-11-09 11:49 PT
-Buy setups,OK,2026-11-09,Buy setups 32. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-09 11:49 PT
-Trading Floor headlines (Google News RSS),OK,2026-11-09,"11 requests for 11 picks without desk headlines, 51 headlines, 0 failed (they say No fresh headlines found).",2026-11-09 11:49 PT
-Trading Floor,OK,2026-11-09,"15 stocks debated: BUY 0, WAIT 10, SKIP 5. Research only, no orders, no alerts.",2026-11-09 11:49 PT
-Trading Floor paper test,OK,2026-11-06,"FAKE MONEY. Equity 9925.24, open 2, waiting 0, closed 0. Fills at the next session's open. No orders, no broker, no new downloads.",2026-11-09 11:49 PT
-Options chains,OK,,"calls 0, puts 0, skipped 15. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 11/06/2026. Education, not financial advice. No broker.",2026-11-09 11:49 PT
-Sector rotation,OK,2026-11-09,"11 sectors, 5 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-09 11:49 PT
-Column check,PARTIAL,,"A column is blank on every row: scanner_canslim, scanner_ep, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-09 11:49 PT
-Market news brief,OK,2026-11-09,evening_close · mood Mixed · 7 headlines,2026-11-09 11:52 PT
+Universe (Wikipedia S&P 500),OK,503,already fetched today,2026-11-09 15:41 PT
+Universe (Wikipedia S&P 400),OK,400,already fetched today,2026-11-09 15:41 PT
+Universe (Wikipedia S&P 600),OK,603,already fetched today,2026-11-09 15:41 PT
+Universe (Wikipedia Nasdaq-100),OK,101,already fetched today,2026-11-09 15:41 PT
+Listed symbols (Nasdaq Trader),OK,2026-11-09,reused cache,2026-11-09 15:41 PT
+Liquid names (Nasdaq screener),OK,2026-11-09,reused cache,2026-11-09 15:41 PT
+Universe size,OK,1724,"1724 names after S&P 400, S&P 600, and liquid additions",2026-11-09 15:41 PT
+Prices (Yahoo Finance),OK,2026-11-09,"incremental 1738, full 8 (new 1, repair 7, refresh 0), waiting for backfill 0, adjustment refetch 0, 2125906 rows, 2 at a time",2026-11-09 15:44 PT
+SEC company tickers,OK,2026-11-09,reused cache,2026-11-09 15:44 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-11-09,"868 names, 1 failed and kept prior rows",2026-11-09 15:45 PT
+Analyst and profile (Yahoo Finance),OK,2026-11-09,"reused cache (at most 60 profiles a full run, again after 7 days)",2026-11-09 15:45 PT
+Earnings dates (Yahoo Finance),OK,2026-11-09,reused cache,2026-11-09 15:45 PT
+Institutional 13F and insider (Nasdaq),OK,2026-11-09,"reused cache (at most 60 names a full run, again after 7 days)",2026-11-09 15:45 PT
+News headlines (Yahoo Finance),OK,2026-11-09,reused cache,2026-11-09 15:46 PT
+Option walls (Yahoo option chain),OK,2026-11-09,reused cache (option chains refresh at most once a day),2026-11-09 15:46 PT
+Put/call (CBOE),OK,2026-11-09,reused cache,2026-11-09 15:46 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-09 15:47 PT
+Economic calendar (Nasdaq),OK,2026-11-09,reused cache,2026-11-09 15:47 PT
+Backtest,OK,2026-11-09,monthly point-in-time test,2026-11-09 15:52 PT
+Price candles,OK,2026-11-09,"1715 tickers, up to 1258 cached sessions. No new download.",2026-11-09 15:53 PT
+Index series,OK,2026-11-09,"SPY, QQQ, VIX copied from the price frame already downloaded. No new request.",2026-11-09 15:53 PT
+Episodic pivot,OK,2026-11-09,"EP rows 46. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-09 15:55 PT
+Pattern scanners,OK,2026-11-09,"VCP 317, CANSLIM 803, box 224, breakdown 1, flag 21, Qullamaggie 82, Marios 82, high volume 660, leaders 596, 52-week 1723 names over 1007 sessions. No new downloads.",2026-11-09 15:55 PT
+Gap up,OK,2026-11-09,Gap up rows 176. Cached daily bars only. No new downloads.,2026-11-09 15:55 PT
+Buy setups,OK,2026-11-09,Buy setups 31. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-09 15:55 PT
+Trading Floor headlines (Google News RSS),OK,2026-11-09,"reused cache, no request this run (the fetch runs once a day on the full run, only for picks without desk headlines)",2026-11-09 15:55 PT
+Trading Floor,OK,2026-11-09,"15 stocks debated: BUY 11, WAIT 4, SKIP 0. Research only, no orders, no alerts.",2026-11-09 15:55 PT
+Trading Floor paper test,OK,2026-11-09,"FAKE MONEY. Equity 9983.32, open 2, waiting 8, closed 0. Fills at the next session's open. No orders, no broker, no new downloads.",2026-11-09 15:55 PT
+Options chains,OK,,"calls 0, puts 0, skipped 16. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 11/09/2026. Education, not financial advice. No broker.",2026-11-09 15:55 PT
+Sector rotation,OK,2026-11-09,"11 sectors, 5 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-09 15:55 PT
+Column check,PARTIAL,,"A column is blank on every row: scanner_canslim, scanner_ep, scanner_52w, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-09 15:55 PT
+Market news brief,OK,2026-11-09,evening_close · mood Mixed · 7 headlines,2026-11-09 15:58 PT
