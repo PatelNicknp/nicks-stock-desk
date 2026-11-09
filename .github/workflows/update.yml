@@ -87,6 +87,7 @@ jobs:
           python tests/test_trading_floor_paper.py
           python tests/test_incremental_prices.py
           python tests/test_twice_daily_universe.py
+          python tests/test_slow_refresh.py
           python tests/test_fast_backfill.py
           python tests/test_market_news_mood.py
           python tests/test_market_news_causes.py
@@ -100,8 +101,12 @@ jobs:
         if: steps.guard.outputs.skip != 'true'
         env:
           PYTHONUNBUFFERED: "1"
+          # Commit the cache as each slow source finishes. A timeout used to drop the whole run, including prices already downloaded.
+          DESK_CHECKPOINT: "1"
         run: |
           set -e
+          git config user.name "stock-desk-bot"
+          git config user.email "stock-desk-bot@users.noreply.github.com"
           # A manual run is full, as before. A watchdog or keeper make-up uses the mode of the slot it replaces.
           # A scheduled run uses the mode of its New York slot (the 18:30 ET slot is the full run).
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" = "hourly" ]; then

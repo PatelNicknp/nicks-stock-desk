@@ -389,6 +389,11 @@
     "min_market_cap": 10000000000,
     "max_stocks": 2000
   },
+  "slow_sources": {
+    "_note": "Yahoo profiles and Nasdaq 13F/insider on a full run. Each name is its own request, so the whole daily list no longer fits in the job. One run refreshes at most batch_per_run names: any still missing, then the ones last refreshed longest ago. A name already refreshed inside refresh_every_days waits. Hourly runs still reuse the cache and make no extra calls.",
+    "batch_per_run": 60,
+    "refresh_every_days": 7
+  },
   "sec_facts": {
     "_note": "SEC company facts for the wider list (features.sec_rolling). The S&P 500, Nasdaq-100, growth names, holdings, and watchlist are fetched every full run. Other names are fetched batch_per_run at a time, oldest first, and again after refresh_every_days. cik_overrides replaces a ticker that the SEC ticker file points at the wrong filer. XOM is Exxon Mobil Corporation, CIK 0000034088. HONA, SPCX, and VYLR already point at the companies that own those tickers; they have no 10-K yet, so yearly rows stay blank.",
     "batch_per_run": 120,

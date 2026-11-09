@@ -119,6 +119,8 @@ def test_settings_and_help():
     assert cfg["features"]["liquid_names"] is True
     assert cfg["sec_facts"]["cik_overrides"]["XOM"] == "0000034088"
     assert cfg["incremental_prices"]["backfill_per_run"] == 40
+    assert cfg["slow_sources"]["batch_per_run"] == 60
+    assert cfg["slow_sources"]["refresh_every_days"] == 7
     rows = dict(zip(tables.settings_rows(cfg)["setting"].astype(str), tables.settings_rows(cfg)["value"].astype(str)))
     assert rows["feature.twice_daily_schedule"] == "True"
     assert rows["index.sp400"] == "True" and rows["index.sp600"] == "True"

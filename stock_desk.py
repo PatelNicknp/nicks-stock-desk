@@ -1465,6 +1465,112 @@ def rolling_sec_pool(tickers, core, cycle, today, batch, every_days, already_tod
     return must + due[:int(batch)]
 
 
+def slow_source_settings(cfg):
+    """How many profiles and 13F rows one full run may refresh.
+
+    Company facts already rotate. Profiles and Nasdaq holdings did not: every
+    full run asked for the whole daily list again, two requests a name. At the
+    current list size that alone ran past 40 minutes.
+    """
+    raw = cfg.get("slow_sources") or {}
+    try:
+        batch = int(raw.get("batch_per_run", 60))
+    except (TypeError, ValueError):
+        batch = 60
+    try:
+        every = int(raw.get("refresh_every_days", 7))
+    except (TypeError, ValueError):
+        every = 7
+    return {"batch_per_run": max(1, batch), "refresh_every_days": max(1, every)}
+
+
+def load_named_cycle(cache, name):
+    path = os.path.join(cache, "%s_cycle.json" % name)
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_named_cycle(cache, name, cycle):
+    with open(os.path.join(cache, "%s_cycle.json" % name), "w") as f:
+        json.dump(cycle, f, indent=1, sort_keys=True)
+
+
+def _cycle_age(cycle, ticker, today):
+    stamp = (cycle or {}).get(ticker)
+    if not stamp:
+        return 10 ** 9
+    try:
+        return (pd.Timestamp(str(today)[:10]) - pd.Timestamp(str(stamp)[:10])).days
+    except (TypeError, ValueError):
+        return 10 ** 9
+
+
+def slow_refresh_pool(tickers, have, cycle, today, batch, every_days, already_today):
+    """Missing names first, then the stalest saved names, at most `batch`.
+
+    Names fetched today are left out so a restarted run does not repeat them.
+    """
+    already = set(already_today or [])
+    have = set(have or [])
+    missing = [t for t in tickers if t not in have and t not in already]
+    due = [t for t in tickers if t in have and t not in already and _cycle_age(cycle, t, today) >= int(every_days)]
+    due.sort(key=lambda t: (-_cycle_age(cycle, t, today), t))
+    return (missing + due)[:max(0, int(batch))]
+
+
+def merge_ticker_rows(prior, fresh_rows):
+    """Keep saved rows for tickers this run did not refresh."""
+    if not fresh_rows:
+        return prior if prior is not None else pd.DataFrame()
+    fresh = pd.DataFrame(fresh_rows)
+    if "ticker" not in fresh.columns:
+        return fresh
+    if prior is None or len(prior) == 0 or "ticker" not in getattr(prior, "columns", []):
+        return fresh
+    got = set(fresh["ticker"].astype(str))
+    keep = prior[~prior["ticker"].astype(str).isin(got)]
+    return pd.concat([keep, fresh], ignore_index=True)
+
+
+def checkpoint_progress(note):
+    """Commit the cache so a later timeout does not drop a finished download.
+
+    The desk step used to commit once, after every source. A timeout threw away
+    prices that had already been written. Off unless the workflow asks for it.
+    """
+    if os.environ.get("DESK_CHECKPOINT") != "1":
+        return
+    folder = root()
+    import subprocess
+    def run(args):
+        return subprocess.run(args, cwd=folder, capture_output=True, text=True)
+    if run(["git", "rev-parse", "--is-inside-work-tree"]).returncode != 0:
+        print("checkpoint skipped, not a git checkout")
+        return
+    run(["git", "config", "user.name", "stock-desk-bot"])
+    run(["git", "config", "user.email", "stock-desk-bot@users.noreply.github.com"])
+    added = run(["git", "add", "cache"])
+    if added.returncode != 0:
+        print("checkpoint add failed", (added.stderr or "")[:200])
+        return
+    if run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
+        return
+    committed = run(["git", "commit", "-m", "Checkpoint desk cache %s" % note])
+    if committed.returncode != 0:
+        print("checkpoint commit failed", (committed.stderr or "")[:200])
+        return
+    pushed = run(["git", "push"])
+    if pushed.returncode != 0:
+        print("checkpoint push failed", (pushed.stderr or "")[:200])
+        return
+    print("checkpoint saved", note)
+
+
 def _need_fetch(name, cache_file, mode):
     exists = os.path.exists(cache_file) and os.path.getsize(cache_file) > 0
     return netutil.decide_slow(STAMPS.get(name), today_et(), exists, mode, force="--force-slow" in sys.argv)
@@ -1630,29 +1736,35 @@ def load_yahoo(tickers, cfg, cache, mode):
     earn_p = os.path.join(cache, "earnings.csv")
     info, earn = read_csv(info_p), read_csv(earn_p)
     decision = _need_fetch("yahoo_slow", info_p, mode)
-    gaps = None
-    if decision == "reuse":
-        gaps = _missing_tickers(info, tickers) if mode == "full" else []
-        if not gaps:
-            log("Analyst and profile (Yahoo Finance)", "OK", STAMPS.get("yahoo_slow", ""), "reused cache (slow sources refresh at most once a day)")
-            log("Earnings dates (Yahoo Finance)", "OK", STAMPS.get("yahoo_slow", ""), "reused cache")
-            return info, earn
-        print("Yahoo profiles filling %d names added since the daily fetch" % len(gaps))
     if decision == "missing":
         log("Analyst and profile (Yahoo Finance)", "MISSING", "", "no cache and this run does not call Yahoo profiles")
         log("Earnings dates (Yahoo Finance)", "MISSING", "", "no cache")
         return info, earn
+    if decision == "reuse" and mode != "full":
+        log("Analyst and profile (Yahoo Finance)", "OK", STAMPS.get("yahoo_slow", ""), "reused cache (slow sources refresh at most once a day)")
+        log("Earnings dates (Yahoo Finance)", "OK", STAMPS.get("yahoo_slow", ""), "reused cache")
+        return info, earn
+    settings = slow_source_settings(cfg)
+    have = set(info["ticker"].astype(str)) if len(info) and "ticker" in info.columns else set()
+    cycle = load_named_cycle(cache, "yahoo")
+    done = progress_load(cache, "yahoo")
+    pool = slow_refresh_pool(
+        list(tickers), have, cycle, today_et(),
+        settings["batch_per_run"], settings["refresh_every_days"], done)
+    if not pool:
+        STAMPS["yahoo_slow"] = today_et()
+        note = "reused cache (at most %d profiles a full run, again after %d days)" % (
+            settings["batch_per_run"], settings["refresh_every_days"])
+        log("Analyst and profile (Yahoo Finance)", "OK", today_et(), note)
+        log("Earnings dates (Yahoo Finance)", "OK", today_et(), "reused cache")
+        return info, earn
+    print("Yahoo profiles refreshing %d names (at most %d a full run)" % (len(pool), settings["batch_per_run"]))
     import yfinance as yf
     lim = netutil.RateLimiter(rl(cfg)["yahoo_profile_per_second"])
-    done = progress_load(cache, "yahoo")
     rows, erows, fails = [], [], 0
     old_info = info.set_index("ticker") if len(info) and "ticker" in info.columns else None
-    if len(info) and done:
-        rows.extend(info[info["ticker"].isin(done)].to_dict("records"))
-        if len(earn):
-            erows.extend(earn[earn["ticker"].isin(done)].to_dict("records"))
-    pool = gaps if gaps else list(tickers)
-    todo = [t for t in pool if t not in done]
+    base_info, base_earn = info, earn
+    todo = list(pool)
     if done:
         print("Yahoo profiles skipping %d names already fetched today" % len(done))
     for i, t in enumerate(todo):
@@ -1698,26 +1810,20 @@ def load_yahoo(tickers, cfg, cache, mode):
             fails += 1
             if old_info is not None and t in old_info.index:
                 rows.append(old_info.loc[t].to_dict())
-        if (i + 1) % 25 == 0:
+        if (i + 1) % 25 == 0 or (i + 1) == len(todo):
             print("Yahoo profiles %d / %d" % (i + 1, len(todo)))
-            if rows:
-                pd.DataFrame(rows).drop_duplicates("ticker", keep="last").to_csv(info_p, index=False)
-            if erows:
-                pd.DataFrame(erows).to_csv(earn_p, index=False)
+            info = merge_ticker_rows(base_info, rows)
+            if len(info) and "ticker" in info.columns:
+                info = info.drop_duplicates("ticker", keep="last")
+                info.to_csv(info_p, index=False)
+            earn = merge_ticker_rows(base_earn, erows)
+            if len(earn):
+                earn.to_csv(earn_p, index=False)
+            for name in done:
+                cycle[name] = today_et()
+            save_named_cycle(cache, "yahoo", cycle)
             progress_save(cache, "yahoo", done)
-    if rows:
-        info = pd.DataFrame(rows).drop_duplicates("ticker", keep="last")
-        info.to_csv(info_p, index=False)
-    if erows:
-        earn = pd.DataFrame(erows)
-        # keep prior earnings for tickers we failed, if we got nothing for them
-        if fails and os.path.exists(earn_p):
-            prev = read_csv(earn_p)
-            if len(prev):
-                got = set(earn["ticker"])
-                earn = pd.concat([earn, prev[~prev["ticker"].isin(got)]], ignore_index=True)
-        earn.to_csv(earn_p, index=False)
-    progress_save(cache, "yahoo", done)
+            checkpoint_progress("yahoo profiles %d/%d" % (i + 1, len(todo)))
     fail_rate = fails / max(len(todo), 1)
     if fail_rate > 0.5:
         log("Analyst and profile (Yahoo Finance)", "CACHED" if len(info) else "MISSING", "", "%d of %d failed" % (fails, len(tickers)))
@@ -1922,37 +2028,37 @@ def load_holders(tickers, cfg, cache, mode):
     detail_p = os.path.join(cache, "holder_rows.csv")
     summary, detail = read_csv(path), read_csv(detail_p)
     decision = _need_fetch("holders", path, mode)
-    gaps = None
     # The saved percent is Nasdaq's raw ratio. Recomputing it needs the holdings
     # total and Nasdaq's share count, which older caches did not keep.
     missing_parts = len(summary) > 0 and "inst_shares" not in summary.columns
-    if decision == "reuse":
-        gaps = _missing_tickers(summary, tickers) if mode == "full" else []
-        if mode == "full" and missing_parts:
-            print("13F cache has no holdings total; refetching so ownership is not just capped")
-            gaps = None
-            decision = "fetch"
-        elif not gaps:
-            log("Institutional 13F and insider (Nasdaq)", "OK", STAMPS.get("holders", ""), "reused cache (slow sources refresh at most once a day)")
-            return summary, detail
-        else:
-            print("Nasdaq filling %d names added since the daily fetch" % len(gaps))
     if decision == "missing":
         log("Institutional 13F and insider (Nasdaq)", "MISSING", "", "no cache and this run does not call Nasdaq")
         return summary, detail
+    if decision == "reuse" and mode != "full":
+        log("Institutional 13F and insider (Nasdaq)", "OK", STAMPS.get("holders", ""), "reused cache (slow sources refresh at most once a day)")
+        return summary, detail
+    settings = slow_source_settings(cfg)
+    have = set(summary["ticker"].astype(str)) if len(summary) and "ticker" in summary.columns else set()
+    cycle = load_named_cycle(cache, "holders")
+    done = progress_load(cache, "holders")
+    if missing_parts:
+        print("13F cache has no holdings total; refreshing a batch so ownership is not just capped")
+    pool = slow_refresh_pool(
+        list(tickers), have, {} if missing_parts else cycle, today_et(),
+        settings["batch_per_run"], settings["refresh_every_days"], done)
+    if not pool:
+        STAMPS["holders"] = today_et()
+        note = "reused cache (at most %d names a full run, again after %d days)" % (
+            settings["batch_per_run"], settings["refresh_every_days"])
+        log("Institutional 13F and insider (Nasdaq)", "OK", today_et(), note)
+        return summary, detail
+    print("Nasdaq refreshing %d names (at most %d a full run)" % (len(pool), settings["batch_per_run"]))
     lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
     headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
-    done = progress_load(cache, "holders")
-    if mode == "full" and missing_parts:
-        done = set()
     sums, rows, fails = [], [], 0
     old = summary.set_index("ticker") if len(summary) and "ticker" in summary.columns else None
-    if len(summary) and done:
-        sums.extend(summary[summary["ticker"].isin(done)].to_dict("records"))
-    if len(detail) and done and "ticker" in detail.columns:
-        rows.extend(detail[detail["ticker"].isin(done)].to_dict("records"))
-    pool = gaps if gaps else list(tickers)
-    todo = [t for t in pool if t not in done]
+    base_summary, base_detail = summary, detail
+    todo = list(pool)
     if done:
         print("Nasdaq skipping %d names already fetched today" % len(done))
     for i, t in enumerate(todo):
@@ -2007,20 +2113,20 @@ def load_holders(tickers, cfg, cache, mode):
             fails += 1
             if old is not None and t in old.index:
                 sums.append(old.loc[t].to_dict())
-        if (i + 1) % 40 == 0:
+        if (i + 1) % 40 == 0 or (i + 1) == len(todo):
             print("Nasdaq %d / %d" % (i + 1, len(todo)))
-            if sums:
-                pd.DataFrame(sums).drop_duplicates("ticker", keep="last").to_csv(path, index=False)
-            if rows:
-                pd.DataFrame(rows).to_csv(detail_p, index=False)
+            summary = merge_ticker_rows(base_summary, sums)
+            if len(summary) and "ticker" in summary.columns:
+                summary = summary.drop_duplicates("ticker", keep="last")
+                summary.to_csv(path, index=False)
+            detail = merge_ticker_rows(base_detail, rows)
+            if len(detail):
+                detail.to_csv(detail_p, index=False)
+            for name in done:
+                cycle[name] = today_et()
+            save_named_cycle(cache, "holders", cycle)
             progress_save(cache, "holders", done)
-    if sums:
-        summary = pd.DataFrame(sums).drop_duplicates("ticker", keep="last")
-        summary.to_csv(path, index=False)
-    if rows:
-        detail = pd.DataFrame(rows)
-        detail.to_csv(detail_p, index=False)
-    progress_save(cache, "holders", done)
+            checkpoint_progress("nasdaq holders %d/%d" % (i + 1, len(todo)))
     fail_rate = fails / max(len(todo), 1)
     if fail_rate > 0.5:
         log("Institutional 13F and insider (Nasdaq)", "CACHED" if len(summary) else "MISSING", "", "%d of %d failed" % (fails, len(tickers)))
@@ -3310,6 +3416,7 @@ def main(argv=None):
 
     universe, tickers = build_price_tickers(cfg, cache, mode, hold_tickers, watch_tickers)
     long = load_prices(tickers, cfg, cache, mode)
+    checkpoint_progress("prices")
     close, high, low, vol = wide_from_long(long, "close"), wide_from_long(long, "high"), wide_from_long(long, "low"), wide_from_long(long, "volume")
     price_status = source_status("Prices (Yahoo Finance)")
 
@@ -3325,8 +3432,8 @@ def main(argv=None):
         annual, quarters = load_sec(list(universe["ticker"]), cik, cfg, cache, mode, core=daily_names) if cik else (pd.DataFrame(), pd.DataFrame())
         if not cik and score_on:
             log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no CIK map")
-        # Profiles and 13F stay on the original daily list. New names would be a new
-        # Yahoo or Nasdaq call for every symbol, which the call budget does not allow.
+        # Profiles and 13F stay on the original daily list. A full run refreshes a
+        # slice of that list (slow_sources), not every name. Hourly reuses the cache.
         info, earnings = load_yahoo(daily_names, cfg, cache, mode)
         holders, holder_rows = load_holders(daily_names, cfg, cache, mode)
     if len(annual) or len(quarters):
