@@ -1,53 +1,53 @@
 {
   "schema_version": 2,
   "feature": "market_news",
-  "session": "2026-11-06",
-  "slot": "morning_open",
-  "updated_pt": "2026-11-06 07:30 PT",
-  "price_as_of": "2026-11-06",
-  "why_moved": "The market rose: S&P 1.0%, Nasdaq 2.0%, Dow-heavy groups (Financials/Industrials) about 0.3%. Biggest driver: AI / Tech mood; lagging sectors were Consumer Staples (-0.9%) and Health Care (-0.1%); leading sectors Technology (2.1%) and Consumer Discretionary (1.0%) held up. Breadth was mixed (294 up, 308 down); VIX is firm at 24.5.",
-  "why_moved_short": "Stocks rose, with Nasdaq (2.0%) leading the S&P (1.0%) higher, while Technology (2.1%) and Consumer Discretionary (1.0%) held up (294 stocks up, 308 down); VIX at 24.5.",
+  "session": "2026-11-09",
+  "slot": "evening_close",
+  "updated_pt": "2026-11-09 11:46 PT",
+  "price_as_of": "2026-11-09",
+  "why_moved": "The market rose: S&P 2.4%, Nasdaq 3.2%, Dow-heavy groups (Financials/Industrials) about 2.8%. Biggest driver: AI / Tech mood; lagging sectors were Energy (0.4%) and Consumer Staples (0.9%); leading sectors Industrials (3.9%) and Technology (3.4%) held up. The move was broad: 1513 stocks rose and 196 fell; VIX is firm at 20.3.",
+  "why_moved_short": "Stocks rose, with Nasdaq (3.2%) leading the S&P (2.4%) higher, while Industrials (3.9%) and Technology (3.4%) held up (1513 stocks up, 196 down); VIX at 20.3.",
   "story": {
     "direction": "up",
-    "date_label": "November 6, 2026",
-    "summary": "U.S. morning summary",
+    "date_label": "November 9, 2026",
+    "summary": "U.S. closing summary",
     "clear_cause": true,
     "cause": "ai_mood",
-    "lead": "The AI trade led stocks higher.",
-    "support": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations.",
+    "lead": "Tech led stocks higher.",
+    "support": "This beaten-down data center stock could be worth a look, says Mike Khouw.",
     "support_ref": 1,
     "bullets": [
       {
-        "lead": "Tech led the gain.",
-        "rest": "Tech rose 2.06%.",
-        "ref": 1
+        "lead": "Industrials led the gain.",
+        "rest": "Industrials rose 3.88%.",
+        "ref": null
       },
       {
-        "lead": "More stocks fell than rose.",
-        "rest": "308 stocks fell and 294 rose.",
+        "lead": "More stocks rose than fell.",
+        "rest": "1513 stocks rose and 196 fell.",
         "ref": null
       }
     ],
     "sector_label": "Where the buying was",
     "chips": [
       {
-        "name": "Tech",
-        "pct": 2.06,
-        "pct_text": "2.06%",
+        "name": "Industrials",
+        "pct": 3.88,
+        "pct_text": "3.88%",
         "arrow": "up",
         "kind": "move",
-        "bar": 53
+        "bar": 87
       },
       {
         "name": "Chips",
-        "pct": 3.88,
-        "pct_text": "3.88%",
+        "pct": 4.48,
+        "pct_text": "4.48%",
         "arrow": "up",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "8 of 11 sectors up",
+        "name": "All 11 sectors up",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -58,15 +58,15 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": 1.02,
-        "pct_text": "1.02%",
+        "pct": 2.35,
+        "pct_text": "2.35%",
         "arrow": "up",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": 2.03,
-        "pct_text": "2.03%",
+        "pct": 3.23,
+        "pct_text": "3.23%",
         "arrow": "up",
         "source": "qqq"
       }
@@ -74,269 +74,385 @@
     "news": [
       {
         "n": 1,
-        "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
-        "source": "Reuters",
-        "via": "Investing.com",
-        "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
-        "published": "2026-11-06",
-        "date_label": "Nov 6"
+        "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
+        "source": "CNBC",
+        "via": "",
+        "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T19:23:57+00:00",
+        "date_label": "Nov 9, 11:23 AM PT",
+        "age_label": "just now",
+        "region": "Global",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 2,
-        "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+        "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
-        "published": "2026-11-06",
-        "date_label": "Nov 6"
+        "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T17:15:22+00:00",
+        "date_label": "Nov 9, 9:15 AM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 3,
-        "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
-        "source": "MarketWatch",
+        "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
+        "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
-        "published": "2026-11-05",
-        "date_label": "Nov 5"
+        "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T18:14:37+00:00",
+        "date_label": "Nov 9, 10:14 AM PT",
+        "age_label": "1h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 4,
+        "title": "Pan American Silver (PAAS): A Low-Beta Silver Miner Turning Metal Prices Into Shareholder Cash",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/pan-american-silver-paas-low-180408104.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T18:04:08+00:00",
+        "date_label": "Nov 9, 10:04 AM PT",
+        "age_label": "1h ago",
+        "region": "US",
+        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
+      },
+      {
+        "n": 5,
+        "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
+        "source": "CNBC",
+        "via": "",
+        "url": "https://www.cnbc.com/2026/11/09/goldman-ceo-ai-financing-market.html",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T18:14:47+00:00",
+        "date_label": "Nov 9, 10:14 AM PT",
+        "age_label": "1h ago",
+        "region": "Global",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 6,
+        "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T17:25:08+00:00",
+        "date_label": "Nov 9, 9:25 AM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
+      },
+      {
+        "n": 7,
+        "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
+        "published": "2026-11-09",
+        "published_at": "2026-11-09T17:17:33+00:00",
+        "date_label": "Nov 9, 9:17 AM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
     "label": "Mixed",
-    "vix": 24.54,
+    "vix": 20.33,
     "put_call_zone": "Greed",
-    "put_call": 0.44,
-    "advancers": 294,
-    "decliners": 308,
-    "why": "VIX 24.5, put/call Greed, 294 up / 308 down"
+    "put_call": 0.59,
+    "advancers": 1513,
+    "decliners": 196,
+    "why": "VIX 20.3, put/call Greed, 1513 up / 196 down"
   },
   "headlines": [
     {
-      "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
-      "source": "Reuters",
-      "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
-      "published": "2026-11-06",
+      "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T17:15:22+00:00",
       "trusted": true,
       "causes": [
-        "ai_mood"
+        "ai_mood",
+        "inflation"
       ],
-      "via": "Investing.com",
-      "rank": 21.5
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 9:15 AM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 16.5
     },
     {
-      "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+      "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
       "source": "Yahoo Finance",
-      "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
-      "published": "2026-11-06",
+      "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T18:14:37+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
       "via": "",
-      "rank": 19.5
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 10:14 AM PT",
+      "age_label": "1h ago",
+      "wrap": 10.0,
+      "rank": 14.5
     },
     {
-      "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
-      "source": "MarketWatch",
-      "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
-      "published": "2026-11-05",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "rank": 15.5
-    },
-    {
-      "title": "Trump blames Democrats for Wall Street selloff after historic midterm election win",
+      "title": "Pan American Silver (PAAS): A Low-Beta Silver Miner Turning Metal Prices Into Shareholder Cash",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/trump-blames-democrats-wall-street-010352357.html?.tsrc=rss",
-      "published": "2026-11-06",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/pan-american-silver-paas-low-180408104.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T18:04:08+00:00",
       "trusted": true,
       "causes": [
         "election"
       ],
       "via": "",
-      "rank": 18.0
+      "region": "US",
+      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 10:04 AM PT",
+      "age_label": "1h ago",
+      "wrap": 10.0,
+      "rank": 12.5
     },
     {
-      "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
-      "published": "2026-11-06",
+      "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
+      "source": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T19:23:57+00:00",
       "trusted": true,
       "causes": [
-        "jobs",
         "ai_mood"
       ],
       "via": "",
-      "rank": 13.0
+      "region": "Global",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 11:23 AM PT",
+      "age_label": "just now",
+      "wrap": 8.0,
+      "rank": 8.5
     },
     {
-      "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
+      "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
+      "source": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/09/goldman-ceo-ai-financing-market.html",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T18:14:47+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "Global",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 10:14 AM PT",
+      "age_label": "1h ago",
+      "wrap": 8.0,
+      "rank": 8.5
+    },
+    {
+      "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
       "source": "Yahoo Finance",
-      "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
-      "published": "2026-11-06",
+      "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T17:25:08+00:00",
       "trusted": true,
       "causes": [
         "election",
         "ai_mood"
       ],
       "via": "",
-      "rank": 11.0
+      "region": "US",
+      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 9:25 AM PT",
+      "age_label": "2h ago",
+      "wrap": 5.0,
+      "rank": 10.5
     },
     {
-      "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
-      "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
-      "published": "2026-11-06",
+      "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
+      "published": "2026-11-09",
+      "published_at": "2026-11-09T17:17:33+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
       "via": "",
-      "rank": 7.5
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 9, 9:17 AM PT",
+      "age_label": "2h ago",
+      "wrap": 5.0,
+      "rank": 9.0
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 13.48,
+      "score": 13.61,
       "headlines": [
         {
-          "title": "Nasdaq posts biggest daily drop in 19 months on fears of AI regulations",
-          "source": "Reuters",
-          "url": "https://www.investing.com/news/stock-market-news/sp-500-futures-steady-after-midterm-rally-nasdaq-lags-on-chip-weakness-5003237",
-          "published": "2026-11-06",
+          "title": "Here’s Why William Blair Upgraded Appian (APPN) Stock",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T17:15:22+00:00",
           "trusted": true,
           "causes": [
-            "ai_mood"
+            "ai_mood",
+            "inflation"
           ],
-          "via": "Investing.com",
-          "rank": 21.5
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 9:15 AM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 16.5
         },
         {
-          "title": "S&P 500, Nasdaq, Dow Futures Dip As Investors Step Back From AI And Tech With Nasdaq In Correction Territory —  NVDA, AAPL, UBER, SOXX In Focus",
+          "title": "GE HealthCare (GEHC) Raised Full-Year Guidance. Here’s What’s Behind Its Recovery.",
           "source": "Yahoo Finance",
-          "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A?.tsrc=rss",
-          "published": "2026-11-06",
+          "url": "https://finance.yahoo.com/healthcare/articles/ge-healthcare-gehc-raised-full-181437807.html?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T18:14:37+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "rank": 19.5
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 10:14 AM PT",
+          "age_label": "1h ago",
+          "wrap": 10.0,
+          "rank": 14.5
         },
         {
-          "title": "Tech stocks log worst day since 2020 as carnage comes to the AI trade",
-          "source": "MarketWatch",
-          "url": "https://www.marketwatch.com/story/tech-stocks-log-worst-day-since-2020-as-carnage-comes-to-the-ai-trade-56109845?mod=mw_rss_topstories",
-          "published": "2026-11-05",
+          "title": "This beaten-down data center stock could be worth a look, says Mike Khouw",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/09/this-beaten-down-data-center-stock-could-be-worth-a-look-says-mike-khouw.html",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T19:23:57+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "rank": 15.5
+          "region": "Global",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 11:23 AM PT",
+          "age_label": "just now",
+          "wrap": 8.0,
+          "rank": 8.5
         },
         {
-          "title": "Dow Jones Futures Fall, Techs Bounce After Nasdaq Dives 5.5%; Nvidia, Sandisk, CoreWeave, SpaceX Plunge",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/0cd2227b-7753-3d54-a8c5-286efe82ac39/dow-jones-futures-fall%2C-techs.html?.tsrc=rss",
-          "published": "2026-11-06",
+          "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/09/goldman-ceo-ai-financing-market.html",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T18:14:47+00:00",
           "trusted": true,
           "causes": [
-            "jobs",
             "ai_mood"
           ],
           "via": "",
-          "rank": 13.0
+          "region": "Global",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 10:14 AM PT",
+          "age_label": "1h ago",
+          "wrap": 8.0,
+          "rank": 8.5
         },
         {
-          "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
+          "title": "AI Stock Rout Called 'Unwarranted.' Why Wall Street Sees Post-Midterms Edge For Cloud Giants.",
           "source": "Yahoo Finance",
-          "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
-          "published": "2026-11-06",
+          "url": "https://finance.yahoo.com/m/4013010f-2025-351f-940d-dd88da810cb5/ai-stock-rout-called.html?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T17:25:08+00:00",
           "trusted": true,
           "causes": [
             "election",
             "ai_mood"
           ],
           "via": "",
-          "rank": 11.0
+          "region": "US",
+          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 9:25 AM PT",
+          "age_label": "2h ago",
+          "wrap": 5.0,
+          "rank": 10.5
         },
         {
-          "title": "Nasdaq sell-off batters Asian chip stocks as SK Hynix, Samsung, Softbank, TSMC tumble",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/06/tech-stocks-sk-hynix-samsung-softbank.html",
-          "published": "2026-11-06",
+          "title": "Here’s Why Jefferies Upgraded Steven Madden (SHOO) Stock",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-jefferies-upgraded-steven-madden-171733975.html?.tsrc=rss",
+          "published": "2026-11-09",
+          "published_at": "2026-11-09T17:17:33+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "rank": 7.5
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 9, 9:17 AM PT",
+          "age_label": "2h ago",
+          "wrap": 5.0,
+          "rank": 9.0
         }
       ]
     },
     {
-      "cause": "election",
-      "label": "Election",
-      "score": 3.0,
-      "headlines": [
-        {
-          "title": "Trump blames Democrats for Wall Street selloff after historic midterm election win",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/trump-blames-democrats-wall-street-010352357.html?.tsrc=rss",
-          "published": "2026-11-06",
-          "trusted": true,
-          "causes": [
-            "election"
-          ],
-          "via": "",
-          "rank": 18.0
-        },
-        {
-          "title": "Massive tech sell-off wipes $2.5 trillion from the stock market",
-          "source": "Yahoo Finance",
-          "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges?.tsrc=rss",
-          "published": "2026-11-06",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "rank": 11.0
-        }
-      ]
+      "cause": "rates",
+      "label": "Rates / Fed",
+      "score": 6.68,
+      "headlines": []
     }
   ],
   "vs_yesterday": {
-    "prior_mood": "Fear",
-    "prior_session": "2026-11-05",
-    "text": "Mood flipped: was Fear, now Mixed.",
-    "flipped": true,
+    "prior_mood": "Mixed",
+    "prior_session": "2026-11-06",
+    "text": "Mood steady versus last brief (Mixed).",
+    "flipped": false,
     "same_fear": false
   },
   "breadth_check": {
     "aligned": true,
-    "flag": "flat_or_mixed",
-    "text": "Index and breadth are roughly in line."
+    "flag": "broad_advance",
+    "text": "Index and breadth agree: a broad up day."
   },
   "regime": {
     "label": "uptrend",
-    "pct_above_50day": 61.7,
-    "pct_above_200day": 57.8,
+    "pct_above_50day": 63.1,
+    "pct_above_200day": 60.3,
     "text": "More than half the desk is still above the 50-day and 200-day."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
       "The market is jumpy (VIX is firm). Small moves are normal; be patient with new buys.",
-      "Index and breadth are mixed. Wait for a clearer day before sizing up.",
+      "Most stocks rose with the indexes. Strength is shared, not just a few names.",
       "The bigger trend is still up on the desk's 50-day and 200-day checks — one rough day does not flip that by itself."
     ],
     "disclaimer": "Research only. Not advice to buy or sell any stock."
@@ -344,75 +460,73 @@
   "calendar": {
     "next": null,
     "week": [],
-    "text": "No big US macro print on the free calendar for the next few sessions.",
+    "text": "No major macro print on the free calendar for the next few sessions.",
     "source": "nasdaq_economicevents"
   },
   "prior_brief": {
-    "session": "2026-11-05",
-    "slot": "evening_close",
-    "why_moved": "Stocks fell, with Nasdaq (-5.0%) leading the S&P (-2.7%) lower, dragged by Technology (-6.2%) and Consumer Discretionary (-3.6%), while Consumer Staples (1.1%) and Energy (1.0%) held up (255 stocks up, 306 down); VIX at 28.2.",
-    "mood": "Fear",
+    "session": "2026-11-06",
+    "slot": "morning_open",
+    "why_moved": "Stocks rose, with Nasdaq (2.0%) leading the S&P (1.0%) higher, while Technology (2.1%) and Consumer Discretionary (1.0%) held up (294 stocks up, 308 down); VIX at 24.5.",
+    "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
       "Election"
     ]
   },
   "stats": {
-    "spy_price": 740.49,
-    "spy_day_pct": 1.02,
-    "qqq_day_pct": 2.03,
+    "spy_price": 752.57,
+    "spy_day_pct": 2.35,
+    "qqq_day_pct": 3.23,
     "dia_day_pct": null,
-    "vix": 24.54,
-    "advancers": 294,
-    "decliners": 308,
-    "breadth_sma50": 61.7,
-    "breadth_sma200": 57.8,
-    "put_call": 0.44,
+    "vix": 20.33,
+    "advancers": 1513,
+    "decliners": 196,
+    "breadth_sma50": 63.1,
+    "breadth_sma200": 60.3,
+    "put_call": 0.59,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
-      "date": "2026-11-06",
-      "slot": "morning_open",
+      "date": "2026-11-09",
+      "slot": "evening_close",
       "mood": "Mixed",
       "regime": "uptrend",
       "causes": [
         "ai_mood",
-        "election"
+        "rates"
       ],
       "sources": [
         "CNBC",
-        "MarketWatch",
-        "Reuters",
         "Yahoo Finance"
       ],
-      "spy_day_pct": 1.02,
-      "qqq_day_pct": 2.03,
+      "spy_day_pct": 2.35,
+      "qqq_day_pct": 3.23,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
     "stats": {
       "by_cause": {
         "election": {
-          "up": 1,
+          "up": 2,
           "down": 2,
           "flat": 0,
-          "n": 3
+          "n": 4
         },
         "ai_mood": {
-          "up": 1,
+          "up": 2,
           "down": 2,
           "flat": 0,
-          "n": 3
+          "n": 4
         }
       },
       "by_source": {
         "Reuters": {
-          "up": 1,
+          "up": 2,
           "down": 2,
           "flat": 0,
-          "n": 3
+          "n": 4
         },
         "Federal Reserve": {
           "up": 0,
@@ -427,30 +541,283 @@
           "n": 1
         },
         "CNBC": {
-          "up": 1,
+          "up": 2,
           "down": 0,
           "flat": 0,
-          "n": 1
+          "n": 2
         },
         "MarketWatch": {
-          "up": 1,
+          "up": 2,
           "down": 0,
           "flat": 0,
-          "n": 1
+          "n": 2
         },
         "Yahoo Finance": {
-          "up": 1,
+          "up": 2,
           "down": 0,
           "flat": 0,
-          "n": 1
+          "n": 2
         }
       },
-      "n_labeled": 3,
+      "n_labeled": 4,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
+  "world_moves": {
+    "retrieved_at": "2026-11-09T19:49:39.414302+00:00",
+    "summary": "Verified indexes on file finished higher. Blank markets are not part of that.",
+    "breadth": "higher",
+    "missing": [
+      "S&P 500",
+      "Nikkei 225",
+      "Shanghai Composite",
+      "Hang Seng"
+    ],
+    "strip": [
+      {
+        "id": "spy",
+        "name": "SPY",
+        "region": "US",
+        "kind": "etf_proxy",
+        "pct": 2.35,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T11:46:00-08:00",
+        "status": "open_print",
+        "source": "Desk price file",
+        "source_url": "",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "Possible context from Yahoo Finance: Here’s Why William Blair Upgraded Appian (APPN) Stock. Not proof this caused the percent.",
+        "cause_source": "Yahoo Finance",
+        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss"
+      },
+      {
+        "id": "sxxp",
+        "name": "STOXX Europe 600",
+        "region": "Europe",
+        "kind": "index",
+        "pct": 2.03,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T20:50:23+01:00",
+        "status": "closed",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ukx",
+        "name": "FTSE 100",
+        "region": "UK",
+        "kind": "index",
+        "pct": 1.73,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T20:52:28+01:00",
+        "status": "closed",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "nifty",
+        "name": "Nifty 50",
+        "region": "India",
+        "kind": "index",
+        "pct": 0.23,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T15:30:00+05:30",
+        "status": "prior_local_close",
+        "source": "NSE India",
+        "source_url": "https://www.nseindia.com/market-data/live-equity-market",
+        "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      }
+    ],
+    "rows": [
+      {
+        "id": "spx",
+        "name": "S&P 500",
+        "region": "US",
+        "kind": "index",
+        "pct": null,
+        "verified": false,
+        "session_date": "",
+        "quote_at": "",
+        "status": "unknown",
+        "source": "",
+        "source_url": "",
+        "note": "No permitted index snapshot for S&P 500.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "sxxp",
+        "name": "STOXX Europe 600",
+        "region": "Europe",
+        "kind": "index",
+        "pct": 2.03,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T20:50:23+01:00",
+        "status": "closed",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "dax",
+        "name": "DAX",
+        "region": "Europe",
+        "kind": "index",
+        "pct": 3.03,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T20:52:15+01:00",
+        "status": "closed",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ukx",
+        "name": "FTSE 100",
+        "region": "UK",
+        "kind": "index",
+        "pct": 1.73,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T20:52:28+01:00",
+        "status": "closed",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "n225",
+        "name": "Nikkei 225",
+        "region": "Japan",
+        "kind": "index",
+        "pct": null,
+        "verified": false,
+        "session_date": "",
+        "quote_at": "",
+        "status": "unknown",
+        "source": "",
+        "source_url": "",
+        "note": "The publisher's daily file says not to circulate the values, so this desk does not republish a Nikkei close.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ssec",
+        "name": "Shanghai Composite",
+        "region": "China",
+        "kind": "index",
+        "pct": null,
+        "verified": false,
+        "session_date": "",
+        "quote_at": "",
+        "status": "unknown",
+        "source": "",
+        "source_url": "",
+        "note": "No permitted index snapshot for Shanghai Composite.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "hsi",
+        "name": "Hang Seng",
+        "region": "Hong Kong",
+        "kind": "index",
+        "pct": null,
+        "verified": false,
+        "session_date": "",
+        "quote_at": "",
+        "status": "unknown",
+        "source": "",
+        "source_url": "",
+        "note": "No permitted index snapshot for Hang Seng.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "nifty",
+        "name": "Nifty 50",
+        "region": "India",
+        "kind": "index",
+        "pct": 0.23,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T15:30:00+05:30",
+        "status": "prior_local_close",
+        "source": "NSE India",
+        "source_url": "https://www.nseindia.com/market-data/live-equity-market",
+        "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "spy",
+        "name": "SPY",
+        "region": "US",
+        "kind": "etf_proxy",
+        "pct": 2.35,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T11:46:00-08:00",
+        "status": "open_print",
+        "source": "Desk price file",
+        "source_url": "",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "Possible context from Yahoo Finance: Here’s Why William Blair Upgraded Appian (APPN) Stock. Not proof this caused the percent.",
+        "cause_source": "Yahoo Finance",
+        "cause_url": "https://finance.yahoo.com/markets/stocks/articles/why-william-blair-upgraded-appian-171522406.html?.tsrc=rss"
+      },
+      {
+        "id": "qqq",
+        "name": "QQQ",
+        "region": "US",
+        "kind": "etf_proxy",
+        "pct": 3.23,
+        "verified": true,
+        "session_date": "2026-11-09",
+        "quote_at": "2026-11-09T11:46:00-08:00",
+        "status": "open_print",
+        "source": "Desk price file",
+        "source_url": "",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      }
+    ]
+  },
   "watch_next": null,
   "weekly_recap": null
 }

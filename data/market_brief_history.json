@@ -93,6 +93,24 @@
       ],
       "spy_day_pct": 1.02,
       "qqq_day_pct": 2.03,
+      "next_day_spy_pct": 2.35,
+      "next_day_direction": "up"
+    },
+    {
+      "date": "2026-11-09",
+      "slot": "evening_close",
+      "mood": "Mixed",
+      "regime": "uptrend",
+      "causes": [
+        "ai_mood",
+        "rates"
+      ],
+      "sources": [
+        "CNBC",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": 2.35,
+      "qqq_day_pct": 3.23,
       "next_day_spy_pct": null,
       "next_day_direction": null
     }
@@ -100,24 +118,24 @@
   "aggregates": {
     "by_cause": {
       "election": {
-        "up": 1,
+        "up": 2,
         "down": 2,
         "flat": 0,
-        "n": 3
+        "n": 4
       },
       "ai_mood": {
-        "up": 1,
+        "up": 2,
         "down": 2,
         "flat": 0,
-        "n": 3
+        "n": 4
       }
     },
     "by_source": {
       "Reuters": {
-        "up": 1,
+        "up": 2,
         "down": 2,
         "flat": 0,
-        "n": 3
+        "n": 4
       },
       "Federal Reserve": {
         "up": 0,
@@ -132,25 +150,25 @@
         "n": 1
       },
       "CNBC": {
-        "up": 1,
+        "up": 2,
         "down": 0,
         "flat": 0,
-        "n": 1
+        "n": 2
       },
       "MarketWatch": {
-        "up": 1,
+        "up": 2,
         "down": 0,
         "flat": 0,
-        "n": 1
+        "n": 2
       },
       "Yahoo Finance": {
-        "up": 1,
+        "up": 2,
         "down": 0,
         "flat": 0,
-        "n": 1
+        "n": 2
       }
     },
-    "n_labeled": 3,
+    "n_labeled": 4,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }

@@ -887,7 +887,6 @@ BWBBP|Bridgewater Bancshares, Inc. - Depositary Shares, Each Representing a 1/10
 BWEN|Broadwind, Inc. - Common Stock|S|N|N|100|N|N
 BWFG|Bankwell Financial Group, Inc. - Common Stock|G|N|N|100|N|N
 BWIN|The Baldwin Insurance Group, Inc. - Class A Common Stock|Q|N|N|100|N|N
-BWMN|Bowman Consulting Group Ltd. - Common Stock|G|N|N|100|N|N
 BXBL|BOXABL, Inc.  - Common stock|G|N|N|100|N|N
 BYAH|Park Ha Biological Technology Co., Ltd. - Class A Ordinary Shares|S|N|N|100|N|N
 BYFC|Broadway Financial Corporation - Class A Common Stock|S|N|N|100|N|N
@@ -2559,7 +2558,6 @@ INJC|Canary Staked INJ ETF|G|N|N|100|Y|N
 INK|AB Equity Premium Income ETF|G|N|N|100|Y|N
 INKT|MiNK Therapeutics, Inc. - Common Stock|S|N|N|100|N|N
 INLF|INLIF LIMITED - Class A Ordinary shares|S|N|N|100|N|N
-INM|InMed Pharmaceuticals Inc. - Common Shares|S|N|D|100|N|N
 INMB|INmune Bio Inc. - Common stock|S|N|N|100|N|N
 INMD|InMode Ltd.  - Ordinary Shares|Q|N|N|100|N|N
 INNV|InnovAge Holding Corp. - Common Stock|Q|N|N|100|N|N
@@ -3089,7 +3087,6 @@ MCHS|Matthews China Innovators Active ETF|G|N|N|100|Y|N
 MCHX|Marchex, Inc. - Class B Common Stock|Q|N|N|100|N|N
 MCRB|Seres Therapeutics, Inc. - Common Stock|Q|N|N|100|N|N
 MCRI|Monarch Casino & Resort, Inc. - Common Stock|Q|N|N|100|N|N
-MCTA|Charming Medical Limited - Class A Ordinary Shares|S|N|N|100|N|N
 MDAI|Spectral AI, Inc. - Class A Common Stock|S|N|N|100|N|N
 MDAIW|Spectral AI, Inc. - Warrants|S|N|N|100|N|N
 MDB|MongoDB, Inc. - Class A Common Stock|G|N|N|40|N|N
@@ -3276,6 +3273,7 @@ MTEN|Mingteng International Corporation Inc. - Class A Ordinary Shares|S|N|N|100
 MTEX|Mannatech, Incorporated - Common Stock|S|N|N|100|N|N
 MTGG|MayTech Global Growth ETF|G|N|N|100|Y|N
 MTLS|Materialise NV - American Depositary Shares|Q|N|N|100|N|N
+MTRI|Mentari Therapeutics, Inc. - Common Stock|S|N|D|100|N|N
 MTRX|Matrix Service Company - Common Stock|Q|N|N|100|N|N
 MTSI|MACOM Technology Solutions Holdings, Inc. - Common Stock|Q|N|N|40|N|N
 MTVA|MetaVia Inc.  - Common Stock|S|N|N|100|N|N
@@ -4320,7 +4318,6 @@ ROCQ|JPMorgan Nasdaq Equity Premium Yield ETF|G|N|N|100|Y|N
 ROCY|JPMorgan Equity Premium Yield ETF|G|N|N|100|Y|N
 ROE|Astoria US Equal Weight Quality Kings ETF|G|N|N|100|Y|N
 ROIV|Roivant Sciences Ltd. - Common Shares|Q|N|N|100|N|N
-ROKU|Roku, Inc. - Class A Common Stock|Q|N|N|100|N|N
 ROMA|Roma Green Finance Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ROOT|Root, Inc. - Common Stock|Q|N|N|100|N|N
 ROP|Roper Technologies, Inc. - Common Stock|Q|N|N|40|N|N
@@ -5121,7 +5118,6 @@ ULBI|Ultralife Corporation - Common Stock|G|N|N|100|N|N
 ULCC|Frontier Group Holdings, Inc. - Common Stock|Q|N|N|100|N|N
 ULH|Universal Logistics Holdings, Inc. - Common Stock|Q|N|N|100|N|N
 ULTA|Ulta Beauty, Inc. - Common Stock|Q|N|N|40|N|N
-ULTI|REX IncomeMax Option Strategy ETF|G|N|N|100|Y|N
 ULVM|VictoryShares US Value Momentum ETF|G|N|N|100|Y|N
 UMBF|UMB Financial Corporation - Common Stock|Q|N|N|100|N|N
 UMBFO|UMB Financial Corporation - Depositary Shares Each Representing a 1/400th Interest in a Share of 7.750% Fixed-Rate Reset Non-Cumulative Perpetual Preferred Stock, Series B|Q|N|N|100|N|N
@@ -5609,4 +5605,4 @@ ZXYZ.A|Nasdaq Symbology Test Common Stock|Q|Y|N|100|N|N
 ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
-File Creation Time: 1106202621:31|||||||
+File Creation Time: 1109202612:11|||||||
