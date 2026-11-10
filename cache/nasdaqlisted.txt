@@ -66,7 +66,6 @@ ACGLN|Arch Capital Group Ltd. - Depositary Shares, each Representing a 1/1,000th
 ACGLO|Arch Capital Group Ltd. - Depositary Shares Each Representing 1/1,000th Interest in a Share of5.45% Non-Cumulative Preferred Shares, Series F|Q|N|N|100|N|N
 ACHC|Acadia Healthcare Company, Inc. - Common Stock|Q|N|N|100|N|N
 ACHP|Global X Asia Semiconductor ETF|G|N|N|100|Y|N
-ACHV|Achieve Life Sciences, Inc.  - Common Shares|S|N|N|100|N|N
 ACIC|American Coastal Insurance Corporation - Common Stock|S|N|N|100|N|N
 ACIU|AC Immune SA - Common Stock|G|N|N|100|N|N
 ACIW|ACI Worldwide, Inc. - Common Stock|Q|N|N|100|N|N
@@ -601,7 +600,7 @@ BDCI|BTC Development Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 BDCIU|BTC Development Corp. - Unit|G|N|N|100|N|N
 BDCIW|BTC Development Corp. - Warrant|G|N|N|100|N|N
 BDGS|Bridges Capital Tactical ETF|G|N|N|100|Y|N
-BDMD|Baird Medical Investment Holdings Ltd - Ordinary Share|S|N|N|100|N|N
+BDMD|Baird Medical Investment Holdings Ltd - Ordinary Share|S|N|D|100|N|N
 BDMDW|Baird Medical Investment Holdings Ltd - Warrant|S|N|N|100|N|N
 BDRX|Biodexa Pharmaceuticals plc - American Depositary Shares|S|N|N|100|N|N
 BDSX|Biodesix, Inc. - Common Stock|G|N|N|100|N|N
@@ -1167,7 +1166,7 @@ CNXC|Concentrix Corporation - Common Stock|Q|N|N|100|N|N
 CNXN|PC Connection, Inc. - Common Stock|Q|N|N|100|N|N
 CNXU|Conexeu Sciences Inc. - Common Stock|S|N|N|100|N|N
 COAG|Hemab Therapeutics Holdings, Inc. - Common Stock|Q|N|N|100|N|N
-COCH|Envoy Medical, Inc. - Class A Common Stock|S|N|D|100|N|N
+COCH|Envoy Medical, Inc. - Class A Common Stock|S|N|N|100|N|N
 COCHW|Envoy Medical, Inc. - Warrant|S|N|N|100|N|N
 COCO|The Vita Coco Company, Inc. - Common Stock|Q|N|N|100|N|N
 COCP|Cocrystal Pharma, Inc. - Common Stock|S|N|N|100|N|N
@@ -1241,7 +1240,7 @@ CRESY|Cresud S.A.C.I.F. y A. - American Depositary Shares, each representing ten
 CREX|Creative Realities, Inc. - Common Stock|S|N|N|100|N|N
 CRGO|Freightos Limited - Ordinary shares|S|N|N|100|N|N
 CRGOW|Freightos Limited - Warrants|S|N|N|100|N|N
-CRIS|Curis, Inc. - Common Stock|S|N|N|100|N|N
+CRIS|Curis, Inc. - Common Stock|S|N|D|100|N|N
 CRMD|CorMedix Inc. - Common Stock|G|N|N|100|N|N
 CRMG|Leverage Shares 2X Long CRM Daily ETF|G|N|N|100|Y|N
 CRML|Critical Metals Corp. - Ordinary Shares|G|N|N|100|N|N
@@ -1707,7 +1706,6 @@ EYPT|EyePoint, Inc. - Common Stock|G|N|N|100|N|N
 EZGO|EZGO Technologies Ltd. - Ordinary Shares|S|N|N|100|N|N
 EZMO|AlphaDroid Broad Markets Momentum ETF|G|N|N|100|Y|N
 EZPW|EZCORP, Inc. - Class A Non-Voting Common Stock|Q|N|N|100|N|N
-EZRA|Reliance Global Group, Inc. - Common Stock|S|N|N|100|N|N
 EZRO|AlphaDroid Defensive Sector Rotation ETF|G|N|N|100|Y|N
 FA|First Advantage Corporation - Common Stock|Q|N|N|100|N|N
 FAAA|Fidelity AAA CLO ETF|G|N|N|100|Y|N
@@ -2026,7 +2024,7 @@ GBDC|Golub Capital BDC, Inc. - Closed End Fund|Q|N|N|100|N|N
 GBFH|GBank Financial Holdings Inc. - Common Stock|S|N|N|100|N|N
 GBLI|Global Indemnity Group, LLC - Class A Common Shares|Q|N|N|100|N|N
 GBUG|Sprott Active Gold & Silver Miners ETF|G|N|N|100|Y|N
-GCBC|Greene County Bancorp, Inc. - Common Stock|S|N|N|100|N|N
+GCBC|Greene Bancorp, Inc. - Common Stock|S|N|N|100|N|N
 GCGR|General Catalyst Global Resilience Merger Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 GCGRU|General Catalyst Global Resilience Merger Corp. - Units|G|N|N|100|N|N
 GCGRW|General Catalyst Global Resilience Merger Corp. - Warrants|G|N|N|100|N|N
@@ -4146,6 +4144,7 @@ QTUM|Defiance Quantum ETF|G|N|N|100|Y|N
 QUBT|Quantum Computing Inc. - Common Stock|S|N|N|100|N|N
 QUCY|Quantum Cyber N.V. - Ordinary Shares|S|N|N|100|N|N
 QUIK|QuickLogic Corporation - Common Stock|S|N|N|100|N|N
+QUIT|Achieve Life Sciences, Inc.  - Common Shares|S|N|N|100|N|N
 QUMS|Quantumsphere Acquisition Corp. - Ordinary Shares|G|N|N|100|N|N
 QUMSR|Quantumsphere Acquisition Corp. - Rights|G|N|N|100|N|N
 QUMSU|Quantumsphere Acquisition Corp. - Units|G|N|N|100|N|N
@@ -4211,7 +4210,6 @@ RDVY|First Trust Rising Dividend Achievers ETF|G|N|N|100|Y|N
 RDWR|Radware Ltd. - Ordinary Shares|Q|N|N|100|N|N
 RDZN|Roadzen, Inc. - Ordinary Shares|G|N|N|100|N|N
 RDZNW|Roadzen, Inc. - Warrants|S|N|N|100|N|N
-REAI|Intelligent Real Estate ETF|G|N|N|100|Y|N
 REAL|The RealReal, Inc. - Common Stock|Q|N|N|100|N|N
 REAX|Real REMAX Group Inc. - Common Stock|S|N|N|100|N|N
 REBN|Reborn Coffee, Inc. - Common Stock|S|N|D|100|N|N
@@ -4433,7 +4431,10 @@ SCOR|comScore, Inc. - Common Stock|Q|N|N|100|N|N
 SCPQ|Social Commerce Partners Corporation - Class A Ordinary Shares|G|N|N|100|N|N
 SCPQU|Social Commerce Partners Corporation - Unit|G|N|N|100|N|N
 SCPQW|Social Commerce Partners Corporation - Warrant|G|N|N|100|N|N
+SCQC|SPACCircle Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
+SCQCR|SPACCircle Acquisition Corp. - Rights|G|N|N|100|N|N
 SCQCU|SPACCircle Acquisition Corp. - Units|G|N|N|100|N|N
+SCQCW|SPACCircle Acquisition Corp. - Warrants|G|N|N|100|N|N
 SCSC|ScanSource, Inc. - Common Stock|Q|N|N|100|N|N
 SCTX|Scribe Therapeutics Inc. - Common Stock|G|N|N|100|N|N
 SCWO|374Water Inc. - common stock|S|N|N|100|N|N
@@ -4773,7 +4774,6 @@ SVRE|SaverOne 2014 Ltd. - American Depositary Shares|S|N|N|100|N|N
 SVREW|SaverOne 2014 Ltd. - Warrant|S|N|N|100|N|N
 SVRN|SVRN, Inc. - Common Stock|S|N|E|100|N|N
 SWAG|Stran & Company, Inc. - Common Stock|S|N|N|100|N|N
-SWAGW|Stran & Company, Inc. - Warrant|S|N|N|100|N|N
 SWBI|Smith & Wesson Brands, Inc. - Common Stock|Q|N|N|100|N|N
 SWIM|Latham Group, Inc. - Common Stock|Q|N|N|100|N|N
 SWKS|Skyworks Solutions, Inc. - Common Stock|Q|N|N|100|N|N
@@ -5069,7 +5069,7 @@ TVTX|Travere Therapeutics, Inc. - Common Stock|G|N|N|100|N|N
 TW|Tradeweb Markets Inc. - Class A Common Stock|Q|N|N|100|N|N
 TWAV|TaoWeave, Inc. - Common Stock|S|N|N|100|N|N
 TWFG|TWFG, Inc. - Common Stock|Q|N|N|100|N|N
-TWG|Top Wealth Group Holding Limited - Class A Ordinary Shares|S|N|D|100|N|N
+TWG|Top Wealth Group Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 TWIN|Twin Disc, Incorporated - Common Stock|Q|N|N|100|N|N
 TWLV|Twelve Seas Investment Company III - Class A Ordinary Shares|G|N|N|100|N|N
 TWLVR|Twelve Seas Investment Company III - Rights|G|N|N|100|N|N
@@ -5472,6 +5472,7 @@ XERS|Xeris Biopharma Holdings, Inc. - Common Stock|Q|N|N|100|N|N
 XEY|GraniteShares YieldBOOST Ether ETF|G|N|N|100|Y|N
 XFOR|X4 Pharmaceuticals, Inc. - Common Stock|S|N|N|100|N|N
 XGN|Exagen Inc. - Common Stock|G|N|N|100|N|N
+XGPU|Reliance Global Group, Inc. - Common Stock|S|N|N|100|N|N
 XHG|XChange TEC.INC - American Depositary Shares|S|N|N|100|N|N
 XHLD|TEN Holdings, Inc. - Common Stock|S|N|N|100|N|N
 XIII|Churchill Capital Corp XIII - Class A Ordinary Shares|G|N|N|100|N|N
@@ -5605,4 +5606,4 @@ ZXYZ.A|Nasdaq Symbology Test Common Stock|Q|Y|N|100|N|N
 ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
-File Creation Time: 1109202612:11|||||||
+File Creation Time: 1110202618:01|||||||

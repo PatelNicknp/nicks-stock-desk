@@ -742,6 +742,7 @@ BGH|Barings Global Short Duration High Yield Fund Common Shares of Beneficial In
 BGIG|Bahl & Gaynor Income Growth ETF|P|BGIG|Y|100|N|BGIG
 BGLD|FT Vest Gold Strategy Quarterly Buffer ETF|Z|BGLD|Y|100|N|BGLD
 BGR|BlackRock Energy and Resources Trust|N|BGR|N|100|N|BGR
+BGRD|BNY Mellon Power Ecosystem ETF|Z|BGRD|Y|100|N|BGRD
 BGS|B&G Foods, Inc. Common Stock|N|BGS|N|100|N|BGS
 BGSF|BGSF, Inc. Common Stock|N|BGSF|N|100|N|BGSF
 BGSI|Boyd Group Services Inc. Common Shares|N|BGSI|N|100|N|BGSI
@@ -2070,6 +2071,7 @@ EMC|Global X Emerging Markets Great Consumer ETF|P|EMC|Y|100|N|EMC
 EMCR|Xtrackers Emerging Markets Carbon Reduction and Climate Improvers ETF|P|EMCR|Y|100|N|EMCR
 EMCS|Xtrackers MSCI Emerging Markets Select ETF|P|EMCS|Y|100|N|EMCS
 EMD|Western Asset Emerging Markets Debt Fund Inc Common Stock|N|EMD|N|100|N|EMD
+EMDI|Principal Finisterre Emerging Markets Diversified Income ETF|P|EMDI|Y|100|N|EMDI
 EMDM|First Trust Bloomberg Emerging Market Democracies ETF|P|EMDM|Y|100|N|EMDM
 EMDV|ProShares MSCI Emerging Markets Dividend Growers ETF|Z|EMDV|Y|100|N|EMDV
 EME|EMCOR Group, Inc. Common Stock|N|EME|N|40|N|EME
@@ -3065,7 +3067,6 @@ HAPS|Harbor Human Capital Factor US Small Cap ETF|P|HAPS|Y|100|N|HAPS
 HARD|Simplify Commodities Strategy No K-1 ETF|P|HARD|Y|100|N|HARD
 HASI|HA Sustainable Infrastructure Capital, Inc. Common Stock|N|HASI|N|100|N|HASI
 HAUG|Corgi U.S. Equities 100% Structured Buffer ETF - August Series|Z|HAUG|Y|100|N|HAUG
-HAUS|Residential REIT ETF|Z|HAUS|Y|100|N|HAUS
 HAUZ|Xtrackers International Real Estate ETF|P|HAUZ|Y|100|N|HAUZ
 HAWG|HCM Hedged Equity ETF|P|HAWG|Y|100|N|HAWG
 HAWK|HawkEye 360, Inc. Common Stock|N|HAWK|N|100|N|HAWK
@@ -4140,6 +4141,7 @@ LSVD|LSV Disciplined Value ETF|P|LSVD|Y|100|N|LSVD
 LTAX|Nomura Tax-Free USA ETF|P|LTAX|Y|100|N|LTAX
 LTB|Corgi FTSE 20 Year U.S. Treasury Bond ETF|Z|LTB|Y|100|N|LTB
 LTC|LTC Properties, Inc. Common Stock|N|LTC|N|100|N|LTC
+LTEQ|Equity Partners ETF|N|LTEQ|Y|100|N|LTEQ
 LTH|Life Time Group Holdings, Inc. Common Stock|N|LTH|N|100|N|LTH
 LTL|ProShares Ultra Communication Services|P|LTL|Y|100|N|LTL
 LTM|LATAM Airlines Group S.A. American Depositary Shares (each representing two thousand (2,000) shares of Common Stock)|N|LTM|N|100|N|LTM
@@ -5187,6 +5189,7 @@ PGP|Pimco Global StocksPlus & Income Fund Common Shares of Beneficial Interest|N
 PGR|Progressive Corporation (The) Common Stock|N|PGR|N|100|N|PGR
 PGRI|Putnam International Stock ETF|P|PGRI|Y|100|N|PGRI
 PGRO|Putnam Focused Large Cap Growth ETF|P|PGRO|Y|100|N|PGRO
+PGRW|Principal Growth ETF|Z|PGRW|Y|100|N|PGRW
 PGX|Invesco Preferred ETF|P|PGX|Y|100|N|PGX
 PGZ|Principal Real Estate Income Fund Common Shares of Beneficial Interest|N|PGZ|N|100|N|PGZ
 PH|Parker-Hannifin Corporation Common Stock|N|PH|N|40|N|PH
@@ -5403,8 +5406,6 @@ PSOX|Tema MLCC & PowerSemi ETF|Z|PSOX|Y|100|N|PSOX
 PSP|Invesco Global Listed Private Equity ETF|P|PSP|Y|100|N|PSP
 PSQ|ProShares Short QQQ|P|PSQ|Y|100|N|PSQ
 PSQA|Palmer Square CLO Senior Debt ETF|P|PSQA|Y|100|N|PSQA
-PSQH|PSQ Holdings, Inc. Class A Common Stock|N|PSQH|N|100|N|PSQH
-PSQH.W|PSQ Holdings, Inc. Warrants, each exercisable for one share of Class A common stock at an exercise price of $11.50 per share|N|PSQH.WS|N|100|N|PSQH+
 PSQO|Palmer Square Credit Opportunities ETF|P|PSQO|Y|100|N|PSQO
 PSR|Invesco Active U.S. Real Estate Fund|P|PSR|Y|100|N|PSR
 PST|ProShares UltraShort Lehman 7-10 Year Treasury|P|PST|Y|100|N|PST
@@ -7672,4 +7673,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1109202612:11||||||
+File Creation Time: 1110202618:01||||||
