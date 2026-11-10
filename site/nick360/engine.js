@@ -416,8 +416,27 @@
     return true;
   }
 
+  // Nick 360's own VCP gates. Commonly described contraction traits, not a proprietary formula.
+  const VCP_RULES = {
+    minDepth: 0.03,
+    depthRatio: 0.80,
+    maxFirstDepth: 0.35,
+    maxFinalDepth: 0.10,
+    minCount: 2,
+    lookback: 325,
+    minBase: 15,
+    dryMax: 0.90,
+    dryOr50: true,
+    volSlack: 0,
+    strictDryMax: 0.75,
+    rightBars: 10,
+    maxRightRange: 0.08,
+    maxBelowPivot: 0.08,
+    maxAbovePivot: 0.05,
+  };
+
   function contractions(bars, asOf) {
-    const start = Math.max(4, asOf - 120);
+    const start = Math.max(4, asOf - (VCP_RULES.lookback - 1));
     const highs = [];
     const lows = [];
     for (let i = start; i + 3 <= asOf; i++) {
@@ -434,18 +453,31 @@
       }
       if (low == null) continue;
       if (low - hi < 2) continue;
-      const depth = (bars[hi].h - bars[low].l) / bars[hi].h;
-      if (!(depth >= 0.03) || !pos(bars[hi].h)) continue;
+      const rawDepth = (bars[hi].h - bars[low].l) / bars[hi].h;
+      const depth = Math.round(rawDepth * 1e6) / 1e6;
+      if (!(depth >= VCP_RULES.minDepth) || !pos(bars[hi].h)) continue;
       found.push({ hi: hi, low: low, depth: depth });
     }
+    const runs = [];
     let run = [];
-    let best = [];
     found.forEach((c) => {
-      if (!run.length || c.depth < run[run.length - 1].depth) run.push(c);
-      else run = [c];
-      if (run.length >= best.length) best = run.slice();
+      const prev = run.length ? run[run.length - 1] : null;
+      if (!prev || c.depth <= prev.depth * VCP_RULES.depthRatio + 1e-9) run.push(c);
+      else {
+        runs.push(run);
+        run = [c];
+      }
     });
-    return { all: found, tight: best };
+    if (run.length) runs.push(run);
+    let longest = [];
+    let qualified = [];
+    runs.forEach((r) => {
+      if (r.length >= longest.length) longest = r;
+      if (r.length < VCP_RULES.minCount) return;
+      if (r[0].depth > VCP_RULES.maxFirstDepth + 1e-9) return;
+      if (r.length >= qualified.length) qualified = r;
+    });
+    return { all: found, tight: qualified.length ? qualified : longest, qualified: qualified.length >= VCP_RULES.minCount };
   }
 
   function volMean(bars, a, b) {
@@ -497,21 +529,7 @@
       events.push({ date: s.bars[k].d, index: k, events: ev, net: netOf(ev) });
     }
     s.recent = events;
-    const pack = contractions(s.bars, Math.max(0, i));
-    let vcp = { candidate: false, reason: "Not enough confirmed swings.", count: pack.tight.length };
-    if (s.template.missing) vcp = { candidate: false, reason: "Trend template is missing an input.", count: pack.tight.length, skipped: true };
-    else if (!s.template.complete) vcp = { candidate: false, reason: "Trend template is not 8 of 8.", count: pack.tight.length };
-    else if (pack.tight.length < 2) vcp = { candidate: false, reason: "Fewer than two tightening contractions in the last 120 sessions.", count: pack.tight.length };
-    else {
-      const a = pack.tight[pack.tight.length - 2];
-      const b = pack.tight[pack.tight.length - 1];
-      const va = volMean(s.bars, a.hi, a.low);
-      const vb = volMean(s.bars, b.hi, b.low);
-      if (va == null || vb == null) vcp = { candidate: false, reason: "Contraction volume is missing.", count: pack.tight.length, skipped: true };
-      else if (!(vb < va)) vcp = { candidate: false, reason: "The later contraction did not print lower average volume.", count: pack.tight.length };
-      else vcp = { candidate: true, reason: "Two or more tighter contractions and lower volume on the latest one. A candidate, not a certified pattern.", count: pack.tight.length, pivot: s.bars[b.hi].h };
-    }
-    s.vcp = vcp;
+    s.vcp = vcpAt(s, i);
     const pivot20 = n ? priorHigh(s.bars, i, 20) : null;
     s.pivot20 = pivot20;
     s.patterns = {
@@ -522,6 +540,105 @@
     s.stale = !!(meta && meta.price_as_of && s.date && s.date < meta.price_as_of);
     s.company = s.company || "";
     s.sector = s.sector || "";
+  }
+
+  function rightRange(bars, i, n) {
+    if (i < n - 1) return null;
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let k = i - (n - 1); k <= i; k++) {
+      if (!pos(bars[k].h) || !pos(bars[k].l)) return null;
+      if (bars[k].h > hi) hi = bars[k].h;
+      if (bars[k].l < lo) lo = bars[k].l;
+    }
+    if (!pos(hi)) return null;
+    return (hi - lo) / hi;
+  }
+
+  function vcpAt(s, i) {
+    const pack = contractions(s.bars, Math.max(0, i));
+    const count = pack.tight.length;
+    const depths = pack.tight.map((c) => c.depth);
+    const base = { candidate: false, strict: false, count: count, depths: depths };
+    if (!s.template || s.template.missing) return Object.assign(base, { reason: "Trend template is missing an input.", skipped: true });
+    if (!s.template.complete) return Object.assign(base, { reason: "Trend template is not 8 of 8." });
+    if (!pack.qualified) {
+      if (count >= VCP_RULES.minCount && pack.tight[0].depth > VCP_RULES.maxFirstDepth + 1e-9) {
+        return Object.assign(base, { reason: count + " contractions. The first contraction is deeper than 35%, so this base is not a VCP candidate." });
+      }
+      return Object.assign(base, { reason: "Fewer than two contractions that are each at most 80% as deep as the one before, inside the last " + VCP_RULES.lookback + " sessions." });
+    }
+    const run = pack.tight;
+    const last = run[run.length - 1];
+    const prev = run[run.length - 2];
+    const pivot = s.bars[last.hi].h;
+    const close = s.bars[i].c;
+    const baseSessions = i - run[0].hi + 1;
+    const brokenOut = pos(pivot) && pos(close) && close > pivot;
+    if (!(last.depth < VCP_RULES.maxFinalDepth)) {
+      return Object.assign(base, { reason: count + " contractions. The last contraction is not under 10%.", pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
+    if (baseSessions < VCP_RULES.minBase) {
+      return Object.assign(base, { reason: count + " contractions. The base is shorter than 15 sessions from the first contraction high.", pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
+    const va = volMean(s.bars, prev.hi, prev.low);
+    const vb = volMean(s.bars, last.hi, last.low);
+    if (va == null || vb == null) return Object.assign(base, { reason: "Contraction volume is missing.", skipped: true, pivot: pivot, baseSessions: baseSessions });
+    const slack = VCP_RULES.volSlack;
+    const volOk = slack > 0 ? vb <= va * (1 + slack) + 1e-9 : vb < va;
+    if (!volOk) {
+      const volReason = slack > 0
+        ? "The later contraction's average volume is more than " + Math.round(slack * 100) + "% above the prior contraction."
+        : "The later contraction did not print lower average volume.";
+      return Object.assign(base, { reason: count + " contractions. " + volReason, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
+    const recent = volMean(s.bars, i - (VCP_RULES.rightBars - 1), i);
+    const priorVol = volMean(s.bars, i - (VCP_RULES.rightBars - 1) - 50, i - VCP_RULES.rightBars);
+    if (recent == null || priorVol == null || !(priorVol > 0)) return Object.assign(base, { reason: "Right-side volume is missing.", skipped: true, pivot: pivot, baseSessions: baseSessions });
+    const dry = recent / priorVol;
+    const avg50 = volMean(s.bars, i - 49, i);
+    const dryOk = dry <= VCP_RULES.dryMax + 1e-9;
+    const below50 = !!(VCP_RULES.dryOr50 && avg50 != null && avg50 > 0 && vb < avg50);
+    if (!(dryOk || below50)) {
+      const pct = Math.round(VCP_RULES.dryMax * 100);
+      const dryReason = VCP_RULES.dryOr50
+        ? "Recent volume is above " + pct + "% of the prior 50-session average, and the last contraction is not below the 50-session average."
+        : "Recent volume is not at or below " + pct + "% of the prior 50-session average.";
+      return Object.assign(base, { reason: count + " contractions. " + dryReason, dry: dry, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
+    const range = rightRange(s.bars, i, VCP_RULES.rightBars);
+    if (range == null) return Object.assign(base, { reason: "The right-side range is not usable.", skipped: true, pivot: pivot, baseSessions: baseSessions, dry: dry });
+    if (!(range <= VCP_RULES.maxRightRange + 1e-9)) {
+      return Object.assign(base, { reason: count + " contractions. The last 10 sessions' high-low range is wider than 8%.", range: range, dry: dry, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
+    if (!pos(pivot) || !pos(close)) return Object.assign(base, { reason: "Pivot or close is missing.", skipped: true, baseSessions: baseSessions, dry: dry, range: range });
+    if (close < pivot * (1 - VCP_RULES.maxBelowPivot) - 1e-9) {
+      return Object.assign(base, { reason: count + " contractions. The close is more than 8% below the pivot.", pivot: pivot, dry: dry, range: range, baseSessions: baseSessions, brokenOut: false });
+    }
+    if (close > pivot * (1 + VCP_RULES.maxAbovePivot) + 1e-9) {
+      return Object.assign(base, { reason: count + " contractions. The close is more than 5% above the pivot.", pivot: pivot, dry: dry, range: range, baseSessions: baseSessions, brokenOut: true });
+    }
+    const flag = brokenOut
+      ? " The close is above the pivot. Breakout volume stays a separate screen."
+      : " The close is still under the pivot.";
+    const strict = dry <= VCP_RULES.strictDryMax + 1e-9;
+    const volBit = strict
+      ? " The last 10 sessions are at or below 75% of the prior 50."
+      : (dryOk
+        ? " The last 10 sessions are at or below 90% of the prior 50."
+        : " The last contraction's average volume is below the 50-session average.");
+    return {
+      candidate: true,
+      strict: strict,
+      count: count,
+      depths: depths,
+      pivot: pivot,
+      brokenOut: brokenOut,
+      baseSessions: baseSessions,
+      dry: dry,
+      range: range,
+      reason: count + " contractions, each at most 80% as deep as the one before. The first is at most 35% and the last is under 10%." + volBit + " The last 10 sessions are within 8% and near the pivot." + flag + (strict ? " Strict." : "") + " A candidate, not a certified pattern.",
+    };
   }
 
   function tightState(s, i) {
@@ -897,10 +1014,10 @@
       formula: "All eight template checks pass. A missing check keeps the stock out rather than failing it.",
       data: "150, 200, and 50-day averages, 252-session high and low, rank.",
       match: (s) => !s.template || s.template.missing ? "skip" : (s.template.complete ? "match" : "no") },
-    { id: "vcp", ref: "VCP / tight base", ourName: "Tight-base candidate", status: "enabled",
-      evidence: "Contraction examples in published books are examples, not a hard rule. This candidate uses the desk's published swing settings (4 left, 3 right, tie is not a swing) plus two tighter contractions and lower volume. It is not a certified visual pattern.",
-      formula: "Template 8 of 8, at least two successive tighter contractions of at least 3% in the last 120 confirmed sessions, and lower average volume on the later contraction.",
-      data: "Template inputs plus swing highs and lows and volume.",
+    { id: "vcp", ref: "VCP / tight base", ourName: "Tight base / VCP candidate", status: "enabled",
+      evidence: "Nick 360's own reading of commonly described volatility-contraction traits. Not a proprietary formula and not a certified visual pattern. Swing settings stay 4 bars left and 3 right, and a tie is not a swing. The 80% depth step, 35% first-contraction cap, under-10% final contraction, 15-session minimum, 325-session lookback, 90% right-side volume or a last contraction below the 50-session average, 8% right-side range, and the 8% below / 5% above pivot band are this desk's choices. Strict marks the tighter 75% volume rule.",
+      formula: "Trend template 8 of 8. Over the last 325 sessions, or every stored session when history is shorter, at least two contractions of at least 3%, each at most 80% as deep as the one before. There is no cap at four: a longer run still counts. The first contraction is at most 35% and the last is under 10%. The base is at least 15 sessions from that first high through the as-of bar. The last contraction's average volume is below the prior contraction's. The last 10 sessions' average volume is at most 90% of the 50 sessions before them, or the last contraction's average volume is below the average of the 50 sessions through the as-of bar. A name whose last 10 sessions are also at or below 75% of that prior 50 is marked strict. The last 10 sessions' high-to-low range is at most 8% of their highest high, and the close is within 8% under the pivot or at most 5% above it. The pivot is the swing high of the last contraction. A close above that pivot is flagged. Breakout volume is a separate screen.",
+      data: "Template inputs, swing highs and lows, volume, and up to 325 stored sessions.",
       match: (s) => s.vcp.skipped ? "skip" : (s.vcp.candidate ? "match" : "no") },
     { id: "dry", ref: "Volume dry-up", ourName: "Volume dry-up", status: "enabled",
       evidence: "Our volume window. Not an institutional-intent reading.",
@@ -1531,6 +1648,7 @@
     RS_WEIGHTS: RS_WEIGHTS,
     SCREEN_DEFS: SCREEN_DEFS,
     COVERAGE: COVERAGE,
+    VCP_RULES: VCP_RULES,
     parseBars: parseBars,
     analyzeBars: analyzeBars,
     percentileRanks: percentileRanks,
