@@ -40,9 +40,9 @@ const NEW_NAV = ["Overview", "Chart Viewer", "Technical", "Fundamental", "Option
 const TECH = ["VCP", "Box breakout", "Flag breakout", "Qullamaggie breakout", "Marios breakout", "Episodic pivot", "Gap Up", "52-week",
   "52-week breakouts", "High volume", "Pullbacks", "Breakdowns", "Trends", "Wheel (stocks only)"];
 const FUND = ["CANSLIM", "Leaders", "Growth", "Quality", "Dividend", "Stock scorecard", "Top stocks"];
-const TECH_LISTS = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "week52", "wheel"];
+const TECH_LISTS = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "week52", "trends", "wheel"];
 const FUND_LISTS = ["canslim", "leaders", "growth", "quality", "dividend"];
-const TECH_SHORT = ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "Gap Up", "Breakdown", "High volume", "52-week", "Wheel"];
+const TECH_SHORT = ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "Gap Up", "Breakdown", "High volume", "52-week", "Trends", "Wheel"];
 const FUND_SHORT = ["CANSLIM", "Leaders", "Growth", "Quality", "Dividend"];
 const BOTH_SHORT = ["Buy setup", "Watchlist"];
 

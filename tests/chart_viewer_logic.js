@@ -280,6 +280,46 @@ eq(built.lists[0].items, ["AAA"], "include_gap_up false drops Gap Up stocks from
 built = V.buildLists(gapFiles, { featureOn: (k) => k !== "feature.scanner_gap_up", includeWatching: true });
 eq(built.lists.some((l) => l.id === "gapup"), false, "features.scanner_gap_up off drops the list");
 
+// Trends list: Uptrend rows only, same cut as the India desk. In the picker, All scanner stocks, and All technical stocks.
+const trendFiles = {
+  "scores.csv": [
+    { ticker: "ZZZ", company: "Zed", score: "2" },
+    { ticker: "AAA", company: "Alpha", score: "9" },
+    { ticker: "SPC", company: "Space", score: "5" },
+  ],
+  "scanner_vcp.csv": [{ ticker: "AAA", status: "READY", strength: "80", reason: "Tight." }],
+  "trends.csv": [
+    { ticker: "ZZZ", trend_label: "Uptrend", sma_alignment: "above 20, above 50, above 100, above 200", score: "4" },
+    { ticker: "AAA", trend_label: "Uptrend", sma_alignment: "", score: "9" },
+    { ticker: "MMM", trend_label: "Mixed", sma_alignment: "above 20, below 50", score: "8" },
+    { ticker: "DDN", trend_label: "Downtrend", sma_alignment: "below 20, below 50, below 100, below 200", score: "1" },
+    { ticker: "BAD", trend_label: "Uptrend", data_status: "MISSING" },
+    { ticker: "SPC", trend_label: " Uptrend ", sma_alignment: "above 20,  above 50, above 100, above 200" },
+  ],
+};
+eq(V.LISTS.some((l) => l.id === "trends" && l.label === "Trends" && l.short === "Trends" && l.file === "trends.csv" && l.kind === "trend" && l.scanner), true, "Trends is a scanner list");
+eq(V.groupOf("trends"), "technical", "Trends is on the technical side");
+built = V.buildLists(trendFiles, { featureOn: allOn, includeWatching: true });
+eq(built.lists.find((l) => l.id === "trends").items, ["AAA", "SPC", "ZZZ"], "Trends keeps Uptrend rows, highest desk score first");
+eq(built.lists[0].items, ["AAA", "SPC", "ZZZ"], "All scanner stocks counts Uptrend and skips Mixed and Downtrend");
+eq(built.info.AAA.count, 2, "AAA is on VCP and Trends");
+eq(built.info.ZZZ.entries[0].label + " " + built.info.ZZZ.entries[0].status, "Trends Uptrend", "Trends reason box label and status");
+eq(built.info.ZZZ.entries[0].reason, "Above the 20, 50, 100, and 200-day averages (above 20, above 50, above 100, above 200).", "Trends reason uses the SMA alignment");
+eq(built.info.AAA.entries.find((e) => e.list === "trends").reason, "Above the 20, 50, 100, and 200-day averages.", "Trends reason without an alignment stays plain");
+eq(built.info.SPC.entries[0].reason, "Above the 20, 50, 100, and 200-day averages (above 20, above 50, above 100, above 200).", "Trends trims the label and collapses alignment spaces");
+built = V.buildLists(trendFiles, { featureOn: allOn, includeWatching: true, includeTrends: false });
+eq(built.lists.some((l) => l.id === "trends"), false, "include_trends false drops the list");
+eq(built.lists[0].items, ["AAA"], "include_trends false drops Trends-only stocks from All");
+built = V.buildLists(trendFiles, { featureOn: (k) => k !== "feature.trends", includeWatching: true });
+eq(built.lists.some((l) => l.id === "trends"), false, "features.trends off drops the list");
+built = V.buildLists(trendFiles, { featureOn: allOn, includeWatching: true, group: "technical" });
+eq(built.lists[0].label, "All technical stocks", "technical All label with Trends");
+eq(built.lists.some((l) => l.id === "trends"), true, "Trends shows on the technical side");
+eq(built.lists[0].items.indexOf("ZZZ") >= 0 && built.lists[0].items.indexOf("MMM") < 0, true, "All technical stocks counts Uptrend rows only");
+built = V.buildLists(trendFiles, { featureOn: allOn, includeWatching: true, group: "fundamental" });
+eq(built.lists.some((l) => l.id === "trends"), false, "Trends stays off the fundamental side");
+eq(built.lists[0].items.indexOf("ZZZ") < 0, true, "All fundamental stocks does not count a Trends-only stock");
+
 if (fails.length) {
   console.log(fails.join("\n"));
   process.exit(1);

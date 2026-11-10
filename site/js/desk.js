@@ -2272,7 +2272,7 @@
   };
   // Lists the Chart Viewer can open. The key is the page id, so a scanner page links to its own list.
   const VIEWER_LISTS = ["buysetups", "watchlist", "growth", "quality", "dividend", "wheel", "vcp", "canslim", "box", "flag",
-    "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "leaders", "week52"];
+    "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "leaders", "week52", "trends"];
   function settingVal(key) {
     const row = SETTINGS.find((r) => r.setting === key);
     return row ? row.value : null;

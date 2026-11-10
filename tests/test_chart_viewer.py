@@ -46,6 +46,8 @@ def test_switch_and_config_block():
     assert (cv["swipe_min_px"], cv["swipe_max_ms"], cv["swipe_ratio"]) == (80, 300, 1.5)
     assert (cv["range_months"], cv["range_months_phone"]) == (6, 3)
     assert cv["native_fullscreen_ios"] is False
+    assert cv["include_trends"] is True
+    assert "include_trends" in cv["_note"] and "Uptrend" in cv["_note"]
     assert (cv["ma_10"], cv["ma_20"], cv["ma_50"], cv["ma_150"], cv["ma_200"]) == (False, False, True, True, True)
     assert cv["volume"] is True and cv["reason_box"] is True and cv["reason_box_toggle"] is True
     for key in ("list_picker", "fullscreen", "native_fullscreen_ios", "swipe", "flip_toggle", "arrows", "keyboard", "counter", "preload_next",
