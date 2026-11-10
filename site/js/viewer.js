@@ -16,6 +16,7 @@
     { id: "breakdowns", label: "Breakdowns", short: "Breakdown", file: "scanner_breakdown.csv", kind: "pattern", feature: "feature.scanner_breakdown", scanner: true },
     { id: "volume", label: "High volume", short: "High volume", file: "scanner_volume.csv", kind: "volume", feature: "feature.scanner_volume", scanner: true },
     { id: "week52", label: "52-week", short: "52-week", file: "scanner_52w.csv", kind: "w52", feature: "feature.scanner_52w", scanner: true },
+    { id: "trends", label: "Trends", short: "Trends", file: "trends.csv", kind: "trend", feature: "feature.trends", scanner: true },
     { id: "growth", label: "Growth", short: "Growth", file: "scanner_growth.csv", kind: "pass", feature: "feature.scanner_growth", scanner: true },
     { id: "quality", label: "Quality", short: "Quality", file: "scanner_quality.csv", kind: "pass", feature: "feature.scanner_quality", scanner: true },
     { id: "dividend", label: "Dividend", short: "Dividend", file: "scanner_dividend.csv", kind: "pass", feature: "feature.scanner_dividend", scanner: true },
@@ -23,7 +24,7 @@
   ];
   const STATUS_RANK = {
     "BROKEN OUT today": 0, "BROKEN DOWN today": 0, "EP TODAY - CONFIRMED": 0, "NEW HIGH ON VOLUME": 0,
-    "READY": 1, "EP TODAY - FORMING": 1, "GAP UP today": 1, "GAP HOLDING": 2, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "BUYING": 1,
+    "READY": 1, "EP TODAY - FORMING": 1, "GAP UP today": 1, "GAP HOLDING": 2, "DAY 2-5 WATCH": 1, "NEW HIGH": 1, "PASSES": 1, "Uptrend": 1, "BUYING": 1,
     "IN TRADE": 2, "NEAR HIGH": 2, "SELLING": 2, "ON WATCHLIST": 2,
     "DELAYED EP WATCH": 3, "NEW LOW": 3, "WATCHING": 4, "EP FADED": 5, "CLOSED": 6,
     // VCP rows under 8 of 8 (vcp.show_weaker_trend on). They rank under plain WATCHING.
@@ -89,6 +90,15 @@
     if (list.kind === "pass") {
       if (!yes(row.passes)) return null;
       return { status: "PASSES", reason: txt(row.why) };
+    }
+    if (list.kind === "trend") {
+      // Same cut as the India desk: Uptrend only (price above the 20, 50, 100, and 200-day averages).
+      // Mixed and Downtrend stay on the Trends page and out of this list.
+      if (txt(row.trend_label) !== "Uptrend") return null;
+      const align = txt(row.sma_alignment).replace(/\s+/g, " ");
+      const reason = align ? "Above the 20, 50, 100, and 200-day averages (" + align + ")."
+        : "Above the 20, 50, 100, and 200-day averages.";
+      return { status: "Uptrend", reason: reason };
     }
     if (list.kind === "volume") {
       if (!yes(row.spike) && !yes(row.streak) && !yes(row.quiet)) return null;
@@ -181,6 +191,7 @@
       if (list.kind === "buy" && opts.includeBuySetups === false) return;
       if (list.kind === "watch" && opts.includeWatchlist === false) return;
       if (list.kind === "gap" && opts.includeGapUp === false) return;
+      if (list.kind === "trend" && opts.includeTrends === false) return;
       const rows = files[list.file] || [];
       const items = [];
       const seen = {};
@@ -403,7 +414,7 @@
   // MA 10 green, MA 20 orange, MA 50 blue, MA 150 yellow, MA 200 red. The chips use the same colors.
   const MAS = [{ n: 10 }, { n: 20 }, { n: 50 }, { n: 150 }, { n: 200 }];
   function maColor(n) { return D.maColor(n); }
-  const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING|GAP UP|GAP HOLDING/;
+  const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING|GAP UP|GAP HOLDING|Uptrend/;
   const WARN = /WATCH|NEAR HIGH|QUIET|ON WATCHLIST|DAY 2-5/;
   const BAD = /BROKEN DOWN|SELLING|NEW LOW|FADED/;
   function statusColor(s) {
@@ -486,6 +497,7 @@
       includeBuySetups: on("include_buy_setups"),
       includeWatchlist: on("include_watchlist"),
       includeGapUp: on("include_gap_up"),
+      includeTrends: on("include_trends"),
       group: group,
       groupOf: groupFor,
     });

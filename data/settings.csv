@@ -349,6 +349,7 @@ chart_viewer.include_closed,False
 chart_viewer.include_buy_setups,True
 chart_viewer.include_watchlist,True
 chart_viewer.include_gap_up,True
+chart_viewer.include_trends,True
 chart_viewer.scanner_links,True
 chart_viewer.fullscreen,True
 chart_viewer.native_fullscreen_ios,False

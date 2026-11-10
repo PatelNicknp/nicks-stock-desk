@@ -35,8 +35,8 @@ V.LISTS.forEach((l) => {
   else eq(V.groupOf(l.id), "", l.id + " is in both sides");
 });
 eq(["canslim", "leaders", "growth", "quality", "dividend"].map((id) => V.groupOf(id)), Array(5).fill("fundamental"), "CANSLIM, Leaders, Growth, Quality, Dividend are fundamental");
-eq(["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "week52", "volume", "breakdowns", "wheel"].map((id) => V.groupOf(id)),
-  Array(11).fill("technical"), "pattern, gap, 52-week, volume, breakdown, and wheel lists are technical");
+eq(["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "week52", "volume", "breakdowns", "trends", "wheel"].map((id) => V.groupOf(id)),
+  Array(12).fill("technical"), "pattern, gap, 52-week, volume, breakdown, trends, and wheel lists are technical");
 // A settings row wins over the default; any other word leaves it out of both; a blank row uses the default.
 const read = (rows) => (key) => (key in rows ? rows[key] : null);
 eq(V.groupOf("wheel", read({ "scanner_groups.wheel": "Fundamental" })), "fundamental", "settings row wins, any case");
@@ -49,7 +49,7 @@ eq(JSON.stringify(V.buildLists(files, Object.assign({}, base, { group: "" }))), 
 eq(JSON.stringify(V.buildLists(files, Object.assign({}, base, { group: "sideways" }))), JSON.stringify(off), "an unknown group is the old behavior");
 eq(off.lists[0].label, "All scanner stocks", "old All label");
 eq(off.lists.map((l) => l.id), ["all", "buysetups", "watchlist", "vcp", "canslim", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "leaders",
-  "breakdowns", "volume", "week52", "growth", "quality", "dividend", "wheel"], "old list set: every list, both sides");
+  "breakdowns", "volume", "week52", "trends", "growth", "quality", "dividend", "wheel"], "old list set: every list, both sides");
 eq(off.lists[0].items, ["AAA", "CCC", "BBB", "DDD"], "old All mixes both sides");
 eq(off.info.AAA.count, 3, "old count is every scanner");
 
@@ -77,6 +77,25 @@ eq(fund.info.BBB.count, 0, "and counts no fundamental scanner");
 // A settings mapping moves a list across.
 const moved = V.buildLists(files, Object.assign({}, base, { group: "fundamental", groupOf: (id) => (id === "volume" ? "fundamental" : V.groupOf(id)) }));
 eq(moved.lists.some((l) => l.id === "volume"), true, "a list mapped to fundamental shows there");
+// Trends (India's cut): Uptrend rows only, on the technical side, and in All technical stocks and All scanner stocks.
+const withTrend = Object.assign({}, files, {
+  "trends.csv": [
+    { ticker: "TTT", trend_label: "Uptrend", sma_alignment: "above 20, above 50, above 100, above 200" },
+    { ticker: "MMM", trend_label: "Mixed", sma_alignment: "above 20" },
+  ],
+});
+const techTrend = V.buildLists(withTrend, Object.assign({}, base, { group: "technical" }));
+eq(techTrend.lists.some((l) => l.id === "trends"), true, "Trends is on the technical side");
+eq(techTrend.lists.find((l) => l.id === "trends").items, ["TTT"], "Trends list is Uptrend rows only");
+eq(techTrend.lists[0].items.indexOf("TTT") >= 0, true, "All technical stocks includes an Uptrend");
+eq(techTrend.lists[0].items.indexOf("MMM") < 0, true, "All technical stocks skips Mixed");
+eq(techTrend.info.TTT.entries.map((e) => e.label), ["Trends"], "technical Why box can show Trends");
+const fundTrend = V.buildLists(withTrend, Object.assign({}, base, { group: "fundamental" }));
+eq(fundTrend.lists.some((l) => l.id === "trends"), false, "Trends is not on the fundamental side");
+eq(fundTrend.lists[0].items.indexOf("TTT") < 0, true, "All fundamental stocks skips a Trends-only stock");
+const offTrend = V.buildLists(withTrend, Object.assign({}, base, { includeTrends: false }));
+eq(offTrend.lists.some((l) => l.id === "trends"), false, "include_trends false drops Trends from All scanner stocks");
+eq(offTrend.lists[0].items.indexOf("TTT") < 0, true, "include_trends false drops the stock from All scanner stocks");
 
 // Remembered pick: address group, then the address list's side, then the saved pick, then default_group, then technical.
 eq(V.pickGroup("", "", "", "", V.groupOf), "technical", "a new device starts on technical");
