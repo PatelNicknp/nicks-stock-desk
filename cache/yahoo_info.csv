@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-ALNY,"Alnylam Pharmaceuticals, Inc.",Healthcare,Biotechnology,14.0202675,1.83333,27.0,302.55557,315.0,20985337856,1793277000.0
-AMAT,"Applied Materials, Inc.",Technology,Semiconductor Equipment & Materials,20.031849,1.41463,37.0,626.86487,610.0,294996049920,1794517200.0
-AMCR,Amcor plc,Consumer Cyclical,Packaging & Containers,10.629939,2.15385,11.0,49.70818,49.0,21244901376,1793826000.0
-AMD,"Advanced Micro Devices, Inc.",Technology,Semiconductors,28.831783,1.41509,48.0,658.5292,650.0,834738847744,1793739600.0
-AME,"AMETEK, Inc.",Industrials,Specialty Industrial Machinery,25.045618,1.7,18.0,287.44443,287.5,55240413184,1793712600.0
-AMGN,Amgen Inc.,Healthcare,Drug Manufacturers - General,18.578379,2.70588,29.0,429.7369,435.0,251164131328,1793739600.0
-AMP,"Ameriprise Financial, Inc.",Financial Services,Asset Management,10.112792,2.71429,11.0,545.1818,525.0,45288329216,1793277000.0
-AMT,American Tower Corporation (REI,Real Estate,REIT - Specialty,27.178371,1.52,23.0,215.8261,210.0,88323768320,1793104200.0
-AMZN,"Amazon.com, Inc.",Consumer Cyclical,Internet Retail,24.60967,1.32787,59.0,326.99017,330.0,2901543223296,1793304000.0
-ANET,"Arista Networks, Inc.",Technology,Computer Hardware,31.003828,1.27586,28.0,249.06535,246.5,234500112384,1793739600.0
-AON,Aon plc,Financial Services,Insurance Brokers,16.78006,2.04762,19.0,363.21054,363.0,71931887616,1793190600.0
-AOS,A.O. Smith Corporation,Industrials,Specialty Industrial Machinery,17.276999,2.92308,10.0,66.5,67.0,8773696512,1793277000.0
-APA,APA Corporation,Energy,Oil & Gas E&P,8.244708,2.57143,26.0,49.65385,51.0,15055299584,1793826000.0
-APD,"Air Products and Chemicals, Inc",Basic Materials,Specialty Chemicals,20.061584,1.91667,21.0,342.66666,347.0,69538013184,1793885400.0
-APH,Amphenol Corporation,Technology,Electronic Components,22.28905,1.42105,19.0,106.97368,107.0,199491616768,1801056600.0
-APO,"Apollo Global Management, Inc. ",Financial Services,Asset Management,11.544637,1.77273,20.0,146.25,145.5,72339800064,1793712600.0
-APP,Applovin Corporation,Communication Services,Advertising Agencies,19.427849,1.57576,31.0,459.7874,450.0,134274859008,1793826000.0
-APTV,Aptiv PLC,Consumer Cyclical,Auto Parts,6.6600623,1.75,18.0,58.61111,56.5,8151859200,1793712600.0
-ARE,Alexandria Real Estate Equities,Real Estate,REIT - Office,-49.259575,3.125,14.0,49.92857,52.5,8064334336,1793044800.0
-ARES,Ares Management Corporation,Financial Services,Asset Management,20.075205,1.95,20.0,146.55,142.5,46503747584,1793277000.0
-ARM,Arm Holdings plc,Technology,Semiconductors,60.766994,1.93023,40.0,273.405,270.0,200259158016,1801688400.0
-ASML,ASML Holding N.V. - New York Re,Technology,Semiconductor Equipment & Materials,23.855,1.36585,17.0,2149.7083,2302.32,582901891072,1801056600.0
-ATO,Atmos Energy Corporation,Utilities,Utilities - Regulated Gas,17.841642,2.71429,11.0,182.72726,182.0,29420062720,1793826000.0
-AVGO,Broadcom Inc.,Technology,Semiconductors,16.43251,1.23529,47.0,533.4238,535.0,1526893248512,1796850000.0
-AVY,Avery Dennison Corporation,Consumer Cyclical,Packaging & Containers,17.151749,1.54545,10.0,203.3,200.5,14347928576,1793277000.0
 AWK,"American Water Works Company, I",Utilities,Utilities - Regulated Water,22.800014,2.61538,11.0,141.90909,142.0,29926424576,1793217600.0
 AXON,"Axon Enterprise, Inc.",Industrials,Aerospace & Defense,32.04509,1.71429,19.0,541.3158,540.0,24691212288,1793912400.0
 AXP,American Express Company,Financial Services,Credit Services,16.095652,2.2069,24.0,364.78708,361.0,218187563008,1792758600.0
@@ -523,3 +498,28 @@ ALB,Albemarle Corporation,Basic Materials,Specialty Chemicals,11.210731,1.91304,
 ALGN,"Align Technology, Inc.",Healthcare,Medical Instruments & Supplies,14.189433,2.25,14.0,185.7857,190.5,12283073536,1793217600.0
 ALL,Allstate Corporation (The),Financial Services,Insurance - Property & Casualty,9.17863,2.52,22.0,275.86365,275.0,64614014976,1793826000.0
 ALLE,Allegion plc,Industrials,Security & Protection Services,18.677135,1.90909,11.0,193.63635,196.0,16113620992,1792672200.0
+ALNY,"Alnylam Pharmaceuticals, Inc.",Healthcare,Biotechnology,14.000178,1.83333,27.0,299.96295,299.0,20310294528,1793277000.0
+AMAT,"Applied Materials, Inc.",Technology,Semiconductor Equipment & Materials,20.075499,1.41463,37.0,620.78375,605.0,295638859776,1794517200.0
+AMCR,Amcor plc,Consumer Cyclical,Packaging & Containers,10.739068,2.15385,11.0,49.52636,49.0,20870805504,1793826000.0
+AMD,"Advanced Micro Devices, Inc.",Technology,Semiconductors,29.125237,1.37736,48.0,657.4875,650.0,844989399040,1793739600.0
+AME,"AMETEK, Inc.",Industrials,Specialty Industrial Machinery,24.777372,1.7,18.0,287.44443,287.5,54648770560,1793712600.0
+AMGN,Amgen Inc.,Healthcare,Drug Manufacturers - General,18.614115,2.70588,29.0,429.7369,435.0,251648262144,1793739600.0
+AMP,"Ameriprise Financial, Inc.",Financial Services,Asset Management,10.07945,2.71429,11.0,545.1818,525.0,45139013632,1793277000.0
+AMT,American Tower Corporation (REI,Real Estate,REIT - Specialty,27.166956,1.52,23.0,215.8261,210.0,88286666752,1793104200.0
+AMZN,"Amazon.com, Inc.",Consumer Cyclical,Internet Retail,24.842163,1.32787,59.0,326.99017,330.0,2928954572800,1793304000.0
+ANET,"Arista Networks, Inc.",Technology,Computer Hardware,30.647673,1.27586,28.0,249.06535,246.5,233754705920,1793739600.0
+AON,Aon plc,Financial Services,Insurance Brokers,16.645937,2.04762,19.0,363.21054,363.0,71356948480,1793190600.0
+AOS,A.O. Smith Corporation,Industrials,Specialty Industrial Machinery,17.024384,2.92308,10.0,66.5,67.0,8645411840,1793277000.0
+APA,APA Corporation,Energy,Oil & Gas E&P,8.177068,2.57143,26.0,49.84615,51.0,15149309952,1793826000.0
+APD,"Air Products and Chemicals, Inc",Basic Materials,Specialty Chemicals,20.088291,1.91667,21.0,342.7143,347.0,69533556736,1793885400.0
+APH,Amphenol Corporation,Technology,Electronic Components,22.0573,1.42105,19.0,106.97368,107.0,197417435136,1801056600.0
+APO,"Apollo Global Management, Inc. ",Financial Services,Asset Management,11.581387,1.77273,20.0,146.25,145.5,72469692416,1793712600.0
+APP,Applovin Corporation,Communication Services,Advertising Agencies,18.959974,1.57576,31.0,459.7874,450.0,131041157120,1793826000.0
+APTV,Aptiv PLC,Consumer Cyclical,Auto Parts,6.5442924,1.75,18.0,58.61111,56.5,8010158080,1793712600.0
+ARE,Alexandria Real Estate Equities,Real Estate,REIT - Office,-47.553192,3.125,14.0,49.92857,52.5,7784980992,1793044800.0
+ARES,Ares Management Corporation,Financial Services,Asset Management,19.97776,1.95,20.0,146.55,142.5,46278017024,1793277000.0
+ARM,Arm Holdings plc,Technology,Semiconductors,58.974537,1.93023,40.0,273.405,270.0,194194309120,1801688400.0
+ASML,ASML Holding N.V. - New York Re,Technology,Semiconductor Equipment & Materials,23.78339,1.36585,17.0,2142.5042,2294.6042,581152079872,1801056600.0
+ATO,Atmos Energy Corporation,Utilities,Utilities - Regulated Gas,17.93626,2.71429,11.0,182.72726,182.0,29635522560,1793826000.0
+AVGO,Broadcom Inc.,Technology,Semiconductors,17.055166,1.23529,47.0,533.4238,535.0,1584749740032,1796850000.0
+AVY,Avery Dennison Corporation,Consumer Cyclical,Packaging & Containers,17.06419,1.54545,10.0,203.3,200.5,14274681856,1793277000.0
