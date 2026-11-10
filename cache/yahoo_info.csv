@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-A,"Agilent Technologies, Inc.",Healthcare,Diagnostics & Research,26.718666,1.77273,20.0,182.05,185.0,50616098816,1795467600.0
-AAPL,Apple Inc.,Technology,Consumer Electronics,33.201855,2.25,40.0,340.4655,350.0,5091204530176,1793653200.0
-ABBV,AbbVie Inc.,Healthcare,Drug Manufacturers - General,18.142347,1.68966,26.0,310.65384,317.0,519095877632,1793363400.0
-ABNB,"Airbnb, Inc.",Consumer Cyclical,Travel Services,30.576014,1.97727,40.0,202.8045,210.0,115156328448,1793912400.0
-ABT,Abbott Laboratories,Healthcare,Medical Devices,18.62903,1.53571,26.0,118.52269,120.0,191552749568,1792585800.0
-ACGL,Arch Capital Group Ltd.,Financial Services,Insurance - Diversified,10.826066,2.3,19.0,113.57895,111.0,35163246592,1793131200.0
-ACN,Accenture plc,Technology,Information Technology Services,16.269098,2.33333,24.0,229.73792,232.5,152693833728,1797514200.0
-ADBE,Adobe Inc.,Technology,Software - Application,8.748129,2.97436,33.0,266.9097,260.0,93310697472,1796850000.0
-ADI,"Analog Devices, Inc.",Technology,Semiconductors,23.651608,1.38235,32.0,472.4375,467.5,189111353344,1795527000.0
-ADM,Archer-Daniels-Midland Company,Consumer Defensive,Farm Products,12.412669,2.81818,10.0,78.5,77.0,33390493696,1793712600.0
-ADP,"Automatic Data Processing, Inc.",Technology,Software - Application,22.475975,2.77778,15.0,298.26666,295.0,120060157952,1793190600.0
-ADSK,"Autodesk, Inc.",Technology,Software - Application,18.688478,1.55556,34.0,308.27676,307.5,55461281792,1795554000.0
-AEE,Ameren Corporation,Utilities,Utilities - Regulated Electric,19.686327,1.89474,18.0,116.45,115.5,31681650688,1793912400.0
-AEP,American Electric Power Company,Utilities,Utilities - Regulated Electric,18.626886,1.79167,23.0,142.93478,142.0,69832777728,1793190600.0
-AES,The AES Corporation,Utilities,Utilities - Diversified,6.2607,3.0,8.0,15.0,15.0,10646384640,
-AFL,AFLAC Incorporated,Financial Services,Insurance - Life,16.352943,3.2,15.0,118.53333,116.0,62172106752,1793826000.0
-AIG,"American International Group, I",Financial Services,Insurance - Diversified,9.112105,2.31818,20.0,88.4,89.0,41415491584,1793739600.0
-AIZ,"Assurant, Inc.",Financial Services,Insurance - Property & Casualty,12.963072,1.42857,6.0,342.5,341.5,15511995392,1793739600.0
-AJG,Arthur J. Gallagher & Co.,Financial Services,Insurance Brokers,19.083912,2.0,18.0,300.1111,296.5,72434671616,1793304000.0
-AKAM,"Akamai Technologies, Inc.",Technology,Software - Infrastructure,11.599324,2.0,22.0,131.32773,122.5,11501639680,1793912400.0
-ALAB,"Astera Labs, Inc.",Technology,Semiconductors,30.244896,1.8,22.0,347.17773,350.0,37598248960,1793739600.0
-ALB,Albemarle Corporation,Basic Materials,Specialty Chemicals,10.693034,1.91304,21.0,142.34666,135.0,11646982144,1793826000.0
-ALGN,"Align Technology, Inc.",Healthcare,Medical Instruments & Supplies,14.25871,2.25,14.0,185.7857,190.5,12359376896,1793217600.0
-ALL,Allstate Corporation (The),Financial Services,Insurance - Property & Casualty,8.929028,2.52,22.0,274.95456,275.0,62686384128,1793826000.0
-ALLE,Allegion plc,Industrials,Security & Protection Services,18.85061,1.90909,11.0,193.63635,196.0,16263284736,1792672200.0
 ALNY,"Alnylam Pharmaceuticals, Inc.",Healthcare,Biotechnology,14.0202675,1.83333,27.0,302.55557,315.0,20985337856,1793277000.0
 AMAT,"Applied Materials, Inc.",Technology,Semiconductor Equipment & Materials,20.031849,1.41463,37.0,626.86487,610.0,294996049920,1794517200.0
 AMCR,Amcor plc,Consumer Cyclical,Packaging & Containers,10.629939,2.15385,11.0,49.70818,49.0,21244901376,1793826000.0
@@ -523,3 +498,28 @@ YUM,"Yum! Brands, Inc.",Consumer Cyclical,Restaurants,24.016157,2.19231,22.0,174
 ZBH,"Zimmer Biomet Holdings, Inc.",Healthcare,Medical Devices,12.095979,2.51852,21.0,116.2381,117.0,20558649344,1793799000.0
 ZBRA,Zebra Technologies Corporation,Technology,Communication Equipment,14.815557,1.9375,15.0,413.45267,427.0,15516729344,1793712600.0
 ZTS,Zoetis Inc.,Healthcare,Drug Manufacturers - Specialty & Generic,12.867497,2.5,13.0,89.69231,85.0,33482481664,1793885400.0
+A,"Agilent Technologies, Inc.",Healthcare,Diagnostics & Research,26.472366,1.77273,20.0,182.05,185.0,50149507072,1795467600.0
+AAPL,Apple Inc.,Technology,Consumer Electronics,33.028427,2.22222,40.0,340.7655,350.0,5064611069952,1793653200.0
+ABBV,AbbVie Inc.,Healthcare,Drug Manufacturers - General,18.143679,1.68966,26.0,310.65384,317.0,519484768256,1793363400.0
+ABNB,"Airbnb, Inc.",Consumer Cyclical,Travel Services,29.620401,1.93182,40.0,202.8045,210.0,111531114496,1793912400.0
+ABT,Abbott Laboratories,Healthcare,Medical Devices,18.60545,1.53571,26.0,118.90731,120.0,191310266368,1792585800.0
+ACGL,Arch Capital Group Ltd.,Financial Services,Insurance - Diversified,10.938316,2.3,19.0,113.57895,111.0,35527835648,1793131200.0
+ACN,Accenture plc,Technology,Information Technology Services,16.250528,2.33333,24.0,229.73792,232.5,152711544832,1797514200.0
+ADBE,Adobe Inc.,Technology,Software - Application,8.636839,2.97436,33.0,266.9097,260.0,92123635712,1796850000.0
+ADI,"Analog Devices, Inc.",Technology,Semiconductors,23.835236,1.38235,32.0,472.4375,467.5,190579589120,1795527000.0
+ADM,Archer-Daniels-Midland Company,Consumer Defensive,Farm Products,12.260518,2.81818,10.0,78.5,77.0,32981202944,1793712600.0
+ADP,"Automatic Data Processing, Inc.",Technology,Software - Application,22.572416,2.77778,15.0,298.26666,295.0,120575320064,1793190600.0
+ADSK,"Autodesk, Inc.",Technology,Software - Application,18.318392,1.55556,34.0,308.27676,307.5,54362988544,1795554000.0
+AEE,Ameren Corporation,Utilities,Utilities - Regulated Electric,19.562426,1.89474,18.0,116.45,115.5,31482255360,1793912400.0
+AEP,American Electric Power Company,Utilities,Utilities - Regulated Electric,18.532639,1.79167,23.0,142.93478,142.0,69612240896,1793190600.0
+AES,The AES Corporation,Utilities,Utilities - Diversified,6.2607,3.0,8.0,15.0,15.0,10646384640,
+AFL,AFLAC Incorporated,Financial Services,Insurance - Life,16.48954,3.2,15.0,118.53333,116.0,62637039616,1793826000.0
+AIG,"American International Group, I",Financial Services,Insurance - Diversified,9.39086,2.31818,20.0,88.4,89.0,42677886976,1793739600.0
+AIZ,"Assurant, Inc.",Financial Services,Insurance - Property & Casualty,13.164035,1.42857,6.0,342.5,341.5,15807377408,1793739600.0
+AJG,Arthur J. Gallagher & Co.,Financial Services,Insurance Brokers,19.086315,2.0,18.0,300.1111,296.5,72475697152,1793304000.0
+AKAM,"Akamai Technologies, Inc.",Technology,Software - Infrastructure,12.0843,2.0,20.0,132.1605,122.5,12073423872,1793912400.0
+ALAB,"Astera Labs, Inc.",Technology,Semiconductors,30.455608,1.8,22.0,347.17773,350.0,37784387584,1793739600.0
+ALB,Albemarle Corporation,Basic Materials,Specialty Chemicals,11.210731,1.91304,21.0,141.72762,135.0,11202674688,1793826000.0
+ALGN,"Align Technology, Inc.",Healthcare,Medical Instruments & Supplies,14.189433,2.25,14.0,185.7857,190.5,12283073536,1793217600.0
+ALL,Allstate Corporation (The),Financial Services,Insurance - Property & Casualty,9.17863,2.52,22.0,275.86365,275.0,64614014976,1793826000.0
+ALLE,Allegion plc,Industrials,Security & Protection Services,18.677135,1.90909,11.0,193.63635,196.0,16113620992,1792672200.0
