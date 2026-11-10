@@ -48,7 +48,7 @@ STATES = {
     "BRK": _state(close=103.0, breakout=True, big_vol=True, in_trade=True, entry_score=8),
     "LOW": _state(close=102.0, big_vol=False),
     "OLD": _state(close=104.0, big_vol=True),  # crossed on an earlier day
-    "ONE": _state(score=8, cnt=1, close=99.0),  # one pullback at 8 of 8: plain WATCHING
+    "ONE": _state(score=8, cnt=1, close=99.0),  # one pullback at 8 of 8: off the list unless min_pullbacks is 1
     "ONEUP": _state(score=8, cnt=1, close=103.0, big_vol=True),  # over the line, still only one pullback
     "HELD": _state(score=6, cnt=0, close=110.0, in_trade=True, entry_score=8),  # bought at 8 of 8, 6 of 8 now
     "HELDV": _state(score=8, cnt=2, close=99.0, in_trade=True, entry_score=8),  # open trade back under the line: WATCHING, not READY
@@ -60,8 +60,10 @@ STATES = {
     "ONE5": _state(score=5, cnt=1, close=99.0),  # under the 6/8 floor, never listed
     "NONE": _state(score=8, cnt=0, close=99.0),
 }
+# Default min_pullbacks is 2, so ONE and ONEUP stay off. An open trade with one pullback (HELDO) stays.
 DEFAULT_LISTED = {"ATP": "READY", "BRK": "BROKEN OUT today", "HELD": "WATCHING", "HELDV": "WATCHING", "HELDO": "WATCHING", "LOW": "WATCHING",
-                  "OLD": "WATCHING", "ONE": "WATCHING", "ONEUP": "WATCHING", "RDY": "READY"}
+                  "OLD": "WATCHING", "RDY": "READY"}
+ONE_PULLBACK = {"ONE": "WATCHING", "ONEUP": "WATCHING"}
 WEAK_LISTED = {"HELDX", "HONA", "SEV", "ONE7"}
 
 
@@ -94,14 +96,21 @@ def test_status_rules_on_fixed_states():
 
 
 def test_one_pullback_is_never_ready_or_broken_out():
-    """READY and BROKEN OUT need is_vcp, which needs two pullbacks. Even a breakout flag cannot lift one pullback."""
+    """READY and BROKEN OUT need is_vcp, which needs two pullbacks. Even a breakout flag cannot lift one pullback.
+
+    The default min_pullbacks of 2 leaves a one-pullback name off the list. Setting it to 1
+    brings that name back as WATCHING, still never READY or BROKEN OUT.
+    """
     for close in (90.0, 100.0, 103.0):
         for big in (False, True):
             st = _state(score=8, cnt=1, close=close, big_vol=big)
-            assert setups._vcp_status(st) == "WATCHING"
-            assert setups._vcp_status(st, True) == "WATCHING"
+            assert setups._vcp_status(st) is None
+            assert setups._vcp_status(st, True) is None
+            assert setups._vcp_status(st, False, 1) == "WATCHING"
+            assert setups._vcp_status(st, True, 1) == "WATCHING"
     odd = _state(score=8, cnt=1, close=103.0, breakout=True, big_vol=True)
-    assert setups._vcp_status(odd) == "WATCHING"
+    assert setups._vcp_status(odd) is None
+    assert setups._vcp_status(odd, False, 1) == "WATCHING"
 
 
 def test_open_trade_is_never_ready():
@@ -129,9 +138,18 @@ def test_entry_score_is_saved_on_the_buy_day():
 
 def test_default_scan_lists_only_8_of_8():
     assert _cfg()["vcp"]["show_weaker_trend"] is False
-    for cfg in (None, {}, {"vcp": {}}, _cfg(), {"vcp": {"show_weaker_trend": "yes"}}):
+    assert _cfg()["vcp"]["min_pullbacks"] == 2
+    assert setups.vcp_min_pullbacks(None) == 2
+    assert setups.vcp_min_pullbacks({}) == 2
+    assert setups.vcp_min_pullbacks({"vcp": {}}) == 2
+    assert setups.vcp_min_pullbacks({"vcp": {"min_pullbacks": "yes"}}) == 2
+    assert setups.vcp_min_pullbacks({"vcp": {"min_pullbacks": True}}) == 2
+    assert setups.vcp_min_pullbacks({"vcp": {"min_pullbacks": 0}}) == 2
+    assert setups.vcp_min_pullbacks({"vcp": {"min_pullbacks": 1}}) == 1
+    for cfg in (None, {}, {"vcp": {}}, _cfg(), {"vcp": {"show_weaker_trend": "yes"}}, {"vcp": {"min_pullbacks": 3}}):
         out = _scan(cfg)
         assert dict(out["status"]) == DEFAULT_LISTED, (cfg, dict(out["status"]))
+        assert "ONE" not in out.index and "ONEUP" not in out.index
     out = _scan()
     # Every listed row is 8 of 8 today, except an open trade bought at 8 of 8.
     assert set(out.drop(index="HELD")["trend_score"]) == {"8 of 8"}
@@ -142,20 +160,27 @@ def test_default_scan_lists_only_8_of_8():
     for t in ("HELDV", "HELDO"):
         assert out.loc[t, "status"] == "WATCHING" and out.loc[t, "in_trade"] == "yes"
         assert "open trade that has dipped back under the buy point" in out.loc[t, "reason"]
-    for t in ("HELD", "LOW", "OLD", "ONE"):
+    for t in ("HELD", "LOW", "OLD"):
         assert "dipped back under" not in out.loc[t, "reason"]
     assert list(out.index)[0] == "BRK"
-    assert "one pullback so far" in out.loc["ONE", "reason"]
-    assert "cannot be READY or BROKEN OUT" in out.loc["ONE", "reason"]
-    assert "one pullback so far" in out.loc["ONEUP", "reason"]
+    assert "one pullback so far" not in " ".join(out["reason"].astype(str))
     assert out.loc["LOW", "status"] == "WATCHING" and "did not print a buy today" in out.loc["LOW", "reason"]
     assert out.loc["OLD", "status"] == "WATCHING" and "did not cross it today" in out.loc["OLD", "reason"]
     assert "WATCHING (one pullback)" not in set(out["status"])
+    restored = _scan({"vcp": {"min_pullbacks": 1}})
+    assert dict(restored["status"]) == {**DEFAULT_LISTED, **ONE_PULLBACK}
+    assert "one pullback so far" in restored.loc["ONE", "reason"]
+    assert "cannot be READY or BROKEN OUT" in restored.loc["ONE", "reason"]
+    assert "one pullback so far" in restored.loc["ONEUP", "reason"]
 
 
 def test_switch_brings_back_only_rows_under_8_of_8_last():
     out = _scan({"vcp": {"show_weaker_trend": True}})
     assert set(out.index) == set(DEFAULT_LISTED) | WEAK_LISTED
+    assert "ONE" not in out.index and "ONEUP" not in out.index
+    both = _scan({"vcp": {"show_weaker_trend": True, "min_pullbacks": 1}})
+    assert set(both.index) == set(DEFAULT_LISTED) | set(ONE_PULLBACK) | WEAK_LISTED
+    assert both.loc["ONE", "status"] == "WATCHING" and both.loc["ONE7", "status"] == WEAK_TREND
     weak = out[out["status"] == WEAK_TREND]
     assert set(weak.index) == WEAK_LISTED
     assert not (weak["trend_score"] == "8 of 8").any()
@@ -171,19 +196,22 @@ def test_switch_brings_back_only_rows_under_8_of_8_last():
 
 
 def test_weaker_and_one_pullback_rows_never_feed_buy_setups_leaders_or_rotation():
-    vcp = _scan({"vcp": {"show_weaker_trend": True}}).reset_index()
-    names = list(vcp["ticker"])
-    scores = pd.DataFrame([{"ticker": t, "company": t, "sector": "Industrials", "index_membership": "SP500",
-                            "score": 9, "verdict": "BUY", "above_sma50": "yes", "above_sma200": "yes"} for t in names])
-    sma = {t: True for t in names}
-    buy = setups.build_buy_setups(vcp, None, None, None, scores, sma_ok=sma, market={"spy": True, "qqq": True})
     live = {"RDY", "ATP", "BRK"}
-    # An open trade that dipped under its buy line is WATCHING, so it is not a READY buy setup.
-    assert "HELDV" not in set(buy["ticker"]) and "HELDO" not in set(buy["ticker"])
-    assert set(buy["ticker"]) == live, set(buy["ticker"])
-    leaders = setups.combine_leaders(vcp, pd.DataFrame())
-    assert set(leaders["ticker"]) == live
-    assert sector_rotation.resolve_buy_tickers(scores, scanners={"vcp": vcp}) == live
+    for cfg in ({"vcp": {"show_weaker_trend": True}}, {"vcp": {"show_weaker_trend": True, "min_pullbacks": 1}}):
+        vcp = _scan(cfg).reset_index()
+        names = list(vcp["ticker"])
+        scores = pd.DataFrame([{"ticker": t, "company": t, "sector": "Industrials", "index_membership": "SP500",
+                                "score": 9, "verdict": "BUY", "above_sma50": "yes", "above_sma200": "yes"} for t in names])
+        sma = {t: True for t in names}
+        buy = setups.build_buy_setups(vcp, None, None, None, scores, sma_ok=sma, market={"spy": True, "qqq": True})
+        # An open trade that dipped under its buy line is WATCHING, so it is not a READY buy setup.
+        # A one-pullback name is WATCHING only when min_pullbacks is 1, and still not a buy setup.
+        assert "HELDV" not in set(buy["ticker"]) and "HELDO" not in set(buy["ticker"])
+        assert "ONE" not in set(buy["ticker"]) and "ONEUP" not in set(buy["ticker"])
+        assert set(buy["ticker"]) == live, (cfg, set(buy["ticker"]))
+        leaders = setups.combine_leaders(vcp, pd.DataFrame())
+        assert set(leaders["ticker"]) == live
+        assert sector_rotation.resolve_buy_tickers(scores, scanners={"vcp": vcp}) == live
 
 
 def test_settings_and_help_carry_the_switch():
@@ -191,13 +219,20 @@ def test_settings_and_help_carry_the_switch():
     rows = tables.settings_rows(cfg)
     got = dict(zip(rows["setting"], rows["value"]))
     assert got["vcp.show_weaker_trend"] is False
+    assert got["vcp.min_pullbacks"] == 2
     assert "vcp._note" not in got
     help_ = dict(tables.help_rows())
     assert "vcp.show_weaker_trend" in help_["VCP weaker trend switch"]
     assert WEAK_TREND in help_["VCP weaker trend switch"]
     assert "WATCHING (one pullback)" not in " ".join(help_.values())
-    assert "one pullback so far" in help_["VCP scanner"]
+    assert "one pullback so far" not in help_["VCP scanner"]
+    assert "only one pullback stays off the list" in help_["VCP scanner"]
+    assert "vcp.min_pullbacks" in help_["VCP scanner"]
     assert "8 of 8" in help_["VCP scanner"] and "two tightening pullbacks" in help_["VCP scanner"]
+    published_help = open(os.path.join(ROOT, "data", "help.csv"), encoding="utf-8").read()
+    assert "only one pullback stays off the list" in published_help
+    published_settings = open(os.path.join(ROOT, "data", "settings.csv"), encoding="utf-8").read()
+    assert "\nvcp.min_pullbacks,2\n" in published_settings
 
 
 def test_saved_vcp_file_matches_the_switch():
@@ -215,6 +250,11 @@ def test_saved_vcp_file_matches_the_switch():
     assert (df.loc[live, "contractions"].astype(int) >= 2).all()
     assert (df.loc[live, "trend_score"] == "8 of 8").all()
     assert not ((df["status"] == "READY") & held).any()
+    floor = int(_cfg()["vcp"].get("min_pullbacks") or 2)
+    if floor >= 2:
+        watching = df["status"] == "WATCHING"
+        assert (df.loc[watching & ~held, "contractions"].astype(int) >= floor).all()
+        assert not df["reason"].astype(str).str.contains("one pullback so far").any()
 
 
 if __name__ == "__main__":
