@@ -70,7 +70,7 @@ const weakFiles = {
   "scanner_vcp.csv": [
     { ticker: "AAA", status: "READY", strength: "80", reason: "Trend template 8/8." },
     { ticker: "HHH", status: "WATCHING (trend not 8/8)", strength: "95", reason: "Pullbacks are tightening, but the trend template is 0 of 8." },
-    { ticker: "OOO", status: "WATCHING", strength: "85", reason: "The trend template is 8 of 8, with one pullback so far." },
+    { ticker: "OOO", status: "WATCHING", strength: "85", reason: "Price is through the buy point, but volume was not 1.5 times the 50-day average." },
     { ticker: "WWW", status: "WATCHING", strength: "70", reason: "Price is through the buy point." },
   ],
 };

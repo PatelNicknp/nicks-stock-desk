@@ -411,6 +411,25 @@ def vcp_show_weaker(cfg):
     return bool(isinstance(block, dict) and block.get("show_weaker_trend") is True)
 
 
+def vcp_min_pullbacks(cfg):
+    """vcp.min_pullbacks from config.json. Default 2.
+
+    This number only decides the one-pullback WATCHING rows. At 2 or higher
+    those names stay off the list. At 1 they are WATCHING again. Open trades,
+    READY, BROKEN OUT today, and show_weaker_trend do not use it. A missing
+    or unusable value is 2.
+    """
+    block = (cfg or {}).get("vcp") if isinstance(cfg, dict) else None
+    raw = block.get("min_pullbacks") if isinstance(block, dict) else None
+    if raw is None or isinstance(raw, bool):
+        return 2
+    try:
+        n = int(raw)
+    except (TypeError, ValueError):
+        return 2
+    return n if n >= 1 else 2
+
+
 def _open_trade_ok(state):
     """An open trade stays listed when its buy printed with the template at 8 of 8."""
     return bool(state["in_trade"] and state.get("entry_score", -1) == 8)
@@ -421,7 +440,7 @@ def _open_trade_dipped(state):
     return bool(state["in_trade"] and state["pivot"] is not None and state["close"] <= state["pivot"])
 
 
-def _vcp_status(state, show_weaker=False):
+def _vcp_status(state, show_weaker=False, min_pullbacks=2):
     """Nick's rule: a stock is listed only at 8 of 8 on the trend template.
 
     BROKEN OUT today: the indicator printed a buy today (8 of 8 and two
@@ -430,11 +449,20 @@ def _vcp_status(state, show_weaker=False):
     under the buy point, and not bought yet. A one-pullback stock is never READY.
     An open trade is never READY: if it dips back under the buy point it stays
     WATCHING, keeps in_trade, and the reason says it dipped.
-    WATCHING: 8 of 8 and either over the buy point without that breakout today,
-    or only one pullback so far, or an open trade whose buy printed at 8 of 8
-    (it stays listed even if today's score has dropped).
+    WATCHING: 8 of 8 with two or more tightening pullbacks and the close over
+    the buy point without that breakout today, or an open trade whose buy
+    printed at 8 of 8 (it stays listed even if today's score has dropped).
+    A name with only one pullback is WATCHING only when min_pullbacks is 1.
+    The default of 2 leaves it off the list. That number does not change the
+    green tag, which stays two pullbacks.
     With show_weaker on, stocks under 8 of 8 come back as VCP_WEAK_TREND.
     """
+    try:
+        floor = int(min_pullbacks)
+    except (TypeError, ValueError):
+        floor = 2
+    if isinstance(min_pullbacks, bool) or floor < 1:
+        floor = 2
     if state["breakout"] and state["is_vcp"]:
         return "BROKEN OUT today"
     if state["is_vcp"] and state["pivot"] is not None:
@@ -443,7 +471,7 @@ def _vcp_status(state, show_weaker=False):
         return "READY" if state["close"] <= state["pivot"] else "WATCHING"
     if _open_trade_ok(state):
         return "WATCHING"
-    if state["score"] == 8 and state["cnt"] == 1:
+    if state["score"] == 8 and state["cnt"] == 1 and floor <= 1:
         return "WATCHING"
     if not show_weaker or state["score"] >= 8:
         return None
@@ -570,6 +598,7 @@ def _panel_date(close):
 def scan_vcp(close, high, low, vol, universe, cfg=None):
     rows = []
     show_weaker = vcp_show_weaker(cfg)
+    min_pullbacks = vcp_min_pullbacks(cfg)
     panel = _panel_date(close)
     spy = close["SPY"] if close is not None and "SPY" in close.columns else None
     names = list(universe["ticker"]) if universe is not None and len(universe) else []
@@ -584,7 +613,7 @@ def scan_vcp(close, high, low, vol, universe, cfg=None):
         )
         if state is None:
             continue
-        status = _vcp_status(state, show_weaker)
+        status = _vcp_status(state, show_weaker, min_pullbacks)
         if status is None:
             continue
         stop, target, _, basis = _vcp_levels(state)

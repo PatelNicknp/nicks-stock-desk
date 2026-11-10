@@ -149,7 +149,9 @@ try {
     check(panned.from < before.from - 5, L("drag") + ": the drag moved back in time (from " + before.from.toFixed(1) + " to " + panned.from.toFixed(1) + ")");
     const kept = async (step) => {
       const v = await view(page);
-      check(Math.abs(v.from - panned.from) <= 1 && Math.abs(v.to - panned.to) <= 1,
+      // The chart library can nudge the left edge by a little more than one bar when it
+      // fits a saved range to a new width. Two bars still catches a jump back to the first view.
+      check(Math.abs(v.from - panned.from) <= 2 && Math.abs(v.to - panned.to) <= 2,
         L(step) + ": keeps the dragged range (" + v.from.toFixed(1) + " to " + v.to.toFixed(1) + ", dragged " + panned.from.toFixed(1) + " to " + panned.to.toFixed(1) + ")");
     };
     await page.setViewportSize({ width: c.h, height: c.w }); await settle(page);

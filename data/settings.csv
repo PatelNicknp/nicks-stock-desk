@@ -192,6 +192,7 @@ trading_floor.sentiment.hot_flags,2
 trading_floor.verdict.buy_min_total,2
 trading_floor.verdict.wait_min_total,0
 vcp.show_weaker_trend,False
+vcp.min_pullbacks,2
 qullamaggie.price_filter,True
 qullamaggie.min_price,20.0
 qullamaggie.adr_filter,True
