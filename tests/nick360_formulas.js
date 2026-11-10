@@ -316,6 +316,353 @@ check("power play boundaries and no lookahead", () => {
   assert.notStrictEqual(miss.state, "match");
 });
 
+function putBar(bars, i, price, vol) {
+  bars[i].o = price;
+  bars[i].h = price;
+  bars[i].l = price;
+  bars[i].c = price;
+  if (vol != null) bars[i].v = vol;
+}
+
+function span(bars, a, b, p0, p1, vol) {
+  const steps = b - a;
+  for (let i = a; i <= b; i++) {
+    const t = steps === 0 ? 0 : (i - a) / steps;
+    putBar(bars, i, p0 + (p1 - p0) * t, vol);
+  }
+}
+
+function risingTape(n) {
+  const bars = [];
+  for (let i = 0; i < n; i++) {
+    const c = 40 + i * 0.22;
+    bars.push({ d: day(i), o: c, h: c, l: c, c: c, v: 1000 });
+  }
+  return bars;
+}
+
+function decliningTape(n) {
+  const bars = [];
+  for (let i = 0; i < n; i++) {
+    const c = 250 - i * 0.15;
+    bars.push({ d: day(i), o: c, h: c, l: c, c: c, v: 1000 });
+  }
+  return bars;
+}
+
+function paintVcp(bars, depths, opt) {
+  const o = opt || {};
+  const end = bars.length - 1;
+  const gap = 8;
+  const lastHigh = end - 17;
+  const firstHigh = lastHigh - (depths.length - 1) * gap;
+  const P = bars[firstHigh].c;
+  const vols = o.vols || depths.map(function () { return 1000; });
+  const closePrice = o.closePrice == null ? P : o.closePrice;
+  for (let c = 0; c < depths.length; c++) {
+    const H = firstHigh + c * gap;
+    const L = H + 4;
+    const low = P * (1 - depths[c]);
+    span(bars, H, L, P, low, vols[c]);
+    const rightEnd = c < depths.length - 1 ? H + gap - 1 : L + 3;
+    span(bars, L + 1, rightEnd, low * 1.01, c < depths.length - 1 ? P * 0.99 : closePrice, 1000);
+  }
+  const tailVol = o.tailVol == null ? 700 : o.tailVol;
+  for (let i = end - 9; i <= end; i++) putBar(bars, i, closePrice, tailVol);
+  return { P: P, firstHigh: firstHigh, lastHigh: lastHigh };
+}
+
+function vcpDesk(leadBars, peerBars) {
+  const records = [{ ticker: "LEAD", bars: leadBars }];
+  if (peerBars) records.push({ ticker: "LAG", bars: peerBars });
+  return E.buildDesk(records, {});
+}
+
+function leadOf(desk) {
+  return desk.stocks.find((s) => s.ticker === "LEAD");
+}
+
+check("a textbook tight base passes every VCP gate and keeps the contraction count", () => {
+  const rules = E.VCP_RULES;
+  assert.strictEqual(rules.depthRatio, 0.8);
+  assert.strictEqual(rules.maxFirstDepth, 0.35);
+  assert.strictEqual(rules.maxFinalDepth, 0.1);
+  assert.strictEqual(rules.lookback, 325);
+  assert.strictEqual(rules.minBase, 15);
+  assert.strictEqual(rules.dryMax, 0.75);
+  assert.strictEqual(rules.rightBars, 10);
+  assert.strictEqual(rules.maxRightRange, 0.08);
+  assert.strictEqual(rules.maxBelowPivot, 0.08);
+  assert.strictEqual(rules.maxAbovePivot, 0.05);
+  const bars = risingTape(420);
+  const painted = paintVcp(bars, [0.16, 0.08], { vols: [1500, 500], tailVol: 700 });
+  const desk = vcpDesk(bars, decliningTape(420));
+  const lead = leadOf(desk);
+  assert.strictEqual(lead.template.complete, true, JSON.stringify(lead.template.items.filter((x) => x.state !== "pass")));
+  assert.strictEqual(lead.vcp.candidate, true, lead.vcp.reason);
+  assert.strictEqual(lead.vcp.count, 2);
+  assert.ok(Math.abs(lead.vcp.depths[0] - 0.16) < 1e-9);
+  assert.ok(Math.abs(lead.vcp.depths[1] - 0.08) < 1e-9);
+  assert.ok(Math.abs(lead.vcp.pivot - painted.P) < 1e-6);
+  assert.strictEqual(lead.vcp.brokenOut, false);
+  assert.ok(lead.vcp.baseSessions >= 15);
+  assert.ok(Math.abs(lead.vcp.dry - 0.7) < 1e-9);
+  assert.ok(/2 contractions/.test(lead.vcp.reason));
+  assert.ok(/still under the pivot/.test(lead.vcp.reason));
+  const vcp = desk.screens.find((s) => s.id === "vcp");
+  assert.deepStrictEqual(vcp.matches, ["LEAD"]);
+  const dry = desk.screens.find((s) => s.id === "dry");
+  assert.ok(dry.matches.indexOf("LEAD") < 0, "70% dry-up is inside the VCP gate and outside the 60% volume dry-up screen");
+});
+
+check("four and five contractions stay fully counted", () => {
+  const four = risingTape(420);
+  paintVcp(four, [0.24, 0.16, 0.08, 0.04], { vols: [1000, 1000, 1800, 600], tailVol: 400 });
+  const fourLead = leadOf(vcpDesk(four, decliningTape(420)));
+  assert.strictEqual(fourLead.vcp.candidate, true, fourLead.vcp.reason);
+  assert.strictEqual(fourLead.vcp.count, 4);
+  assert.ok(/^4 contractions/.test(fourLead.vcp.reason));
+  const five = risingTape(460);
+  paintVcp(five, [0.3, 0.22, 0.15, 0.1, 0.05], { vols: [1000, 1000, 1000, 1800, 600], tailVol: 400 });
+  const fiveLead = leadOf(vcpDesk(five, decliningTape(460)));
+  assert.strictEqual(fiveLead.vcp.candidate, true, fiveLead.vcp.reason);
+  assert.strictEqual(fiveLead.vcp.count, 5);
+  assert.ok(/^5 contractions/.test(fiveLead.vcp.reason));
+});
+
+check("trend template 8 of 8 is still required", () => {
+  const bars = risingTape(420);
+  paintVcp(bars, [0.16, 0.08], { vols: [1500, 500], tailVol: 700 });
+  const alone = leadOf(vcpDesk(bars, null));
+  assert.strictEqual(alone.vcp.candidate, false);
+  assert.strictEqual(alone.vcp.skipped, true);
+  assert.ok(/missing an input/.test(alone.vcp.reason));
+  const fast = risingTape(420);
+  fast.forEach((b, i) => { const c = 20 + i * 1.4; b.o = b.h = b.l = b.c = c; });
+  const ranked = leadOf(vcpDesk(bars, fast));
+  assert.strictEqual(ranked.template.complete, false);
+  assert.strictEqual(ranked.vcp.candidate, false);
+  assert.ok(/not 8 of 8/.test(ranked.vcp.reason));
+});
+
+check("each contraction must be at most 80% as deep as the one before", () => {
+  const weak = risingTape(420);
+  paintVcp(weak, [0.12, 0.1], { vols: [1500, 500], tailVol: 700 });
+  const weakLead = leadOf(vcpDesk(weak, decliningTape(420)));
+  assert.strictEqual(weakLead.vcp.candidate, false, weakLead.vcp.reason);
+  assert.ok(weakLead.vcp.count < 2);
+  assert.ok(/at most 80%/.test(weakLead.vcp.reason));
+  const edge = risingTape(420);
+  paintVcp(edge, [0.1, 0.08], { vols: [1500, 500], tailVol: 700 });
+  const edgeLead = leadOf(vcpDesk(edge, decliningTape(420)));
+  assert.strictEqual(edgeLead.vcp.candidate, true, edgeLead.vcp.reason);
+  assert.strictEqual(edgeLead.vcp.count, 2);
+  const over = risingTape(420);
+  paintVcp(over, [0.1, 0.081], { vols: [1500, 500], tailVol: 700 });
+  const overLead = leadOf(vcpDesk(over, decliningTape(420)));
+  assert.strictEqual(overLead.vcp.candidate, false);
+  assert.ok(overLead.vcp.count < 2);
+});
+
+check("the first contraction cannot be deeper than 35% and the last must be under 10%", () => {
+  const deep = risingTape(420);
+  paintVcp(deep, [0.4, 0.08], { vols: [1500, 500], tailVol: 400 });
+  const deepLead = leadOf(vcpDesk(deep, decliningTape(420)));
+  assert.strictEqual(deepLead.template.complete, true, JSON.stringify(deepLead.template.items));
+  assert.strictEqual(deepLead.vcp.candidate, false, deepLead.vcp.reason);
+  assert.ok(/deeper than 35%/.test(deepLead.vcp.reason));
+  const cap = risingTape(420);
+  paintVcp(cap, [0.35, 0.08], { vols: [1500, 500], tailVol: 400 });
+  const capLead = leadOf(vcpDesk(cap, decliningTape(420)));
+  assert.strictEqual(capLead.vcp.candidate, true, capLead.vcp.reason);
+  const justOver = risingTape(420);
+  paintVcp(justOver, [0.351, 0.08], { vols: [1500, 500], tailVol: 400 });
+  const justLead = leadOf(vcpDesk(justOver, decliningTape(420)));
+  assert.ok(/deeper than 35%/.test(justLead.vcp.reason));
+  const wideLast = risingTape(420);
+  paintVcp(wideLast, [0.2, 0.1], { vols: [1500, 500], tailVol: 400 });
+  const wideLead = leadOf(vcpDesk(wideLast, decliningTape(420)));
+  assert.strictEqual(wideLead.vcp.candidate, false, wideLead.vcp.reason);
+  assert.ok(/not under 10%/.test(wideLead.vcp.reason));
+  const tightLast = risingTape(420);
+  paintVcp(tightLast, [0.2, 0.099], { vols: [1500, 500], tailVol: 400 });
+  const tightLead = leadOf(vcpDesk(tightLast, decliningTape(420)));
+  assert.strictEqual(tightLead.vcp.candidate, true, tightLead.vcp.reason);
+});
+
+check("a dip under 3% is not a contraction", () => {
+  const bars = risingTape(420);
+  paintVcp(bars, [0.16, 0.02, 0.06], { vols: [1500, 1000, 500], tailVol: 400 });
+  const lead = leadOf(vcpDesk(bars, decliningTape(420)));
+  assert.strictEqual(lead.vcp.candidate, true, lead.vcp.reason);
+  assert.strictEqual(lead.vcp.count, 2);
+  assert.ok(Math.abs(lead.vcp.depths[0] - 0.16) < 1e-9);
+  assert.ok(Math.abs(lead.vcp.depths[1] - 0.06) < 1e-9);
+});
+
+check("base length is at least 15 sessions and the lookback is 325", () => {
+  function shortBase(sessions) {
+    const bars = risingTape(420);
+    const end = bars.length - 1;
+    const H = end - (sessions - 1);
+    const P = bars[H].c;
+    const rel = [P, P * 0.96, P * 0.9, P * 0.86, P * 0.96, P * 0.98, P, P * 0.985, P * 0.97, P * 0.96, P * 0.95, P * 0.97, P * 0.98, P];
+    rel.forEach((price, k) => putBar(bars, H + k, price, k <= 3 ? 1800 : k >= 6 && k <= 10 ? 600 : 1000));
+    for (let i = end - 9; i <= end; i++) bars[i].v = 400;
+    return bars;
+  }
+  const tooShort = leadOf(vcpDesk(shortBase(14), decliningTape(420)));
+  assert.strictEqual(tooShort.template.complete, true, JSON.stringify(tooShort.template.items.filter((x) => x.state !== "pass")));
+  assert.strictEqual(tooShort.vcp.baseSessions, 14);
+  assert.strictEqual(tooShort.vcp.candidate, false, tooShort.vcp.reason);
+  assert.ok(/shorter than 15/.test(tooShort.vcp.reason));
+  const enough = leadOf(vcpDesk(shortBase(15), decliningTape(420)));
+  assert.strictEqual(enough.vcp.baseSessions, 15, enough.vcp.reason);
+  assert.strictEqual(enough.vcp.candidate, true, enough.vcp.reason);
+
+  function distant(back) {
+    const bars = risingTape(520);
+    const end = bars.length - 1;
+    const saved = bars.map((b) => b.c);
+    const c1 = end - back;
+    const P1 = saved[c1];
+    span(bars, c1, c1 + 4, P1, P1 * 0.84, 2000);
+    const c2 = end - 17;
+    const P2 = saved[c2];
+    for (let i = c1 + 5; i < c2; i++) {
+      const t = (i - (c1 + 5)) / (c2 - (c1 + 5));
+      putBar(bars, i, P1 * 0.9 + (P2 * 0.99 - P1 * 0.9) * t, 1000);
+    }
+    span(bars, c2, c2 + 4, P2, P2 * 0.94, 800);
+    span(bars, c2 + 5, c2 + 7, P2 * 0.95, P2, 1000);
+    for (let i = end - 9; i <= end; i++) putBar(bars, i, P2, 400);
+    return bars;
+  }
+  const inside = leadOf(vcpDesk(distant(300), decliningTape(520)));
+  assert.strictEqual(inside.template.complete, true, JSON.stringify(inside.template.items.filter((x) => x.state !== "pass")));
+  assert.strictEqual(inside.vcp.candidate, true, inside.vcp.reason);
+  assert.ok(inside.vcp.baseSessions > 120);
+  assert.ok(inside.vcp.baseSessions <= 325);
+  const outside = leadOf(vcpDesk(distant(340), decliningTape(520)));
+  assert.strictEqual(outside.template.complete, true, outside.vcp.reason);
+  assert.strictEqual(outside.vcp.candidate, false, outside.vcp.reason);
+  assert.ok(/at most 80%/.test(outside.vcp.reason));
+  assert.ok(outside.vcp.count < 2);
+});
+
+check("volume must dry up on the last contraction and into the last 10 sessions", () => {
+  const louder = risingTape(420);
+  paintVcp(louder, [0.16, 0.08], { vols: [500, 1500], tailVol: 700 });
+  const louderLead = leadOf(vcpDesk(louder, decliningTape(420)));
+  assert.strictEqual(louderLead.vcp.candidate, false, louderLead.vcp.reason);
+  assert.ok(/lower average volume/.test(louderLead.vcp.reason));
+  const dryEdge = risingTape(420);
+  paintVcp(dryEdge, [0.16, 0.08], { vols: [1500, 500], tailVol: 750 });
+  const dryEdgeLead = leadOf(vcpDesk(dryEdge, decliningTape(420)));
+  assert.ok(Math.abs(dryEdgeLead.vcp.dry - 0.75) < 1e-9, String(dryEdgeLead.vcp.dry));
+  assert.strictEqual(dryEdgeLead.vcp.candidate, true, dryEdgeLead.vcp.reason);
+  const wet = risingTape(420);
+  paintVcp(wet, [0.16, 0.08], { vols: [1500, 500], tailVol: 751 });
+  const wetLead = leadOf(vcpDesk(wet, decliningTape(420)));
+  assert.strictEqual(wetLead.vcp.candidate, false, wetLead.vcp.reason);
+  assert.ok(/75%/.test(wetLead.vcp.reason));
+  const missing = risingTape(420);
+  paintVcp(missing, [0.16, 0.08], { vols: [1500, 500], tailVol: 700 });
+  missing[missing.length - 30].v = null;
+  const missingLead = leadOf(vcpDesk(missing, decliningTape(420)));
+  assert.strictEqual(missingLead.vcp.skipped, true, missingLead.vcp.reason);
+  assert.strictEqual(missingLead.vcp.candidate, false);
+});
+
+check("the right side must be tight and the close must sit near the pivot", () => {
+  function withTail(mutate) {
+    const bars = risingTape(420);
+    const painted = paintVcp(bars, [0.16, 0.08], { vols: [1500, 500], tailVol: 400 });
+    mutate(bars, painted.P);
+    return leadOf(vcpDesk(bars, decliningTape(420)));
+  }
+  const wide = withTail((bars, P) => {
+    for (let i = bars.length - 10; i < bars.length; i++) {
+      bars[i].h = P;
+      bars[i].l = P * 0.919;
+      bars[i].c = P;
+      bars[i].o = P;
+    }
+  });
+  assert.strictEqual(wide.template.complete, true, JSON.stringify(wide.template.items.filter((x) => x.state !== "pass")));
+  assert.strictEqual(wide.vcp.candidate, false, wide.vcp.reason);
+  assert.ok(/wider than 8%/.test(wide.vcp.reason));
+  const rangeEdge = withTail((bars, P) => {
+    for (let i = bars.length - 10; i < bars.length; i++) {
+      bars[i].h = P;
+      bars[i].l = P * 0.92;
+      bars[i].c = P;
+      bars[i].o = P;
+    }
+  });
+  assert.ok(Math.abs(rangeEdge.vcp.range - 0.08) < 1e-9);
+  assert.strictEqual(rangeEdge.vcp.candidate, true, rangeEdge.vcp.reason);
+  function pullClose(factor) {
+    const bars = risingTape(420);
+    const painted = paintVcp(bars, [0.2, 0.095], { vols: [1500, 500], tailVol: 400 });
+    const end = bars.length - 1;
+    for (let i = end - 49; i <= end - 30; i++) putBar(bars, i, painted.P * 0.86, 1000);
+    for (let i = end - 29; i <= end - 26; i++) {
+      const t = (i - (end - 29)) / 3;
+      putBar(bars, i, painted.P * (0.9 + 0.06 * t), 1000);
+    }
+    for (let i = end - 9; i <= end; i++) putBar(bars, i, painted.P * factor, 400);
+    return leadOf(vcpDesk(bars, decliningTape(420)));
+  }
+  const lowLead = pullClose(0.919);
+  assert.strictEqual(lowLead.template.complete, true, JSON.stringify(lowLead.template.items.filter((x) => x.state !== "pass")));
+  assert.strictEqual(lowLead.vcp.candidate, false, lowLead.vcp.reason);
+  assert.ok(/more than 8% below/.test(lowLead.vcp.reason));
+  const underLead = pullClose(0.92);
+  assert.strictEqual(underLead.vcp.candidate, true, underLead.vcp.reason);
+  assert.strictEqual(underLead.vcp.brokenOut, false);
+  const extended = risingTape(420);
+  const ext = paintVcp(extended, [0.16, 0.08], { vols: [1500, 500], tailVol: 400, closePrice: null });
+  for (let i = extended.length - 10; i < extended.length; i++) putBar(extended, i, ext.P * 1.051, 400);
+  const extLead = leadOf(vcpDesk(extended, decliningTape(420)));
+  assert.strictEqual(extLead.vcp.candidate, false, extLead.vcp.reason);
+  assert.strictEqual(extLead.vcp.brokenOut, true);
+  assert.ok(/more than 5% above/.test(extLead.vcp.reason));
+  const atCap = risingTape(420);
+  const cap = paintVcp(atCap, [0.16, 0.08], { vols: [1500, 500], tailVol: 400 });
+  for (let i = atCap.length - 10; i < atCap.length; i++) putBar(atCap, i, cap.P * 1.05, 400);
+  const capLead = leadOf(vcpDesk(atCap, decliningTape(420)));
+  assert.strictEqual(capLead.vcp.candidate, true, capLead.vcp.reason);
+  assert.strictEqual(capLead.vcp.brokenOut, true);
+  assert.ok(/above the pivot/.test(capLead.vcp.reason));
+  assert.ok(/separate screen/.test(capLead.vcp.reason));
+});
+
+check("a close above the VCP pivot is flagged and breakout volume stays separate", () => {
+  const bars = risingTape(420);
+  const painted = paintVcp(bars, [0.16, 0.08], { vols: [1500, 500], tailVol: 700 });
+  putBar(bars, bars.length - 1, painted.P * 1.02, 700);
+  const desk = vcpDesk(bars, decliningTape(420));
+  const lead = leadOf(desk);
+  assert.strictEqual(lead.vcp.candidate, true, lead.vcp.reason);
+  assert.strictEqual(lead.vcp.brokenOut, true);
+  assert.ok(lead.vcp.pivot === painted.P);
+  const breakout = desk.screens.find((s) => s.id === "breakout");
+  assert.ok(breakout.matches.indexOf("LEAD") < 0);
+  assert.notStrictEqual(lead.patterns.breakout.state, "match");
+  const riser = risingTape(420);
+  putBar(riser, riser.length - 1, riser[riser.length - 1].c, 5000);
+  const popped = leadOf(vcpDesk(riser, decliningTape(420)));
+  assert.strictEqual(popped.patterns.breakout.state, "match");
+  assert.strictEqual(popped.vcp.candidate, false);
+  const formulas = {};
+  E.SCREEN_DEFS.forEach((d) => { formulas[d.id] = d.formula; });
+  assert.strictEqual(formulas.tight, "Last 15 sessions' high-to-low range is at most 8% of the midpoint, the 10-session volume is at most 70% of the prior 50, and the close is above the 50-day.");
+  assert.strictEqual(formulas.dry, "10-session average volume is at most 60% of the 50 sessions before that window, the close is above the 50-day, and the close is within 15% of the 63-session high.");
+  assert.strictEqual(formulas.near, "Close is under that high by at most 3% and still above the 50-day.");
+  assert.strictEqual(formulas.breakout, "Close above the highest high of the prior 20 sessions, and volume at least 1.5 times the prior 50-session average. Today's volume is not inside that average.");
+});
+
 check("blank index volume is not a higher-volume day", () => {
   const bars = barsFrom([10, 11, 12], { volume: [0, 0, 0] });
   bars.forEach((b) => { b.v = null; });

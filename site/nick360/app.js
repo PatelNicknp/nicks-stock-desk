@@ -244,11 +244,15 @@
     });
     return list;
   }
-  function rowHtml(s) {
+  function rowHtml(s, screen) {
     const g = gradeLetter(s);
     const ch = s.chg;
-    return '<button type="button" class="srow' + (s.ticker === state.symbol ? " sel" : "") + '" data-act="pick" data-ticker="' + esc(s.ticker) + '">' +
-      "<b>" + esc(s.ticker) + "</b><span class=\"" + (ch == null ? "mut" : ch >= 0 ? "up" : "dn") + "\">" + pct(ch, 2) + "</span><span>" + px(s.close) +
+    const vcpMark = screen && screen.id === "vcp" && s.vcp && s.vcp.count
+      ? " " + s.vcp.count + (s.vcp.brokenOut ? "\u2191" : "")
+      : "";
+    const tip = screen && screen.id === "vcp" && s.vcp ? ' title="' + esc(s.vcp.reason) + '"' : "";
+    return '<button type="button" class="srow' + (s.ticker === state.symbol ? " sel" : "") + '" data-act="pick" data-ticker="' + esc(s.ticker) + '"' + tip + ">" +
+      "<b>" + esc(s.ticker) + esc(vcpMark) + "</b><span class=\"" + (ch == null ? "mut" : ch >= 0 ? "up" : "dn") + "\">" + pct(ch, 2) + "</span><span>" + px(s.close) +
       "</span><span>" + (E.finite(rankOf(s)) ? rankOf(s) : "—") + "</span><span class=\"g" + esc(g || "") + "\">" + esc(g || "—") +
       "</span><span class=\"" + (s.offHigh != null && s.offHigh < 0 ? "dn" : "mut") + "\">" + pct(s.offHigh, 1) + "</span></button>";
   }
@@ -291,9 +295,10 @@
           (open ? '<div class="pad note">' + esc(screen.evidence) + " " + esc(screen.formula) + "</div>" : "");
       }
       const rows = open ? screenRows(screen) : [];
+      const vcpNote = screen.id === "vcp" ? '<div class="pad note">The number after the symbol is how many contractions are in the run. Two is the minimum, and four or more stay listed. An arrow means the close is above that name\'s pivot. The run must tighten by at least 20% each step, start at most 35% deep, finish under 10%, and cover at least 15 sessions. Volume has to dry up, and the last 10 sessions have to be inside an 8% range with the close near the pivot. Breakout volume is a separate screen.</div>' : "";
       return '<button type="button" class="scr' + (open ? " open" : "") + '" data-act="toggle" data-screen="' + esc(screen.id) + '" title="' + esc(screen.formula) + '"><span class="car">▸</span>' + esc(screen.ourName) +
         '<span class="cnt">' + screen.matches.length + "</span></button>" +
-        (open ? '<div>' + (rows.length ? rows.map(rowHtml).join("") : '<div class="pad note">No names passed. ' + screen.skipped + " not evaluated because an input was missing. " + screen.evaluated + " were evaluated.</div>") + "</div>" : "");
+        (open ? '<div>' + vcpNote + (rows.length ? rows.map((s) => rowHtml(s, screen)).join("") : '<div class="pad note">No names passed. ' + screen.skipped + " not evaluated because an input was missing. " + screen.evaluated + " were evaluated.</div>") + "</div>" : "");
     }).join("");
     return head + '<div class="scroll" id="screencroll">' + body + "</div>";
   }
@@ -400,8 +405,8 @@
     const lines = [];
     lines.push("Our buy point is the highest high of the prior 20 sessions, which excludes today" + (E.finite(s.pivot20) ? ": " + px(s.pivot20) + "." : ". It is unavailable.") );
     if (s.patterns && s.patterns.near && E.finite(s.patterns.near.dist)) lines.push("The close is " + pct(-s.patterns.near.dist, 2) + " versus that high.");
-    if (s.vcp && s.vcp.candidate) lines.push("Tight-base candidate pivot " + px(s.vcp.pivot) + ". " + s.vcp.reason);
-    else if (s.vcp) lines.push(s.vcp.reason);
+    if (s.vcp && s.vcp.candidate) lines.push("Tight base / VCP candidate, " + s.vcp.count + " contraction" + (s.vcp.count === 1 ? "" : "s") + ", pivot " + px(s.vcp.pivot) + ". " + (s.vcp.brokenOut ? "Flagged: the close is above that pivot. " : "") + s.vcp.reason);
+    else if (s.vcp) lines.push((s.vcp.count ? s.vcp.count + " contraction" + (s.vcp.count === 1 ? "" : "s") + ". " : "") + s.vcp.reason);
     if (num(sc.entry_low) != null || num(sc.stop) != null) {
       lines.push("Stock box plan, unchanged from the desk file: entry " + px(num(sc.entry_low)) + "–" + px(num(sc.entry_high)) + ", stop " + px(num(sc.stop)) + ", target " + px(num(sc.trade_target)) + ". Amber is that entry, red is that stop, green is that target. The indigo line is our 20-session high.");
     } else lines.push("This symbol has no stock-box entry and stop on the score file, so those lines are not drawn.");
