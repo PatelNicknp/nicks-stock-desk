@@ -425,7 +425,10 @@
     minCount: 2,
     lookback: 325,
     minBase: 15,
-    dryMax: 0.75,
+    dryMax: 0.90,
+    dryOr50: true,
+    volSlack: 0,
+    strictDryMax: 0.75,
     rightBars: 10,
     maxRightRange: 0.08,
     maxBelowPivot: 0.08,
@@ -556,7 +559,7 @@
     const pack = contractions(s.bars, Math.max(0, i));
     const count = pack.tight.length;
     const depths = pack.tight.map((c) => c.depth);
-    const base = { candidate: false, count: count, depths: depths };
+    const base = { candidate: false, strict: false, count: count, depths: depths };
     if (!s.template || s.template.missing) return Object.assign(base, { reason: "Trend template is missing an input.", skipped: true });
     if (!s.template.complete) return Object.assign(base, { reason: "Trend template is not 8 of 8." });
     if (!pack.qualified) {
@@ -581,13 +584,27 @@
     const va = volMean(s.bars, prev.hi, prev.low);
     const vb = volMean(s.bars, last.hi, last.low);
     if (va == null || vb == null) return Object.assign(base, { reason: "Contraction volume is missing.", skipped: true, pivot: pivot, baseSessions: baseSessions });
-    if (!(vb < va)) return Object.assign(base, { reason: count + " contractions. The later contraction did not print lower average volume.", pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    const slack = VCP_RULES.volSlack;
+    const volOk = slack > 0 ? vb <= va * (1 + slack) + 1e-9 : vb < va;
+    if (!volOk) {
+      const volReason = slack > 0
+        ? "The later contraction's average volume is more than " + Math.round(slack * 100) + "% above the prior contraction."
+        : "The later contraction did not print lower average volume.";
+      return Object.assign(base, { reason: count + " contractions. " + volReason, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    }
     const recent = volMean(s.bars, i - (VCP_RULES.rightBars - 1), i);
     const priorVol = volMean(s.bars, i - (VCP_RULES.rightBars - 1) - 50, i - VCP_RULES.rightBars);
     if (recent == null || priorVol == null || !(priorVol > 0)) return Object.assign(base, { reason: "Right-side volume is missing.", skipped: true, pivot: pivot, baseSessions: baseSessions });
     const dry = recent / priorVol;
-    if (!(dry <= VCP_RULES.dryMax + 1e-9)) {
-      return Object.assign(base, { reason: count + " contractions. Recent volume is not at or below 75% of the prior 50-session average.", dry: dry, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
+    const avg50 = volMean(s.bars, i - 49, i);
+    const dryOk = dry <= VCP_RULES.dryMax + 1e-9;
+    const below50 = !!(VCP_RULES.dryOr50 && avg50 != null && avg50 > 0 && vb < avg50);
+    if (!(dryOk || below50)) {
+      const pct = Math.round(VCP_RULES.dryMax * 100);
+      const dryReason = VCP_RULES.dryOr50
+        ? "Recent volume is above " + pct + "% of the prior 50-session average, and the last contraction is not below the 50-session average."
+        : "Recent volume is not at or below " + pct + "% of the prior 50-session average.";
+      return Object.assign(base, { reason: count + " contractions. " + dryReason, dry: dry, pivot: pivot, baseSessions: baseSessions, brokenOut: brokenOut });
     }
     const range = rightRange(s.bars, i, VCP_RULES.rightBars);
     if (range == null) return Object.assign(base, { reason: "The right-side range is not usable.", skipped: true, pivot: pivot, baseSessions: baseSessions, dry: dry });
@@ -604,8 +621,15 @@
     const flag = brokenOut
       ? " The close is above the pivot. Breakout volume stays a separate screen."
       : " The close is still under the pivot.";
+    const strict = dry <= VCP_RULES.strictDryMax + 1e-9;
+    const volBit = strict
+      ? " The last 10 sessions are at or below 75% of the prior 50."
+      : (dryOk
+        ? " The last 10 sessions are at or below 90% of the prior 50."
+        : " The last contraction's average volume is below the 50-session average.");
     return {
       candidate: true,
+      strict: strict,
       count: count,
       depths: depths,
       pivot: pivot,
@@ -613,7 +637,7 @@
       baseSessions: baseSessions,
       dry: dry,
       range: range,
-      reason: count + " contractions, each at most 80% as deep as the one before. The first is at most 35% and the last is under 10%. Volume dried up into the right side, and the last 10 sessions are within 8% and near the pivot." + flag + " A candidate, not a certified pattern.",
+      reason: count + " contractions, each at most 80% as deep as the one before. The first is at most 35% and the last is under 10%." + volBit + " The last 10 sessions are within 8% and near the pivot." + flag + (strict ? " Strict." : "") + " A candidate, not a certified pattern.",
     };
   }
 
@@ -991,8 +1015,8 @@
       data: "150, 200, and 50-day averages, 252-session high and low, rank.",
       match: (s) => !s.template || s.template.missing ? "skip" : (s.template.complete ? "match" : "no") },
     { id: "vcp", ref: "VCP / tight base", ourName: "Tight base / VCP candidate", status: "enabled",
-      evidence: "Nick 360's own reading of commonly described volatility-contraction traits. Not a proprietary formula and not a certified visual pattern. Swing settings stay 4 bars left and 3 right, and a tie is not a swing. The 80% depth step, 35% first-contraction cap, under-10% final contraction, 15-session minimum, 325-session lookback, 75% right-side volume, 8% right-side range, and the 8% below / 5% above pivot band are this desk's choices.",
-      formula: "Trend template 8 of 8. Over the last 325 sessions, or every stored session when history is shorter, at least two contractions of at least 3%, each at most 80% as deep as the one before. There is no cap at four: a longer run still counts. The first contraction is at most 35% and the last is under 10%. The base is at least 15 sessions from that first high through the as-of bar. The last contraction's average volume is below the prior contraction's, and the last 10 sessions' average volume is at most 75% of the 50 sessions before them. The last 10 sessions' high-to-low range is at most 8% of their highest high, and the close is within 8% under the pivot or at most 5% above it. The pivot is the swing high of the last contraction. A close above that pivot is flagged. Breakout volume is a separate screen.",
+      evidence: "Nick 360's own reading of commonly described volatility-contraction traits. Not a proprietary formula and not a certified visual pattern. Swing settings stay 4 bars left and 3 right, and a tie is not a swing. The 80% depth step, 35% first-contraction cap, under-10% final contraction, 15-session minimum, 325-session lookback, 90% right-side volume or a last contraction below the 50-session average, 8% right-side range, and the 8% below / 5% above pivot band are this desk's choices. Strict marks the tighter 75% volume rule.",
+      formula: "Trend template 8 of 8. Over the last 325 sessions, or every stored session when history is shorter, at least two contractions of at least 3%, each at most 80% as deep as the one before. There is no cap at four: a longer run still counts. The first contraction is at most 35% and the last is under 10%. The base is at least 15 sessions from that first high through the as-of bar. The last contraction's average volume is below the prior contraction's. The last 10 sessions' average volume is at most 90% of the 50 sessions before them, or the last contraction's average volume is below the average of the 50 sessions through the as-of bar. A name whose last 10 sessions are also at or below 75% of that prior 50 is marked strict. The last 10 sessions' high-to-low range is at most 8% of their highest high, and the close is within 8% under the pivot or at most 5% above it. The pivot is the swing high of the last contraction. A close above that pivot is flagged. Breakout volume is a separate screen.",
       data: "Template inputs, swing highs and lows, volume, and up to 325 stored sessions.",
       match: (s) => s.vcp.skipped ? "skip" : (s.vcp.candidate ? "match" : "no") },
     { id: "dry", ref: "Volume dry-up", ourName: "Volume dry-up", status: "enabled",

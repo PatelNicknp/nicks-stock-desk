@@ -248,7 +248,7 @@
     const g = gradeLetter(s);
     const ch = s.chg;
     const vcpMark = screen && screen.id === "vcp" && s.vcp && s.vcp.count
-      ? " " + s.vcp.count + (s.vcp.brokenOut ? "\u2191" : "")
+      ? " " + s.vcp.count + (s.vcp.strict ? "S" : "") + (s.vcp.brokenOut ? "\u2191" : "")
       : "";
     const tip = screen && screen.id === "vcp" && s.vcp ? ' title="' + esc(s.vcp.reason) + '"' : "";
     return '<button type="button" class="srow' + (s.ticker === state.symbol ? " sel" : "") + '" data-act="pick" data-ticker="' + esc(s.ticker) + '"' + tip + ">" +
@@ -295,7 +295,7 @@
           (open ? '<div class="pad note">' + esc(screen.evidence) + " " + esc(screen.formula) + "</div>" : "");
       }
       const rows = open ? screenRows(screen) : [];
-      const vcpNote = screen.id === "vcp" ? '<div class="pad note">The number after the symbol is how many contractions are in the run. Two is the minimum, and four or more stay listed. An arrow means the close is above that name\'s pivot. The run must tighten by at least 20% each step, start at most 35% deep, finish under 10%, and cover at least 15 sessions. Volume has to dry up, and the last 10 sessions have to be inside an 8% range with the close near the pivot. Breakout volume is a separate screen.</div>' : "";
+      const vcpNote = screen.id === "vcp" ? '<div class="pad note">The number after the symbol is how many contractions are in the run. Two is the minimum, and four or more stay listed. An S means the last 10 sessions are also at or below 75% of the prior 50. An arrow means the close is above that name\'s pivot. The run must tighten by at least 20% each step, start at most 35% deep, finish under 10%, and cover at least 15 sessions. The last contraction must print lower volume than the one before it. The last 10 sessions must average at most 90% of the prior 50, or that last contraction must sit below the 50-session average. The last 10 sessions stay inside an 8% range with the close near the pivot. Breakout volume is a separate screen.</div>' : "";
       return '<button type="button" class="scr' + (open ? " open" : "") + '" data-act="toggle" data-screen="' + esc(screen.id) + '" title="' + esc(screen.formula) + '"><span class="car">▸</span>' + esc(screen.ourName) +
         '<span class="cnt">' + screen.matches.length + "</span></button>" +
         (open ? '<div>' + vcpNote + (rows.length ? rows.map((s) => rowHtml(s, screen)).join("") : '<div class="pad note">No names passed. ' + screen.skipped + " not evaluated because an input was missing. " + screen.evaluated + " were evaluated.</div>") + "</div>" : "");
