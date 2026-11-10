@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-AWK,"American Water Works Company, I",Utilities,Utilities - Regulated Water,22.800014,2.61538,11.0,141.90909,142.0,29926424576,1793217600.0
-AXON,"Axon Enterprise, Inc.",Industrials,Aerospace & Defense,32.04509,1.71429,19.0,541.3158,540.0,24691212288,1793912400.0
-AXP,American Express Company,Financial Services,Credit Services,16.095652,2.2069,24.0,364.78708,361.0,218187563008,1792758600.0
-AZO,"AutoZone, Inc.",Consumer Cyclical,Auto Parts,17.054878,1.48148,23.0,3665.6086,3648.0,52733550592,1790080200.0
-BA,Boeing Company (The),Industrials,Aerospace & Defense,79.54782,1.42857,26.0,233.34615,235.0,136341012480,1793104200.0
-BAC,Bank of America Corporation,Financial Services,Banks - Diversified,9.812552,1.48,22.0,62.47727,62.0,350737629184,1800019800.0
-BALL,Ball Corporation,Consumer Cyclical,Packaging & Containers,15.09908,1.71429,13.0,72.61538,74.0,17580091392,1793712600.0
-BAX,Baxter International Inc.,Healthcare,Medical Instruments & Supplies,12.89165,2.86667,12.0,27.25,26.0,13642472448,1793277000.0
-BBY,"Best Buy Co., Inc.",Consumer Cyclical,Specialty Retail,14.7264805,2.8,20.0,89.05,90.0,22294054912,1795527000.0
-BDX,"Becton, Dickinson and Company",Healthcare,Medical Instruments & Supplies,15.200937,2.0,14.0,224.0,227.5,58873688064,1793885400.0
 BE,Bloom Energy Corporation,Industrials,Electrical Equipment & Parts,36.7371,2.17241,26.0,283.84616,295.0,57802649600,1792699200.0
 BEN,"Franklin Templeton, Inc.",Financial Services,Asset Management,10.091947,2.61538,13.0,36.84615,36.0,18500993024,1793971800.0
 BF-B,Brown Forman Inc,Consumer Defensive,Beverages - Wineries & Distilleries,17.743677,3.22222,17.0,28.25882,28.0,13954062336,1796304600.0
@@ -523,3 +513,13 @@ ASML,ASML Holding N.V. - New York Re,Technology,Semiconductor Equipment & Materi
 ATO,Atmos Energy Corporation,Utilities,Utilities - Regulated Gas,17.93626,2.71429,11.0,182.72726,182.0,29635522560,1793826000.0
 AVGO,Broadcom Inc.,Technology,Semiconductors,17.055166,1.23529,47.0,533.4238,535.0,1584749740032,1796850000.0
 AVY,Avery Dennison Corporation,Consumer Cyclical,Packaging & Containers,17.06419,1.54545,10.0,203.3,200.5,14274681856,1793277000.0
+AWK,"American Water Works Company, I",Utilities,Utilities - Regulated Water,22.80836,2.61538,11.0,141.90909,142.0,29937375232,1793217600.0
+AXON,"Axon Enterprise, Inc.",Industrials,Aerospace & Defense,32.033527,1.71429,19.0,541.3158,540.0,24636653568,1793912400.0
+AXP,American Express Company,Financial Services,Credit Services,16.000427,2.2069,24.0,364.78708,361.0,216896749568,1792758600.0
+AZO,"AutoZone, Inc.",Consumer Cyclical,Auto Parts,16.747316,1.48148,23.0,3665.6086,3648.0,51782574080,1790080200.0
+BA,Boeing Company (The),Industrials,Aerospace & Defense,80.16276,1.42857,26.0,233.34615,235.0,137394970624,1793104200.0
+BAC,Bank of America Corporation,Financial Services,Banks - Diversified,9.783595,1.48,22.0,62.47727,62.0,349702586368,1800019800.0
+BALL,Ball Corporation,Consumer Cyclical,Packaging & Containers,14.931412,1.71429,13.0,72.61538,74.0,17384871936,1793712600.0
+BAX,Baxter International Inc.,Healthcare,Medical Instruments & Supplies,12.916094,2.86667,12.0,27.25,26.0,13668339712,1793277000.0
+BBY,"Best Buy Co., Inc.",Consumer Cyclical,Specialty Retail,14.421699,2.8,20.0,89.05,90.0,21832652800,1795527000.0
+BDX,"Becton, Dickinson and Company",Healthcare,Medical Instruments & Supplies,14.944782,2.0,14.0,226.14285,227.5,57912160256,1793885400.0
