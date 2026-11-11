@@ -2357,6 +2357,7 @@
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,
     lastNDays: lastNDays, seriesNum: seriesNum, retColor: retColor, band: band,
     loadCsv: loadCsv, forgetCsv: (name) => { cache.delete(name); }, ensureTv: ensureTv, barsFromRows: barsFromRows, smaValues: smaValues, timeKey: timeKey,
+    formatUpdated: formatUpdated, latestChecked: latestChecked,
     themed: themed, themedChart: themedChart, isLight: () => LIGHT, maColor: maColor,
     settingVal: settingVal, splitOn: splitOn, groupOf: groupOf, navGroups: navGroups, SCANNER_GROUPS: SCANNER_GROUPS, viewerOn: viewerOn, viewerHref: viewerHref, VIEWER_LISTS: VIEWER_LISTS,
     boot: boot,
