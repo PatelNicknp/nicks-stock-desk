@@ -1048,7 +1048,7 @@ CGO|Calamos Global Total Return Fund - Closed End Fund|Q|N|N|100|N|N
 CGON|CG Oncology, Inc. - Common stock|Q|N|N|100|N|N
 CGPT|VegaShares AI Inference ETF|G|N|N|100|Y|N
 CGTL|Creative Global Technology Holdings Limited - Class A Ordinary Shares|S|N|N|100|N|N
-CGTX|Cognition Therapeutics, Inc. - Common Stock|S|N|N|100|N|N
+CGTX|Cognition Therapeutics, Inc. - Common Stock|S|N|D|100|N|N
 CHA|Chagee Holdings Limited - American Depositary Shares, each representing 1 Class A ordinary share|Q|N|N|100|N|N
 CHAD|DeFi Development Corp. - Variable Rate Series C Perpetual Preferred Stock|S|N|N|100|N|N
 CHAI|Core AI Holdings, Inc. - Common Shares|S|N|D|100|N|N
@@ -2798,7 +2798,6 @@ KOYNU|CSLM Digital Asset Acquisition Corp III - Units|G|N|N|100|N|N
 KOYNW|CSLM Digital Asset Acquisition Corp III - Warrants|G|N|N|100|N|N
 KPLT|Katapult Holdings, Inc. - Common Stock|G|N|N|100|N|N
 KPRX|Kiora Pharmaceuticals, Inc.  - Common Stock|S|N|N|100|N|N
-KPTI|Karyopharm Therapeutics Inc. - Common Stock|Q|N|N|100|N|N
 KQQQ|Kurv Technology Titans Select ETF|G|N|N|100|Y|N
 KRAQ|KRAKacquisition Corp - Class A Ordinary Shares|G|N|N|100|N|N
 KRAQU|KRAKacquisition Corp - Unit|G|N|N|100|N|N
@@ -5606,4 +5605,4 @@ ZXYZ.A|Nasdaq Symbology Test Common Stock|Q|Y|N|100|N|N
 ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
-File Creation Time: 1110202618:01|||||||
+File Creation Time: 1111202618:01|||||||

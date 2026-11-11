@@ -443,7 +443,6 @@ ASTX|Tradr 2X Long ASTS Daily ETF|Z|ASTX|Y|100|N|ASTX
 ASTY|Defiance Daily Target 2X Long ASTS ETF|Z|ASTY|Y|100|N|ASTY
 ASX|ASE Technology Holding Co., Ltd. American Depositary Shares (each representing Two Common Shares) |N|ASX|N|100|N|ASX
 AT|Defiance Robotics Actuators ETF|Z|AT|Y|100|N|AT
-ATCH|AtlasClear Holdings, Inc. Common Stock|A|ATCH|N|100|N|ATCH
 ATCL|REX Autocallable Income ETF|P|ATCL|Y|100|N|ATCL
 ATEN|A10 Networks, Inc. Common Stock|N|ATEN|N|100|N|ATEN
 ATEST|Tick Pilot Test Control Common Stock|A|ATEST|N|100|Y|ATEST
@@ -3160,7 +3159,6 @@ HLI|Houlihan Lokey, Inc. Class A Common Stock|N|HLI|N|100|N|HLI
 HLIO|Helios Technologies, Inc. Common Stock|N|HLIO|N|100|N|HLIO
 HLLY|Holley Inc. Common Stock|N|HLLY|N|100|N|HLLY
 HLN|Haleon plc American Depositary Shares (Each representing two Ordinary Shares)|N|HLN|N|100|N|HLN
-HLSQ|Tessera Defense and Homeland Security Inc. Common Stock|A|HLSQ|N|100|N|HLSQ
 HMAY|Corgi U.S. Equities 100% Structured Buffer ETF - May Series|Z|HMAY|Y|100|N|HMAY
 HMC|Honda Motor Company, Ltd. Common Stock|N|HMC|N|100|N|HMC
 HMN|Horace Mann Educators Corporation Common Stock|N|HMN|N|100|N|HMN
@@ -3318,6 +3316,7 @@ IBIK|iShares iBonds Oct 2034 Term TIPS ETF|P|IBIK|Y|100|N|IBIK
 IBIL|iShares iBonds Oct 2035 Term TIPS ETF|P|IBIL|Y|100|N|IBIL
 IBIM|iShares iBonds Oct 2036 Term TIPS ETF|P|IBIM|Y|100|N|IBIM
 IBLC|iShares Blockchain and Tech ETF|P|IBLC|Y|100|N|IBLC
+IBLY|FT Vest Equity Target Income Plus 0-3 Month Treasury ETF|Z|IBLY|Y|100|N|IBLY
 IBM|International Business Machines Corporation Common Stock|N|IBM|N|100|N|IBM
 IBMO|iShares iBonds Dec 2026 Term Muni Bond ETF|Z|IBMO|Y|100|N|IBMO
 IBMP|iShares iBonds Dec 2027 Term Muni Bond ETF|Z|IBMP|Y|100|N|IBMP
@@ -3522,6 +3521,10 @@ IPOS|Renaissance Capital Greenwich Fund|P|IPOS|Y|100|N|IPOS
 IQDF|Northern Trust International Quality Dividend ETF|P|IQDF|Y|100|N|IQDF
 IQDG|WisdomTree International Quality Dividend Growth Fund|Z|IQDG|Y|100|N|IQDG
 IQDY|Northern Trust International Quality Dividend Dynamic ETF|P|IQDY|Y|100|N|IQDY
+IQEE|Invesco Emerging Markets Enhanced ETF|P|IQEE|Y|100|N|IQEE
+IQEI|Invesco International Developed Enhanced ETF|P|IQEI|Y|100|N|IQEI
+IQEL|Invesco U.S. Large Cap Enhanced ETF|P|IQEL|Y|100|N|IQEL
+IQES|Invesco U.S. Small Cap Enhanced ETF|P|IQES|Y|100|N|IQES
 IQHI|NYLIM MacKay High Income ETF|P|IQHI|Y|100|N|IQHI
 IQI|Invesco Quality Municipal Income Trust Common Stock|N|IQI|N|100|N|IQI
 IQLT|iShares MSCI Intl Quality Factor ETF|P|IQLT|Y|100|N|IQLT
@@ -4267,7 +4270,6 @@ MEIB|Direxion META Defined Income Boost ETF|Z|MEIB|Y|100|N|MEIB
 MEM|Matthews Emerging Markets Equity Active ETF|P|MEM|Y|100|N|MEM
 MEME|Roundhill Meme Stock ETF|P|MEME|Y|100|N|MEME
 MEMX|Matthews Emerging Markets ex China Active ETF|P|MEMX|Y|100|N|MEMX
-MEMY|Tuttle Capital Meme Stock Income Blast ETF|Z|MEMY|Y|100|N|MEMY
 MER$K|Bank of America Corporation Income Capital Obligation Notes initially due December 15, 2066|N|MERpK|N|100|N|MER-K
 MET|MetLife, Inc. Common Stock|N|MET|N|100|N|MET
 MET$A|MetLife, Inc. Preferred Series A Floating Rate|N|METpA|N|100|N|MET-A
@@ -7673,4 +7675,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1110202618:01||||||
+File Creation Time: 1111202618:01||||||
