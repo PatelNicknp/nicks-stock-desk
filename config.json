@@ -388,9 +388,11 @@
     "liquid": true
   },
   "liquid_names": {
-    "_note": "Other common stocks (features.liquid_names and indexes.liquid). On the full run the desk reads the Nasdaq stock screener, keeps names with a market cap of at least min_market_cap dollars that the Nasdaq Trader symbol files call a common stock, and adds the ones that are not already on an index until the scored list reaches max_stocks. No Yahoo request. Off leaves the S&P lists, the Nasdaq-100, and the growth names as they are.",
-    "min_market_cap": 10000000000,
-    "max_stocks": 2000
+    "_note": "Other common stocks (features.liquid_names and indexes.liquid). On the full run the desk reads the Nasdaq stock screener (one download that includes last sale and volume), keeps US-listed common stocks with market cap above min_market_cap dollars, last sale above min_price, and screener volume above min_volume that the Nasdaq Trader symbol files call a common stock, and adds the ones that are not already on an index until the scored list reaches max_stocks. ETFs, funds, warrants, and preferreds are skipped. The screener volume is the session volume the feed reports, not a 30-day average, because that field is not in the free screener and this step does not add Yahoo calls. No Yahoo request. Off leaves the S&P lists, the Nasdaq-100, and the growth names as they are.",
+    "min_market_cap": 300000000,
+    "min_price": 5,
+    "min_volume": 100000,
+    "max_stocks": 2500
   },
   "slow_sources": {
     "_note": "Yahoo profiles and Nasdaq 13F/insider on a full run. Each name is its own request, so the whole daily list no longer fits in the job. One run refreshes at most batch_per_run names: any still missing, then the ones last refreshed longest ago. A name already refreshed inside refresh_every_days waits. Hourly runs still reuse the cache and make no extra calls.",
