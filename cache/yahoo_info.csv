@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-COIN,"Coinbase Global, Inc.",Financial Services,Financial Data & Stock Exchanges,56.11063,2.02632,34.0,196.56177,199.0,36295094272,1793304000.0
-COO,"The Cooper Companies, Inc.",Healthcare,Medical Instruments & Supplies,13.620642,2.47059,15.0,65.8,65.0,12153776128,1796331600.0
-COP,ConocoPhillips,Energy,Oil & Gas E&P,11.93991,1.86667,27.0,152.0,150.0,159177785344,1793885400.0
-COR,"Cencora, Inc.",Healthcare,Medical Distribution,15.9662695,1.78571,12.0,372.91666,376.0,66220843008,1793799000.0
-COST,Costco Wholesale Corporation,Consumer Defensive,Discount Stores,42.273766,1.92683,37.0,1071.3243,1082.0,469336031232,1796936400.0
-CPAY,"Corpay, Inc.",Technology,Software - Infrastructure,14.380552,1.6875,15.0,467.66666,470.0,29272227840,1793826000.0
-CPRT,"Copart, Inc.",Industrials,Specialty Business Services,17.980663,2.33333,10.0,39.0,37.0,30147422208,1789070400.0
-CPT,Camden Property Trust,Real Estate,REIT - Residential,218.04349,2.58333,22.0,110.42045,110.0,10036988928,1793912400.0
-CRH,CRH PLC,Basic Materials,Building Materials,16.413637,1.34783,24.0,121.175,116.5,65239175168,1793277000.0
-CRL,Charles River Laboratories Inte,Healthcare,Diagnostics & Research,27.425282,1.64706,15.0,349.0,375.0,17017888768,1793799000.0
 CRM,"Salesforce, Inc.",Technology,Software - Application,13.515884,1.67857,53.0,287.0836,285.0,178146590720,1787774400.0
 CRWD,"CrowdStrike Holdings, Inc.",Technology,Software - Infrastructure,139.40485,1.66038,50.0,249.6834,250.0,229858017280,1796158800.0
 CRWV,"CoreWeave, Inc.",Technology,Software - Infrastructure,-24.110037,1.7619,38.0,131.52632,126.5,26992199680,1794344400.0
@@ -523,3 +513,13 @@ CNC,Centene Corporation,Healthcare,Healthcare Plans,12.658068,2.38095,18.0,75.38
 CNP,"CenterPoint Energy, Inc (Holdin",Utilities,Utilities - Regulated Electric,19.704153,2.09524,19.0,44.23684,44.0,27337156608,1793104200.0
 COF,Capital One Financial Corporati,Financial Services,Credit Services,8.206793,1.56522,21.0,255.19048,252.0,117804253184,1792526400.0
 COHR,Coherent Corp.,Technology,Scientific & Technical Instruments,13.595679,1.5,25.0,371.9185,380.0,42279149568,1793826000.0
+COIN,"Coinbase Global, Inc.",Financial Services,Financial Data & Stock Exchanges,54.712673,2.02632,34.0,196.56177,199.0,34983190528,1793304000.0
+COO,"The Cooper Companies, Inc.",Healthcare,Medical Instruments & Supplies,13.54712,2.47059,15.0,65.8,65.0,12088172544,1796331600.0
+COP,ConocoPhillips,Energy,Oil & Gas E&P,12.015479,1.93333,27.0,152.33333,150.0,160312819712,1793885400.0
+COR,"Cencora, Inc.",Healthcare,Medical Distribution,16.072273,1.78571,12.0,381.25,387.5,66543341568,1793799000.0
+COST,Costco Wholesale Corporation,Consumer Defensive,Discount Stores,42.58882,1.97561,37.0,1073.3513,1095.0,472437915648,1796936400.0
+CPAY,"Corpay, Inc.",Technology,Software - Infrastructure,14.4500675,1.6875,15.0,492.0,481.0,29404012544,1793826000.0
+CPRT,"Copart, Inc.",Industrials,Specialty Business Services,17.845304,2.33333,10.0,39.0,37.0,29920473088,1789070400.0
+CPT,Camden Property Trust,Real Estate,REIT - Residential,217.15218,2.58333,22.0,110.23864,108.5,9995960320,1793912400.0
+CRH,CRH PLC,Basic Materials,Building Materials,16.211124,1.34783,24.0,121.175,116.5,64434249728,1793277000.0
+CRL,Charles River Laboratories Inte,Healthcare,Diagnostics & Research,26.703733,1.64706,15.0,349.0,375.0,16569860096,1793799000.0
