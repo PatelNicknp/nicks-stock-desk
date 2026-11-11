@@ -89,6 +89,8 @@ jobs:
           python tests/test_twice_daily_universe.py
           python tests/test_slow_refresh.py
           python tests/test_fast_backfill.py
+          python tests/test_profiles.py
+          python tests/test_year_rollover.py
           python tests/test_market_news_mood.py
           python tests/test_market_news_causes.py
           python tests/test_market_news_news_calendar.py
