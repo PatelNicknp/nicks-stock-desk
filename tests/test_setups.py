@@ -790,6 +790,144 @@ def test_high_volume_spike_streak_and_quiet():
     assert len(off["scanner_volume"]) == 0
 
 
+
+
+def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
+    n = 260
+    idx = _dates(n)
+    # Winner stays near its high and beats SPY. Loser fades 20% off the high.
+    win = 40 * (1.004 ** np.arange(n))
+    lose = np.concatenate([40 * (1.002 ** np.arange(n - 40)), np.linspace(40 * (1.002 ** (n - 41)), 40 * (1.002 ** (n - 41)) * 0.80, 40)])
+    thin = 30 + np.arange(n) * 0.01
+    spy = 100 * (1.0004 ** np.arange(n))
+    frames = {
+        "WIN": pd.DataFrame({"close": win, "high": win * 1.01, "low": win * 0.99, "volume": np.full(n, 800_000.0)}, index=idx),
+        "LOSE": pd.DataFrame({"close": lose, "high": lose * 1.01, "low": lose * 0.99, "volume": np.full(n, 800_000.0)}, index=idx),
+        "THIN": pd.DataFrame({"close": thin, "high": thin * 1.01, "low": thin * 0.99, "volume": np.full(n, 50_000.0)}, index=idx),
+        "SPY": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 1e8)}, index=idx),
+    }
+    close, high, low, vol = _panel(list(frames), frames)
+    # Year labels roll forward: CY2026 vs CY2025 still compute, so a year change does not break C or A.
+    quarters = pd.DataFrame([
+        {"ticker": "WIN", "frame": "CY2025Q4", "eps": 1.0},
+        {"ticker": "WIN", "frame": "CY2026Q4", "eps": 1.4},
+        {"ticker": "LOSE", "frame": "CY2025Q4", "eps": 2.0},
+        {"ticker": "LOSE", "frame": "CY2026Q4", "eps": 2.1},
+    ])
+    annual = pd.DataFrame([
+        {"ticker": "WIN", "frame": "CY2025", "eps": 3.0},
+        {"ticker": "WIN", "frame": "CY2026", "eps": 3.9},
+        {"ticker": "LOSE", "frame": "CY2025", "eps": 4.0},
+        {"ticker": "LOSE", "frame": "CY2026", "eps": 4.2},
+    ])
+    holders = pd.DataFrame([
+        {"ticker": "WIN", "inst_up": 12, "inst_down": 3, "ownership_pct": 55, "nasdaq_so_m": 180},
+        {"ticker": "LOSE", "inst_up": 2, "inst_down": 9, "ownership_pct": 40, "nasdaq_so_m": 50},
+    ])
+    uni = _uni(["WIN", "LOSE", "THIN", "MISS"])
+    out = setups.scorecard_canslim(close, high, low, vol, uni, quarters, annual, holders).set_index("ticker")
+    assert list(out.index) == ["WIN", "LOSE", "THIN", "MISS"]
+    win = out.loc["WIN"]
+    lose = out.loc["LOSE"]
+    thin = out.loc["THIN"]
+    miss = out.loc["MISS"]
+    assert win["c_result"] == "pass" and float(win["c_value"].replace("%", "").replace("+", "")) == 40.0
+    assert win["a_result"] == "pass"
+    assert win["n_result"] == "pass"
+    assert win["s_result"] == "pass" and "180.0M shares" in win["s_value"]
+    assert "x vol" in win["s_value"]
+    assert "20-day" not in win["s_value"]
+    assert "20-day" in win["s_detail"]
+    for key, text in setups.SCORECARD_RULES.items():
+        assert text.startswith("Passes when"), key
+        assert win[key + "_rule"] == text
+    assert setups.SCORECARD_RULES["m"] == (
+        "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day."
+    )
+    assert win["i_result"] == "pass"
+    assert win["m_result"] == "pass"
+    assert win["l_result"] in ("pass", "fail")
+    assert lose["c_result"] == "fail"  # 5% growth
+    assert lose["a_result"] == "fail"
+    assert lose["n_result"] == "fail"  # about 20% below the high
+    assert lose["i_result"] == "fail"
+    assert thin["s_result"] == "fail"
+    assert thin["c_result"] == "no_data"
+    assert thin["a_result"] == "no_data"
+    assert thin["i_result"] == "no_data"
+    assert "not a fail" in thin["i_detail"].lower() or "not on file" in thin["i_detail"].lower()
+    assert miss["c_result"] == "no_data" and miss["n_result"] == "no_data" and miss["l_result"] == "no_data"
+    # Blank letters do not count as a fail and do not inflate the pass count.
+    assert int(thin["pass_count"]) == sum(thin[k] == "pass" for k in ("c_result", "a_result", "n_result", "s_result", "l_result", "i_result", "m_result"))
+    assert "no_data" not in [thin["c_result"], thin["n_result"]] or int(thin["pass_count"]) < 7
+    # The CANSLIM scanner page is unchanged: it still lists only qualify names and uses 55, not 80.
+    scanned, _market = setups.scan_canslim(close, high, low, vol, uni, quarters, annual, holders)
+    assert setups.SCORECARD_RS_MIN == 80.0
+    assert setups.NSE_RS_STRICT == 55.0
+    assert setups.NSE_NEAR_HIGH == -15.0
+    off = setups.build_setups(close, high, low, vol, uni, quarters, annual, holders, {"scorecard_canslim": False, "scanner_vcp": False, "scanner_canslim": False, "scanner_box": False, "scanner_flag": False, "scanner_leaders": False, "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False, "scanner_qullamaggie": False, "scanner_marios": False})
+    assert len(off["scorecard_canslim"]) == 0
+
+
+
+def test_scorecard_canslim_switch_hides_the_section():
+    import json
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    cfg = json.loads((root / "config.json").read_text())
+    assert cfg.get("features", {}).get("scorecard_canslim") is True
+    settings = (root / "data" / "settings.csv").read_text()
+    assert "feature.scorecard_canslim" in settings
+    pages = (root / "site" / "js" / "pages.js").read_text()
+    assert 'if (!D.featureOn("feature.scorecard_canslim")) return "";' in pages
+    n = 260
+    idx = _dates(n)
+    spy = 100 * (1.0004 ** np.arange(n))
+    frames = {
+        "WIN": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 800_000.0)}, index=idx),
+        "SPY": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 1e8)}, index=idx),
+    }
+    close, high, low, vol = _panel(list(frames), frames)
+    uni = _uni(["WIN"])
+    empty = pd.DataFrame()
+    off = setups.build_setups(close, high, low, vol, uni, empty, empty, empty, {
+        "scorecard_canslim": False, "scanner_vcp": False, "scanner_canslim": False,
+        "scanner_box": False, "scanner_flag": False, "scanner_leaders": False,
+        "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False,
+        "scanner_qullamaggie": False, "scanner_marios": False,
+    })
+    assert len(off["scorecard_canslim"]) == 0
+    on = setups.build_setups(close, high, low, vol, uni, empty, empty, empty, {
+        "scorecard_canslim": True, "scanner_vcp": False, "scanner_canslim": False,
+        "scanner_box": False, "scanner_flag": False, "scanner_leaders": False,
+        "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False,
+        "scanner_qullamaggie": False, "scanner_marios": False,
+    })
+    assert len(on["scorecard_canslim"]) == 1
+
+
+def test_scorecard_canslim_n_uses_the_15_percent_line():
+    n = 260
+    idx = _dates(n)
+    close = np.full(n, 100.0)
+    close[-1] = 85.0  # exactly 15% below the 52-week closing high
+    spy = 100 * (1.0004 ** np.arange(n))
+    frames = {
+        "EDGE": pd.DataFrame({"close": close, "high": close * 1.01, "low": close * 0.99, "volume": np.full(n, 300_000.0)}, index=idx),
+        "SPY": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 1e8)}, index=idx),
+    }
+    c, h, l, v = _panel(list(frames), frames)
+    out = setups.scorecard_canslim(c, h, l, v, _uni(["EDGE"]), pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
+    row = out.iloc[0]
+    assert row["n_result"] == "pass"
+    close2 = np.full(n, 100.0)
+    close2[-1] = 84.0  # 16% below
+    frames["EDGE"] = pd.DataFrame({"close": close2, "high": close2 * 1.01, "low": close2 * 0.99, "volume": np.full(n, 300_000.0)}, index=idx)
+    c, h, l, v = _panel(list(frames), frames)
+    row = setups.scorecard_canslim(c, h, l, v, _uni(["EDGE"]), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()).iloc[0]
+    assert row["n_result"] == "fail"
+
+
 if __name__ == "__main__":
     test_pivot_is_strict_and_delayed()
     test_vcp_ready_matches_pine_levels()
@@ -812,4 +950,7 @@ if __name__ == "__main__":
     test_buy_setups_settings_default_on()
     test_breakdown_break_watch_and_trend()
     test_high_volume_spike_streak_and_quiet()
+    test_scorecard_canslim_letters_and_blank_is_not_a_fail()
+    test_scorecard_canslim_switch_hides_the_section()
+    test_scorecard_canslim_n_uses_the_15_percent_line()
     print("setups ok")

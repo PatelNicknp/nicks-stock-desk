@@ -9,6 +9,7 @@ feature.news_earnings_summaries,True
 feature.freshness_flags,True
 feature.universe,True
 feature.scorecard,True
+feature.scorecard_canslim,True
 feature.top_stocks,True
 feature.top_sectors,True
 feature.scanner_growth,True

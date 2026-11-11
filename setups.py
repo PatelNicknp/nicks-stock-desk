@@ -38,6 +38,34 @@ NSE_RS_SHORT = 63
 NSE_NEAR_HIGH = -15.0  # percent from the 52-week closing high
 NSE_RS_STRICT = 55.0
 NSE_RS_SOFT = 40.0
+# Scorecard CAN SLIM (every stock). Separate from the scanner's qualify rules.
+# C/A use 25% growth. L uses 80 because Nick chose the classic line; the scanner
+# still qualifies at NSE_RS_STRICT (55). N reuses NSE_NEAR_HIGH (-15). S reuses
+# NSE_ADV_MIN (200,000). M uses uptrend() on SPY, the same market rule as Buy setups.
+SCORECARD_EPS_MIN = 25.0
+SCORECARD_RS_MIN = 80.0
+SCORECARD_RULES = {
+    "c": "Passes when quarterly EPS is at least 25% above the year-ago quarter.",
+    "a": "Passes when annual EPS is at least 25% above last year.",
+    "n": "Passes when the close is within 15% of the 52-week closing high.",
+    "s": "Passes when 20-day average volume is 200,000 shares or more.",
+    "l": "Passes when the RS percentile is 80 or higher.",
+    "i": "Passes when 13F holders bought more shares than they sold.",
+    "m": "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
+}
+SCORECARD_NOTE = (
+    "Scorecard CAN SLIM for every stock. C and A need 25% growth from cached SEC EPS. "
+    "N is within 15% of the 52-week closing high (the existing CANSLIM near-high line; "
+    "the scanner's READY line is 5%). S passes when the 20-day average volume is at least "
+    "200,000 shares (the existing liquidity line) and shows shares outstanding from the "
+    "Nasdaq 13F file when that figure is on file, plus today's volume versus the 50-day average. "
+    "L is an RS percentile of 80 or higher (Nick; the scanner's strict qualify still uses 55), "
+    "ranked among names with enough price history versus SPY. "
+    "I is more institutional shares bought than sold in the cached 13F summary; missing data "
+    "is not a fail. M is SPY in an uptrend: close above the 50-day and the 200-day, and the "
+    "50-day above the 200-day (the same market rule as Buy setups). "
+    "A blank letter is no data yet, not a fail. Research only. No new downloads."
+)
 
 # Desk pattern rules. These are not in the Pine file.
 BOX_MIN_DAYS = 15
@@ -1038,6 +1066,221 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
     out["_k"] = out["status"].map(rank)
     out = out.sort_values(["_k", "strength"], ascending=[True, False]).drop(columns="_k")
     return out, market
+
+
+
+def _sc_blank(rule, detail=""):
+    return "no_data", "", rule, detail
+
+
+def _sc_letter(ok, value, rule, detail=""):
+    if ok is None:
+        return _sc_blank(rule, detail)
+    return ("pass" if ok else "fail"), value, rule, detail
+
+
+def _fmt_pct_signed(pct):
+    x = _num(pct)
+    if x is None:
+        return ""
+    sign = "+" if x > 0 else ""
+    return "%s%.1f%%" % (sign, x)
+
+
+def _fmt_shares(n):
+    x = _num(n)
+    if x is None:
+        return ""
+    if abs(x) >= 1_000_000_000:
+        return "%.1fB shares" % (x / 1_000_000_000.0)
+    if abs(x) >= 1_000_000:
+        return "%.1fM shares" % (x / 1_000_000.0)
+    if abs(x) >= 1_000:
+        return "%.0fK shares" % (x / 1_000.0)
+    return "%s shares" % _round(x, 0)
+
+
+def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders):
+    """CAN SLIM letters for every stock on the scorecard. No network calls.
+
+    Missing inputs stay no_data (not a fail). Does not change scan_canslim.
+    """
+    rows = []
+    if close is None or len(close) == 0 or universe is None or len(universe) == 0:
+        return pd.DataFrame()
+    names = [str(t) for t in list(universe["ticker"]) if str(t)]
+    spy = close["SPY"].dropna() if "SPY" in close.columns else None
+    spy_ok = uptrend(spy) if spy is not None else None
+    spy_state = _ma_state(spy) if spy is not None else None
+    if spy_ok is None:
+        m_res, m_val, m_rule, m_det = _sc_blank(
+            SCORECARD_RULES["m"],
+            "SPY was not in the price cache or its history is shorter than 200 sessions.",
+        )
+    else:
+        if spy_state is None:
+            m_det = "SPY averages are not verified."
+        else:
+            last, sma50, sma200 = spy_state
+            m_det = "SPY close %s, 50-day %s, 200-day %s." % (_round(last), _round(sma50), _round(sma200))
+        m_res, m_val, m_rule, m_det = _sc_letter(
+            spy_ok,
+            "confirmed uptrend" if spy_ok else "not an uptrend",
+            SCORECARD_RULES["m"],
+            m_det,
+        )
+    bench = spy
+    bench_r63 = _ret(bench, NSE_RS_SHORT) if bench is not None else None
+    bench_r126 = _ret(bench, NSE_RS_LONG) if bench is not None else None
+
+    holder_map = {}
+    if holders is not None and len(holders) and "ticker" in holders.columns:
+        for _, hr in holders.iterrows():
+            holder_map[str(hr.get("ticker") or "")] = hr
+
+    rs_vals = {}
+    recs = []
+    for ticker in names:
+        rec = {"ticker": ticker}
+        if ticker not in close.columns:
+            recs.append(rec)
+            continue
+        c = close[ticker].dropna()
+        if len(c) == 0:
+            recs.append(rec)
+            continue
+        last = float(c.iloc[-1])
+        rec["last"] = last
+        hi52 = float(c.iloc[-252:].max()) if len(c) >= 252 else (float(c.max()) if len(c) else None)
+        rec["hi52"] = hi52
+        rec["pct_from_high"] = (last / hi52 - 1.0) * 100.0 if hi52 else None
+        vol_s = None
+        if vol is not None and ticker in vol.columns:
+            vol_s = vol[ticker].reindex(c.index)
+            rec["adv"] = float(vol_s.iloc[-20:].mean()) if vol_s.notna().any() and len(vol_s) >= 1 else None
+            if rec["adv"] is not None and not np.isfinite(rec["adv"]):
+                rec["adv"] = None
+            if vol_s is not None and len(vol_s) >= VOL_LEN and np.isfinite(vol_s.iloc[-1]):
+                avg50 = float(vol_s.rolling(VOL_LEN, min_periods=VOL_LEN).mean().iloc[-1])
+                last_v = float(vol_s.iloc[-1])
+                if np.isfinite(avg50) and avg50 > 0 and np.isfinite(last_v):
+                    rec["vol_ratio"] = last_v / avg50
+        if bench is not None and bench_r63 is not None and bench_r126 is not None and len(c) >= 150:
+            aligned = bench.reindex(c.index).ffill()
+            common = c.index.intersection(aligned.dropna().index)
+            cc = c.loc[common]
+            if len(cc) >= 150:
+                r63 = _ret(cc, NSE_RS_SHORT)
+                r126 = _ret(cc, NSE_RS_LONG)
+                if r63 is not None and r126 is not None:
+                    rec["rs_rel"] = (0.6 * (r126 - bench_r126) + 0.4 * (r63 - bench_r63)) * 100.0
+                    rs_vals[ticker] = rec["rs_rel"]
+        recs.append(rec)
+
+    pct_map = {}
+    if rs_vals:
+        ranked = pd.Series(rs_vals)
+        pct_s = ranked.rank(pct=True, method="average") * 100.0
+        pct_map = pct_s.to_dict()
+
+    c_rule = SCORECARD_RULES["c"]
+    a_rule = SCORECARD_RULES["a"]
+    n_rule = SCORECARD_RULES["n"]
+    s_rule = SCORECARD_RULES["s"]
+    l_rule = SCORECARD_RULES["l"]
+    i_rule = SCORECARD_RULES["i"]
+    for rec in recs:
+        ticker = rec["ticker"]
+        c_pct, c_now, c_old = _yoy_eps(quarters, ticker, True)
+        if c_pct is None:
+            c_res, c_val, _c_rule, c_det = _sc_blank(c_rule, "Quarterly EPS versus the year-ago quarter is not on file yet.")
+        else:
+            c_res, c_val, _c_rule, c_det = _sc_letter(
+                c_pct >= SCORECARD_EPS_MIN, _fmt_pct_signed(c_pct), c_rule,
+                "%.2f vs %.2f" % (c_now, c_old),
+            )
+        a_pct, a_now, a_old = _yoy_eps(annual, ticker, False)
+        if a_pct is None:
+            a_res, a_val, _a_rule, a_det = _sc_blank(a_rule, "Annual EPS versus last year is not on file yet.")
+        else:
+            a_res, a_val, _a_rule, a_det = _sc_letter(
+                a_pct >= SCORECARD_EPS_MIN, _fmt_pct_signed(a_pct), a_rule,
+                "%.2f vs %.2f" % (a_now, a_old),
+            )
+        dist = rec.get("pct_from_high")
+        if dist is None:
+            n_res, n_val, _n_rule, n_det = _sc_blank(n_rule, "Not enough saved closes to measure the 52-week high.")
+        else:
+            if dist >= 0:
+                n_shown = "at the 52-week high" if abs(dist) < 0.05 else "%.1f%% above the 52-week high" % dist
+            else:
+                n_shown = "%.1f%% below the 52-week high" % abs(dist)
+            n_res, n_val, _n_rule, n_det = _sc_letter(
+                dist + 1e-9 >= NSE_NEAR_HIGH, n_shown, n_rule,
+                "Close %s, 52-week closing high %s." % (_round(rec.get("last")), _round(rec.get("hi52"))),
+            )
+        adv = rec.get("adv")
+        hr = holder_map.get(ticker)
+        so = None
+        if hr is not None:
+            so_m = _num(hr.get("nasdaq_so_m"))
+            if so_m is not None:
+                so = so_m * 1_000_000.0
+        so_txt = _fmt_shares(so)
+        vol_ratio = rec.get("vol_ratio")
+        s_parts = []
+        if so_txt:
+            s_parts.append(so_txt)
+        if vol_ratio is not None:
+            s_parts.append("%.1fx vol" % vol_ratio)
+        s_val = ", ".join(s_parts)
+        if adv is None:
+            s_res, s_val, _s_rule, s_det = _sc_blank(
+                s_rule,
+                (so_txt + ". " if so_txt else "") + "20-day average volume is not on file yet.",
+            )
+        else:
+            s_det = "%s 20-day average volume." % _fmt_shares(adv).replace(" shares", "")
+            s_res, s_val, _s_rule, s_det = _sc_letter(adv >= NSE_ADV_MIN, s_val, s_rule, s_det)
+        rs_p = pct_map.get(ticker)
+        if rs_p is None:
+            l_res, l_val, _l_rule, l_det = _sc_blank(
+                l_rule, "Not enough saved history versus SPY to rank relative strength.",
+            )
+        else:
+            l_res, l_val, _l_rule, l_det = _sc_letter(
+                rs_p >= SCORECARD_RS_MIN, "RS %.0f" % rs_p, l_rule,
+                "RS percentile %.1f among names with enough history versus SPY." % rs_p,
+            )
+        i_trend, i_text = _holder_trend(holders, ticker)
+        if i_trend == NOT_VERIFIED or i_trend == "":
+            i_res, i_val, _i_rule, i_det = _sc_blank(
+                i_rule,
+                i_text or "13F holdings are not on file yet. This is not a fail.",
+            )
+        else:
+            i_res, i_val, _i_rule, i_det = _sc_letter(
+                i_trend == "up",
+                i_trend,
+                i_rule,
+                i_text,
+            )
+        letters = (c_res, a_res, n_res, s_res, l_res, i_res, m_res)
+        rows.append({
+            "ticker": ticker,
+            "c_result": c_res, "c_value": c_val, "c_rule": c_rule, "c_detail": c_det,
+            "a_result": a_res, "a_value": a_val, "a_rule": a_rule, "a_detail": a_det,
+            "n_result": n_res, "n_value": n_val, "n_rule": n_rule, "n_detail": n_det,
+            "s_result": s_res, "s_value": s_val, "s_rule": s_rule, "s_detail": s_det,
+            "l_result": l_res, "l_value": l_val, "l_rule": l_rule, "l_detail": l_det,
+            "i_result": i_res, "i_value": i_val if i_res != "no_data" else "", "i_rule": i_rule,
+            "i_detail": i_det if i_det else "13F holdings are not on file yet. This is not a fail.",
+            "m_result": m_res, "m_value": m_val, "m_rule": m_rule, "m_detail": m_det,
+            "pass_count": sum(1 for x in letters if x == "pass"),
+            "data_status": "OK",
+            "note": SCORECARD_NOTE,
+        })
+    return pd.DataFrame(rows)
 
 
 def _big_volume(volume):
@@ -2918,6 +3161,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_hv = features.get("scanner_volume", True)
     want_q = features.get("scanner_qullamaggie", True)
     want_m = features.get("scanner_marios", True)
+    want_sc = features.get("scorecard_canslim", True)
     vcp = scan_vcp(close, high, low, vol, universe, cfg) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
@@ -2927,6 +3171,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     qull = scan_qullamaggie(close, high, low, vol, universe, cfg, opn=opn, scores=scores) if want_q else pd.DataFrame()
     mar = scan_marios(close, high, low, vol, universe, cfg, opn=opn, scores=scores) if want_m else pd.DataFrame()
     leaders = combine_leaders(vcp, canslim) if want_l else pd.DataFrame()
+    sc_letters = scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders) if want_sc else pd.DataFrame()
     if want_w:
         week, week_hist = scan_52w(close, high, low, vol, universe, scores)
     else:
@@ -2947,4 +3192,5 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
         "scanner_leaders": leaders,
         "scanner_52w": week,
         "highs_lows_history": week_hist,
+        "scorecard_canslim": sc_letters,
     }

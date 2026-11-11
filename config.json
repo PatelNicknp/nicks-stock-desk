@@ -11,6 +11,7 @@
     "freshness_flags": true,
     "universe": true,
     "scorecard": true,
+    "scorecard_canslim": true,
     "top_stocks": true,
     "top_sectors": true,
     "scanner_growth": true,

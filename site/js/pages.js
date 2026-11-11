@@ -403,6 +403,247 @@
     const shown = n == null ? D.na() : D.esc(D.signedPts(n));
     return card(label, '<span style="color:#E6EBF5">' + shown + "</span>", "", n == null ? "" : D.ptsColor(n));
   }
+
+  const SC_CS_LETTERS = [
+    { key: "c", letter: "C", name: "Current quarterly EPS", short: "Qtr EPS" },
+    { key: "a", letter: "A", name: "Annual EPS growth", short: "Annual EPS" },
+    { key: "n", letter: "N", name: "New highs", short: "New highs" },
+    { key: "s", letter: "S", name: "Supply and demand", short: "Supply" },
+    { key: "l", letter: "L", name: "Leader / RS", short: "Leader" },
+    { key: "i", letter: "I", name: "Institutional buying", short: "Institutions" },
+    { key: "m", letter: "M", name: "Market direction", short: "Market" },
+  ];
+  const SC_CS_RULES = {
+    c: "Passes when quarterly EPS is at least 25% above the year-ago quarter.",
+    a: "Passes when annual EPS is at least 25% above last year.",
+    n: "Passes when the close is within 15% of the 52-week closing high.",
+    s: "Passes when 20-day average volume is 200,000 shares or more.",
+    l: "Passes when the RS percentile is 80 or higher.",
+    i: "Passes when 13F holders bought more shares than they sold.",
+    m: "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
+  };
+  function scCsStatusLabel(result) {
+    if (result === "pass") return "PASS";
+    if (result === "fail") return "FAIL";
+    return "No data";
+  }
+  function scCsShownValue(x) {
+    let raw = x.result === "no_data" ? (x.value || "No data yet") : (x.value || scCsStatusLabel(x.result));
+    if (x.key === "s" && raw && /20-day volume/.test(raw)) {
+      const shares = (raw.match(/([^,]+ shares)/) || [])[1];
+      const xr = (raw.match(/([0-9.]+)x the 50-day/) || [])[1];
+      const parts = [];
+      if (shares) parts.push(shares);
+      if (xr) parts.push(xr + "x vol");
+      if (parts.length) raw = parts.join(", ");
+    }
+    return raw;
+  }
+  function scCsExtra(x) {
+    const bits = [];
+    const raw = String(x.detail || x.value || "");
+    if (x.key === "s") {
+      const adv = raw.match(/([^,]*?)\s*20-day (?:average )?volume/);
+      if (adv && adv[1].trim()) bits.push(adv[1].trim() + " 20-day average volume.");
+      else if (x.detail && x.detail !== x.value) bits.push(x.detail);
+    } else if (x.result === "no_data" && x.detail) {
+      bits.push(x.detail);
+    }
+    return bits.join(" ");
+  }
+  function scCsClass(result) {
+    if (result === "pass") return "pass";
+    if (result === "fail") return "fail";
+    return "nodata";
+  }
+  function renderScorecardCanslim(ticker, rows) {
+    if (!D.featureOn("feature.scorecard_canslim")) return "";
+    const rec = (rows || []).find((r) => r.ticker === ticker && r.data_status !== "MISSING") || null;
+    const letters = SC_CS_LETTERS.map((spec) => {
+      const result = rec ? String(rec[spec.key + "_result"] || "no_data") : "no_data";
+      const value = rec ? rec[spec.key + "_value"] : "";
+      const rule = rec ? rec[spec.key + "_rule"] : "";
+      const detail = rec ? rec[spec.key + "_detail"] : "";
+      return Object.assign({}, spec, { result: result, value: value, rule: rule, detail: detail });
+    });
+    const passN = letters.filter((x) => x.result === "pass").length;
+    const chips = letters.map((x) => '<span class="sc-cs-chip ' + scCsClass(x.result) + '">' + D.esc(x.letter) + "</span>").join("");
+    const rowsHtml = letters.map((x) => {
+      const shown = scCsShownValue(x);
+      const rule = SC_CS_RULES[x.key] || x.rule || "";
+      const extra = scCsExtra(x);
+      const ruleText = extra && rule ? rule + " " + extra : (extra || rule);
+      return '<button type="button" class="sc-cs-row ' + scCsClass(x.result) + '" data-letter="' + D.esc(x.letter) + '" aria-expanded="false">' +
+        '<div class="sc-cs-topline"><span class="sc-cs-letter">' + D.esc(x.letter) + '</span>' +
+        '<span class="sc-cs-copy"><span class="sc-cs-name"><span class="sc-cs-name-full">' + D.esc(x.name) +
+        '</span><span class="sc-cs-name-short">' + D.esc(x.short || x.name) + "</span></span>" +
+        '<span class="sc-cs-value">' + D.esc(shown) + "</span></span>" +
+        '<span class="sc-cs-status">' + D.esc(scCsStatusLabel(x.result)) + '</span>' +
+        '<span class="sc-cs-chev" aria-hidden="true">▾</span></div>' +
+        '<div class="sc-cs-rule">' + D.esc(ruleText) + "</div></button>";
+    }).join("");
+    return '<div class="panel pad sc-canslim"><div class="sc-cs-head"><div class="ptitle">CAN SLIM</div>' +
+      '<div class="sc-cs-count">' + passN + " of 7 pass</div></div>" +
+      '<div class="sc-cs-chips">' + chips + "</div>" +
+      '<div class="sc-cs-rows">' + rowsHtml + "</div></div>";
+  }
+  function wireScorecardCanslim(host) {
+    const box = host && host.querySelector(".sc-canslim");
+    if (!box) return;
+    box.addEventListener("click", (ev) => {
+      const row = ev.target.closest(".sc-cs-row");
+      if (!row || !box.contains(row)) return;
+      if (window.matchMedia && !window.matchMedia("(max-width:699px)").matches) return;
+      const open = !row.classList.contains("open");
+      row.classList.toggle("open", open);
+      row.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+
+  const SC_VS_METRICS = [
+    { title: "Forward P/E", hint: "lower is better", stock: "forward_pe", sector: "ind_forward_pe", pts: "pts_forward_pe_ind", kind: "num2", match: "Forward P/E" },
+    { title: "Trailing P/E", hint: "lower is better", stock: "ttm_pe", sector: "ind_ttm_pe", pts: "pts_ttm_pe_ind", kind: "num2", match: "Trailing P/E" },
+    { title: "Price / sales", hint: "lower is better", stock: "ps", sector: "ind_ps", pts: "pts_ps_ind", kind: "num2", match: "Price / sales" },
+    { title: "Price / FCF", hint: "lower is better", stock: "pfcf", sector: "ind_pfcf", pts: "pts_pfcf_ind", kind: "num2", match: "Price / free cash flow" },
+    { title: "Revenue growth", hint: "higher is better", stock: "rev_growth", sector: "ind_rev_growth", pts: "pts_rev_growth_ind", kind: "pct", match: "Revenue growth" },
+    { title: "EPS growth", hint: "higher is better", stock: "eps_growth", sector: "ind_eps_growth", pts: "pts_eps_growth_ind", kind: "pct", match: "EPS growth" },
+    { title: "Dividend yield", hint: "higher is better", stock: "div_yield", sector: "ind_div_yield", pts: "pts_div_yield_ind", kind: "pct", match: "Dividend yield" },
+  ];
+  const SC_BD_GROUPS = [
+    { name: "Technical", pts: "pts_tech" },
+    { name: "Financials", pts: "pts_fin" },
+    { name: "Sentiment", pts: "pts_sent" },
+    { name: "Earnings", pts: "pts_earnings" },
+    { name: "Sector", pts: "pts_sector" },
+  ];
+  function scPtChip(n, blank) {
+    if (blank || n == null || !Number.isFinite(n)) return '<span class="sc-pt nodata">–</span>';
+    const cls = n >= 2 ? "p2" : n >= 1 ? "p1" : n <= -1 ? "m1" : "z";
+    const txt = (n > 0 ? "+" : "") + String(Math.round(n));
+    return '<span class="sc-pt ' + cls + '">' + txt + "</span>";
+  }
+  function scSignedPts(n) {
+    if (n == null || !Number.isFinite(n)) return "–";
+    return (n > 0 ? "+" : "") + String(Math.round(n));
+  }
+  function scSplitItem(raw) {
+    const s = String(raw || "");
+    const m = /^(.*)\((lower is better|higher is better)\)$/i.exec(s);
+    if (m) return { name: m[1].trim(), hint: m[2].toLowerCase() };
+    if (s === "Analyst rating") return { name: s, hint: "Lower number is stronger" };
+    return { name: s, hint: "" };
+  }
+  function scFmtKind(n, kind, signed) {
+    if (n == null || !Number.isFinite(n)) return "";
+    if (kind === "pct") {
+      const body = D.fmt(n, n >= 10 || n <= -10 ? 1 : 2);
+      return (signed && n > 0 ? "+" : "") + body + "%";
+    }
+    if (kind === "rsi") return D.fmt(n, 0);
+    return D.fmt(n, Math.abs(n) >= 10 ? 1 : 2);
+  }
+  function scItemKind(name) {
+    if (/debt/i.test(name)) return "num2";
+    if (/growth|yield|equity|estimate|3 months/i.test(name)) return "pct";
+    if (/RSI/i.test(name)) return "rsi";
+    return "num2";
+  }
+  function scTrendNow(row) {
+    const a20 = D.num(row.above_sma20);
+    const a50 = D.num(row.above_sma50);
+    if (a20 === 1 && a50 === 1) return "Above both";
+    if (a20 === 1 && a50 === 0) return "Above 20-day";
+    if (a20 === 0 && a50 === 1) return "Above 50-day";
+    if (a20 === 0 && a50 === 0) return "Below both";
+    const s = String(row.sma_alignment || "");
+    if (!s) return "";
+    const up20 = s.indexOf("above 20") >= 0;
+    const up50 = s.indexOf("above 50") >= 0;
+    if (up20 && up50) return "Above both";
+    if (up20) return "Above 20-day";
+    if (up50) return "Above 50-day";
+    if (s.indexOf("below 20") >= 0 && s.indexOf("below 50") >= 0) return "Below both";
+    return "";
+  }
+  function scVsMetricFor(itemName) {
+    return SC_VS_METRICS.find((m) => itemName.indexOf(m.match) === 0) || null;
+  }
+  function renderScoreBreakdown(details, row) {
+    const groups = SC_BD_GROUPS.map((g) => {
+      const items = (details || []).filter((r) => r.group_name === g.name);
+      const itemHtml = items.map((it) => {
+        const split = scSplitItem(it.item);
+        const pts = D.num(it.points);
+        const blank = D.isBlank(it.points) && D.isBlank(it.points_label);
+        const is13f = split.name === "Institutional 13F trend";
+        const no13f = is13f && (blank || pts == null);
+        let nowTxt = "";
+        if (split.name === "Trend vs 20-day and 50-day") nowTxt = scTrendNow(row);
+        else if (no13f) nowTxt = "No data yet";
+        else if (split.name === "Insider buys vs sells" && D.isBlank(it.now_value) && pts === 0) nowTxt = "Even";
+        else {
+          const nv = D.num(it.now_value);
+          nowTxt = nv == null ? (it.now_value || "") : scFmtKind(nv, scItemKind(split.name), /estimate|3 months/i.test(split.name));
+        }
+        const av = D.num(it.avg_value);
+        const avgTxt = av == null ? "" : "Own avg " + scFmtKind(av, scItemKind(split.name), false);
+        const vsMet = scVsMetricFor(split.name);
+        const vsPts = vsMet ? D.num(row[vsMet.pts]) : D.num(it.vs_industry);
+        let note = "";
+        let noteCls = "";
+        if (vsMet && vsPts != null && vsPts > 0) { note = "Better than sector"; noteCls = "better"; }
+        else if (vsMet && vsPts != null && vsPts < 0) { note = "Worse than sector"; noteCls = "worse"; }
+        else if (!vsMet && pts === 0 && av != null) { note = "Near own average"; noteCls = "near"; }
+        if (no13f) {
+          note = "Blank, not a fail";
+          noteCls = "near";
+        }
+        return '<div class="sc-bd-item"><div class="sc-bd-iname">' + D.esc(split.name) +
+          (split.hint ? '<span class="sc-bd-hint">' + D.esc(split.hint) + "</span>" : "") +
+          '</div><div class="sc-bd-ivals"><div class="sc-bd-now">' + D.esc(nowTxt || "–") + "</div>" +
+          (avgTxt ? '<div class="sc-bd-avg">' + D.esc(avgTxt) + "</div>" : "") +
+          (note ? '<div class="sc-bd-note ' + noteCls + '">' + D.esc(note) + "</div>" : "") +
+          "</div>" + scPtChip(pts, blank || no13f) + "</div>";
+      }).join("");
+      return '<div class="sc-bd-group"><div class="sc-bd-ghead"><span>' + D.esc(g.name) + "</span>" +
+        scPtChip(D.num(row[g.pts]), D.num(row[g.pts]) == null) + "</div>" + itemHtml + "</div>";
+    }).join("");
+    const bits = SC_BD_GROUPS.map((g) => g.name + " " + scSignedPts(D.num(row[g.pts]))).join(", ");
+    return '<div class="panel pad sc-breakdown"><div class="sc-bd-head"><div class="ptitle">Score breakdown</div>' +
+      scPtChip(D.num(row.score), D.num(row.score) == null) + "</div>" +
+      '<p class="sc-bd-cap">Each point is versus this company\'s own 3-year average. A blank is missing, not zero. Group totals match the tiles above: ' +
+      D.esc(bits) + ".</p>" + groups + "</div>";
+  }
+  function renderVersusSector(row) {
+    const items = SC_VS_METRICS.map((m) => {
+      const stock = D.num(row[m.stock]);
+      const sector = D.num(row[m.sector]);
+      const pts = D.num(row[m.pts]);
+      const better = pts != null && pts > 0;
+      const worse = pts != null && pts < 0;
+      const mark = better ? "Better" : worse ? "Worse" : "";
+      const markCls = better ? "better" : worse ? "worse" : "";
+      let bar = "";
+      if (stock != null && sector != null) {
+        const max = Math.max(Math.abs(stock), Math.abs(sector), 1e-9);
+        const w = Math.max(10, Math.min(100, (Math.abs(stock) / max) * 100));
+        bar = '<div class="sc-vs-bar"><i class="' + (worse ? "worse" : "better") + '" style="width:' + w.toFixed(0) + '%"></i></div>';
+      }
+      return '<div class="sc-vs-item"><div class="sc-vs-name">' + D.esc(m.title) +
+        '<span class="sc-bd-hint">' + D.esc(m.hint) + "</span></div>" +
+        '<div class="sc-vs-pair"><div class="labs"><span>' + D.esc(row.ticker) + " <b>" +
+        D.esc(stock == null ? "–" : scFmtKind(stock, m.kind, false)) + "</b></span><span>Sector <b>" +
+        D.esc(sector == null ? "–" : scFmtKind(sector, m.kind, false)) + "</b></span></div>" + bar + "</div>" +
+        '<div class="sc-vs-mark ' + markCls + '">' + D.esc(mark) + "</div>" + scPtChip(pts, pts == null) + "</div>";
+    }).join("");
+    const sectorName = row.sector || "this";
+    return '<div class="panel pad sc-versus"><div class="sc-vs-head"><div class="ptitle">Versus sector</div></div>' +
+      '<p class="sc-vs-cap">' + D.esc(row.ticker) + " compared with the " + D.esc(sectorName) +
+      " sector average. Green means better, red means worse. These points are not added into the desk score again.</p>" +
+      items + "</div>";
+  }
+
   function renderScorecard(ctx) {
     const scores = D.realRows(ctx.files["scores.csv"]);
     const params = new URLSearchParams(location.search);
@@ -435,12 +676,6 @@
       const earn = (ctx.files["earnings_history.csv"] || []).filter((r) => r.ticker === ticker && !D.isBlank(r.eps_actual))
         .sort((a, b) => a.earnings_date < b.earnings_date ? -1 : 1).slice(-8);
       const news = (ctx.files["news.csv"] || []).filter((r) => r.ticker === ticker && (kind === "" || r.kind === kind));
-      const vsRows = [
-        ["pts_forward_pe_ind", "Forward P/E"], ["pts_ttm_pe_ind", "Trailing P/E"], ["pts_ps_ind", "Price / sales"],
-        ["pts_pfcf_ind", "Price / FCF"], ["pts_rev_growth_ind", "Revenue growth"], ["pts_eps_growth_ind", "EPS growth"],
-        ["pts_div_yield_ind", "Dividend yield"],
-      ];
-      const vs = vsRows.map((pair) => "<tr><td>" + D.esc(pair[1]) + '</td><td class="c">' + D.pointsHtml(row[pair[0]]) + "</td></tr>").join("");
       const basis = [
         ["Fundamentals from", row.fundamentals_basis], ["Filed", row.fundamentals_filed],
         ["Years in own average", row.fin_avg_years], ["Forward P/E average", row.forward_pe_avg_basis],
@@ -448,14 +683,17 @@
       ].map((pair) => '<div class="rowhead"><span>' + D.esc(pair[0]) + '</span><span class="m2" style="text-align:right">' +
         (D.isBlank(pair[1]) ? D.na() : D.esc(pair[1])) + "</span></div>").join("");
       const scoreN = D.num(row.score);
+      const canslimHtml = renderScorecardCanslim(ticker, ctx.files["scorecard_canslim.csv"]);
       host.innerHTML =
         '<div class="panel pad identity"><div class="id-main"><div class="big">' + D.esc(row.ticker) + "</div><div>" + D.esc(row.company) +
         "</div>" + D.blurbHtml(row.ticker) + '<div class="m2" style="font-size:12px">' + D.esc(row.sector) + (row.industry ? " · " + D.esc(row.industry) : "") + "</div></div>" +
-        '<div class="stat"><div class="l">Price</div><div class="v">' + px2(row.price) + "</div></div>" +
-        '<div class="stat"><div class="l">Day %</div><div class="v" style="color:' + D.retColor(day) + '">' + (day == null ? D.na() : D.esc((day > 0 ? "+" : "") + D.fmt(day, 2) + "%")) + "</div></div>" +
-        '<div class="stat"><div class="l">Confidence</div><div class="v" style="font-size:16px">' + (D.isBlank(row.confidence) ? D.na() : D.esc(row.confidence)) + '</div><div class="l" style="margin-top:8px">Verdict</div><div class="vpill">' + D.verdictHtml(row.verdict) + "</div></div>" +
-        '<div class="stat"><div class="l">Desk score</div><div class="v"><span class="scorepill deskscore" style="background:' + D.band(scoreN || 0) + '">' + D.esc(scoreN == null ? "–" : String(scoreN)) + "</span></div></div></div>" +
-        '<div class="panel pad"><p style="font-size:13px;line-height:20px">' + D.esc(row.reason || "") + "</p></div>" +
+        '<div class="id-stats">' +
+        '<div class="stat id-price"><div class="l">Price</div><div class="v">' + px2(row.price) + "</div></div>" +
+        '<div class="stat id-day"><div class="l">Day %</div><div class="v" style="color:' + D.retColor(day) + '">' + (day == null ? D.na() : D.esc((day > 0 ? "+" : "") + D.fmt(day, 2) + "%")) + "</div></div>" +
+        '<div class="stat id-conf"><div class="l">Confidence</div><div class="v" style="font-size:16px">' + (D.isBlank(row.confidence) ? D.na() : D.esc(row.confidence)) + '</div><div class="l" style="margin-top:8px">Verdict</div><div class="vpill">' + D.verdictHtml(row.verdict) + "</div></div>" +
+        '<div class="stat id-score"><div class="l">Desk score</div><div class="v"><span class="scorepill deskscore" style="background:' + D.band(scoreN || 0) + '">' + D.esc(scoreN == null ? "–" : String(scoreN)) + "</span></div></div></div></div>" +
+        '<div class="sc-cols">' + canslimHtml + '<div class="sc-top">' +
+        '<div class="panel pad sc-reason"><p style="font-size:13px;line-height:20px">' + D.esc(row.reason || "") + "</p></div>" +
         '<div class="cards">' +
         ptsCard("Technical", row.pts_tech) + ptsCard("Financials", row.pts_fin) + ptsCard("Sentiment", row.pts_sent) +
         ptsCard("Earnings", row.pts_earnings) + ptsCard("Sector", row.pts_sector) +
@@ -470,12 +708,13 @@
         miniStat("Analyst target", px2(row.target_analyst)) + miniStat("Cash-flow target", rangeTarget(row.target_pfcf, row.price)) +
         miniStat("PEG target", rangeTarget(row.target_peg, row.price)) + miniStat("Blended target", blendHtml(row)) +
         miniStat("Inputs in blend", blendCount(row)) +
-        "</div></div></div>" +
-        '<div class="split chartpair">' + priceShell("Plan levels stay on the chart") +
+        "</div></div></div></div></div>" +
+        '<div class="sc-below"><div class="split chartpair">' + priceShell("Plan levels stay on the chart") +
         '<div class="panel pad"><div class="ptitle">EPS surprise %, last 8 reports</div><div class="chart-box"><canvas id="eh"></canvas></div></div></div>' +
-        '<div class="split r21"><div class="panel" id="break"></div><div><div class="panel"><div class="pad" style="padding-bottom:0"><div class="ptitle">Versus sector</div></div><div class="scroll"><table><tbody>' + vs +
-        '</tbody></table></div></div><div class="panel pad"><div class="ptitle">Data basis</div><div style="font-size:11px;margin-top:8px">' + basis + "</div></div></div></div>" +
-        '<div class="panel" id="news"></div><p class="cap">' + D.esc(newsEmpty) + "</p>";
+        '<div class="sc-break-vs">' + renderScoreBreakdown(details, row) + renderVersusSector(row) + "</div>" +
+        '<div class="panel pad sc-basis"><div class="ptitle">Data basis</div><div style="font-size:11px;margin-top:8px">' + basis + "</div></div>" +
+        '<div class="panel" id="news"></div><p class="cap">' + D.esc(newsEmpty) + "</p></div>";
+      wireScorecardCanslim(host);
       const entryLo = D.num(row.entry_low);
       const entryHi = D.num(row.entry_high);
       const hlines = [];
@@ -513,13 +752,6 @@
             y: { ticks: { color: "#8B96AD" }, grid: { color: "#1E293B" } },
           },
         },
-      });
-      D.drawTable(document.getElementById("break"), {
-        title: "Score breakdown",
-        rows: details,
-        columns: [T("group_name", "Group"), T("item", "Item", "text", { wrap: true }), T("points_label", "Points", "plabel"),
-          T("now_value", "Now", "num", { dec: 2 }), T("avg_value", "Own 3-yr avg", "num", { dec: 2 }), T("vs_industry", "Vs sector", "points")],
-        state: { sort: "group_name", dir: "asc", sort2: "item", dir2: "asc", page: 0 }, pageSize: 20,
       });
       D.drawTable(document.getElementById("news"), {
         title: "News", sub: newsEmpty,
@@ -3357,7 +3589,7 @@
     buysetups: { files: ["buy_setups.csv"], render: renderBuySetups },
     tradingfloor: { files: ["trading_floor.csv"], render: renderTradingFloor },
     papertest: { files: ["paper_summary.csv", "paper_equity.csv", "paper_trades.csv"], render: renderPaperTest },
-    scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], render: renderScorecard },
+    scorecard: { files: ["scores.csv", "score_details.csv", "news.csv", "earnings_history.csv"], optionalFiles: ["scorecard_canslim.csv"], render: renderScorecard },
     watchlist: { files: ["portfolio.csv", "portfolio_summary.csv", "watchlist.csv"], render: renderWatch },
     alerts: { files: ["alerts.csv", "score_changes.csv"], render: renderAlerts },
     backtest: { files: ["backtest_summary.csv", "backtest_equity.csv", "backtest_buckets.csv", "backtest_yearly.csv", "backtest_notes.csv"], render: renderBacktest },
