@@ -189,6 +189,10 @@ Slow sources are fetched at most once per US session and reused on the hourly ru
 
 - Prices: one batched Yahoo download (`yfinance` multi-ticker), not one call per stock.
 - SEC EDGAR company facts, Yahoo profiles and earnings dates, Nasdaq 13F summaries and insider counts, and option chains: once a day. Option chains cover the holdings, the watchlist, and the top scores only (about 40 names, nearest expiries), so the page stays small.
+- A full run fills SEC company facts and SEC submissions (name, country, exchange, SIC industry) for the whole universe. It prefers the official nightly `companyfacts.zip` and `submissions.zip`, and falls back to one request per company at under 8 per second. IFRS tags are read so foreign 20-F / 40-F filers are not left blank. SIC is mapped to an approximate GICS-style sector only where Wikipedia or Yahoo left the sector blank; those labels are not official GICS and they never overwrite a filled value.
+- The Nasdaq earnings calendar is one request per weekday for the next 60 calendar days, starting from today (the window moves into January on its own when the year changes). Next earnings is filled only where it is still missing. If a request fails, the saved calendar is kept.
+- Nasdaq 13F and insider counts usually refresh 60 names on a full run, at 3 requests a second (two requests a name). A one-time Actions input, `ownership_full`, lifts that cap so every name in the universe is eligible. The fill stops in time to finish the 120-minute job, saves progress, and starts the next run if names are still waiting. Regular runs stay on the 60-name slice.
+- Finnhub company websites run only when a `FINNHUB_API_KEY` is already in the environment. The desk never adds a key, and it skips this source cleanly when the key is missing. Company one-liners stay in the hand-written `data/company_blurbs.csv` file.
 - Requests are spaced (SEC stays under 8 per second, under the SEC's 10 per second rule) with a User-Agent of `NickStockDesk research nicks-stock-desk@example.com`.
 - A 429 or a dropped connection waits and retries with a longer pause each time (1.5s, 3s, 6s, 12s).
 - If a source still fails, the previous file is kept and `updates_log.csv` says CACHED. If there is no previous file, the page gets one MISSING row and a plain-English note. Missing cells inside a row stay blank.
@@ -212,6 +216,7 @@ Hourly runs (`--hourly`) refresh prices and rebuild the tables from the cache. T
 | `stock_desk.py` | The job |
 | `scoring.py` | Score, verdicts, targets, alerts, backtest |
 | `fundamentals.py` | SEC filing parser. A filing counts the day after it was filed |
+| `profiles.py` | SEC submissions profiles, approximate SIC sectors, Nasdaq earnings calendar, optional Finnhub websites |
 | `netutil.py` | Rate gate, retry, once-a-day decision |
 | `tables.py` | One table per Looker page |
 | `setups.py` | VCP, CANSLIM, box, flag, and leaders. No network calls |

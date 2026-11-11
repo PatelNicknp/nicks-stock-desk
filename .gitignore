@@ -4,3 +4,4 @@ __pycache__/
 .venv/
 cache/options_chains/
 cache/treasury_3m.json
+cache/bulk/

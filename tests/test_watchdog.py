@@ -229,3 +229,12 @@ if __name__ == "__main__":
         if name.startswith("test_") and callable(fn):
             fn()
     print("watchdog ok")
+
+
+def test_ownership_chain_dispatch_body():
+    body = w.ownership_dispatch_body("nick/full-profiles-earnings", "0")
+    assert body["ref"] == "nick/full-profiles-earnings"
+    assert body["inputs"]["mode"] == "full"
+    assert body["inputs"]["ownership_full"] == "true"
+    assert body["inputs"]["ownership_run"] == "1"
+    assert w.chain_ownership({"GITHUB_REF_NAME": "main", "DESK_OWNERSHIP_RUN": "2", "DRY_RUN": "1"}) is True

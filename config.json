@@ -397,10 +397,17 @@
     "refresh_every_days": 7
   },
   "sec_facts": {
-    "_note": "SEC company facts for the wider list (features.sec_rolling). The S&P 500, Nasdaq-100, growth names, holdings, and watchlist are fetched every full run. Other names are fetched batch_per_run at a time, oldest first, and again after refresh_every_days. cik_overrides replaces a ticker that the SEC ticker file points at the wrong filer. XOM is Exxon Mobil Corporation, CIK 0000034088. HONA, SPCX, and VYLR already point at the companies that own those tickers; they have no 10-K yet, so yearly rows stay blank.",
+    "_note": "A full run fills company facts for the whole universe (full_universe). It prefers the official nightly companyfacts.zip (use_bulk_zip) and falls back to one request per company at under 8/sec. The older daily slice (batch_per_run, refresh_every_days, features.sec_rolling) is used only when full_universe is off. cik_overrides replaces a ticker that the SEC ticker file points at the wrong filer. XOM is Exxon Mobil Corporation, CIK 0000034088. HONA, SPCX, and VYLR already point at the companies that own those tickers; they have no 10-K yet, so yearly rows stay blank.",
+    "full_universe": true,
+    "use_bulk_zip": true,
     "batch_per_run": 120,
     "refresh_every_days": 7,
     "cik_overrides": {"XOM": "0000034088"}
+  },
+  "earnings_calendar": {
+    "_note": "Nasdaq earnings calendar on a full run. One request per weekday for the next days_ahead calendar days, starting from today so the window crosses into January by itself when the year changes. A failed fetch keeps the saved calendar. Next earnings is filled only where it is still missing.",
+    "days_ahead": 60,
+    "skip_weekends": true
   },
   "scoring": {
     "flat_band_pct": 0.05,

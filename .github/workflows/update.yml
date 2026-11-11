@@ -24,6 +24,16 @@ on:
         description: "Set to watchdog, keeper, or keeper_retry by those workflows. Leave blank for a manual run."
         required: false
         default: ""
+      ownership_full:
+        description: "One-time: refresh 13F and insider data for every name in the universe. Default stays the usual 60-name slice. A chunk stops in time to finish the 120-minute job and starts the next run if names are still waiting."
+        required: false
+        default: false
+        type: boolean
+      ownership_run:
+        description: "Leave at 0. A chained ownership_full run sets the next number itself."
+        required: false
+        default: "0"
+        type: string
 
 permissions:
   contents: write
@@ -36,6 +46,8 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    outputs:
+      ownership_chain: ${{ steps.desk.outputs.ownership_chain }}
     # The paper test is saved at the end of the 18:30 ET full run, after the backtest.
     # A 60-minute cap was cancelling that run inside the backtest, so fills never saved.
     timeout-minutes: 120
@@ -89,6 +101,8 @@ jobs:
           python tests/test_twice_daily_universe.py
           python tests/test_slow_refresh.py
           python tests/test_fast_backfill.py
+          python tests/test_profiles.py
+          python tests/test_year_rollover.py
           python tests/test_market_news_mood.py
           python tests/test_market_news_causes.py
           python tests/test_market_news_news_calendar.py
@@ -98,17 +112,25 @@ jobs:
           python tests/test_market_news_tips.py
           python tests/test_market_news_story.py
       - name: Update the desk
+        id: desk
         if: steps.guard.outputs.skip != 'true'
         env:
           PYTHONUNBUFFERED: "1"
           # Commit the cache as each slow source finishes. A timeout used to drop the whole run, including prices already downloaded.
           DESK_CHECKPOINT: "1"
+          DESK_OWNERSHIP_FULL: ${{ github.event_name == 'workflow_dispatch' && inputs.ownership_full || false }}
+          DESK_OWNERSHIP_RUN: ${{ inputs.ownership_run || 0 }}
         run: |
           set -e
           git config user.name "stock-desk-bot"
           git config user.email "stock-desk-bot@users.noreply.github.com"
           # A manual run is full, as before. A watchdog or keeper make-up uses the mode of the slot it replaces.
           # A scheduled run uses the mode of its New York slot (the 18:30 ET slot is the full run).
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.ownership_full }}" = "true" ]; then
+            export DESK_OWNERSHIP_FULL=1
+          else
+            export DESK_OWNERSHIP_FULL=0
+          fi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.mode }}" = "hourly" ]; then
             python stock_desk.py --hourly
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ steps.guard.outputs.mode }}" = "full" ]; then
@@ -116,6 +138,7 @@ jobs:
           else
             python stock_desk.py --hourly
           fi
+          python3 -c "import stock_desk as desk; print(desk.emit_ownership_status_output(desk.paths()[1]))"
       - name: Save the new numbers
         if: steps.guard.outputs.skip != 'true'
         run: |
@@ -128,6 +151,29 @@ jobs:
             git commit -m "Update desk data $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
+
+  # Continue a one-time 13F/insider fill if this run stopped to stay inside 120 minutes.
+  # The update job has already saved progress. This starts the next full run on the
+  # same branch with ownership_full still on. Regular scheduled runs never set that input.
+  ownership_chain:
+    needs: update
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.ownership_full == true && needs.update.result == 'success' && needs.update.outputs.ownership_chain == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            watchdog.py
+          sparse-checkout-cone-mode: false
+      - name: Start the next 13F chunk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DESK_OWNERSHIP_RUN: ${{ inputs.ownership_run || 0 }}
+        run: python3 watchdog.py chain-ownership
 
   # Second way in for the keeper: if no keeper is queued or running (chain broken), start one.
   # Does nothing when one is live or features.self_heal_keeper is off. Reads no market data.

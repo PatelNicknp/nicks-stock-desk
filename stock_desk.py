@@ -18,6 +18,7 @@ import requests
 
 import netutil
 import fundamentals as fund
+import profiles
 import scoring
 import tables
 import setups
@@ -1425,6 +1426,8 @@ def sec_rolling_settings(cfg):
         "on": bool((cfg.get("features") or {}).get("sec_rolling", True)),
         "batch_per_run": max(1, batch),
         "refresh_every_days": max(1, every),
+        "full_universe": bool(raw.get("full_universe", True)),
+        "use_bulk_zip": bool(raw.get("use_bulk_zip", True)),
     }
 
 
@@ -1482,6 +1485,89 @@ def slow_source_settings(cfg):
     except (TypeError, ValueError):
         every = 7
     return {"batch_per_run": max(1, batch), "refresh_every_days": max(1, every)}
+
+
+# One-time 13F/insider fill for the whole universe. Off unless the workflow
+# input ownership_full is set. The 35-minute budget leaves room for scores
+# and the backtest inside the 120-minute job; leftover names chain to the
+# next manual-style full run and resume from today's progress file.
+OWNERSHIP_FULL_BUDGET_SEC = 2100
+OWNERSHIP_FULL_MAX_RUNS = 8
+OWNERSHIP_STATUS_FILE = "ownership_full_status.json"
+
+
+def ownership_full_on(env=None):
+    env = os.environ if env is None else env
+    val = str((env or {}).get("DESK_OWNERSHIP_FULL") or "").strip().lower()
+    return val in ("1", "true", "yes", "on")
+
+
+def ownership_full_run_index(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(0, int((env or {}).get("DESK_OWNERSHIP_RUN") or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def ownership_full_budget_sec(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(30, int((env or {}).get("DESK_OWNERSHIP_BUDGET_SEC") or OWNERSHIP_FULL_BUDGET_SEC))
+    except (TypeError, ValueError):
+        return OWNERSHIP_FULL_BUDGET_SEC
+
+
+def ownership_full_max_runs(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(1, int((env or {}).get("DESK_OWNERSHIP_MAX_RUNS") or OWNERSHIP_FULL_MAX_RUNS))
+    except (TypeError, ValueError):
+        return OWNERSHIP_FULL_MAX_RUNS
+
+
+def holders_batch_per_run(settings, n_tickers, mode, env=None):
+    """Usual 60-name slice, or every name when ownership_full is on for a full run."""
+    if ownership_full_on(env) and mode == "full":
+        return max(1, int(n_tickers))
+    return int(settings["batch_per_run"])
+
+
+def ownership_should_chain(waiting, fetched, run_index, max_runs):
+    """Continue only when this chunk saved names and more are still waiting."""
+    if int(waiting or 0) <= 0 or int(fetched or 0) <= 0:
+        return False
+    return int(run_index or 0) + 1 < int(max_runs)
+
+
+def write_ownership_status(cache, status):
+    path = os.path.join(cache, OWNERSHIP_STATUS_FILE)
+    with open(path, "w") as f:
+        json.dump(status or {}, f, indent=1, sort_keys=True)
+    return path
+
+
+def read_ownership_status(cache):
+    path = os.path.join(cache, OWNERSHIP_STATUS_FILE)
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def emit_ownership_status_output(cache, dest=None):
+    """Tell the workflow whether to start the next ownership_full run."""
+    status = read_ownership_status(cache)
+    chain = "true" if status.get("chain") else "false"
+    dest = dest or os.environ.get("GITHUB_OUTPUT")
+    if dest:
+        with open(dest, "a") as fh:
+            fh.write("ownership_chain=%s\n" % chain)
+            fh.write("ownership_waiting=%s\n" % int(status.get("waiting") or 0))
+    return chain, status
 
 
 def load_named_cycle(cache, name):
@@ -1617,6 +1703,61 @@ def _flow_gap(annual):
     return int((rev.notna() & ni.isna()).sum()) >= 80
 
 
+
+def _bulk_dir(cache):
+    path = os.path.join(cache, "bulk")
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def _download_sec_zip(cfg, cache, url, filename, stamp_key, timeout=300):
+    """Download an official SEC zip once a day. Returns the path, or empty on failure."""
+    dest = os.path.join(_bulk_dir(cache), filename)
+    if os.path.exists(dest) and os.path.getsize(dest) > 0 and STAMPS.get(stamp_key) == today_et():
+        return dest
+    headers = session_headers(cfg, sec=True)
+    lim = netutil.RateLimiter(rl(cfg)["sec_requests_per_second"])
+    try:
+        print("SEC downloading %s" % filename)
+        profiles.http_download(requests, url, dest, headers, timeout=timeout, limiter=lim)
+    except Exception as exc:
+        print("SEC zip failed %s: %s" % (filename, str(exc)[:160]))
+        if os.path.exists(dest) and os.path.getsize(dest) > 0:
+            return dest
+        return ""
+    if os.path.exists(dest) and os.path.getsize(dest) > 0:
+        STAMPS[stamp_key] = today_et()
+        return dest
+    return ""
+
+
+def apply_companyfacts_zip(tickers, cik, cfg, cache, annual, quarters, annual_p, quarter_p):
+    """Fill annual and quarterly statements for the whole universe from companyfacts.zip."""
+    wanted = {t: cik[t] for t in tickers if t in cik}
+    if not wanted:
+        return False, annual, quarters, []
+    path = _download_sec_zip(cfg, cache, profiles.COMPANYFACTS_ZIP_URL, "companyfacts.zip", "sec_companyfacts_zip", timeout=600)
+    if not path:
+        return False, annual, quarters, list(wanted)
+    try:
+        fresh_a, fresh_q, found, missing = profiles.parse_companyfacts_from_zip(path, wanted, fund.parse_companyfacts)
+    except Exception as exc:
+        print("SEC companyfacts zip parse failed:", str(exc)[:160])
+        return False, annual, quarters, list(wanted)
+    if found:
+        if len(fresh_a):
+            keep = annual[~annual["ticker"].isin(fresh_a["ticker"])] if len(annual) and "ticker" in annual.columns else annual
+            annual = pd.concat([keep, fresh_a], ignore_index=True) if len(keep) else fresh_a
+            annual.to_csv(annual_p, index=False)
+        if len(fresh_q):
+            keep = quarters[~quarters["ticker"].isin(fresh_q["ticker"])] if len(quarters) and "ticker" in quarters.columns else quarters
+            quarters = pd.concat([keep, fresh_q], ignore_index=True) if len(keep) else fresh_q
+            quarters.to_csv(quarter_p, index=False)
+    leftover = [t for t in missing if t in cik]
+    print("SEC companyfacts zip: %d names, %d leftover" % (len(found), len(leftover)))
+    return True, annual, quarters, leftover
+
+
 def load_sec(tickers, cik, cfg, cache, mode, core=None):
     annual_p = os.path.join(cache, "annual.csv")
     quarter_p = os.path.join(cache, "quarters.csv")
@@ -1625,7 +1766,10 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
     gaps = None
     sheet_blank = _balance_sheet_blank(annual)
     flow_gap = _flow_gap(annual)
-    if decision == "reuse":
+    rolling_early = sec_rolling_settings(cfg)
+    want_bulk = mode == "full" and rolling_early.get("use_bulk_zip", True) and STAMPS.get("sec_facts_bulk") != today_et()
+    want_all = mode == "full" and rolling_early.get("full_universe", True) and STAMPS.get("sec_facts_bulk") != today_et()
+    if decision == "reuse" and not want_bulk and not want_all:
         gaps = _missing_tickers(annual, tickers) if mode == "full" else []
         gaps = [t for t in gaps if t in cik]
         # One full run may refetch when the saved statements are unusable.
@@ -1645,23 +1789,56 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
             return annual, quarters
         else:
             print("SEC filling %d names added since the daily fetch" % len(gaps))
+    elif decision == "reuse" and (want_bulk or want_all):
+        # A full run with the official zip (or whole-universe pull) still
+        # refreshes every name once a day, even if yesterday's cache exists.
+        gaps = None
     if decision == "missing":
         log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no cache and this run does not call the SEC")
         return annual, quarters
+    rolling = sec_rolling_settings(cfg)
+    # Official zip or a whole-universe pull still runs on a full day even if a
+    # earlier cache stamp exists, so one run can fill every name.
+    zip_leftover = None
+    if mode == "full" and rolling.get("use_bulk_zip", True) and STAMPS.get("sec_facts_bulk") != today_et():
+        ok, annual, quarters, zip_leftover = apply_companyfacts_zip(
+            tickers, cik, cfg, cache, annual, quarters, annual_p, quarter_p
+        )
+        if ok:
+            STAMPS["sec_facts_bulk"] = today_et()
+            cycle = load_sec_cycle(cache)
+            for t in (tickers or []):
+                if t in cik and len(annual) and "ticker" in annual.columns and t in set(annual["ticker"].astype(str)):
+                    cycle[t] = today_et()
+            save_sec_cycle(cache, cycle)
+            STAMPS["sec_facts"] = today_et()
+            if not zip_leftover:
+                note = "%d names from official companyfacts.zip" % (annual["ticker"].nunique() if len(annual) else 0)
+                status = "PARTIAL" if _balance_sheet_blank(annual) else "OK"
+                if status == "PARTIAL":
+                    note += "; equity and debt are still blank"
+                log("Fundamentals (SEC EDGAR company facts)", status, today_et(), note)
+                return annual, quarters
+            print("SEC filling %d names not in the official zip" % len(zip_leftover))
     lim = netutil.RateLimiter(rl(cfg)["sec_requests_per_second"])
     headers = session_headers(cfg, sec=True)
     # A new day refreshes everyone. A crash the same day continues where it stopped.
     # A balance-sheet refetch ignores today's progress: those rows were parsed without equity.
     done = progress_load(cache, "sec")
-    if mode == "full" and (sheet_blank or flow_gap) and not gaps:
+    if mode == "full" and (sheet_blank or flow_gap) and not gaps and zip_leftover is None:
         done = set()
     new_a, new_q, fails = [], [], 0
     pool = gaps if gaps else [t for t in tickers if t in cik]
-    rolling = sec_rolling_settings(cfg)
+    if zip_leftover is not None:
+        pool = zip_leftover
     cycle = load_sec_cycle(cache)
-    # A blank-sheet repair still walks everyone. Otherwise the S&P 400 and 600
-    # are a daily slice, and the S&P 500, Nasdaq-100, and growth names stay daily.
-    if rolling["on"] and not (sheet_blank or flow_gap):
+    # The official zip (or full_universe) fills every name in one full run.
+    # The older daily slice is only used when that switch is off.
+    if zip_leftover is None and rolling.get("full_universe", True) and mode == "full":
+        pool = [t for t in tickers if t in cik]
+    elif rolling["on"] and not (sheet_blank or flow_gap) and zip_leftover is None:
+        # A blank-sheet repair still walks everyone. Otherwise the S&P 400 and 600
+        # are a daily slice, and the S&P 500, Nasdaq-100, and growth names stay daily.
         pool = rolling_sec_pool(pool, core, cycle, today_et(), rolling["batch_per_run"], rolling["refresh_every_days"], done)
     todo = [t for t in pool if t not in done]
     if done:
@@ -1704,6 +1881,8 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
         log("Fundamentals (SEC EDGAR company facts)", "CACHED", "", "%d of %d failed; will try again next full run" % (fails, len(todo)))
     else:
         STAMPS["sec_facts"] = today_et()
+        if rolling.get("full_universe", True) or zip_leftover is not None:
+            STAMPS["sec_facts_bulk"] = today_et()
         note = "%d names" % annual["ticker"].nunique() if len(annual) else "0"
         if fails:
             note += ", %d failed and kept prior rows" % fails
@@ -1729,6 +1908,158 @@ def _flush_sec(annual, quarters, new_a, new_q, annual_p, quarter_p):
         quarters.to_csv(quarter_p, index=False)
         new_q.clear()
     return annual, quarters
+
+
+
+def load_sec_profiles(tickers, cik, cfg, cache, mode):
+    """Name, country, exchange, and SIC industry from SEC submissions. Whole universe on a full run."""
+    path = os.path.join(cache, "sec_profiles.csv")
+    prior = read_csv(path)
+    if mode != "full":
+        status = "OK" if len(prior) else "MISSING"
+        log("Company profiles (SEC EDGAR submissions)", status, STAMPS.get("sec_profiles", ""),
+            "reused cache" if len(prior) else "no cache and this run does not call the SEC")
+        return prior
+    wanted = {t: cik[t] for t in tickers if t in (cik or {})}
+    if not wanted:
+        log("Company profiles (SEC EDGAR submissions)", "MISSING" if not len(prior) else "CACHED", "", "no CIK map")
+        return prior
+    rolling = sec_rolling_settings(cfg)
+    rows = pd.DataFrame()
+    leftover = list(wanted)
+    if rolling.get("use_bulk_zip", True):
+        zpath = _download_sec_zip(cfg, cache, profiles.SUBMISSIONS_ZIP_URL, "submissions.zip", "sec_submissions_zip", timeout=600)
+        if zpath:
+            try:
+                rows = profiles.parse_submissions_from_zip(zpath, wanted)
+                have = set(rows["ticker"].astype(str)) if len(rows) and "ticker" in rows.columns else set()
+                leftover = [t for t in wanted if t not in have]
+                print("SEC submissions zip: %d names, %d leftover" % (len(have), len(leftover)))
+            except Exception as exc:
+                print("SEC submissions zip parse failed:", str(exc)[:160])
+                leftover = list(wanted)
+    if leftover:
+        lim = netutil.RateLimiter(rl(cfg)["sec_requests_per_second"])
+        headers = session_headers(cfg, sec=True)
+        fetched = []
+        for i, t in enumerate(leftover):
+            url = "https://data.sec.gov/submissions/CIK%s.json" % wanted[t]
+            try:
+                r = netutil.http_get(requests, url, headers, 60, limiter=lim, max_tries=rl(cfg)["max_retries"])
+                fetched.append(profiles.parse_submissions_profile(r.json(), ticker=t))
+            except Exception as exc:
+                if i < 3:
+                    print("sec submissions fail", t, str(exc)[:100])
+            if (i + 1) % 80 == 0:
+                print("SEC submissions %d / %d" % (i + 1, len(leftover)))
+        if fetched:
+            add = pd.DataFrame(fetched)
+            rows = pd.concat([rows, add], ignore_index=True) if len(rows) else add
+    if rows is None or len(rows) == 0:
+        status = "CACHED" if len(prior) else "MISSING"
+        log("Company profiles (SEC EDGAR submissions)", status, STAMPS.get("sec_profiles", ""),
+            "kept the saved profiles" if len(prior) else "no submissions data")
+        return prior
+    # Merge: new rows replace the same ticker, other prior rows stay.
+    if len(prior) and "ticker" in prior.columns:
+        keep = prior[~prior["ticker"].astype(str).isin(set(rows["ticker"].astype(str)))]
+        rows = pd.concat([keep, rows], ignore_index=True)
+    rows.to_csv(path, index=False)
+    STAMPS["sec_profiles"] = today_et()
+    log("Company profiles (SEC EDGAR submissions)", "OK", today_et(), "%d names" % rows["ticker"].nunique())
+    return rows
+
+
+def load_nasdaq_earnings(cfg, cache, mode, start=None):
+    """Next earnings dates from the Nasdaq calendar. One call per day. Never wipe the saved file on failure."""
+    path = os.path.join(cache, "nasdaq_earnings_calendar.csv")
+    prior = read_csv(path)
+    if mode != "full":
+        status = "OK" if len(prior) else "MISSING"
+        log("Earnings dates (Nasdaq calendar)", status, STAMPS.get("nasdaq_earnings", ""),
+            "reused cache" if len(prior) else "no cache and this run does not call Nasdaq")
+        return prior
+    block = cfg.get("earnings_calendar") or {}
+    try:
+        days_ahead = int(block.get("days_ahead", 60))
+    except (TypeError, ValueError):
+        days_ahead = 60
+    skip_weekends = bool(block.get("skip_weekends", True))
+    start = pd.Timestamp(start or today_et())
+    days = profiles.calendar_days(start, days_ahead=days_ahead, skip_weekends=skip_weekends)
+    lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
+    headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+    fresh_rows, failed = [], 0
+    for i, day in enumerate(days):
+        url = "https://api.nasdaq.com/api/calendar/earnings?date=%s" % day
+        try:
+            r = netutil.http_get(requests, url, headers, 30, limiter=lim, max_tries=rl(cfg)["max_retries"])
+            payload = r.json()
+            fresh_rows.extend(profiles.parse_nasdaq_earnings_payload(payload, day))
+        except Exception as exc:
+            failed += 1
+            if failed <= 3:
+                print("nasdaq earnings fail", day, str(exc)[:100])
+    fresh = pd.DataFrame(fresh_rows)
+    if failed and not len(fresh):
+        log("Earnings dates (Nasdaq calendar)", "CACHED" if len(prior) else "MISSING", STAMPS.get("nasdaq_earnings", ""),
+            "kept the saved calendar after %d failed days" % failed)
+        return prior
+    merged = profiles.keep_calendar_on_failure(prior, fresh, failed=False)
+    if merged is None or len(merged) == 0:
+        log("Earnings dates (Nasdaq calendar)", "CACHED" if len(prior) else "MISSING", "", "empty calendar, kept the saved file")
+        return prior
+    merged.to_csv(path, index=False)
+    STAMPS["nasdaq_earnings"] = today_et()
+    note = "%d rows, %d weekdays" % (len(merged), len(days))
+    if failed:
+        note += ", %d days failed and kept prior rows" % failed
+    log("Earnings dates (Nasdaq calendar)", "OK", today_et(), note)
+    return merged
+
+
+def load_finnhub_websites(tickers, cfg, cache, mode):
+    """Optional company websites. Runs only when FINNHUB_API_KEY is already in the environment."""
+    path = os.path.join(cache, "finnhub_profiles.csv")
+    prior = read_csv(path)
+    key = profiles.finnhub_api_key()
+    if not key:
+        log("Company websites (Finnhub)", "OK", "", "skipped; no FINNHUB_API_KEY")
+        return prior
+    if mode != "full":
+        log("Company websites (Finnhub)", "OK" if len(prior) else "MISSING", STAMPS.get("finnhub_websites", ""),
+            "reused cache" if len(prior) else "no cache")
+        return prior
+    have = set()
+    if len(prior) and "ticker" in prior.columns:
+        filled = prior.copy()
+        if "website" in filled.columns:
+            have = set(filled[filled["website"].astype(str).str.strip() != ""]["ticker"].astype(str))
+    todo = [t for t in tickers if t not in have][:60]
+    if not todo:
+        log("Company websites (Finnhub)", "OK", STAMPS.get("finnhub_websites", ""), "already filled")
+        return prior
+    lim = netutil.RateLimiter(1.0)  # well under the free-tier cap
+    headers = {"User-Agent": session_headers(cfg).get("User-Agent", "Mozilla/5.0")}
+    rows, fails = [], 0
+    for i, t in enumerate(todo):
+        url = "https://finnhub.io/api/v1/stock/profile2?symbol=%s&token=%s" % (t, key)
+        try:
+            r = netutil.http_get(requests, url, headers, 30, limiter=lim, max_tries=2)
+            rows.append(profiles.parse_finnhub_profile(r.json(), t))
+        except Exception:
+            fails += 1
+    fresh = pd.DataFrame(rows)
+    if not len(fresh):
+        log("Company websites (Finnhub)", "CACHED" if len(prior) else "MISSING", "", "kept the saved websites")
+        return prior
+    if len(prior) and "ticker" in prior.columns:
+        keep = prior[~prior["ticker"].astype(str).isin(set(fresh["ticker"].astype(str)))]
+        fresh = pd.concat([keep, fresh], ignore_index=True)
+    fresh.to_csv(path, index=False)
+    STAMPS["finnhub_websites"] = today_et()
+    log("Company websites (Finnhub)", "OK", today_et(), "%d names, %d failed" % (len(fresh), fails))
+    return fresh
 
 
 def load_yahoo(tickers, cfg, cache, mode):
@@ -2023,7 +2354,7 @@ def _parse_int(v):
         return None
 
 
-def load_holders(tickers, cfg, cache, mode):
+def load_holders(tickers, cfg, cache, mode, clock=None, budget_sec=None):
     path = os.path.join(cache, "holders.csv")
     detail_p = os.path.join(cache, "holder_rows.csv")
     summary, detail = read_csv(path), read_csv(detail_p)
@@ -2041,18 +2372,29 @@ def load_holders(tickers, cfg, cache, mode):
     have = set(summary["ticker"].astype(str)) if len(summary) and "ticker" in summary.columns else set()
     cycle = load_named_cycle(cache, "holders")
     done = progress_load(cache, "holders")
+    full = ownership_full_on() and mode == "full"
+    batch = holders_batch_per_run(settings, len(tickers), mode)
     if missing_parts:
         print("13F cache has no holdings total; refreshing a batch so ownership is not just capped")
     pool = slow_refresh_pool(
         list(tickers), have, {} if missing_parts else cycle, today_et(),
-        settings["batch_per_run"], settings["refresh_every_days"], done)
+        batch, settings["refresh_every_days"], done)
     if not pool:
         STAMPS["holders"] = today_et()
         note = "reused cache (at most %d names a full run, again after %d days)" % (
-            settings["batch_per_run"], settings["refresh_every_days"])
+            batch, settings["refresh_every_days"])
+        if full:
+            note = "ownership_full: every name already fetched today"
+            write_ownership_status(cache, {
+                "active": True, "chain": False, "waiting": 0, "fetched_this_run": 0,
+                "done_today": len(done), "universe": len(tickers), "stopped_for_budget": False,
+            })
         log("Institutional 13F and insider (Nasdaq)", "OK", today_et(), note)
         return summary, detail
-    print("Nasdaq refreshing %d names (at most %d a full run)" % (len(pool), settings["batch_per_run"]))
+    if full:
+        print("Nasdaq ownership_full refreshing %d of %d names (cap lifted for this run)" % (len(pool), len(tickers)))
+    else:
+        print("Nasdaq refreshing %d names (at most %d a full run)" % (len(pool), batch))
     lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
     headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     sums, rows, fails = [], [], 0
@@ -2061,7 +2403,16 @@ def load_holders(tickers, cfg, cache, mode):
     todo = list(pool)
     if done:
         print("Nasdaq skipping %d names already fetched today" % len(done))
+    clock = clock or time.monotonic
+    budget = ownership_full_budget_sec() if budget_sec is None else budget_sec
+    started = clock()
+    stopped_for_budget = False
+    fetched_now = 0
     for i, t in enumerate(todo):
+        if full and budget is not None and (clock() - started) >= float(budget):
+            stopped_for_budget = True
+            print("Nasdaq ownership_full: stopping after %d names to finish this run inside the 120-minute limit; %d still waiting" % (i, len(todo) - i))
+            break
         try:
             hurl = "https://api.nasdaq.com/api/company/%s/institutional-holdings?limit=5" % t
             iurl = "https://api.nasdaq.com/api/company/%s/insider-trades?limit=5" % t
@@ -2109,6 +2460,7 @@ def load_holders(tickers, cfg, cache, mode):
                 "as_of": as_of, "insider_buys": buys, "insider_sells": sells,
             })
             done.add(t)
+            fetched_now += 1
         except Exception:
             fails += 1
             if old is not None and t in old.index:
@@ -2127,12 +2479,42 @@ def load_holders(tickers, cfg, cache, mode):
             save_named_cycle(cache, "holders", cycle)
             progress_save(cache, "holders", done)
             checkpoint_progress("nasdaq holders %d/%d" % (i + 1, len(todo)))
+    if sums or rows:
+        # A budget stop can land between 40-name checkpoints; flush what we have.
+        summary = merge_ticker_rows(base_summary, sums)
+        if len(summary) and "ticker" in summary.columns:
+            summary = summary.drop_duplicates("ticker", keep="last")
+            summary.to_csv(path, index=False)
+        detail = merge_ticker_rows(base_detail, rows)
+        if len(detail):
+            detail.to_csv(detail_p, index=False)
+        for name in done:
+            cycle[name] = today_et()
+        save_named_cycle(cache, "holders", cycle)
+        progress_save(cache, "holders", done)
+        if fetched_now:
+            checkpoint_progress("nasdaq holders %d/%d" % (fetched_now, len(todo)))
     fail_rate = fails / max(len(todo), 1)
-    if fail_rate > 0.5:
+    waiting = [name for name in tickers if name not in done]
+    if fail_rate > 0.5 and not fetched_now:
         log("Institutional 13F and insider (Nasdaq)", "CACHED" if len(summary) else "MISSING", "", "%d of %d failed" % (fails, len(tickers)))
     else:
         STAMPS["holders"] = today_et()
-        log("Institutional 13F and insider (Nasdaq)", "OK", today_et(), "%d names, %d failed" % (len(summary), fails))
+        note = "%d names, %d failed" % (len(summary), fails)
+        if stopped_for_budget:
+            note += "; stopped to stay inside the 120-minute job, %d waiting for the next ownership_full run" % len(waiting)
+        log("Institutional 13F and insider (Nasdaq)", "OK" if not stopped_for_budget else "PARTIAL", today_et(), note)
+    if full:
+        write_ownership_status(cache, {
+            "active": True,
+            "chain": ownership_should_chain(len(waiting), fetched_now, ownership_full_run_index(), ownership_full_max_runs()),
+            "waiting": len(waiting),
+            "fetched_this_run": fetched_now,
+            "done_today": len(done),
+            "universe": len(tickers),
+            "stopped_for_budget": stopped_for_budget,
+            "run_index": ownership_full_run_index(),
+        })
     return summary, detail
 
 
@@ -2529,7 +2911,7 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
         if len(earnings) and "ticker" in earnings.columns:
             sube = earnings[earnings["ticker"] == t].copy()
             if len(sube):
-                sube["earnings_dt"] = pd.to_datetime(sube["earnings_dt"], utc=True, errors="coerce")
+                sube["earnings_dt"] = profiles.parse_earnings_dt(sube["earnings_dt"])
                 past = sube[pd.to_numeric(sube["eps_actual"], errors="coerce").notna()].sort_values("earnings_dt")
                 if len(past):
                     last = past.iloc[-1]
@@ -2568,7 +2950,10 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
             "ticker": t,
             "company": u.get("company") or inf.get("company") or "",
             "sector": sector,
-            "industry": inf.get("industry") or "",
+            "industry": (str(u.get("industry") or "").strip() or inf.get("industry") or ""),
+            "country": (str(u.get("country") or "").strip() or inf.get("country") or ""),
+            "website": (str(u.get("website") or "").strip() or inf.get("website") or ""),
+            "sector_source": (str(u.get("sector_source") or "").strip() or ""),
             "index_membership": u.get("index_membership") or membership_label(u.get("in_sp500"), u.get("in_ndx100"), u.get("in_growth")),
             "universe": u.get("index_membership") or membership_label(u.get("in_sp500"), u.get("in_ndx100"), u.get("in_growth")),
             "price": round(mkt["price"], 2),
@@ -2600,7 +2985,7 @@ def build_scores(universe, close, high, low, vol, annual, quarters, info, holder
         if len(earnings) and "ticker" in earnings.columns:
             sube = earnings[earnings["ticker"] == t]
             if len(sube):
-                dts = pd.to_datetime(sube["earnings_dt"], utc=True, errors="coerce")
+                dts = profiles.parse_earnings_dt(sube["earnings_dt"])
                 future = dts[dts > pd.Timestamp.now(tz="UTC")]
                 if len(future):
                     nxt = str(future.min().date())
@@ -3427,15 +3812,24 @@ def main(argv=None):
         annual, quarters = pd.DataFrame(), pd.DataFrame()
         info, earnings = pd.DataFrame(), pd.DataFrame()
         holders, holder_rows = pd.DataFrame(), pd.DataFrame()
+        profiles_df, finnhub_df = pd.DataFrame(), pd.DataFrame()
     else:
         daily_names = core_tickers(universe, hold_tickers, watch_tickers)
         annual, quarters = load_sec(list(universe["ticker"]), cik, cfg, cache, mode, core=daily_names) if cik else (pd.DataFrame(), pd.DataFrame())
         if not cik and score_on:
             log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no CIK map")
-        # Profiles and 13F stay on the original daily list. A full run refreshes a
-        # slice of that list (slow_sources), not every name. Hourly reuses the cache.
+        # Yahoo profiles stay on the original daily list. 13F stays on that list
+        # too, unless ownership_full is on for this run, in which the cap is
+        # lifted and every universe name is eligible. Hourly reuses the cache.
         info, earnings = load_yahoo(daily_names, cfg, cache, mode)
-        holders, holder_rows = load_holders(daily_names, cfg, cache, mode)
+        holder_names = list(universe["ticker"]) if (ownership_full_on() and mode == "full") else daily_names
+        holders, holder_rows = load_holders(holder_names, cfg, cache, mode)
+        # SEC profiles and the Nasdaq calendar cover the whole universe. They
+        # do not add Yahoo calls. Finnhub websites run only when a key already exists.
+        profiles_df = load_sec_profiles(list(universe["ticker"]), cik or {}, cfg, cache, mode)
+        nasdaq_cal = load_nasdaq_earnings(cfg, cache, mode)
+        earnings = profiles.merge_earnings_dates(earnings, nasdaq_cal, now=pd.Timestamp.now(tz="UTC"))
+        finnhub_df = load_finnhub_websites(list(universe["ticker"]), cfg, cache, mode)
     if len(annual) or len(quarters):
         annual, quarters = fund.adjust_pershare_for_splits(annual, quarters)
     info = attach_share_market_cap(info, close, annual, quarters)
@@ -3461,6 +3855,19 @@ def main(argv=None):
                     universe.at[i, "company"] = row.get("company")
     if len(universe) and "sector" in universe.columns:
         universe["sector"] = universe["sector"].map(gics_sector)
+    # SIC sectors and names fill blanks only. Wikipedia and Yahoo values stay.
+    if "profiles_df" in locals() and len(profiles_df):
+        universe = profiles.apply_profiles_to_universe(universe, profiles_df)
+        info = profiles.apply_profiles_to_info(info, profiles_df)
+    if "finnhub_df" in locals() and len(finnhub_df):
+        web_only = finnhub_df.copy()
+        for col in ("company", "sector", "industry", "country"):
+            if col in web_only.columns:
+                web_only[col] = ""
+        universe = profiles.apply_profiles_to_universe(universe, web_only)
+        if len(info) and "website" not in info.columns:
+            info["website"] = ""
+        info = profiles.apply_profiles_to_info(info, web_only)
 
     scores, prepared = build_scores(universe, close, high, low, vol, annual, quarters, info, holders, earnings, cfg) if len(close) else (pd.DataFrame(), {})
     scores = apply_feature_blanks(scores, features)
