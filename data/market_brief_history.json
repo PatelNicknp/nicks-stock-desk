@@ -131,6 +131,24 @@
       "qqq_day_pct": -0.49,
       "next_day_spy_pct": null,
       "next_day_direction": null
+    },
+    {
+      "date": "2026-11-10",
+      "slot": "evening_close",
+      "mood": "Mixed",
+      "regime": "uptrend",
+      "causes": [
+        "ai_mood",
+        "inflation"
+      ],
+      "sources": [
+        "CNBC",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": -0.37,
+      "qqq_day_pct": -0.68,
+      "next_day_spy_pct": null,
+      "next_day_direction": null
     }
   ],
   "aggregates": {

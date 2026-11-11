@@ -1,14 +1,23 @@
 trade_id,ticker,company,signal_date,signal_total,status,entry_date,entry_price,shares,cost,stop,target,last_date,last_close,days_held,exit_date,exit_price,exit_reason,exit_words,pnl,pnl_pct,market_value,note
-2026-11-03-LLY,LLY,Lilly (Eli),2026-11-03,3.0,OPEN,2026-11-04,1440.0,0.6944,999.94,1318.31,1701.05,2026-11-09,1411.95,4.0,,,,,-19.48,-1.95,980.46,Bought at the open on 2026-11-04.
-2026-11-03-CHD,CHD,Church & Dwight,2026-11-03,2.0,OPEN,2026-11-04,111.0,9.009,1000.0,102.72,132.54,2026-11-09,111.31,4.0,,,,,2.79,0.28,1002.79,Bought at the open on 2026-11-04.
-2026-11-09-AIZ,AIZ,Assurant,2026-11-09,4.0,PENDING,,,,,295.01,380.65,,,,,,,,,,,Buys at the next session's open.
-2026-11-09-AAPL,AAPL,Apple Inc.,2026-11-09,3.0,PENDING,,,,,326.14,420.83,,,,,,,,,,,Buys at the next session's open.
+2026-11-03-LLY,LLY,Lilly (Eli),2026-11-03,3.0,OPEN,2026-11-04,1440.0,0.6944,999.94,1318.31,1701.05,2026-11-10,1432.29,5.0,,,,,-5.35,-0.54,994.58,Bought at the open on 2026-11-04.
+2026-11-03-CHD,CHD,Church & Dwight,2026-11-03,2.0,OPEN,2026-11-04,111.0,9.009,1000.0,102.72,132.54,2026-11-10,111.76,5.0,,,,,6.85,0.68,1006.85,Bought at the open on 2026-11-04.
+2026-11-09-AIZ,AIZ,Assurant,2026-11-09,4.0,OPEN,2026-11-10,318.75,3.1373,1000.01,295.01,380.65,2026-11-10,322.16,1.0,,,,,10.7,1.07,1010.71,Bought at the open on 2026-11-10.
+2026-11-09-AAPL,AAPL,Apple Inc.,2026-11-09,3.0,OPEN,2026-11-10,351.545,2.8446,1000.0,326.14,420.83,2026-11-10,348.51,1.0,,,,,-8.63,-0.86,991.37,Bought at the open on 2026-11-10.
 2026-11-09-LLY,LLY,Lilly (Eli),2026-11-09,3.0,SKIPPED,,,,,1318.73,1701.59,,,,,,,,,,,Already held.
-2026-11-09-MET,MET,MetLife,2026-11-09,3.0,PENDING,,,,,95.75,123.55,,,,,,,,,,,Buys at the next session's open.
-2026-11-09-MSFT,MSFT,Microsoft,2026-11-09,3.0,PENDING,,,,,516.89,666.96,,,,,,,,,,,Buys at the next session's open.
-2026-11-09-KO,KO,Coca-Cola Company (The),2026-11-09,2.0,PENDING,,,,,89.31,115.24,,,,,,,,,,,Buys at the next session's open.
-2026-11-09-ICE,ICE,Intercontinental Exchange,2026-11-09,2.0,PENDING,,,,,162.68,209.9,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-MET,MET,MetLife,2026-11-09,3.0,OPEN,2026-11-10,102.09,9.7953,1000.0,95.75,123.55,2026-11-10,102.44,1.0,,,,,3.43,0.34,1003.43,Bought at the open on 2026-11-10.
+2026-11-09-MSFT,MSFT,Microsoft,2026-11-09,3.0,OPEN,2026-11-10,543.41,1.8402,999.98,516.89,666.96,2026-11-10,533.16,1.0,,,,,-18.86,-1.89,981.12,Bought at the open on 2026-11-10.
+2026-11-09-KO,KO,Coca-Cola Company (The),2026-11-09,2.0,OPEN,2026-11-10,96.65,10.3466,1000.0,89.31,115.24,2026-11-10,96.91,1.0,,,,,2.69,0.27,1002.69,Bought at the open on 2026-11-10.
+2026-11-09-ICE,ICE,Intercontinental Exchange,2026-11-09,2.0,OPEN,2026-11-10,173.94,5.7491,1000.0,162.68,209.9,2026-11-10,176.36,1.0,,,,,13.91,1.39,1013.91,Bought at the open on 2026-11-10.
 2026-11-09-CHD,CHD,Church & Dwight,2026-11-09,2.0,SKIPPED,,,,,104.19,134.44,,,,,,,,,,,Already held.
-2026-11-09-WAT,WAT,Waters Corporation,2026-11-09,2.0,PENDING,,,,,446.47,576.08,,,,,,,,,,,Buys at the next session's open.
-2026-11-09-WELL,WELL,Welltower,2026-11-09,2.0,PENDING,,,,,233.54,301.34,,,,,,,,,,,Buys at the next session's open.
+2026-11-09-WAT,WAT,Waters Corporation,2026-11-09,2.0,OPEN,2026-11-10,470.0,2.1277,1000.02,446.47,576.08,2026-11-10,475.52,1.0,,,,,11.74,1.17,1011.76,Bought at the open on 2026-11-10.
+2026-11-09-WELL,WELL,Welltower,2026-11-09,2.0,OPEN,2026-11-10,245.8,4.0683,999.99,233.54,301.34,2026-11-10,247.66,1.0,,,,,7.57,0.76,1007.56,Bought at the open on 2026-11-10.
 2026-11-09-XEL,XEL,Xcel Energy,2026-11-09,2.0,SKIPPED,,,,,76.04,98.11,,,,,,,,,,,No free slot (max 10 open).
+2026-11-10-AIZ,AIZ,Assurant,2026-11-10,3.0,SKIPPED,,,,,299.61,386.59,,,,,,,,,,,Already held.
+2026-11-10-KO,KO,Coca-Cola Company (The),2026-11-10,3.0,SKIPPED,,,,,90.13,116.29,,,,,,,,,,,Already held.
+2026-11-10-SPG,SPG,Simon Property Group,2026-11-10,3.0,SKIPPED,,,,,218.07,281.38,,,,,,,,,,,No free slot (max 10 open).
+2026-11-10-MET,MET,MetLife,2026-11-10,3.0,SKIPPED,,,,,95.75,123.55,,,,,,,,,,,Already held.
+2026-11-10-DIS,DIS,Walt Disney Company (The),2026-11-10,2.0,SKIPPED,,,,,110.87,143.05,,,,,,,,,,,No free slot (max 10 open).
+2026-11-10-ICE,ICE,Intercontinental Exchange,2026-11-10,2.0,SKIPPED,,,,,164.01,211.63,,,,,,,,,,,Already held.
+2026-11-10-LLY,LLY,Lilly (Eli),2026-11-10,2.0,SKIPPED,,,,,1332.03,1718.75,,,,,,,,,,,Already held.
+2026-11-10-WELL,WELL,Welltower,2026-11-10,2.0,SKIPPED,,,,,233.54,301.34,,,,,,,,,,,Already held.
+2026-11-10-PNW,PNW,Pinnacle West Capital,2026-11-10,2.0,SKIPPED,,,,,100.2,129.29,,,,,,,,,,,No free slot (max 10 open).
