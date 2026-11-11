@@ -148,6 +148,24 @@
       ],
       "spy_day_pct": -0.37,
       "qqq_day_pct": -0.68,
+      "next_day_spy_pct": 0.91,
+      "next_day_direction": "up"
+    },
+    {
+      "date": "2026-11-11",
+      "slot": "morning_open",
+      "mood": "Mixed",
+      "regime": "uptrend",
+      "causes": [
+        "ai_mood",
+        "inflation"
+      ],
+      "sources": [
+        "Reuters",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": 0.91,
+      "qqq_day_pct": 1.93,
       "next_day_spy_pct": null,
       "next_day_direction": null
     }
@@ -161,24 +179,30 @@
         "n": 4
       },
       "ai_mood": {
-        "up": 3,
+        "up": 4,
         "down": 3,
         "flat": 0,
-        "n": 6
+        "n": 7
       },
       "rates": {
         "up": 1,
         "down": 1,
         "flat": 0,
         "n": 2
+      },
+      "inflation": {
+        "up": 1,
+        "down": 0,
+        "flat": 0,
+        "n": 1
       }
     },
     "by_source": {
       "Reuters": {
-        "up": 2,
+        "up": 3,
         "down": 2,
         "flat": 0,
-        "n": 4
+        "n": 5
       },
       "Federal Reserve": {
         "up": 1,
@@ -205,10 +229,10 @@
         "n": 1
       },
       "CNBC": {
-        "up": 2,
+        "up": 3,
         "down": 1,
         "flat": 0,
-        "n": 3
+        "n": 4
       },
       "MarketWatch": {
         "up": 2,
@@ -217,13 +241,13 @@
         "n": 2
       },
       "Yahoo Finance": {
-        "up": 2,
+        "up": 3,
         "down": 1,
         "flat": 0,
-        "n": 3
+        "n": 4
       }
     },
-    "n_labeled": 6,
+    "n_labeled": 7,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }

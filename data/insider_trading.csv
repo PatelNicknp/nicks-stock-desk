@@ -377,7 +377,7 @@ VRTX,3.0,1.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This d
 VST,3.0,4.0,0.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 VTR,19.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 VTRS,0.0,1.0,0.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
-VYLR,18.0,0.0,,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+VYLR,18.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 VZ,0.0,12.0,-1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 WAB,0.0,9.0,-1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 WAT,2.0,0.0,1.0,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

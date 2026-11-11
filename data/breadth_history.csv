@@ -1,5 +1,4 @@
 date,pct_above_sma20,pct_above_sma50,pct_above_sma100,pct_above_sma200,data_status,note,disclaimer
-2026-04-23,71.4,65.1,60.9,63.9,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-24,70.2,64.9,60.0,63.1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-27,68.4,65.4,60.5,63.5,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-04-28,64.5,64.3,59.8,62.9,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
@@ -139,3 +138,4 @@ date,pct_above_sma20,pct_above_sma50,pct_above_sma100,pct_above_sma200,data_stat
 2026-11-06,52.5,49.9,46.1,53.1,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-11-09,64.6,59.2,52.9,58.4,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
 2026-11-10,62.7,57.1,51.6,57.3,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
+2026-11-11,62.3,56.8,51.5,57.2,OK,,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."
