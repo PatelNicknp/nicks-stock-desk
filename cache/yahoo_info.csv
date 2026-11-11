@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-BE,Bloom Energy Corporation,Industrials,Electrical Equipment & Parts,36.7371,2.17241,26.0,283.84616,295.0,57802649600,1792699200.0
-BEN,"Franklin Templeton, Inc.",Financial Services,Asset Management,10.091947,2.61538,13.0,36.84615,36.0,18500993024,1793971800.0
-BF-B,Brown Forman Inc,Consumer Defensive,Beverages - Wineries & Distilleries,17.743677,3.22222,17.0,28.25882,28.0,13954062336,1796304600.0
-BG,Bunge Limited,Consumer Defensive,Farm Products,9.195614,1.55556,9.0,139.22221,140.0,19476654080,1793277000.0
-BIIB,Biogen Inc.,Healthcare,Drug Manufacturers - General,15.9367075,1.77778,32.0,268.2603,271.0,38301696000,1793190600.0
-BKNG,Booking Holdings Inc. Common St,Consumer Cyclical,Travel Services,13.236622,1.54054,35.0,215.8,215.0,120613462016,1793739600.0
-BKR,Baker Hughes Company,Energy,Oil & Gas Equipment & Services,17.243753,1.56,24.0,70.125,70.5,48521814016,1793131200.0
-BLK,"BlackRock, Inc.",Financial Services,Asset Management,18.84515,1.38889,17.0,1361.0588,1350.0,188637478912,1791981000.0
-BMY,Bristol-Myers Squibb Company,Healthcare,Drug Manufacturers - General,9.362391,2.5,24.0,65.25,65.5,128072196096,1793277000.0
-BNY,The Bank of New York Mellon Cor,Financial Services,Banks - Diversified,14.585227,2.11765,15.0,163.7,165.0,102455525376,1800019800.0
-BR,"Broadridge Financial Solutions,",Technology,Information Technology Services,16.605844,2.33333,8.0,209.25,213.0,21729970176,1793712600.0
-BRK-B,Berkshire Hathaway Inc. New,Financial Services,Insurance - Diversified,25.574772,,3.0,555.6667,529.0,1228082380800,1794085200.0
-BRO,"Brown & Brown, Inc.",Financial Services,Insurance Brokers,15.06915,2.57143,18.0,74.77778,75.5,23759085568,1793044800.0
-BSX,Boston Scientific Corporation,Healthcare,Medical Devices,14.0420475,1.93548,28.0,49.59857,49.0,63720730624,1793190600.0
-BX,Blackstone Inc.,Financial Services,Asset Management,16.898535,2.08333,22.0,138.86365,134.5,153932316672,1792672200.0
-BXP,"BXP, Inc.",Real Estate,REIT - Office,32.03164,2.18182,20.0,73.6,70.0,12068634624,1793131200.0
-C,"Citigroup, Inc.",Financial Services,Banks - Diversified,9.342589,1.65217,21.0,150.59525,150.0,202001154048,1799933400.0
-CAH,"Cardinal Health, Inc.",Healthcare,Medical Distribution,19.169487,1.52941,15.0,291.53333,290.0,63331442688,1793885400.0
-CARR,Carrier Global Corporation,Industrials,Building Products & Equipment,16.93139,2.07692,23.0,68.70087,70.0,44086558720,1793277000.0
-CASY,"Caseys General Stores, Inc.",Consumer Cyclical,Specialty Retail,29.224304,1.6,19.0,788.6842,775.0,25394778112,1788897600.0
-CAT,"Caterpillar, Inc.",Industrials,Farm & Heavy Construction Machinery,18.435265,1.96552,26.0,823.4139,800.0,272031727616,1793277000.0
-CB,Chubb Limited,Financial Services,Insurance - Property & Casualty,12.382178,2.48,23.0,373.21738,374.0,139428364288,1792526400.0
-CBOE,"Cboe Global Markets, Inc.",Financial Services,Financial Data & Stock Exchanges,23.034864,2.66667,15.0,355.6,350.0,37193728000,1793363400.0
-CBRE,CBRE Group Inc,Real Estate,Real Estate Services,15.8030615,1.53846,12.0,172.0,170.5,40364765184,1792672200.0
-CCEP,Coca-Cola Europacific Partners ,Consumer Defensive,Beverages - Non-Alcoholic,21.21977,2.0,12.0,115.1473,119.50739,51628097536,
 CCI,Crown Castle Inc.,Real Estate,REIT - Specialty,30.378036,2.13636,21.0,93.49524,91.0,37859315712,1792612800.0
 CCL,Carnival Corporation Ltd.,Consumer Cyclical,Travel Services,11.926859,1.63333,27.0,33.48889,33.0,41290559488,1790685000.0
 CDNS,"Cadence Design Systems, Inc.",Technology,Software - Application,34.229633,1.33333,24.0,411.7604,420.0,92465725440,1793044800.0
@@ -523,3 +498,28 @@ BALL,Ball Corporation,Consumer Cyclical,Packaging & Containers,14.931412,1.71429
 BAX,Baxter International Inc.,Healthcare,Medical Instruments & Supplies,12.916094,2.86667,12.0,27.25,26.0,13668339712,1793277000.0
 BBY,"Best Buy Co., Inc.",Consumer Cyclical,Specialty Retail,14.421699,2.8,20.0,89.05,90.0,21832652800,1795527000.0
 BDX,"Becton, Dickinson and Company",Healthcare,Medical Instruments & Supplies,14.944782,2.0,14.0,226.14285,227.5,57912160256,1793885400.0
+BE,Bloom Energy Corporation,Industrials,Electrical Equipment & Parts,34.827785,2.17241,26.0,283.84616,295.0,54798508032,1792699200.0
+BEN,"Franklin Templeton, Inc.",Financial Services,Asset Management,10.029489,2.61538,13.0,36.92308,36.0,18598625280,1793971800.0
+BF-B,Brown Forman Inc,Consumer Defensive,Beverages - Wineries & Distilleries,17.982904,3.22222,17.0,28.25882,28.0,14142196736,1796304600.0
+BG,Bunge Limited,Consumer Defensive,Farm Products,9.019168,1.55556,9.0,139.22221,140.0,19102932992,1793277000.0
+BIIB,Biogen Inc.,Healthcare,Drug Manufacturers - General,15.576285,1.77778,32.0,268.2603,271.0,37435469824,1793190600.0
+BKNG,Booking Holdings Inc. Common St,Consumer Cyclical,Travel Services,12.993349,1.54054,35.0,215.65714,215.0,118441852928,1793739600.0
+BKR,Baker Hughes Company,Energy,Oil & Gas Equipment & Services,16.922073,1.56,24.0,70.125,70.5,47439360000,1793131200.0
+BLK,"BlackRock, Inc.",Financial Services,Asset Management,18.854252,1.38889,17.0,1361.0588,1350.0,188728590336,1791981000.0
+BMY,Bristol-Myers Squibb Company,Healthcare,Drug Manufacturers - General,9.374058,2.5,24.0,65.25,65.5,128368590848,1793277000.0
+BNY,The Bank of New York Mellon Cor,Financial Services,Banks - Diversified,14.478135,,15.0,163.7,165.0,101701877760,1800019800.0
+BR,"Broadridge Financial Solutions,",Technology,Information Technology Services,16.678452,2.33333,8.0,209.25,213.0,21824980992,1793712600.0
+BRK-B,Berkshire Hathaway Inc. New,Financial Services,Insurance - Diversified,25.960896,2.25,3.0,555.6667,529.0,1239317086208,1794085200.0
+BRO,"Brown & Brown, Inc.",Financial Services,Insurance Brokers,15.123848,2.57143,18.0,74.77778,75.5,23845326848,1793044800.0
+BSX,Boston Scientific Corporation,Healthcare,Medical Devices,14.278003,1.93548,28.0,49.59857,49.0,64791457792,1793190600.0
+BX,Blackstone Inc.,Financial Services,Asset Management,16.606468,2.08333,22.0,138.86365,134.5,151247781888,1792672200.0
+BXP,"BXP, Inc.",Real Estate,REIT - Office,30.463861,2.18182,20.0,73.6,70.0,11477939200,1793131200.0
+C,"Citigroup, Inc.",Financial Services,Banks - Diversified,9.360196,1.65217,21.0,150.59525,150.0,202381852672,1799933400.0
+CAH,"Cardinal Health, Inc.",Healthcare,Medical Distribution,19.309845,1.52941,15.0,293.26666,290.0,63976316928,1793885400.0
+CARR,Carrier Global Corporation,Industrials,Building Products & Equipment,16.656454,2.07692,23.0,68.70087,70.0,43370672128,1793277000.0
+CASY,"Caseys General Stores, Inc.",Consumer Cyclical,Specialty Retail,29.708975,1.6,19.0,788.6842,775.0,25815937024,1788897600.0
+CAT,"Caterpillar, Inc.",Industrials,Farm & Heavy Construction Machinery,18.127872,1.96552,26.0,823.4139,800.0,267495833600,1793277000.0
+CB,Chubb Limited,Financial Services,Insurance - Property & Casualty,12.524349,2.48,23.0,373.21738,374.0,141029261312,1792526400.0
+CBOE,"Cboe Global Markets, Inc.",Financial Services,Financial Data & Stock Exchanges,23.571806,2.66667,15.0,355.6,350.0,38060711936,1793363400.0
+CBRE,CBRE Group Inc,Real Estate,Real Estate Services,15.208443,1.53846,12.0,172.0,170.5,38845972480,1792672200.0
+CCEP,Coca-Cola Europacific Partners ,Consumer Defensive,Beverages - Non-Alcoholic,21.208523,2.0,12.0,114.76141,119.106895,51565088768,
