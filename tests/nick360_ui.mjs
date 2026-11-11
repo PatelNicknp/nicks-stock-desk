@@ -68,6 +68,17 @@ const link = await page.$eval("#nick360-open", (el) => ({
 }));
 if (link.target !== "_blank" || !String(link.rel).includes("noopener") || !String(link.rel).includes("noreferrer")) fail("new tab link is not safe: " + JSON.stringify(link));
 if (link.text !== "Nick 360" || link.href !== "nick360/index.html") fail("overview button mismatch " + JSON.stringify(link));
+const runBtn = await page.$eval("#run-everything-open", (el) => ({
+  target: el.getAttribute("target"),
+  rel: el.getAttribute("rel"),
+  text: el.textContent.trim(),
+  href: el.getAttribute("href"),
+}));
+if (runBtn.text !== "Run everything") fail("run everything label " + JSON.stringify(runBtn));
+if (runBtn.href !== "https://github.com/PatelNicknp/nicks-stock-desk/actions/workflows/update.yml") fail("run everything href " + JSON.stringify(runBtn));
+if (runBtn.target !== "_blank" || !String(runBtn.rel).includes("noopener") || !String(runBtn.rel).includes("noreferrer")) fail("run everything is not a safe new tab: " + JSON.stringify(runBtn));
+const last = await page.$eval("#run-everything-updated", (el) => el.textContent.trim());
+if (!last.startsWith("Last update:")) fail("last update label missing: " + last);
 const deskSheets = await page.evaluate(() => Array.from(document.styleSheets).map((s) => s.href || ""));
 if (deskSheets.some((href) => href.includes("nick360.css"))) fail("Nick 360 CSS loaded on the stock box");
 const h1 = await page.$eval("h1", (el) => getComputedStyle(el).fontFamily);
