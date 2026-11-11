@@ -15,5 +15,10 @@
  "listed_common": "2026-11-10",
  "liquid_names": "2026-11-10",
  "prices_full_refresh": "2026-11-05",
- "trading_floor_news": "2026-11-10"
+ "trading_floor_news": "2026-11-10",
+ "sec_companyfacts_zip": "2026-11-10",
+ "sec_facts_bulk": "2026-11-10",
+ "sec_submissions_zip": "2026-11-10",
+ "sec_profiles": "2026-11-10",
+ "nasdaq_earnings": "2026-11-10"
 }

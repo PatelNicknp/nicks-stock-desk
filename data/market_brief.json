@@ -3,10 +3,10 @@
   "feature": "market_news",
   "session": "2026-11-10",
   "slot": "evening_close",
-  "updated_pt": "2026-11-10 16:05 PT",
+  "updated_pt": "2026-11-10 19:42 PT",
   "price_as_of": "2026-11-10",
-  "why_moved": "The market fell: S&P -0.4%, Nasdaq -0.7%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-1.1%) and Materials (-0.2%); leading sectors Financials (0.5%) and Energy (0.4%) held up. The move was fairly broad: 983 stocks fell and 719 rose.",
-  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -0.7%), dragged by Technology (-1.1%), while Financials (0.5%) and Energy (0.4%) held up (719 stocks up, 983 down).",
+  "why_moved": "The market fell: S&P -0.4%, Nasdaq -0.7%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-1.1%) and Materials (-0.2%); leading sectors Financials (0.5%) and Energy (0.4%) held up. The move was fairly broad: 1450 stocks fell and 1010 rose.",
+  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -0.7%), dragged by Technology (-1.1%), while Financials (0.5%) and Energy (0.4%) held up (1010 stocks up, 1450 down).",
   "story": {
     "direction": "down",
     "date_label": "November 10, 2026",
@@ -14,7 +14,7 @@
     "clear_cause": true,
     "cause": "ai_mood",
     "lead": "Tech led stocks lower.",
-    "support": "Why JPMorgan Says SAP (SAP) Is “No Longer Priced For AI Disruption”.",
+    "support": "Exclusive-Microsoft presses Trump to scuttle ban on Chinese data center tech.",
     "support_ref": 1,
     "bullets": [
       {
@@ -24,7 +24,7 @@
       },
       {
         "lead": "More stocks fell than rose.",
-        "rest": "983 stocks fell and 719 rose.",
+        "rest": "1450 stocks fell and 1010 rose.",
         "ref": null
       },
       {
@@ -79,16 +79,16 @@
     "news": [
       {
         "n": 1,
-        "title": "Why JPMorgan Says SAP (SAP) Is “No Longer Priced For AI Disruption”",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/why-jpmorgan-says-sap-sap-222205895.html?.tsrc=rss",
+        "title": "Exclusive-Microsoft presses Trump to scuttle ban on Chinese data center tech",
+        "source": "Reuters",
+        "via": "Investing.com",
+        "url": "https://www.investing.com/news/stock-market-news/exclusivemicrosoft-presses-trump-to-scuttle-expected-ban-on-chinese-data-center-technology-5014745",
         "published": "2026-11-10",
-        "published_at": "2026-11-10T22:22:05+00:00",
-        "date_label": "Nov 10, 2:22 PM PT",
-        "age_label": "1h ago",
-        "region": "US",
-        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
+        "published_at": "2026-11-11T01:06:40+00:00",
+        "date_label": "Nov 10, 5:06 PM PT",
+        "age_label": "2h ago",
+        "region": "Global",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 2,
@@ -99,38 +99,12 @@
         "published": "2026-11-10",
         "published_at": "2026-11-10T22:25:02+00:00",
         "date_label": "Nov 10, 2:25 PM PT",
-        "age_label": "1h ago",
+        "age_label": "5h ago",
         "region": "US",
         "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 3,
-        "title": "Dow Jones Futures: Stock Market Falls On Surging Treasury Yields, Nvidia Sell-Off; CoreWeave Rises Late",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures%3A-stock.html?.tsrc=rss",
-        "published": "2026-11-10",
-        "published_at": "2026-11-10T23:54:32+00:00",
-        "date_label": "Nov 10, 3:54 PM PT",
-        "age_label": "just now",
-        "region": "US",
-        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
-      },
-      {
-        "n": 4,
-        "title": "Stock Market Today, Nov. 10: Wall Street's Rally Hits a Roadblock as Hot Inflation Raises the Stakes for the Fed",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-wall-street-s-rally-hits-a-roadblock-as-hot-inflation-raises-the-stakes-for-the-fed/?.tsrc=rss",
-        "published": "2026-11-10",
-        "published_at": "2026-11-10T22:50:07+00:00",
-        "date_label": "Nov 10, 2:50 PM PT",
-        "age_label": "1h ago",
-        "region": "US",
-        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
-      },
-      {
-        "n": 5,
         "title": "Stock Market Today, Nov. 10: Opendoor Shares Fall on CPI Data Despite Revenue Above $1 Billion",
         "source": "Yahoo Finance",
         "via": "",
@@ -138,25 +112,38 @@
         "published": "2026-11-10",
         "published_at": "2026-11-10T22:24:36+00:00",
         "date_label": "Nov 10, 2:24 PM PT",
-        "age_label": "1h ago",
+        "age_label": "5h ago",
         "region": "Global",
         "why": "Possible transmission: an inflation print can shift rate expectations. This is not proof it caused the day's move."
       },
       {
-        "n": 6,
-        "title": "Stock Market Today, Nov. 10: Nvidia Stock Plunges 5.5% as CEO Scandal Overshadows Its Upcoming Earnings Report",
+        "n": 4,
+        "title": "S&P 500 Sell-Off: 1 Investing Step to Take Right Now, and 1 Risky Move to Avoid",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-nvidia-stock-plunges-5-5-as-ceo-scandal-overshadows-its-upcoming-earnings-report/?.tsrc=rss",
+        "url": "https://www.fool.com/investing/2026/11/10/sp-500-sell-off-1-investing-step-to-take-right-now/?.tsrc=rss",
         "published": "2026-11-10",
-        "published_at": "2026-11-10T22:35:02+00:00",
-        "date_label": "Nov 10, 2:35 PM PT",
-        "age_label": "1h ago",
-        "region": "Global",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+        "published_at": "2026-11-11T03:05:00+00:00",
+        "date_label": "Nov 10, 7:05 PM PT",
+        "age_label": "just now",
+        "region": "US",
+        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
       },
       {
-        "n": 7,
+        "n": 5,
+        "title": "Dow Jones Futures Rise As CoreWave Jumps, Lifts AI Stocks; Look For This Bullish Signal",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures-rise-as.html?.tsrc=rss",
+        "published": "2026-11-10",
+        "published_at": "2026-11-11T03:39:04+00:00",
+        "date_label": "Nov 10, 7:39 PM PT",
+        "age_label": "just now",
+        "region": "US",
+        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
+      },
+      {
+        "n": 6,
         "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
         "source": "CNBC",
         "via": "",
@@ -164,9 +151,22 @@
         "published": "2026-11-09",
         "published_at": "2026-11-09T18:14:47+00:00",
         "date_label": "Nov 9, 10:14 AM PT",
-        "age_label": "29h ago",
+        "age_label": "33h ago",
         "region": "Global",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 7,
+        "title": "U.S. stock futures tick higher after Wall St slips on hot CPI, Nvidia losses",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-tick-higher-011241932.html?.tsrc=rss",
+        "published": "2026-11-10",
+        "published_at": "2026-11-11T01:12:41+00:00",
+        "date_label": "Nov 10, 5:12 PM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
@@ -176,9 +176,9 @@
     "vix": 19.46,
     "put_call_zone": "Greed",
     "put_call": 0.56,
-    "advancers": 719,
-    "decliners": 983,
-    "why": "VIX 19.5, put/call Greed, 719 up / 983 down"
+    "advancers": 1010,
+    "decliners": 1450,
+    "why": "VIX 19.5, put/call Greed, 1010 up / 1450 down"
   },
   "headlines": [
     {
@@ -197,47 +197,9 @@
       "region": "US",
       "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
       "published_pt": "Nov 10, 2:25 PM PT",
-      "age_label": "1h ago",
+      "age_label": "5h ago",
       "wrap": 15.0,
       "rank": 21.0
-    },
-    {
-      "title": "Dow Jones Futures: Stock Market Falls On Surging Treasury Yields, Nvidia Sell-Off; CoreWeave Rises Late",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures%3A-stock.html?.tsrc=rss",
-      "published": "2026-11-10",
-      "published_at": "2026-11-10T23:54:32+00:00",
-      "trusted": true,
-      "causes": [
-        "rates",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 10, 3:54 PM PT",
-      "age_label": "just now",
-      "wrap": 15.0,
-      "rank": 16.0
-    },
-    {
-      "title": "Stock Market Today, Nov. 10: Wall Street's Rally Hits a Roadblock as Hot Inflation Raises the Stakes for the Fed",
-      "source": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-wall-street-s-rally-hits-a-roadblock-as-hot-inflation-raises-the-stakes-for-the-fed/?.tsrc=rss",
-      "published": "2026-11-10",
-      "published_at": "2026-11-10T22:50:07+00:00",
-      "trusted": true,
-      "causes": [
-        "rates",
-        "inflation"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 10, 2:50 PM PT",
-      "age_label": "1h ago",
-      "wrap": 10.0,
-      "rank": 15.5
     },
     {
       "title": "Stock Market Today, Nov. 10: Opendoor Shares Fall on CPI Data Despite Revenue Above $1 Billion",
@@ -253,27 +215,62 @@
       "region": "Global",
       "why": "Possible transmission: an inflation print can shift rate expectations. This is not proof it caused the day's move.",
       "published_pt": "Nov 10, 2:24 PM PT",
-      "age_label": "1h ago",
+      "age_label": "5h ago",
       "wrap": 10.0,
       "rank": 14.0
     },
     {
-      "title": "Stock Market Today, Nov. 10: Nvidia Stock Plunges 5.5% as CEO Scandal Overshadows Its Upcoming Earnings Report",
+      "title": "S&P 500 Sell-Off: 1 Investing Step to Take Right Now, and 1 Risky Move to Avoid",
       "source": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-nvidia-stock-plunges-5-5-as-ceo-scandal-overshadows-its-upcoming-earnings-report/?.tsrc=rss",
+      "url": "https://www.fool.com/investing/2026/11/10/sp-500-sell-off-1-investing-step-to-take-right-now/?.tsrc=rss",
       "published": "2026-11-10",
-      "published_at": "2026-11-10T22:35:02+00:00",
+      "published_at": "2026-11-11T03:05:00+00:00",
+      "trusted": true,
+      "causes": [],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
+      "published_pt": "Nov 10, 7:05 PM PT",
+      "age_label": "just now",
+      "wrap": 10.0,
+      "rank": 12.0
+    },
+    {
+      "title": "Dow Jones Futures Rise As CoreWave Jumps, Lifts AI Stocks; Look For This Bullish Signal",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures-rise-as.html?.tsrc=rss",
+      "published": "2026-11-10",
+      "published_at": "2026-11-11T03:39:04+00:00",
+      "trusted": true,
+      "causes": [
+        "rates",
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 10, 7:39 PM PT",
+      "age_label": "just now",
+      "wrap": 10.0,
+      "rank": 11.0
+    },
+    {
+      "title": "Exclusive-Microsoft presses Trump to scuttle ban on Chinese data center tech",
+      "source": "Reuters",
+      "url": "https://www.investing.com/news/stock-market-news/exclusivemicrosoft-presses-trump-to-scuttle-expected-ban-on-chinese-data-center-technology-5014745",
+      "published": "2026-11-10",
+      "published_at": "2026-11-11T01:06:40+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
-      "via": "",
+      "via": "Investing.com",
       "region": "Global",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 10, 2:35 PM PT",
-      "age_label": "1h ago",
-      "wrap": 10.0,
-      "rank": 10.5
+      "published_pt": "Nov 10, 5:06 PM PT",
+      "age_label": "2h ago",
+      "wrap": 8.0,
+      "rank": 8.5
     },
     {
       "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
@@ -289,28 +286,29 @@
       "region": "Global",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
       "published_pt": "Nov 9, 10:14 AM PT",
-      "age_label": "29h ago",
+      "age_label": "33h ago",
       "wrap": 8.0,
       "rank": 8.5
     },
     {
-      "title": "Why JPMorgan Says SAP (SAP) Is “No Longer Priced For AI Disruption”",
+      "title": "U.S. stock futures tick higher after Wall St slips on hot CPI, Nvidia losses",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/why-jpmorgan-says-sap-sap-222205895.html?.tsrc=rss",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-tick-higher-011241932.html?.tsrc=rss",
       "published": "2026-11-10",
-      "published_at": "2026-11-10T22:22:05+00:00",
+      "published_at": "2026-11-11T01:12:41+00:00",
       "trusted": true,
       "causes": [
-        "election",
-        "ai_mood"
+        "rates",
+        "ai_mood",
+        "inflation"
       ],
       "via": "",
       "region": "US",
-      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-      "published_pt": "Nov 10, 2:22 PM PT",
-      "age_label": "1h ago",
+      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 10, 5:12 PM PT",
+      "age_label": "2h ago",
       "wrap": 5.0,
-      "rank": 10.5
+      "rank": 18.5
     }
   ],
   "causes": [
@@ -335,16 +333,16 @@
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
           "published_pt": "Nov 10, 2:25 PM PT",
-          "age_label": "1h ago",
+          "age_label": "5h ago",
           "wrap": 15.0,
           "rank": 21.0
         },
         {
-          "title": "Dow Jones Futures: Stock Market Falls On Surging Treasury Yields, Nvidia Sell-Off; CoreWeave Rises Late",
+          "title": "Dow Jones Futures Rise As CoreWave Jumps, Lifts AI Stocks; Look For This Bullish Signal",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures%3A-stock.html?.tsrc=rss",
+          "url": "https://finance.yahoo.com/m/656fca57-9896-3dfb-96e8-e0af2bc227df/dow-jones-futures-rise-as.html?.tsrc=rss",
           "published": "2026-11-10",
-          "published_at": "2026-11-10T23:54:32+00:00",
+          "published_at": "2026-11-11T03:39:04+00:00",
           "trusted": true,
           "causes": [
             "rates",
@@ -353,28 +351,28 @@
           "via": "",
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 10, 3:54 PM PT",
+          "published_pt": "Nov 10, 7:39 PM PT",
           "age_label": "just now",
-          "wrap": 15.0,
-          "rank": 16.0
+          "wrap": 10.0,
+          "rank": 11.0
         },
         {
-          "title": "Stock Market Today, Nov. 10: Nvidia Stock Plunges 5.5% as CEO Scandal Overshadows Its Upcoming Earnings Report",
-          "source": "Yahoo Finance",
-          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-nvidia-stock-plunges-5-5-as-ceo-scandal-overshadows-its-upcoming-earnings-report/?.tsrc=rss",
+          "title": "Exclusive-Microsoft presses Trump to scuttle ban on Chinese data center tech",
+          "source": "Reuters",
+          "url": "https://www.investing.com/news/stock-market-news/exclusivemicrosoft-presses-trump-to-scuttle-expected-ban-on-chinese-data-center-technology-5014745",
           "published": "2026-11-10",
-          "published_at": "2026-11-10T22:35:02+00:00",
+          "published_at": "2026-11-11T01:06:40+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
-          "via": "",
+          "via": "Investing.com",
           "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 10, 2:35 PM PT",
-          "age_label": "1h ago",
-          "wrap": 10.0,
-          "rank": 10.5
+          "published_pt": "Nov 10, 5:06 PM PT",
+          "age_label": "2h ago",
+          "wrap": 8.0,
+          "rank": 8.5
         },
         {
           "title": "Goldman CEO Solomon says AI financing remains strong despite market jitters",
@@ -390,28 +388,29 @@
           "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
           "published_pt": "Nov 9, 10:14 AM PT",
-          "age_label": "29h ago",
+          "age_label": "33h ago",
           "wrap": 8.0,
           "rank": 8.5
         },
         {
-          "title": "Why JPMorgan Says SAP (SAP) Is “No Longer Priced For AI Disruption”",
+          "title": "U.S. stock futures tick higher after Wall St slips on hot CPI, Nvidia losses",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/why-jpmorgan-says-sap-sap-222205895.html?.tsrc=rss",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-tick-higher-011241932.html?.tsrc=rss",
           "published": "2026-11-10",
-          "published_at": "2026-11-10T22:22:05+00:00",
+          "published_at": "2026-11-11T01:12:41+00:00",
           "trusted": true,
           "causes": [
-            "election",
-            "ai_mood"
+            "rates",
+            "ai_mood",
+            "inflation"
           ],
           "via": "",
           "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 10, 2:22 PM PT",
-          "age_label": "1h ago",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 10, 5:12 PM PT",
+          "age_label": "2h ago",
           "wrap": 5.0,
-          "rank": 10.5
+          "rank": 18.5
         }
       ]
     },
@@ -436,28 +435,9 @@
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
           "published_pt": "Nov 10, 2:25 PM PT",
-          "age_label": "1h ago",
+          "age_label": "5h ago",
           "wrap": 15.0,
           "rank": 21.0
-        },
-        {
-          "title": "Stock Market Today, Nov. 10: Wall Street's Rally Hits a Roadblock as Hot Inflation Raises the Stakes for the Fed",
-          "source": "Yahoo Finance",
-          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/10/stock-market-today-nov-10-wall-street-s-rally-hits-a-roadblock-as-hot-inflation-raises-the-stakes-for-the-fed/?.tsrc=rss",
-          "published": "2026-11-10",
-          "published_at": "2026-11-10T22:50:07+00:00",
-          "trusted": true,
-          "causes": [
-            "rates",
-            "inflation"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 10, 2:50 PM PT",
-          "age_label": "1h ago",
-          "wrap": 10.0,
-          "rank": 15.5
         },
         {
           "title": "Stock Market Today, Nov. 10: Opendoor Shares Fall on CPI Data Despite Revenue Above $1 Billion",
@@ -473,9 +453,29 @@
           "region": "Global",
           "why": "Possible transmission: an inflation print can shift rate expectations. This is not proof it caused the day's move.",
           "published_pt": "Nov 10, 2:24 PM PT",
-          "age_label": "1h ago",
+          "age_label": "5h ago",
           "wrap": 10.0,
           "rank": 14.0
+        },
+        {
+          "title": "U.S. stock futures tick higher after Wall St slips on hot CPI, Nvidia losses",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-tick-higher-011241932.html?.tsrc=rss",
+          "published": "2026-11-10",
+          "published_at": "2026-11-11T01:12:41+00:00",
+          "trusted": true,
+          "causes": [
+            "rates",
+            "ai_mood",
+            "inflation"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 10, 5:12 PM PT",
+          "age_label": "2h ago",
+          "wrap": 5.0,
+          "rank": 18.5
         }
       ]
     }
@@ -494,8 +494,8 @@
   },
   "regime": {
     "label": "uptrend",
-    "pct_above_50day": 61.3,
-    "pct_above_200day": 58.4,
+    "pct_above_50day": 57.1,
+    "pct_above_200day": 57.3,
     "text": "More than half the desk is still above the 50-day and 200-day."
   },
   "tips": {
@@ -515,12 +515,12 @@
   },
   "prior_brief": {
     "session": "2026-11-10",
-    "slot": "morning_open",
-    "why_moved": "The S&P slipped -0.5% (Nasdaq -0.5%) (418 stocks up, 1291 down).",
+    "slot": "evening_close",
+    "why_moved": "The S&P slipped -0.4% (Nasdaq -0.7%), dragged by Technology (-1.1%), while Financials (0.5%) and Energy (0.4%) held up (719 stocks up, 983 down).",
     "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
-      "Election"
+      "Inflation"
     ]
   },
   "stats": {
@@ -529,10 +529,10 @@
     "qqq_day_pct": -0.68,
     "dia_day_pct": null,
     "vix": 19.46,
-    "advancers": 719,
-    "decliners": 983,
-    "breadth_sma50": 61.3,
-    "breadth_sma200": 58.4,
+    "advancers": 1010,
+    "decliners": 1450,
+    "breadth_sma50": 57.1,
+    "breadth_sma200": 57.3,
     "put_call": 0.56,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
@@ -549,6 +549,7 @@
       ],
       "sources": [
         "CNBC",
+        "Reuters",
         "Yahoo Finance"
       ],
       "spy_day_pct": -0.37,
@@ -634,7 +635,7 @@
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-11T00:09:16.424457+00:00",
+    "retrieved_at": "2026-11-11T03:45:40.467566+00:00",
     "summary": "Not enough verified index closes to call a worldwide move. Session dates are each market's own date, not one global day.",
     "breadth": "unknown",
     "missing": [
@@ -654,14 +655,14 @@
         "pct": -0.37,
         "verified": true,
         "session_date": "2026-11-10",
-        "quote_at": "2026-11-10T16:05:00-08:00",
+        "quote_at": "2026-11-10T19:42:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",
         "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Only 2 Novembers Since 1950 Have Started Worse for the S&P 500 Than This One. Here's What Followed the Other Weak Starts.. Not proof this caused the percent.",
+        "cause": "Possible context from Yahoo Finance: S&P 500 Sell-Off: 1 Investing Step to Take Right Now, and 1 Risky Move to Avoid. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://www.fool.com/investing/2026/11/10/only-2-novembers-since-1950-have-started-worse-for-the-s-and-p-500-than-this-one-here-s-what-followed-the-other-weak-starts/?.tsrc=rss"
+        "cause_url": "https://www.fool.com/investing/2026/11/10/sp-500-sell-off-1-investing-step-to-take-right-now/?.tsrc=rss"
       },
       {
         "id": "sxxp",
@@ -693,9 +694,9 @@
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
-        "cause": "",
-        "cause_source": "",
-        "cause_url": ""
+        "cause": "Possible context from Investing.com: What could drive India’s Nifty higher? BofA outlines key risks. Not proof this caused the percent.",
+        "cause_source": "Investing.com",
+        "cause_url": "https://www.investing.com/news/stock-market-news/what-could-drive-indias-nifty-higher-bofa-outlines-key-risks-5017483"
       }
     ],
     "rows": [
@@ -831,9 +832,9 @@
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
-        "cause": "",
-        "cause_source": "",
-        "cause_url": ""
+        "cause": "Possible context from Investing.com: What could drive India’s Nifty higher? BofA outlines key risks. Not proof this caused the percent.",
+        "cause_source": "Investing.com",
+        "cause_url": "https://www.investing.com/news/stock-market-news/what-could-drive-indias-nifty-higher-bofa-outlines-key-risks-5017483"
       },
       {
         "id": "spy",
@@ -843,14 +844,14 @@
         "pct": -0.37,
         "verified": true,
         "session_date": "2026-11-10",
-        "quote_at": "2026-11-10T16:05:00-08:00",
+        "quote_at": "2026-11-10T19:42:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",
         "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Only 2 Novembers Since 1950 Have Started Worse for the S&P 500 Than This One. Here's What Followed the Other Weak Starts.. Not proof this caused the percent.",
+        "cause": "Possible context from Yahoo Finance: S&P 500 Sell-Off: 1 Investing Step to Take Right Now, and 1 Risky Move to Avoid. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://www.fool.com/investing/2026/11/10/only-2-novembers-since-1950-have-started-worse-for-the-s-and-p-500-than-this-one-here-s-what-followed-the-other-weak-starts/?.tsrc=rss"
+        "cause_url": "https://www.fool.com/investing/2026/11/10/sp-500-sell-off-1-investing-step-to-take-right-now/?.tsrc=rss"
       },
       {
         "id": "qqq",
@@ -860,7 +861,7 @@
         "pct": -0.68,
         "verified": true,
         "session_date": "2026-11-10",
-        "quote_at": "2026-11-10T16:05:00-08:00",
+        "quote_at": "2026-11-10T19:42:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",

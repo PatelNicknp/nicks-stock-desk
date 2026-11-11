@@ -455,9 +455,15 @@ incremental_prices.history_period,5y
 incremental_prices.backfill_per_run,40
 incremental_prices.fast_backfill_per_run,600
 incremental_prices.fast_backfill_max_runs,4
-liquid_names.min_market_cap,10000000000
-liquid_names.max_stocks,2000
+liquid_names.min_market_cap,300000000
+liquid_names.min_price,5
+liquid_names.min_volume,100000
+liquid_names.max_stocks,2500
+sec_facts.full_universe,True
+sec_facts.use_bulk_zip,True
 sec_facts.batch_per_run,120
 sec_facts.refresh_every_days,7
 sec_facts.cik_overrides.XOM,0000034088
+earnings_calendar.days_ahead,60
+earnings_calendar.skip_weekends,True
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

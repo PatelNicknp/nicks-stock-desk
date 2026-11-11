@@ -143,6 +143,7 @@
       ],
       "sources": [
         "CNBC",
+        "Reuters",
         "Yahoo Finance"
       ],
       "spy_day_pct": -0.37,
