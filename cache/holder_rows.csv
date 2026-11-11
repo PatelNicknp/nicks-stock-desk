@@ -1,81 +1,4 @@
 ticker,owner,shares,share_change,as_of
-EFX,"BlackRock, Inc.",9396150.0,-65798.0,6/30/2026
-EFX,Vanguard Capital Management LLC,7780433.0,-44672.0,6/30/2026
-EFX,Harris Associates L P,7447263.0,-81853.0,6/30/2026
-EFX,Vanguard Portfolio Management LLC,5242614.0,-28390.0,6/30/2026
-EG,"BlackRock, Inc.",3220769.0,-76816.0,6/30/2026
-EG,Vanguard Capital Management LLC,2583110.0,-50612.0,6/30/2026
-EG,Vanguard Portfolio Management LLC,2068927.0,-99163.0,6/30/2026
-EG,Norges Bank,1929157.0,71850.0,6/30/2026
-EIX,"BlackRock, Inc.",44867854.0,-1292255.0,6/30/2026
-EIX,State Street Corp,36146533.0,1548246.0,6/30/2026
-EIX,Vanguard Capital Management LLC,25114526.0,137624.0,6/30/2026
-EIX,Vanguard Portfolio Management LLC,23216874.0,117294.0,6/30/2026
-EL,Bank Of America Corp /De/,21249057.0,7405292.0,6/30/2026
-EL,"BlackRock, Inc.",20829012.0,2283503.0,6/30/2026
-EL,Vanguard Capital Management LLC,16155282.0,82543.0,6/30/2026
-EL,Vanguard Portfolio Management LLC,12382455.0,237491.0,6/30/2026
-ELV,"BlackRock, Inc.",18991090.0,-896021.0,6/30/2026
-ELV,Vanguard Capital Management LLC,14058204.0,-287255.0,6/30/2026
-ELV,State Street Corp,10426610.0,137914.0,6/30/2026
-ELV,Wellington Management Group LLP,9213513.0,984976.0,6/30/2026
-EME,"BlackRock, Inc.",4116754.0,8569.0,6/30/2026
-EME,Vanguard Capital Management LLC,2901344.0,1146.0,6/30/2026
-EME,Vanguard Portfolio Management LLC,1988553.0,-9617.0,6/30/2026
-EME,State Street Corp,1978559.0,43850.0,6/30/2026
-EMR,"BlackRock, Inc.",43265282.0,1454040.0,6/30/2026
-EMR,Vanguard Capital Management LLC,36588248.0,62165.0,6/30/2026
-EMR,State Street Corp,27678497.0,403957.0,6/30/2026
-EMR,Bank Of America Corp /De/,18366373.0,-1575471.0,6/30/2026
-EOG,Capital World Investors,55451748.0,3560784.0,6/30/2026
-EOG,"BlackRock, Inc.",45522136.0,1261803.0,6/30/2026
-EOG,Vanguard Capital Management LLC,34792072.0,-262059.0,6/30/2026
-EOG,State Street Corp,33971430.0,49882.0,6/30/2026
-EQIX,"BlackRock, Inc.",11444924.0,313356.0,6/30/2026
-EQIX,Vanguard Capital Management LLC,6444422.0,57102.0,6/30/2026
-EQIX,Vanguard Portfolio Management LLC,6102138.0,98047.0,6/30/2026
-EQIX,State Street Corp,6026104.0,-52292.0,6/30/2026
-EQT,"BlackRock, Inc.",60261896.0,-716511.0,6/30/2026
-EQT,Vanguard Capital Management LLC,40864324.0,298037.0,6/30/2026
-EQT,State Street Corp,39679249.0,1398316.0,6/30/2026
-EQT,Vanguard Portfolio Management LLC,32757657.0,789531.0,6/30/2026
-ERIE,"Pnc Financial Services Group, Inc.",4753225.0,-73553.0,9/30/2026
-ES,"BlackRock, Inc.",42706691.0,565135.0,6/30/2026
-ES,State Street Corp,28475822.0,318554.0,6/30/2026
-ES,Vanguard Capital Management LLC,24543557.0,160413.0,6/30/2026
-ES,Vanguard Portfolio Management LLC,20234827.0,231608.0,6/30/2026
-ESS,"BlackRock, Inc.",7430141.0,174651.0,6/30/2026
-ESS,Vanguard Portfolio Management LLC,5490501.0,2454.0,6/30/2026
-ESS,State Street Corp,5211810.0,-13696.0,6/30/2026
-ESS,"Cohen & Steers, Inc.",4914673.0,71547.0,6/30/2026
-ETN,"BlackRock, Inc.",30675945.0,131775.0,6/30/2026
-ETN,Vanguard Capital Management LLC,25364223.0,118107.0,6/30/2026
-ETN,State Street Corp,17479372.0,502549.0,6/30/2026
-ETN,Jpmorgan Chase & Co,16785110.0,-2515801.0,6/30/2026
-ETR,"BlackRock, Inc.",42324362.0,1363963.0,6/30/2026
-ETR,Vanguard Capital Management LLC,30538725.0,1115176.0,6/30/2026
-ETR,Vanguard Portfolio Management LLC,26857755.0,1314737.0,6/30/2026
-ETR,State Street Corp,25587118.0,633587.0,6/30/2026
-EVRG,"BlackRock, Inc.",27996513.0,2513503.0,6/30/2026
-EVRG,State Street Corp,16868189.0,410572.0,6/30/2026
-EVRG,Vanguard Capital Management LLC,14657069.0,112669.0,6/30/2026
-EVRG,Vanguard Portfolio Management LLC,11329099.0,-944811.0,6/30/2026
-EW,"BlackRock, Inc.",58789433.0,6198500.0,6/30/2026
-EW,Vanguard Capital Management LLC,37615952.0,-111840.0,6/30/2026
-EW,Vanguard Portfolio Management LLC,26411402.0,4384.0,6/30/2026
-EW,State Street Corp,26321940.0,25541.0,6/30/2026
-EXC,"BlackRock, Inc.",119770685.0,7021076.0,6/30/2026
-EXC,State Street Corp,67464176.0,-107789.0,6/30/2026
-EXC,Vanguard Capital Management LLC,66799154.0,783466.0,6/30/2026
-EXC,Vanguard Portfolio Management LLC,56233966.0,1568532.0,6/30/2026
-EXE,"BlackRock, Inc.",19497795.0,860316.0,6/30/2026
-EXE,Vanguard Capital Management LLC,15619960.0,72466.0,6/30/2026
-EXE,State Street Corp,15619193.0,1124635.0,6/30/2026
-EXE,Vanguard Portfolio Management LLC,11834044.0,476607.0,6/30/2026
-EXPD,"BlackRock, Inc.",13456209.0,1048595.0,6/30/2026
-EXPD,Vanguard Capital Management LLC,8548852.0,-145864.0,6/30/2026
-EXPD,State Street Corp,7335241.0,109798.0,6/30/2026
-EXPD,Vanguard Portfolio Management LLC,6624219.0,-25903.0,6/30/2026
 EXPE,"BlackRock, Inc.",10274676.0,-223128.0,6/30/2026
 EXPE,Vanguard Capital Management LLC,7477741.0,-123007.0,6/30/2026
 EXPE,Vanguard Portfolio Management LLC,5809377.0,-104536.0,6/30/2026
@@ -1890,3 +1813,80 @@ ED,"BlackRock, Inc.",41665829.0,2210360.0,6/30/2026
 ED,State Street Corp,25094015.0,214087.0,6/30/2026
 ED,Vanguard Capital Management LLC,24085197.0,586850.0,6/30/2026
 ED,Vanguard Portfolio Management LLC,19117849.0,475865.0,6/30/2026
+EFX,"BlackRock, Inc.",9396150.0,-65798.0,6/30/2026
+EFX,Vanguard Capital Management LLC,7780433.0,-44672.0,6/30/2026
+EFX,Harris Associates L P,7447263.0,-81853.0,6/30/2026
+EFX,Vanguard Portfolio Management LLC,5242614.0,-28390.0,6/30/2026
+EG,"BlackRock, Inc.",3220769.0,-76816.0,6/30/2026
+EG,Vanguard Capital Management LLC,2583110.0,-50612.0,6/30/2026
+EG,Vanguard Portfolio Management LLC,2068927.0,-99163.0,6/30/2026
+EG,Norges Bank,1929157.0,71850.0,6/30/2026
+EIX,"BlackRock, Inc.",44867854.0,-1292255.0,6/30/2026
+EIX,State Street Corp,36146533.0,1548246.0,6/30/2026
+EIX,Vanguard Capital Management LLC,25114526.0,137624.0,6/30/2026
+EIX,Vanguard Portfolio Management LLC,23216874.0,117294.0,6/30/2026
+EL,Bank Of America Corp /De/,21249057.0,7405292.0,6/30/2026
+EL,"BlackRock, Inc.",20829012.0,2283503.0,6/30/2026
+EL,Vanguard Capital Management LLC,16155282.0,82543.0,6/30/2026
+EL,Vanguard Portfolio Management LLC,12382455.0,237491.0,6/30/2026
+ELV,"BlackRock, Inc.",18991090.0,-896021.0,6/30/2026
+ELV,Vanguard Capital Management LLC,14058204.0,-287255.0,6/30/2026
+ELV,State Street Corp,10426610.0,137914.0,6/30/2026
+ELV,Wellington Management Group LLP,9213513.0,984976.0,6/30/2026
+EME,"BlackRock, Inc.",4116754.0,8569.0,6/30/2026
+EME,Vanguard Capital Management LLC,2901344.0,1146.0,6/30/2026
+EME,Vanguard Portfolio Management LLC,1988553.0,-9617.0,6/30/2026
+EME,State Street Corp,1978559.0,43850.0,6/30/2026
+EMR,"BlackRock, Inc.",43265282.0,1454040.0,6/30/2026
+EMR,Vanguard Capital Management LLC,36588248.0,62165.0,6/30/2026
+EMR,State Street Corp,27678497.0,403957.0,6/30/2026
+EMR,Bank Of America Corp /De/,18366373.0,-1575471.0,6/30/2026
+EOG,Capital World Investors,55451748.0,3560784.0,6/30/2026
+EOG,"BlackRock, Inc.",45522136.0,1261803.0,6/30/2026
+EOG,Vanguard Capital Management LLC,34792072.0,-262059.0,6/30/2026
+EOG,State Street Corp,33971430.0,49882.0,6/30/2026
+EQIX,"BlackRock, Inc.",11444924.0,313356.0,6/30/2026
+EQIX,Vanguard Capital Management LLC,6444422.0,57102.0,6/30/2026
+EQIX,Vanguard Portfolio Management LLC,6102138.0,98047.0,6/30/2026
+EQIX,State Street Corp,6026104.0,-52292.0,6/30/2026
+EQT,"BlackRock, Inc.",60261896.0,-716511.0,6/30/2026
+EQT,Vanguard Capital Management LLC,40864324.0,298037.0,6/30/2026
+EQT,State Street Corp,39679249.0,1398316.0,6/30/2026
+EQT,Vanguard Portfolio Management LLC,32757657.0,789531.0,6/30/2026
+ERIE,"Pnc Financial Services Group, Inc.",4753225.0,-73553.0,9/30/2026
+ES,"BlackRock, Inc.",42706691.0,565135.0,6/30/2026
+ES,State Street Corp,28475822.0,318554.0,6/30/2026
+ES,Vanguard Capital Management LLC,24543557.0,160413.0,6/30/2026
+ES,Vanguard Portfolio Management LLC,20234827.0,231608.0,6/30/2026
+ESS,"BlackRock, Inc.",7430141.0,174651.0,6/30/2026
+ESS,Vanguard Portfolio Management LLC,5490501.0,2454.0,6/30/2026
+ESS,State Street Corp,5211810.0,-13696.0,6/30/2026
+ESS,"Cohen & Steers, Inc.",4914673.0,71547.0,6/30/2026
+ETN,"BlackRock, Inc.",30675945.0,131775.0,6/30/2026
+ETN,Vanguard Capital Management LLC,25364223.0,118107.0,6/30/2026
+ETN,State Street Corp,17479372.0,502549.0,6/30/2026
+ETN,Jpmorgan Chase & Co,16785110.0,-2515801.0,6/30/2026
+ETR,"BlackRock, Inc.",42324362.0,1363963.0,6/30/2026
+ETR,Vanguard Capital Management LLC,30538725.0,1115176.0,6/30/2026
+ETR,Vanguard Portfolio Management LLC,26857755.0,1314737.0,6/30/2026
+ETR,State Street Corp,25587118.0,633587.0,6/30/2026
+EVRG,"BlackRock, Inc.",27996513.0,2513503.0,6/30/2026
+EVRG,State Street Corp,16868189.0,410572.0,6/30/2026
+EVRG,Vanguard Capital Management LLC,14657069.0,112669.0,6/30/2026
+EVRG,Vanguard Portfolio Management LLC,11329099.0,-944811.0,6/30/2026
+EW,"BlackRock, Inc.",58789433.0,6198500.0,6/30/2026
+EW,Vanguard Capital Management LLC,37615952.0,-111840.0,6/30/2026
+EW,Vanguard Portfolio Management LLC,26411402.0,4384.0,6/30/2026
+EW,State Street Corp,26321940.0,25541.0,6/30/2026
+EXC,"BlackRock, Inc.",119770685.0,7021076.0,6/30/2026
+EXC,State Street Corp,67464176.0,-107789.0,6/30/2026
+EXC,Vanguard Capital Management LLC,66799154.0,783466.0,6/30/2026
+EXC,Vanguard Portfolio Management LLC,56233966.0,1568532.0,6/30/2026
+EXE,"BlackRock, Inc.",19497795.0,860316.0,6/30/2026
+EXE,Vanguard Capital Management LLC,15619960.0,72466.0,6/30/2026
+EXE,State Street Corp,15619193.0,1124635.0,6/30/2026
+EXE,Vanguard Portfolio Management LLC,11834044.0,476607.0,6/30/2026
+EXPD,"BlackRock, Inc.",13456209.0,1048595.0,6/30/2026
+EXPD,Vanguard Capital Management LLC,8548852.0,-145864.0,6/30/2026
+EXPD,State Street Corp,7335241.0,109798.0,6/30/2026
+EXPD,Vanguard Portfolio Management LLC,6624219.0,-25903.0,6/30/2026
