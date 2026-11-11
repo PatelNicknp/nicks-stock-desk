@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-CRM,"Salesforce, Inc.",Technology,Software - Application,13.515884,1.67857,53.0,287.0836,285.0,178146590720,1787774400.0
-CRWD,"CrowdStrike Holdings, Inc.",Technology,Software - Infrastructure,139.40485,1.66038,50.0,249.6834,250.0,229858017280,1796158800.0
-CRWV,"CoreWeave, Inc.",Technology,Software - Infrastructure,-24.110037,1.7619,38.0,131.52632,126.5,26992199680,1794344400.0
-CSCO,"Cisco Systems, Inc.",Technology,Communication Equipment,17.498129,1.86207,25.0,135.56,135.0,387851976704,1794517200.0
-CSGP,"CoStar Group, Inc.",Real Estate,Real Estate Services,17.696264,2.14286,20.0,35.85,34.5,12597182464,1793131200.0
-CSX,CSX Corporation,Industrials,Railroads,21.415781,1.92,23.0,53.80739,54.57,92363472896,1792612800.0
-CTAS,Cintas Corporation,Industrials,Specialty Business Services,36.288177,2.2,16.0,218.4375,224.5,88774082560,1790166600.0
-CTSH,Cognizant Technology Solutions ,Technology,Information Technology Services,10.244981,2.2069,25.0,69.784,70.0,28748525568,1793277000.0
-CVNA,Carvana Co.,Consumer Cyclical,Auto & Truck Dealerships,35.667713,2.0,21.0,81.14286,83.0,113041874944,1793217600.0
-CVS,CVS Health Corporation,Healthcare,Healthcare Plans,9.863314,1.46429,25.0,110.3184,110.0,108908847104,1793799000.0
-CVX,Chevron Corporation,Energy,Oil & Gas Integrated,12.7694025,1.61538,24.0,243.45833,243.5,410680131584,1793363400.0
-D,"Dominion Energy, Inc.",Utilities,Utilities - Regulated Electric,17.99194,2.5625,12.0,70.16667,68.0,60439379968,1793363400.0
-DAL,"Delta Air Lines, Inc.",Industrials,Airlines,12.46847,1.32,24.0,100.98333,101.5,59870027776,1791549000.0
-DASH,"DoorDash, Inc.",Consumer Cyclical,Internet Retail,22.555172,1.57143,40.0,249.2215,250.0,78837596160,1793277000.0
-DD,"DuPont de Nemours, Inc.",Basic Materials,Specialty Chemicals,18.944834,1.61111,17.0,172.4706,173.0,20493475840,1793712600.0
-DDOG,"Datadog, Inc.",Technology,Software - Application,57.056564,1.41667,47.0,271.71106,275.0,65081098240,1793799000.0
-DE,Deere & Company,Industrials,Farm & Heavy Construction Machinery,30.346247,1.92,23.0,694.0078,728.0,187458158592,1795613400.0
-DECK,Deckers Outdoor Corporation,Consumer Cyclical,Footwear & Accessories,11.064841,2.55556,21.0,96.74286,95.0,12079938560,1792699200.0
-DELL,Dell Technologies Inc.,Technology,Computer Hardware,11.452051,1.82759,25.0,590.0,600.0,220627025920,1795554000.0
-DG,Dollar General Corporation,Consumer Defensive,Discount Stores,16.476954,2.32258,29.0,141.51724,140.0,30226704384,1796304600.0
-DGX,Quest Diagnostics Incorporated,Healthcare,Diagnostics & Research,21.63408,2.05882,15.0,257.26666,260.0,28601049088,1792672200.0
-DHI,"D.R. Horton, Inc.",Consumer Cyclical,Residential Construction,14.445786,2.80952,14.0,146.5,148.5,42360242176,1800365400.0
-DHR,Danaher Corporation,Healthcare,Diagnostics & Research,25.223957,1.45833,21.0,259.90475,260.0,165389549568,1792585800.0
-DIS,Walt Disney Company (The),Communication Services,Entertainment,15.8084,1.51515,32.0,126.83281,129.5,204715982848,1794922200.0
-DLR,"Digital Realty Trust, Inc.",Real Estate,REIT - Specialty,62.492435,1.44118,32.0,224.125,225.0,69592875008,1793304000.0
 DLTR,"Dollar Tree, Inc.",Consumer Defensive,Discount Stores,17.492107,2.51724,26.0,134.96153,137.5,25907054592,1795527000.0
 DOC,"Healthpeak Properties, Inc.",Real Estate,REIT - Healthcare Facilities,148.21428,2.40909,19.0,22.39474,22.0,15064889344,1793653200.0
 DOV,Dover Corporation,Industrials,Specialty Industrial Machinery,18.113884,1.57895,19.0,238.78947,245.0,28385171456,1792672200.0
@@ -523,3 +498,28 @@ CPRT,"Copart, Inc.",Industrials,Specialty Business Services,17.845304,2.33333,10
 CPT,Camden Property Trust,Real Estate,REIT - Residential,217.15218,2.58333,22.0,110.23864,108.5,9995960320,1793912400.0
 CRH,CRH PLC,Basic Materials,Building Materials,16.211124,1.34783,24.0,121.175,116.5,64434249728,1793277000.0
 CRL,Charles River Laboratories Inte,Healthcare,Diagnostics & Research,26.703733,1.64706,15.0,349.0,375.0,16569860096,1793799000.0
+CRM,"Salesforce, Inc.",Technology,Software - Application,13.612667,1.67857,53.0,287.0836,285.0,179422232576,1796245200.0
+CRWD,"CrowdStrike Holdings, Inc.",Technology,Software - Infrastructure,142.24591,1.66038,50.0,249.6834,250.0,234542514176,1796158800.0
+CRWV,"CoreWeave, Inc.",Technology,Software - Infrastructure,-33.414894,1.7619,37.0,125.45946,125.0,33516877824,1794344400.0
+CSCO,"Cisco Systems, Inc.",Technology,Communication Equipment,17.916203,1.86207,24.0,135.79167,135.0,397255049216,1794517200.0
+CSGP,"CoStar Group, Inc.",Real Estate,Real Estate Services,17.105635,2.14286,20.0,35.85,34.5,12176739328,1793131200.0
+CSX,CSX Corporation,Industrials,Railroads,22.145134,1.92,23.0,53.80739,54.57,95672369152,1792612800.0
+CTAS,Cintas Corporation,Industrials,Specialty Business Services,36.887108,2.2,16.0,218.4375,224.5,90239287296,1790166600.0
+CTSH,Cognizant Technology Solutions ,Technology,Information Technology Services,10.264098,2.2069,25.0,69.784,70.0,28802170880,1793277000.0
+CVNA,Carvana Co.,Consumer Cyclical,Auto & Truck Dealerships,34.77332,2.0,21.0,81.14286,83.0,110207254528,1793217600.0
+CVS,CVS Health Corporation,Healthcare,Healthcare Plans,10.323306,1.46429,25.0,110.3184,110.0,114538520576,1793799000.0
+CVX,Chevron Corporation,Energy,Oil & Gas Integrated,12.929642,1.61538,24.0,242.83333,242.5,416163364864,1793363400.0
+D,"Dominion Energy, Inc.",Utilities,Utilities - Regulated Electric,17.820438,2.5625,12.0,70.16667,68.0,59863265280,1793363400.0
+DAL,"Delta Air Lines, Inc.",Industrials,Airlines,12.497879,1.32,24.0,100.98333,101.5,60080558080,1791549000.0
+DASH,"DoorDash, Inc.",Consumer Cyclical,Internet Retail,23.373732,1.57143,39.0,250.68872,250.0,77717135360,1793277000.0
+DD,"DuPont de Nemours, Inc.",Basic Materials,Specialty Chemicals,19.03796,1.61111,17.0,172.4706,173.0,20623355904,1793712600.0
+DDOG,"Datadog, Inc.",Technology,Software - Application,57.928307,1.40816,48.0,269.65457,275.0,66569027584,1793799000.0
+DE,Deere & Company,Industrials,Farm & Heavy Construction Machinery,30.193304,1.96,23.0,694.0078,728.0,186513375232,1795613400.0
+DECK,Deckers Outdoor Corporation,Consumer Cyclical,Footwear & Accessories,10.818009,2.57143,22.0,96.39091,95.0,11796960256,1792699200.0
+DELL,Dell Technologies Inc.,Technology,Computer Hardware,12.332572,1.82759,25.0,590.0,600.0,237590495232,1795554000.0
+DG,Dollar General Corporation,Consumer Defensive,Discount Stores,16.528667,2.32258,29.0,141.51724,140.0,30321571840,1796304600.0
+DGX,Quest Diagnostics Incorporated,Healthcare,Diagnostics & Research,21.586084,2.05882,15.0,257.26666,260.0,28552484864,1792672200.0
+DHI,"D.R. Horton, Inc.",Consumer Cyclical,Residential Construction,13.651573,2.80952,14.0,146.5,148.5,40031322112,1800365400.0
+DHR,Danaher Corporation,Healthcare,Diagnostics & Research,25.248098,1.45833,21.0,259.90475,260.0,165547835392,1792585800.0
+DIS,Walt Disney Company (The),Communication Services,Entertainment,15.953737,1.51515,32.0,126.83281,129.5,206598078464,1794922200.0
+DLR,"Digital Realty Trust, Inc.",Real Estate,REIT - Specialty,62.61862,1.44118,32.0,224.125,225.0,69733400576,1793304000.0
