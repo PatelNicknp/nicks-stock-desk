@@ -835,6 +835,15 @@ def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
     assert win["a_result"] == "pass"
     assert win["n_result"] == "pass"
     assert win["s_result"] == "pass" and "180.0M shares" in win["s_value"]
+    assert "x vol" in win["s_value"]
+    assert "20-day" not in win["s_value"]
+    assert "20-day" in win["s_detail"]
+    for key, text in setups.SCORECARD_RULES.items():
+        assert text.startswith("Passes when"), key
+        assert win[key + "_rule"] == text
+    assert setups.SCORECARD_RULES["m"] == (
+        "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day."
+    )
     assert win["i_result"] == "pass"
     assert win["m_result"] == "pass"
     assert win["l_result"] in ("pass", "fail")
@@ -858,6 +867,43 @@ def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
     assert setups.NSE_NEAR_HIGH == -15.0
     off = setups.build_setups(close, high, low, vol, uni, quarters, annual, holders, {"scorecard_canslim": False, "scanner_vcp": False, "scanner_canslim": False, "scanner_box": False, "scanner_flag": False, "scanner_leaders": False, "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False, "scanner_qullamaggie": False, "scanner_marios": False})
     assert len(off["scorecard_canslim"]) == 0
+
+
+
+def test_scorecard_canslim_switch_hides_the_section():
+    import json
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    cfg = json.loads((root / "config.json").read_text())
+    assert cfg.get("features", {}).get("scorecard_canslim") is True
+    settings = (root / "data" / "settings.csv").read_text()
+    assert "feature.scorecard_canslim" in settings
+    pages = (root / "site" / "js" / "pages.js").read_text()
+    assert 'if (!D.featureOn("feature.scorecard_canslim")) return "";' in pages
+    n = 260
+    idx = _dates(n)
+    spy = 100 * (1.0004 ** np.arange(n))
+    frames = {
+        "WIN": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 800_000.0)}, index=idx),
+        "SPY": pd.DataFrame({"close": spy, "high": spy * 1.01, "low": spy * 0.99, "volume": np.full(n, 1e8)}, index=idx),
+    }
+    close, high, low, vol = _panel(list(frames), frames)
+    uni = _uni(["WIN"])
+    empty = pd.DataFrame()
+    off = setups.build_setups(close, high, low, vol, uni, empty, empty, empty, {
+        "scorecard_canslim": False, "scanner_vcp": False, "scanner_canslim": False,
+        "scanner_box": False, "scanner_flag": False, "scanner_leaders": False,
+        "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False,
+        "scanner_qullamaggie": False, "scanner_marios": False,
+    })
+    assert len(off["scorecard_canslim"]) == 0
+    on = setups.build_setups(close, high, low, vol, uni, empty, empty, empty, {
+        "scorecard_canslim": True, "scanner_vcp": False, "scanner_canslim": False,
+        "scanner_box": False, "scanner_flag": False, "scanner_leaders": False,
+        "scanner_52w": False, "scanner_breakdown": False, "scanner_volume": False,
+        "scanner_qullamaggie": False, "scanner_marios": False,
+    })
+    assert len(on["scorecard_canslim"]) == 1
 
 
 def test_scorecard_canslim_n_uses_the_15_percent_line():
@@ -905,5 +951,6 @@ if __name__ == "__main__":
     test_breakdown_break_watch_and_trend()
     test_high_volume_spike_streak_and_quiet()
     test_scorecard_canslim_letters_and_blank_is_not_a_fail()
+    test_scorecard_canslim_switch_hides_the_section()
     test_scorecard_canslim_n_uses_the_15_percent_line()
     print("setups ok")

@@ -44,6 +44,15 @@ NSE_RS_SOFT = 40.0
 # NSE_ADV_MIN (200,000). M uses uptrend() on SPY, the same market rule as Buy setups.
 SCORECARD_EPS_MIN = 25.0
 SCORECARD_RS_MIN = 80.0
+SCORECARD_RULES = {
+    "c": "Passes when quarterly EPS is at least 25% above the year-ago quarter.",
+    "a": "Passes when annual EPS is at least 25% above last year.",
+    "n": "Passes when the close is within 15% of the 52-week closing high.",
+    "s": "Passes when 20-day average volume is 200,000 shares or more.",
+    "l": "Passes when the RS percentile is 80 or higher.",
+    "i": "Passes when 13F holders bought more shares than they sold.",
+    "m": "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
+}
 SCORECARD_NOTE = (
     "Scorecard CAN SLIM for every stock. C and A need 25% growth from cached SEC EPS. "
     "N is within 15% of the 52-week closing high (the existing CANSLIM near-high line; "
@@ -1105,7 +1114,7 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
     spy_state = _ma_state(spy) if spy is not None else None
     if spy_ok is None:
         m_res, m_val, m_rule, m_det = _sc_blank(
-            "SPY is in an uptrend: price above the 50-day and the 200-day, and the 50-day above the 200-day",
+            SCORECARD_RULES["m"],
             "SPY was not in the price cache or its history is shorter than 200 sessions.",
         )
     else:
@@ -1117,7 +1126,7 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
         m_res, m_val, m_rule, m_det = _sc_letter(
             spy_ok,
             "confirmed uptrend" if spy_ok else "not an uptrend",
-            "SPY is in an uptrend: price above the 50-day and the 200-day, and the 50-day above the 200-day",
+            SCORECARD_RULES["m"],
             m_det,
         )
     bench = spy
@@ -1174,12 +1183,12 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
         pct_s = ranked.rank(pct=True, method="average") * 100.0
         pct_map = pct_s.to_dict()
 
-    c_rule = "25% or more vs the year-ago quarter"
-    a_rule = "25% or more vs last year"
-    n_rule = "Within 15% of the 52-week closing high"
-    s_rule = "20-day average volume is 200,000 shares or more"
-    l_rule = "RS percentile 80 or higher"
-    i_rule = "13F holders bought more shares than they sold"
+    c_rule = SCORECARD_RULES["c"]
+    a_rule = SCORECARD_RULES["a"]
+    n_rule = SCORECARD_RULES["n"]
+    s_rule = SCORECARD_RULES["s"]
+    l_rule = SCORECARD_RULES["l"]
+    i_rule = SCORECARD_RULES["i"]
     for rec in recs:
         ticker = rec["ticker"]
         c_pct, c_now, c_old = _yoy_eps(quarters, ticker, True)
@@ -1222,10 +1231,8 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
         s_parts = []
         if so_txt:
             s_parts.append(so_txt)
-        if adv is not None:
-            s_parts.append("%s 20-day volume" % _fmt_shares(adv).replace(" shares", ""))
         if vol_ratio is not None:
-            s_parts.append("%.1fx the 50-day volume" % vol_ratio)
+            s_parts.append("%.1fx vol" % vol_ratio)
         s_val = ", ".join(s_parts)
         if adv is None:
             s_res, s_val, _s_rule, s_det = _sc_blank(
@@ -1233,7 +1240,8 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
                 (so_txt + ". " if so_txt else "") + "20-day average volume is not on file yet.",
             )
         else:
-            s_res, s_val, _s_rule, s_det = _sc_letter(adv >= NSE_ADV_MIN, s_val, s_rule, s_val)
+            s_det = "%s 20-day average volume." % _fmt_shares(adv).replace(" shares", "")
+            s_res, s_val, _s_rule, s_det = _sc_letter(adv >= NSE_ADV_MIN, s_val, s_rule, s_det)
         rs_p = pct_map.get(ticker)
         if rs_p is None:
             l_res, l_val, _l_rule, l_det = _sc_blank(

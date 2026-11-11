@@ -400,18 +400,51 @@
   }
 
   const SC_CS_LETTERS = [
-    { key: "c", letter: "C", name: "Current quarterly EPS" },
-    { key: "a", letter: "A", name: "Annual EPS growth" },
-    { key: "n", letter: "N", name: "New highs" },
-    { key: "s", letter: "S", name: "Supply and demand" },
-    { key: "l", letter: "L", name: "Leader / RS" },
-    { key: "i", letter: "I", name: "Institutional buying" },
-    { key: "m", letter: "M", name: "Market direction" },
+    { key: "c", letter: "C", name: "Current quarterly EPS", short: "Qtr EPS" },
+    { key: "a", letter: "A", name: "Annual EPS growth", short: "Annual EPS" },
+    { key: "n", letter: "N", name: "New highs", short: "New highs" },
+    { key: "s", letter: "S", name: "Supply and demand", short: "Supply" },
+    { key: "l", letter: "L", name: "Leader / RS", short: "Leader" },
+    { key: "i", letter: "I", name: "Institutional buying", short: "Institutions" },
+    { key: "m", letter: "M", name: "Market direction", short: "Market" },
   ];
+  const SC_CS_RULES = {
+    c: "Passes when quarterly EPS is at least 25% above the year-ago quarter.",
+    a: "Passes when annual EPS is at least 25% above last year.",
+    n: "Passes when the close is within 15% of the 52-week closing high.",
+    s: "Passes when 20-day average volume is 200,000 shares or more.",
+    l: "Passes when the RS percentile is 80 or higher.",
+    i: "Passes when 13F holders bought more shares than they sold.",
+    m: "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
+  };
   function scCsStatusLabel(result) {
     if (result === "pass") return "PASS";
     if (result === "fail") return "FAIL";
-    return "No data yet";
+    return "No data";
+  }
+  function scCsShownValue(x) {
+    let raw = x.result === "no_data" ? (x.value || "No data yet") : (x.value || scCsStatusLabel(x.result));
+    if (x.key === "s" && raw && /20-day volume/.test(raw)) {
+      const shares = (raw.match(/([^,]+ shares)/) || [])[1];
+      const xr = (raw.match(/([0-9.]+)x the 50-day/) || [])[1];
+      const parts = [];
+      if (shares) parts.push(shares);
+      if (xr) parts.push(xr + "x vol");
+      if (parts.length) raw = parts.join(", ");
+    }
+    return raw;
+  }
+  function scCsExtra(x) {
+    const bits = [];
+    const raw = String(x.detail || x.value || "");
+    if (x.key === "s") {
+      const adv = raw.match(/([^,]*?)\s*20-day (?:average )?volume/);
+      if (adv && adv[1].trim()) bits.push(adv[1].trim() + " 20-day average volume.");
+      else if (x.detail && x.detail !== x.value) bits.push(x.detail);
+    } else if (x.result === "no_data" && x.detail) {
+      bits.push(x.detail);
+    }
+    return bits.join(" ");
   }
   function scCsClass(result) {
     if (result === "pass") return "pass";
@@ -431,14 +464,15 @@
     const passN = letters.filter((x) => x.result === "pass").length;
     const chips = letters.map((x) => '<span class="sc-cs-chip ' + scCsClass(x.result) + '">' + D.esc(x.letter) + "</span>").join("");
     const rowsHtml = letters.map((x) => {
-      const shown = x.result === "no_data" ? (x.value || "No data yet") : (x.value || scCsStatusLabel(x.result));
-      const rule = x.rule || "";
-      const extra = (x.result === "no_data" && x.detail) ? x.detail : "";
-      const ruleText = extra && rule ? rule + ". " + extra : (extra || rule);
+      const shown = scCsShownValue(x);
+      const rule = SC_CS_RULES[x.key] || x.rule || "";
+      const extra = scCsExtra(x);
+      const ruleText = extra && rule ? rule + " " + extra : (extra || rule);
       return '<button type="button" class="sc-cs-row ' + scCsClass(x.result) + '" data-letter="' + D.esc(x.letter) + '" aria-expanded="false">' +
         '<div class="sc-cs-topline"><span class="sc-cs-letter">' + D.esc(x.letter) + '</span>' +
-        '<span class="sc-cs-name">' + D.esc(x.name) + "</span>" +
-        '<span class="sc-cs-value">' + D.esc(shown) + "</span>" +
+        '<span class="sc-cs-copy"><span class="sc-cs-name"><span class="sc-cs-name-full">' + D.esc(x.name) +
+        '</span><span class="sc-cs-name-short">' + D.esc(x.short || x.name) + "</span></span>" +
+        '<span class="sc-cs-value">' + D.esc(shown) + "</span></span>" +
         '<span class="sc-cs-status">' + D.esc(scCsStatusLabel(x.result)) + '</span>' +
         '<span class="sc-cs-chev" aria-hidden="true">▾</span></div>' +
         '<div class="sc-cs-rule">' + D.esc(ruleText) + "</div></button>";
@@ -648,10 +682,11 @@
       host.innerHTML =
         '<div class="panel pad identity"><div class="id-main"><div class="big">' + D.esc(row.ticker) + "</div><div>" + D.esc(row.company) +
         "</div>" + D.blurbHtml(row.ticker) + '<div class="m2" style="font-size:12px">' + D.esc(row.sector) + (row.industry ? " · " + D.esc(row.industry) : "") + "</div></div>" +
-        '<div class="stat"><div class="l">Price</div><div class="v">' + px2(row.price) + "</div></div>" +
-        '<div class="stat"><div class="l">Day %</div><div class="v" style="color:' + D.retColor(day) + '">' + (day == null ? D.na() : D.esc((day > 0 ? "+" : "") + D.fmt(day, 2) + "%")) + "</div></div>" +
-        '<div class="stat"><div class="l">Confidence</div><div class="v" style="font-size:16px">' + (D.isBlank(row.confidence) ? D.na() : D.esc(row.confidence)) + '</div><div class="l" style="margin-top:8px">Verdict</div><div class="vpill">' + D.verdictHtml(row.verdict) + "</div></div>" +
-        '<div class="stat"><div class="l">Desk score</div><div class="v"><span class="scorepill deskscore" style="background:' + D.band(scoreN || 0) + '">' + D.esc(scoreN == null ? "–" : String(scoreN)) + "</span></div></div></div>" +
+        '<div class="id-stats">' +
+        '<div class="stat id-price"><div class="l">Price</div><div class="v">' + px2(row.price) + "</div></div>" +
+        '<div class="stat id-day"><div class="l">Day %</div><div class="v" style="color:' + D.retColor(day) + '">' + (day == null ? D.na() : D.esc((day > 0 ? "+" : "") + D.fmt(day, 2) + "%")) + "</div></div>" +
+        '<div class="stat id-conf"><div class="l">Confidence</div><div class="v" style="font-size:16px">' + (D.isBlank(row.confidence) ? D.na() : D.esc(row.confidence)) + '</div><div class="l" style="margin-top:8px">Verdict</div><div class="vpill">' + D.verdictHtml(row.verdict) + "</div></div>" +
+        '<div class="stat id-score"><div class="l">Desk score</div><div class="v"><span class="scorepill deskscore" style="background:' + D.band(scoreN || 0) + '">' + D.esc(scoreN == null ? "–" : String(scoreN)) + "</span></div></div></div></div>" +
         '<div class="sc-cols">' + canslimHtml + '<div class="sc-top">' +
         '<div class="panel pad sc-reason"><p style="font-size:13px;line-height:20px">' + D.esc(row.reason || "") + "</p></div>" +
         '<div class="cards">' +
