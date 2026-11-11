@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-CCI,Crown Castle Inc.,Real Estate,REIT - Specialty,30.378036,2.13636,21.0,93.49524,91.0,37859315712,1792612800.0
-CCL,Carnival Corporation Ltd.,Consumer Cyclical,Travel Services,11.926859,1.63333,27.0,33.48889,33.0,41290559488,1790685000.0
-CDNS,"Cadence Design Systems, Inc.",Technology,Software - Application,34.229633,1.33333,24.0,411.7604,420.0,92465725440,1793044800.0
-CDW,CDW Corporation,Technology,Information Technology Services,13.179281,1.8,9.0,184.11111,190.0,20523644928,1793799000.0
-CEG,Constellation Energy Corporatio,Utilities,Utilities - Independent Power Producers,20.493196,1.64,23.0,337.76697,343.0,97298120704,1794231000.0
-CELH,"Celsius Holdings, Inc.",Consumer Defensive,Beverages - Non-Alcoholic,19.714289,1.75,21.0,41.71429,41.0,8270863360,1793885400.0
-CF,"CF Industries Holdings, Inc.",Basic Materials,Agricultural Inputs,10.633527,2.81818,20.0,129.286,127.0,17549801472,1793826000.0
-CFG,"Citizens Financial Group, Inc.",Financial Services,Banks - Regional,10.109334,1.55,19.0,76.39474,76.0,27511769088,1800019800.0
-CHD,"Church & Dwight Company, Inc.",Consumer Defensive,Household & Personal Products,27.48288,2.25,18.0,110.27778,115.0,26298689536,1793363400.0
-CHRW,"C.H. Robinson Worldwide, Inc.",Industrials,Integrated Freight & Logistics,17.310616,1.6087,23.0,179.30435,180.0,14988934144,1793190600.0
-CHTR,"Charter Communications, Inc.",Communication Services,Telecom Services,2.8099155,3.0,18.0,169.88889,140.0,21564968960,1793971800.0
-CI,The Cigna Group,Healthcare,Healthcare Plans,8.882234,1.84,25.0,342.9616,340.0,78112702464,1801747800.0
-CIEN,Ciena Corporation,Technology,Communication Equipment,22.731506,1.66667,20.0,512.9907,536.5,38240088064,1788438600.0
-CINF,Cincinnati Financial Corporatio,Financial Services,Insurance - Property & Casualty,20.325901,2.5,6.0,187.33333,186.0,28711034880,1793044800.0
-CL,Colgate-Palmolive Company,Consumer Defensive,Household & Personal Products,23.850113,2.09524,20.0,101.7,102.5,77735280640,1793363400.0
-CLX,Clorox Company (The),Consumer Defensive,Household & Personal Products,16.897635,3.11111,16.0,97.75,96.0,12633202688,1793653200.0
-CMCSA,Comcast Corporation,Communication Services,Telecom Services,6.9338164,2.62963,22.0,27.97727,27.25,86715572224,1792672200.0
-CME,CME Group Inc.,Financial Services,Financial Data & Stock Exchanges,23.064646,2.41176,16.0,317.0625,328.5,109248585728,1792585800.0
-CMG,"Chipotle Mexican Grill, Inc.",Consumer Cyclical,Restaurants,27.033445,1.82857,30.0,40.56667,40.0,45368328192,1793217600.0
-CMI,Cummins Inc.,Industrials,Specialty Industrial Machinery,13.593259,1.77273,19.0,662.34735,637.0,63587692544,1793885400.0
-CMS,CMS Energy Corporation,Utilities,Utilities - Regulated Electric,16.832758,2.3125,13.0,73.84615,73.0,21878523904,1793104200.0
-CNC,Centene Corporation,Healthcare,Healthcare Plans,12.494861,2.38095,18.0,75.38889,75.0,34300788736,1793104200.0
-CNP,"CenterPoint Energy, Inc (Holdin",Utilities,Utilities - Regulated Electric,19.529758,2.09524,19.0,44.23684,44.0,27095203840,1793104200.0
-COF,Capital One Financial Corporati,Financial Services,Credit Services,8.412968,1.56522,21.0,255.19048,252.0,120763801600,1792526400.0
-COHR,Coherent Corp.,Technology,Scientific & Technical Instruments,14.57413,1.5,25.0,369.3984,380.0,44990283776,1793826000.0
 COIN,"Coinbase Global, Inc.",Financial Services,Financial Data & Stock Exchanges,56.11063,2.02632,34.0,196.56177,199.0,36295094272,1793304000.0
 COO,"The Cooper Companies, Inc.",Healthcare,Medical Instruments & Supplies,13.620642,2.47059,15.0,65.8,65.0,12153776128,1796331600.0
 COP,ConocoPhillips,Energy,Oil & Gas E&P,11.93991,1.86667,27.0,152.0,150.0,159177785344,1793885400.0
@@ -523,3 +498,28 @@ CB,Chubb Limited,Financial Services,Insurance - Property & Casualty,12.524349,2.
 CBOE,"Cboe Global Markets, Inc.",Financial Services,Financial Data & Stock Exchanges,23.571806,2.66667,15.0,355.6,350.0,38060711936,1793363400.0
 CBRE,CBRE Group Inc,Real Estate,Real Estate Services,15.208443,1.53846,12.0,172.0,170.5,38845972480,1792672200.0
 CCEP,Coca-Cola Europacific Partners ,Consumer Defensive,Beverages - Non-Alcoholic,21.208523,2.0,12.0,114.76141,119.106895,51565088768,
+CCI,Crown Castle Inc.,Real Estate,REIT - Specialty,30.504354,,21.0,93.49524,91.0,38016741376,1792612800.0
+CCL,Carnival Corporation Ltd.,Consumer Cyclical,Travel Services,11.939209,1.63333,27.0,33.48889,33.0,41333317632,1790685000.0
+CDNS,"Cadence Design Systems, Inc.",Technology,Software - Application,33.68521,1.33333,24.0,411.7604,420.0,90995056640,1793044800.0
+CDW,CDW Corporation,Technology,Information Technology Services,13.573601,1.8,9.0,184.11111,190.0,21137707008,1793799000.0
+CEG,Constellation Energy Corporatio,Utilities,Utilities - Independent Power Producers,19.971508,1.64,23.0,337.8974,345.0,94869348352,1794231000.0
+CELH,"Celsius Holdings, Inc.",Consumer Defensive,Beverages - Non-Alcoholic,19.58899,1.75,21.0,41.71429,41.0,8218246656,1793885400.0
+CF,"CF Industries Holdings, Inc.",Basic Materials,Agricultural Inputs,10.762694,2.81818,20.0,129.436,127.5,17899421696,1793826000.0
+CFG,"Citizens Financial Group, Inc.",Financial Services,Banks - Regional,9.984566,1.55,19.0,76.39474,76.0,27172222976,1800019800.0
+CHD,"Church & Dwight Company, Inc.",Consumer Defensive,Household & Personal Products,27.566746,2.25,18.0,110.27778,115.0,26378942464,1793363400.0
+CHRW,"C.H. Robinson Worldwide, Inc.",Industrials,Integrated Freight & Logistics,17.271786,1.6087,23.0,179.30435,180.0,14955312128,1793190600.0
+CHTR,"Charter Communications, Inc.",Communication Services,Telecom Services,3.2746625,3.0,18.0,170.44444,145.0,24003651584,1793971800.0
+CI,The Cigna Group,Healthcare,Healthcare Plans,9.088462,1.84,24.0,342.66833,340.0,79875530752,1801747800.0
+CIEN,Ciena Corporation,Technology,Communication Equipment,22.937191,1.66667,20.0,512.9907,536.5,38586101760,1788438600.0
+CINF,Cincinnati Financial Corporatio,Financial Services,Insurance - Property & Casualty,20.636719,2.5,6.0,187.33333,186.0,29150074880,1793044800.0
+CL,Colgate-Palmolive Company,Consumer Defensive,Household & Personal Products,23.923279,2.09524,20.0,101.7,102.5,77973749760,1793363400.0
+CLX,Clorox Company (The),Consumer Defensive,Household & Personal Products,17.28163,3.16667,16.0,97.0,96.0,12892010496,1793653200.0
+CMCSA,Comcast Corporation,Communication Services,Telecom Services,7.027517,2.62963,22.0,27.97727,27.25,87887405056,1792672200.0
+CME,CME Group Inc.,Financial Services,Financial Data & Stock Exchanges,23.336353,2.41176,16.0,317.0625,328.5,110633787392,1792585800.0
+CMG,"Chipotle Mexican Grill, Inc.",Consumer Cyclical,Restaurants,27.0749,1.82857,30.0,40.56667,40.0,45437898752,1793217600.0
+CMI,Cummins Inc.,Industrials,Specialty Industrial Machinery,13.319577,1.77273,19.0,646.92633,610.0,62258032640,1793885400.0
+CMS,CMS Energy Corporation,Utilities,Utilities - Regulated Electric,16.837584,2.3125,13.0,73.84615,73.0,21884796928,1793104200.0
+CNC,Centene Corporation,Healthcare,Healthcare Plans,12.658068,2.38095,18.0,75.38889,75.0,34748825600,1793104200.0
+CNP,"CenterPoint Energy, Inc (Holdin",Utilities,Utilities - Regulated Electric,19.704153,2.09524,19.0,44.23684,44.0,27337156608,1793104200.0
+COF,Capital One Financial Corporati,Financial Services,Credit Services,8.206793,1.56522,21.0,255.19048,252.0,117804253184,1792526400.0
+COHR,Coherent Corp.,Technology,Scientific & Technical Instruments,13.595679,1.5,25.0,371.9185,380.0,42279149568,1793826000.0
