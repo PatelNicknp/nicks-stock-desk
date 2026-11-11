@@ -3613,6 +3613,7 @@ def main(argv=None):
         setup_frames = {k: pd.DataFrame() for k in (
             "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_breakdown", "scanner_flag", "scanner_leaders",
             "scanner_qullamaggie", "scanner_marios", "scanner_52w", "highs_lows_history", "scanner_volume",
+            "scorecard_canslim",
         )}
     def _n(frame):
         if frame is None or len(frame) == 0 or "ticker" not in getattr(frame, "columns", []):
@@ -3761,6 +3762,7 @@ def main(argv=None):
         "scanner_wheel": gated(w, "scanner_wheel", features.get("scanner_wheel", True), "Wheel screen off or empty."),
         "scanner_vcp": gated(setup_frames["scanner_vcp"], "scanner_vcp", features.get("scanner_vcp", True), "No VCP setups. The scan used cached prices only."),
         "scanner_canslim": gated(setup_frames["scanner_canslim"], "scanner_canslim", features.get("scanner_canslim", True), "No CANSLIM setups. Missing letters stay not verified. No new downloads."),
+        "scorecard_canslim": gated(setup_frames.get("scorecard_canslim"), "scorecard_canslim", features.get("scorecard_canslim", True), "No scorecard CAN SLIM letters. Missing letters stay no data yet, not a fail. No new downloads."),
         "scanner_box": gated(setup_frames["scanner_box"], "scanner_box", features.get("scanner_box", True), "No box setups in the cached prices."),
         "scanner_breakdown": gated(setup_frames.get("scanner_breakdown"), "scanner_breakdown", features.get("scanner_breakdown", True), "No breakdowns in the cached prices."),
         "scanner_volume": gated(setup_frames.get("scanner_volume"), "scanner_volume", features.get("scanner_volume", True), "No high-volume names in the cached prices."),

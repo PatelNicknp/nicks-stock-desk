@@ -2313,10 +2313,17 @@
       return;
     }
     try {
-      const names = ["updates_log.csv", "market_today.csv", "settings.csv"].concat(spec.files || []);
+      const optional = new Set(spec.optionalFiles || []);
+      const names = ["updates_log.csv", "market_today.csv", "settings.csv"].concat(spec.files || []).concat(spec.optionalFiles || []);
       const unique = Array.from(new Set(names));
       const loaded = {};
-      await Promise.all(unique.map(async (n) => { loaded[n] = await loadCsv(n); }));
+      await Promise.all(unique.map(async (n) => {
+        try { loaded[n] = await loadCsv(n); }
+        catch (err) {
+          if (!optional.has(n)) throw err;
+          loaded[n] = [];
+        }
+      }));
       SETTINGS = loaded["settings.csv"] || [];
       applyTheme(themeChoice());
       await loadBlurbs();

@@ -54,6 +54,9 @@ Also added, when we have them:
 
 The desk score is the sum of the pieces we actually have. `scores.csv` has every component in its own column. `score_details.csv` is the same breakdown in a long list for the scorecard.
 
+The stock scorecard can also show a CAN SLIM card for every stock (`features.scorecard_canslim`, on by default, separate from `scanner_canslim`). The letters are written to `scorecard_canslim.csv` from cached prices, SEC EPS, and the Nasdaq 13F summary. No new downloads. C and A need 25% growth. N is within 15% of the 52-week closing high (the existing CANSLIM near-high line). S passes at a 20-day average volume of 200,000 shares and shows shares outstanding plus volume versus the 50-day average when those are on file. L needs an RS percentile of 80 or higher (Nick; the scanner's strict qualify still uses 55). I is more institutional shares bought than sold; a missing 13F row is no data yet, not a fail. M is SPY in an uptrend using the same 50-day / 200-day rule as Buy setups. A blank letter does not count as a pass or a fail.
+
+
 Forward P/E has no free history. Its baseline is the 3-year average of year-end trailing P/E. The column `forward_pe_avg_basis` says so.
 
 The industry column is the middle value of the other stocks in the same sector on this desk. It needs at least four peers. It is not a paid industry database, and it is not added into the score a second time.
