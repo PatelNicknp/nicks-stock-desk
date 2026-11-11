@@ -332,7 +332,12 @@
     }
     const nick360 = document.createElement("div");
     nick360.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px";
-    nick360.innerHTML = '<a id="nick360-open" href="nick360/index.html" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;padding:8px 14px;border-radius:8px;background:#2b2850;color:#c9c2ff;font-weight:700;text-decoration:none;white-space:nowrap">Nick 360</a>' + ' <a id="tito-options-floor-open" href="https://patelnicknp.github.io/tito-options-floor/" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;padding:8px 14px;border-radius:8px;background:#2b2850;color:#c9c2ff;font-weight:700;text-decoration:none;white-space:nowrap">Options Floor</a>' +
+    const stamp = mt.updated_pt || D.latestChecked(ctx.files["updates_log.csv"]);
+    const btnStyle = "display:inline-flex;align-items:center;padding:8px 14px;border-radius:8px;background:#2b2850;color:#c9c2ff;font-weight:700;text-decoration:none;white-space:nowrap";
+    nick360.innerHTML = '<a id="nick360-open" href="nick360/index.html" target="_blank" rel="noopener noreferrer" style="' + btnStyle + '">Nick 360</a>' +
+      ' <a id="tito-options-floor-open" href="https://patelnicknp.github.io/tito-options-floor/" target="_blank" rel="noopener noreferrer" style="' + btnStyle + '">Options Floor</a>' +
+      ' <a id="run-everything-open" href="https://github.com/PatelNicknp/nicks-stock-desk/actions/workflows/update.yml" target="_blank" rel="noopener noreferrer" style="' + btnStyle + '">Run everything</a>' +
+      '<span id="run-everything-updated" class="psub" style="margin:0">Last update: ' + D.esc(D.formatUpdated(stamp)) + '</span>' +
       '<span class="psub" style="margin:0">Opens the Nick 360 workspace in a new tab. Signals only, from the stored desk files.</span>';
     ctx.page.insertBefore(nick360, ctx.page.firstChild);
   }

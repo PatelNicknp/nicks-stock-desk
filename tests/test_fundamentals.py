@@ -222,6 +222,113 @@ def test_dividend_zero_is_real_when_concept_absent_from_one_year():
     assert abs(m["div_yield"] - 0.6 / 20.0) < 1e-9
 
 
+
+
+def test_ifrs_revenue_profit_and_eps_are_not_blank():
+    """Foreign 20-F / 40-F filers often use ifrs-full Revenue and DilutedEarningsPerShare."""
+    def row(val, frame, start, end, filed, form, **extra):
+        rec = {"val": val, "frame": frame, "end": end, "filed": filed, "form": form, "fp": "FY", "fy": 2024}
+        if start:
+            rec["start"] = start
+        rec.update(extra)
+        return rec
+    annual_rev = [
+        row(100, "CY2024", "2024-01-01", "2024-12-31", "2025-02-01", "40-F"),
+    ]
+    annual_ni = [
+        row(10, "CY2024", "2024-01-01", "2024-12-31", "2025-02-01", "40-F"),
+    ]
+    annual_eps = [
+        row(1.25, "CY2024", "2024-01-01", "2024-12-31", "2025-02-01", "40-F"),
+    ]
+    facts = {
+        "facts": {
+            "ifrs-full": {
+                "Revenue": {"units": {"CAD": annual_rev}},
+                "ProfitLossAttributableToOwnersOfParent": {"units": {"CAD": annual_ni}},
+                "DilutedEarningsPerShare": {"units": {"CAD/shares": annual_eps}},
+            }
+        }
+    }
+    annual, _ = fund.parse_companyfacts(facts)
+    assert len(annual) == 1
+    row0 = annual.iloc[0]
+    assert row0["revenue"] == 100
+    assert row0["net_income"] == 10
+    assert abs(row0["eps"] - 1.25) < 1e-9
+
+
+def test_us_gaap_wins_but_ifrs_fills_a_missing_tag():
+    facts = {
+        "facts": {
+            "us-gaap": {
+                "Revenues": {"units": {"USD": [
+                    {"val": 50, "frame": "CY2024", "start": "2024-01-01", "end": "2024-12-31",
+                     "filed": "2025-02-01", "form": "10-K", "fp": "FY", "fy": 2024}
+                ]}},
+            },
+            "ifrs-full": {
+                "Revenue": {"units": {"USD": [
+                    {"val": 999, "frame": "CY2024", "start": "2024-01-01", "end": "2024-12-31",
+                     "filed": "2025-02-01", "form": "20-F", "fp": "FY", "fy": 2024}
+                ]}},
+                "ProfitLoss": {"units": {"USD": [
+                    {"val": 7, "frame": "CY2024", "start": "2024-01-01", "end": "2024-12-31",
+                     "filed": "2025-02-01", "form": "20-F", "fp": "FY", "fy": 2024}
+                ]}},
+            },
+        }
+    }
+    annual, _ = fund.parse_companyfacts(facts)
+    row0 = annual.iloc[0]
+    # US-GAAP Revenues is preferred over IFRS Revenue for the same year.
+    assert row0["revenue"] == 50
+    assert row0["net_income"] == 7
+
+
+
+
+def test_ifrs_earnings_loss_per_share_tag():
+    facts = {
+        "facts": {
+            "ifrs-full": {
+                "Revenue": {"units": {"CAD": [
+                    {"val": 66, "frame": "CY2025", "start": "2024-11-01", "end": "2025-10-31",
+                     "filed": "2025-12-01", "form": "40-F", "fp": "FY", "fy": 2025}
+                ]}},
+                "DilutedEarningsLossPerShare": {"units": {"CAD/shares": [
+                    {"val": 11.2, "frame": "CY2025", "start": "2024-11-01", "end": "2025-10-31",
+                     "filed": "2025-12-01", "form": "40-F", "fp": "FY", "fy": 2025}
+                ]}},
+            }
+        }
+    }
+    annual, _ = fund.parse_companyfacts(facts)
+    assert abs(annual.iloc[0]["eps"] - 11.2) < 1e-9
+    assert str(annual.iloc[0]["end"])[:10] == "2025-10-31"
+
+
+def test_six_k_annual_frame_is_kept_for_foreign_filers():
+    """Canadian names such as CNI often file annual results on a 6-K, not a 40-F."""
+    facts = {
+        "facts": {
+            "us-gaap": {
+                "Revenues": {"units": {"CAD": [
+                    {"val": 17304, "frame": "CY2025", "start": "2025-01-01", "end": "2025-12-31",
+                     "filed": "2026-02-04", "form": "6-K", "fp": "FY", "fy": 2025}
+                ]}},
+                "NetIncomeLoss": {"units": {"CAD": [
+                    {"val": 4444, "frame": "CY2025", "start": "2025-01-01", "end": "2025-12-31",
+                     "filed": "2026-02-04", "form": "6-K", "fp": "FY", "fy": 2025}
+                ]}},
+            }
+        }
+    }
+    annual, _ = fund.parse_companyfacts(facts)
+    assert len(annual) == 1
+    assert annual.iloc[0]["revenue"] == 17304
+    assert annual.iloc[0]["net_income"] == 4444
+
 if __name__ == "__main__":
     test_parser_drops_ytd_and_combines_debt()
     test_known_on_blocks_same_day_and_missing_fcf()
@@ -230,4 +337,8 @@ if __name__ == "__main__":
     test_unframed_fy_fact_fills_net_income_and_does_not_replace_a_framed_value()
     test_split_puts_eps_on_the_adjusted_share_count()
     test_dividend_zero_is_real_when_concept_absent_from_one_year()
+    test_ifrs_revenue_profit_and_eps_are_not_blank()
+    test_us_gaap_wins_but_ifrs_fills_a_missing_tag()
+    test_ifrs_earnings_loss_per_share_tag()
+    test_six_k_annual_frame_is_kept_for_foreign_filers()
     print("fundamentals ok")

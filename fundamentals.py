@@ -19,6 +19,10 @@ REVENUE_CONCEPTS = [
     "Revenues",
     "RevenuesNetOfInterestExpense",
     "RegulatedAndUnregulatedOperatingRevenue",
+    # IFRS tags used by many 20-F / 40-F foreign filers (RY, MFC, CCEP).
+    "Revenue",
+    "RevenueFromContractsWithCustomers",
+    "RevenueFromContractWithCustomer",
 ]
 # Later tags fill a year the earlier tag left blank. NetIncomeLoss is still preferred.
 NI_CONCEPTS = [
@@ -28,19 +32,47 @@ NI_CONCEPTS = [
     "NetIncomeLossAvailableToCommonStockholdersDiluted",
     "IncomeLossFromContinuingOperations",
     "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+    "ProfitLossAttributableToOwnersOfParent",
+    "ProfitLossFromContinuingOperations",
 ]
-EPS_CONCEPTS = ["EarningsPerShareDiluted"]
+EPS_CONCEPTS = [
+    "EarningsPerShareDiluted",
+    "DilutedEarningsPerShare",
+    "DilutedEarningsLossPerShare",
+    "BasicAndDilutedEarningsPerShare",
+    "EarningsPerShareBasic",
+    "BasicEarningsPerShare",
+    "BasicEarningsLossPerShare",
+]
 GP_CONCEPTS = ["GrossProfit"]
-OI_CONCEPTS = ["OperatingIncomeLoss"]
-EQUITY_CONCEPTS = ["StockholdersEquity"]
-DEBT_NC = ["LongTermDebtNoncurrent"]
-DEBT_CUR = ["LongTermDebtCurrent", "DebtCurrent"]
-DEBT_LT = ["LongTermDebt"]
-OCF_CONCEPTS = ["NetCashProvidedByUsedInOperatingActivities"]
-CAPEX_CONCEPTS = ["PaymentsToAcquirePropertyPlantAndEquipment"]
-DPS_CONCEPTS = ["CommonStockDividendsPerShareDeclared"]
-SHARES_FLOW = ["WeightedAverageNumberOfDilutedSharesOutstanding"]
-SHARES_INSTANT = ["CommonStockSharesOutstanding"]
+OI_CONCEPTS = ["OperatingIncomeLoss", "ProfitLossFromOperatingActivities"]
+EQUITY_CONCEPTS = [
+    "StockholdersEquity",
+    "Equity",
+    "EquityAttributableToOwnersOfParent",
+]
+DEBT_NC = ["LongTermDebtNoncurrent", "NoncurrentBorrowings"]
+DEBT_CUR = ["LongTermDebtCurrent", "DebtCurrent", "CurrentBorrowings"]
+DEBT_LT = ["LongTermDebt", "LongtermBorrowings"]
+OCF_CONCEPTS = [
+    "NetCashProvidedByUsedInOperatingActivities",
+    "CashFlowsFromUsedInOperatingActivities",
+]
+CAPEX_CONCEPTS = [
+    "PaymentsToAcquirePropertyPlantAndEquipment",
+    "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities",
+]
+DPS_CONCEPTS = ["CommonStockDividendsPerShareDeclared", "DividendsPaidOrdinarySharesPerShare"]
+SHARES_FLOW = [
+    "WeightedAverageNumberOfDilutedSharesOutstanding",
+    "WeightedAverageSharesDiluted",
+    "WeightedAverageOrdinarySharesDiluted",
+]
+SHARES_INSTANT = [
+    "CommonStockSharesOutstanding",
+    "OrdinarySharesNumber",
+    "NumberOfSharesOutstanding",
+]
 
 
 def _duration(row):
@@ -350,10 +382,23 @@ def _apply_unframed_flows(df, maps):
     return df
 
 
+def _taxonomy_facts(facts):
+    """Prefer US-GAAP tags, then fill gaps from IFRS so foreign filers are not blank."""
+    us = facts.get("us-gaap") or {}
+    ifrs = facts.get("ifrs-full") or {}
+    if not us:
+        return ifrs
+    if not ifrs:
+        return us
+    merged = dict(ifrs)
+    merged.update(us)
+    return merged
+
+
 def parse_companyfacts(payload):
     """Return (annual_df, quarter_df) for one company. Empty frames if nothing usable."""
     facts = (payload or {}).get("facts") or {}
-    gaap = facts.get("us-gaap") or facts.get("ifrs-full") or {}
+    gaap = _taxonomy_facts(facts)
     empty = pd.DataFrame()
     if not gaap:
         return empty, empty
@@ -369,7 +414,7 @@ def parse_companyfacts(payload):
         "dps": [DPS_CONCEPTS],
         "shares": [SHARES_FLOW, SHARES_INSTANT],
     }
-    annual_forms = ("10-K", "20-F", "40-F")
+    annual_forms = ("10-K", "20-F", "40-F", "6-K")
     amaps = {}
     for key, groups in annual_specs.items():
         if key == "net_income":
@@ -377,12 +422,12 @@ def parse_companyfacts(payload):
             continue
         amaps[key], _ = _first_with_rows(gaap, groups, ANNUAL_FRAME, 300, 380, True, annual_forms, 1)
     # shares and equity and debt are instant (a stock, not a flow)
-    shares_i, _ = _first_with_rows(gaap, [SHARES_INSTANT], ANNUAL_FRAME, 0, 0, False, ("10-K", "20-F", "40-F"), 1)
+    shares_i, _ = _first_with_rows(gaap, [SHARES_INSTANT], ANNUAL_FRAME, 0, 0, False, annual_forms, 1)
     if shares_i and not amaps.get("shares"):
         amaps["shares"] = shares_i
-    equity, _ = _first_with_rows(gaap, [EQUITY_CONCEPTS], ANNUAL_FRAME, 0, 0, False, ("10-K", "20-F", "40-F"), 1)
+    equity, _ = _first_with_rows(gaap, [EQUITY_CONCEPTS], ANNUAL_FRAME, 0, 0, False, annual_forms, 1)
     amaps["equity"] = equity
-    amaps["debt"] = _debt_map(gaap, ANNUAL_FRAME, ("10-K", "20-F", "40-F"), False)
+    amaps["debt"] = _debt_map(gaap, ANNUAL_FRAME, annual_forms, False)
     annual = _merge_frames(amaps, [], [])
     # Real filings usually omit the CY#### frame on the balance sheet. Attach by period end.
     annual = _attach_by_end(annual, _instant_by_end(gaap, EQUITY_CONCEPTS, annual_forms), "equity")
@@ -412,17 +457,17 @@ def parse_companyfacts(payload):
         "capex": [CAPEX_CONCEPTS],
         "dps": [DPS_CONCEPTS],
     }
-    quarter_forms = ("10-Q", "10-K", "20-F", "40-F")
+    quarter_forms = ("10-Q", "10-K", "20-F", "40-F", "6-K")
     for key, groups in q_flow.items():
         if key == "net_income":
             qmaps[key], _ = _series_fallback(gaap, NI_CONCEPTS, QUARTER_FRAME, 75, 110, True, quarter_forms)
             continue
         qmaps[key], _ = _first_with_rows(gaap, groups, QUARTER_FRAME, 75, 110, True, quarter_forms, 1)
-    qmaps["equity"], _ = _first_with_rows(gaap, [EQUITY_CONCEPTS], QUARTER_FRAME, 0, 0, False, ("10-Q", "10-K", "20-F", "40-F"), 1)
-    qmaps["debt"] = _debt_map(gaap, QUARTER_FRAME, ("10-Q", "10-K", "20-F", "40-F"), False)
-    qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT, SHARES_FLOW], QUARTER_FRAME, 75, 110, True, ("10-Q", "10-K", "20-F", "40-F"), 1)
+    qmaps["equity"], _ = _first_with_rows(gaap, [EQUITY_CONCEPTS], QUARTER_FRAME, 0, 0, False, quarter_forms, 1)
+    qmaps["debt"] = _debt_map(gaap, QUARTER_FRAME, quarter_forms, False)
+    qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT, SHARES_FLOW], QUARTER_FRAME, 75, 110, True, quarter_forms, 1)
     if not qmaps["shares"]:
-        qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT], QUARTER_FRAME, 0, 0, False, ("10-Q", "10-K", "20-F", "40-F"), 1)
+        qmaps["shares"], _ = _first_with_rows(gaap, [SHARES_INSTANT], QUARTER_FRAME, 0, 0, False, quarter_forms, 1)
     quarters = _merge_frames(qmaps, [], [])
     quarters = _attach_by_end(quarters, _instant_by_end(gaap, EQUITY_CONCEPTS, quarter_forms), "equity")
     quarters = _attach_by_end(quarters, _debt_by_end(gaap, quarter_forms), "debt")

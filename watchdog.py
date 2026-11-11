@@ -7,6 +7,7 @@ Never calls Yahoo. Four commands:
     python watchdog.py keeper        # keeper workflow: sleep to each slot, make it up if it did not run
     python watchdog.py ensure-keeper # end of every update and watchdog run: start a keeper if none is live
     python watchdog.py chain-backfill # Fill new price history: start the next chunk if the workflow asks
+    python watchdog.py chain-ownership # ownership_full: start the next 13F chunk if names are still waiting
 
 Intended slots are New York time (America/New_York), Monday to Friday:
 hourly at 10:15, 11:15, ... 17:15 and the full run at 18:30. GitHub cron is UTC only,
@@ -540,6 +541,24 @@ def chain_backfill(env):
     return _dispatch("backfill.yml", body["inputs"], ref=body["ref"])
 
 
+def ownership_dispatch_body(ref, run_index):
+    """The next full desk run with ownership_full still on, one index higher."""
+    try:
+        nxt = int(run_index or 0) + 1
+    except (TypeError, ValueError):
+        nxt = 1
+    return {"ref": ref or "main", "inputs": {"mode": "full", "ownership_full": "true", "ownership_run": str(nxt), "reason": ""}}
+
+
+def chain_ownership(env):
+    """Start the next 13F/insider chunk. The workflow decides whether this should run."""
+    body = ownership_dispatch_body(env.get("GITHUB_REF_NAME"), env.get("DESK_OWNERSHIP_RUN"))
+    print("chain-ownership:", body, flush=True)
+    if env.get("DRY_RUN", "").lower() in ("1", "true", "yes"):
+        return True
+    return _dispatch("update.yml", body["inputs"], ref=body["ref"])
+
+
 def ensure_keeper(cfg=None, dry=False):
     cfg = read_config() if cfg is None else cfg
     try:
@@ -683,6 +702,9 @@ def main(argv):
         return 0
     if cmd == "chain-backfill":
         ok = chain_backfill(os.environ)
+        return 0 if ok else 1
+    if cmd == "chain-ownership":
+        ok = chain_ownership(os.environ)
         return 0 if ok else 1
     if cmd == "guard":
         skip, mode = run_guard(os.environ)
