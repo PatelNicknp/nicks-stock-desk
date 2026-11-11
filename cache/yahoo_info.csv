@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-DLTR,"Dollar Tree, Inc.",Consumer Defensive,Discount Stores,17.492107,2.51724,26.0,134.96153,137.5,25907054592,1795527000.0
-DOC,"Healthpeak Properties, Inc.",Real Estate,REIT - Healthcare Facilities,148.21428,2.40909,19.0,22.39474,22.0,15064889344,1793653200.0
-DOV,Dover Corporation,Industrials,Specialty Industrial Machinery,18.113884,1.57895,19.0,238.78947,245.0,28385171456,1792672200.0
-DOW,Dow Inc.,Basic Materials,Chemicals,16.99008,2.6,17.0,34.76471,33.0,22538063872,1801143000.0
-DPZ,Domino's Pizza Inc,Consumer Cyclical,Restaurants,16.291246,2.2,27.0,356.48148,350.0,11056529408,1791894600.0
-DRI,"Darden Restaurants, Inc.",Consumer Cyclical,Restaurants,18.56011,1.82143,25.0,233.44,235.0,26030862336,1797600600.0
-DTE,DTE Energy Company,Utilities,Utilities - Regulated Electric,17.12548,2.05882,14.0,148.39285,147.5,29099116544,1793885400.0
-DUK,Duke Energy Corporation (Holdin,Utilities,Utilities - Regulated Electric,17.997538,2.13043,19.0,132.26315,130.0,100607950848,1793885400.0
-DVA,DaVita Inc.,Healthcare,Medical Care Facilities,11.066254,2.5,7.0,222.2857,216.0,11744688128,1793304000.0
-DVN,Devon Energy Corporation,Energy,Oil & Gas E&P,7.890917,1.25926,27.0,61.51852,62.0,48078848000,1793912400.0
-DXCM,"DexCom, Inc.",Healthcare,Medical Devices,25.695175,1.34483,26.0,98.15385,96.5,30041196544,1793304000.0
-EBAY,eBay Inc.,Consumer Cyclical,Internet Retail,17.725883,2.5,27.0,126.74074,133.0,53536047104,1793217600.0
-ECHO,EchoStar Corporation,Communication Services,Telecom Services,5.804235,1.33333,10.0,139.2,131.0,28987242496,1793712600.0
-ECL,Ecolab Inc.,Basic Materials,Specialty Chemicals,32.724194,1.54167,21.0,330.57144,330.0,86325182464,1793104200.0
-ED,"Consolidated Edison, Inc.",Utilities,Utilities - Regulated Electric,18.352295,3.21053,17.0,109.5,109.0,44276256768,1793912400.0
-EFX,"Equifax, Inc.",Industrials,Consulting Services,20.025106,1.75,20.0,201.1,203.0,22434328576,1792499400.0
-EG,"Everest Group, Ltd.",Financial Services,Insurance - Reinsurance,6.814865,2.41176,16.0,433.375,429.0,15345616896,1793217600.0
-EIX,Edison International,Utilities,Utilities - Regulated Electric,9.282211,3.17647,15.0,63.03333,62.0,23241148416,1793304000.0
-EL,"Estee Lauder Companies, Inc. (T",Consumer Defensive,Household & Personal Products,28.342579,2.26667,28.0,114.88571,119.0,41686081536,1801661400.0
-ELV,"Elevance Health, Inc.",Healthcare,Healthcare Plans,13.941636,1.77273,21.0,482.38095,492.0,91226357760,1792585800.0
-EME,"EMCOR Group, Inc.",Industrials,Engineering & Construction,15.85635,1.72727,8.0,907.125,919.0,28375773184,1793277000.0
-EMR,Emerson Electric Company,Industrials,Specialty Industrial Machinery,21.302036,1.9,28.0,182.78535,189.0,95894716416,1793799000.0
-EOG,"EOG Resources, Inc.",Energy,Oil & Gas E&P,8.987322,2.36364,29.0,167.58621,165.0,76341616640,1793912400.0
-EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,51.454456,1.45714,32.0,1234.875,1230.0,105407709184,1793217600.0
-EQT,EQT Corporation,Energy,Oil & Gas E&P,14.380628,1.5,22.0,67.0,67.5,31033507840,1793131200.0
 ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.358591,1.0,,,,14190425088,1793304000.0
 ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.268861,2.70588,14.0,72.0,74.0,26468933632,1793826000.0
 ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,44.152443,2.57692,25.0,296.54,297.0,19095601152,1793131200.0
@@ -523,3 +498,28 @@ DHI,"D.R. Horton, Inc.",Consumer Cyclical,Residential Construction,13.651573,2.8
 DHR,Danaher Corporation,Healthcare,Diagnostics & Research,25.248098,1.45833,21.0,259.90475,260.0,165547835392,1792585800.0
 DIS,Walt Disney Company (The),Communication Services,Entertainment,15.953737,1.51515,32.0,126.83281,129.5,206598078464,1794922200.0
 DLR,"Digital Realty Trust, Inc.",Real Estate,REIT - Specialty,62.61862,1.44118,32.0,224.125,225.0,69733400576,1793304000.0
+DLTR,"Dollar Tree, Inc.",Consumer Defensive,Discount Stores,18.103365,2.62069,26.0,134.96153,137.5,26812368896,1795527000.0
+DOC,"Healthpeak Properties, Inc.",Real Estate,REIT - Healthcare Facilities,145.57143,2.40909,19.0,22.39474,22.0,14796261376,1793653200.0
+DOV,Dover Corporation,Industrials,Specialty Industrial Machinery,17.984907,1.57895,19.0,238.78947,245.0,28254822400,1792672200.0
+DOW,Dow Inc.,Basic Materials,Chemicals,17.756775,2.6,17.0,34.76471,33.0,23555119104,1801143000.0
+DPZ,Domino's Pizza Inc,Consumer Cyclical,Restaurants,15.927473,,27.0,356.48148,350.0,10809644032,1791894600.0
+DRI,"Darden Restaurants, Inc.",Consumer Cyclical,Restaurants,18.46895,1.82143,25.0,233.44,235.0,25903009792,1797600600.0
+DTE,DTE Energy Company,Utilities,Utilities - Regulated Electric,17.113232,2.05882,14.0,148.39285,147.5,29078302720,1793885400.0
+DUK,Duke Energy Corporation (Holdin,Utilities,Utilities - Regulated Electric,17.970482,2.13043,19.0,132.26315,130.0,100403036160,1793885400.0
+DVA,DaVita Inc.,Healthcare,Medical Care Facilities,10.875415,2.5,7.0,222.2857,216.0,11542150144,1793304000.0
+DVN,Devon Energy Corporation,Energy,Oil & Gas E&P,8.60722,1.25,27.0,60.81481,62.0,51230158848,1793912400.0
+DXCM,"DexCom, Inc.",Healthcare,Medical Devices,25.62978,1.34483,26.0,98.57692,96.5,29964740608,1793304000.0
+EBAY,eBay Inc.,Consumer Cyclical,Internet Retail,17.831991,2.5,27.0,126.74074,133.0,53856518144,1793217600.0
+ECHO,EchoStar Corporation,Communication Services,Telecom Services,5.954555,1.44444,10.0,139.2,131.0,29737965568,1793712600.0
+ECL,Ecolab Inc.,Basic Materials,Specialty Chemicals,32.731632,1.54167,21.0,330.57144,330.0,86344802304,1793104200.0
+ED,"Consolidated Edison, Inc.",Utilities,Utilities - Regulated Electric,18.335373,3.21053,17.0,109.5,109.0,44235431936,1793912400.0
+EFX,"Equifax, Inc.",Industrials,Consulting Services,19.762009,1.75,20.0,201.1,203.0,22047207424,1792499400.0
+EG,"Everest Group, Ltd.",Financial Services,Insurance - Reinsurance,6.970733,2.41176,16.0,433.375,429.0,15696599040,1793217600.0
+EIX,Edison International,Utilities,Utilities - Regulated Electric,9.208446,3.17647,15.0,63.03333,62.0,23056449536,1793304000.0
+EL,"Estee Lauder Companies, Inc. (T",Consumer Defensive,Household & Personal Products,27.670216,2.26667,28.0,115.35,119.0,40700579840,1801661400.0
+ELV,"Elevance Health, Inc.",Healthcare,Healthcare Plans,14.180857,1.77273,21.0,482.38095,492.0,92791685120,1792585800.0
+EME,"EMCOR Group, Inc.",Industrials,Engineering & Construction,16.299105,1.83333,9.0,884.1111,918.0,29191213056,1793277000.0
+EMR,Emerson Electric Company,Industrials,Specialty Industrial Machinery,20.789932,1.9,28.0,182.82108,189.0,91649114112,1793799000.0
+EOG,"EOG Resources, Inc.",Energy,Oil & Gas E&P,9.209003,2.36364,29.0,167.41379,165.0,79727321088,1793912400.0
+EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,51.60957,1.45714,32.0,1234.875,1230.0,105725468672,1793217600.0
+EQT,EQT Corporation,Energy,Oil & Gas E&P,15.2734375,1.5,22.0,66.90909,67.5,32960198656,1793131200.0
