@@ -280,10 +280,10 @@ def apply_profiles_to_info(info, profiles):
     return out
 
 
-def calendar_days(start, days_ahead=45, skip_weekends=True):
+def calendar_days(start, days_ahead=60, skip_weekends=True):
     """Dates to request from the Nasdaq earnings calendar, starting at `start`.
 
-    `days_ahead` is calendar days. Weekends are skipped so a 45-day window
+    `days_ahead` is calendar days. Weekends are skipped so a 60-day window
     is about 33 calls, not 45.
     """
     start = pd.Timestamp(start).normalize()

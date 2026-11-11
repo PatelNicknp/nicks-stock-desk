@@ -150,10 +150,20 @@ def test_calendar_and_ytd_do_not_hardcode_a_year():
     assert "today_et()" in src or "today" in src
 
 
+
+
+def test_sixty_day_calendar_reaches_january():
+    days = profiles.calendar_days("2026-11-10", days_ahead=60, skip_weekends=True)
+    assert days[0] == "2026-11-10"
+    assert "2027-01-08" in days
+    last = pd.Timestamp(days[-1])
+    assert last.year == 2027
+    assert (last - pd.Timestamp("2026-11-10")).days <= 59
 if __name__ == "__main__":
     test_nasdaq_calendar_window_crosses_into_january()
     test_next_earnings_drops_last_years_dates_after_january_1()
     test_ytd_resets_on_the_first_sessions_of_the_new_year()
     test_sec_keeps_a_january_fiscal_year_end_on_its_own_year()
     test_calendar_and_ytd_do_not_hardcode_a_year()
+    test_sixty_day_calendar_reaches_january()
     print("year rollover ok")

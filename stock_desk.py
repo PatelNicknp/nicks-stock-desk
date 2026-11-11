@@ -1487,6 +1487,89 @@ def slow_source_settings(cfg):
     return {"batch_per_run": max(1, batch), "refresh_every_days": max(1, every)}
 
 
+# One-time 13F/insider fill for the whole universe. Off unless the workflow
+# input ownership_full is set. The 35-minute budget leaves room for scores
+# and the backtest inside the 120-minute job; leftover names chain to the
+# next manual-style full run and resume from today's progress file.
+OWNERSHIP_FULL_BUDGET_SEC = 2100
+OWNERSHIP_FULL_MAX_RUNS = 8
+OWNERSHIP_STATUS_FILE = "ownership_full_status.json"
+
+
+def ownership_full_on(env=None):
+    env = os.environ if env is None else env
+    val = str((env or {}).get("DESK_OWNERSHIP_FULL") or "").strip().lower()
+    return val in ("1", "true", "yes", "on")
+
+
+def ownership_full_run_index(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(0, int((env or {}).get("DESK_OWNERSHIP_RUN") or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def ownership_full_budget_sec(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(30, int((env or {}).get("DESK_OWNERSHIP_BUDGET_SEC") or OWNERSHIP_FULL_BUDGET_SEC))
+    except (TypeError, ValueError):
+        return OWNERSHIP_FULL_BUDGET_SEC
+
+
+def ownership_full_max_runs(env=None):
+    env = os.environ if env is None else env
+    try:
+        return max(1, int((env or {}).get("DESK_OWNERSHIP_MAX_RUNS") or OWNERSHIP_FULL_MAX_RUNS))
+    except (TypeError, ValueError):
+        return OWNERSHIP_FULL_MAX_RUNS
+
+
+def holders_batch_per_run(settings, n_tickers, mode, env=None):
+    """Usual 60-name slice, or every name when ownership_full is on for a full run."""
+    if ownership_full_on(env) and mode == "full":
+        return max(1, int(n_tickers))
+    return int(settings["batch_per_run"])
+
+
+def ownership_should_chain(waiting, fetched, run_index, max_runs):
+    """Continue only when this chunk saved names and more are still waiting."""
+    if int(waiting or 0) <= 0 or int(fetched or 0) <= 0:
+        return False
+    return int(run_index or 0) + 1 < int(max_runs)
+
+
+def write_ownership_status(cache, status):
+    path = os.path.join(cache, OWNERSHIP_STATUS_FILE)
+    with open(path, "w") as f:
+        json.dump(status or {}, f, indent=1, sort_keys=True)
+    return path
+
+
+def read_ownership_status(cache):
+    path = os.path.join(cache, OWNERSHIP_STATUS_FILE)
+    if not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def emit_ownership_status_output(cache, dest=None):
+    """Tell the workflow whether to start the next ownership_full run."""
+    status = read_ownership_status(cache)
+    chain = "true" if status.get("chain") else "false"
+    dest = dest or os.environ.get("GITHUB_OUTPUT")
+    if dest:
+        with open(dest, "a") as fh:
+            fh.write("ownership_chain=%s\n" % chain)
+            fh.write("ownership_waiting=%s\n" % int(status.get("waiting") or 0))
+    return chain, status
+
+
 def load_named_cycle(cache, name):
     path = os.path.join(cache, "%s_cycle.json" % name)
     if not os.path.exists(path):
@@ -1898,9 +1981,9 @@ def load_nasdaq_earnings(cfg, cache, mode, start=None):
         return prior
     block = cfg.get("earnings_calendar") or {}
     try:
-        days_ahead = int(block.get("days_ahead", 45))
+        days_ahead = int(block.get("days_ahead", 60))
     except (TypeError, ValueError):
-        days_ahead = 45
+        days_ahead = 60
     skip_weekends = bool(block.get("skip_weekends", True))
     start = pd.Timestamp(start or today_et())
     days = profiles.calendar_days(start, days_ahead=days_ahead, skip_weekends=skip_weekends)
@@ -2271,7 +2354,7 @@ def _parse_int(v):
         return None
 
 
-def load_holders(tickers, cfg, cache, mode):
+def load_holders(tickers, cfg, cache, mode, clock=None, budget_sec=None):
     path = os.path.join(cache, "holders.csv")
     detail_p = os.path.join(cache, "holder_rows.csv")
     summary, detail = read_csv(path), read_csv(detail_p)
@@ -2289,18 +2372,29 @@ def load_holders(tickers, cfg, cache, mode):
     have = set(summary["ticker"].astype(str)) if len(summary) and "ticker" in summary.columns else set()
     cycle = load_named_cycle(cache, "holders")
     done = progress_load(cache, "holders")
+    full = ownership_full_on() and mode == "full"
+    batch = holders_batch_per_run(settings, len(tickers), mode)
     if missing_parts:
         print("13F cache has no holdings total; refreshing a batch so ownership is not just capped")
     pool = slow_refresh_pool(
         list(tickers), have, {} if missing_parts else cycle, today_et(),
-        settings["batch_per_run"], settings["refresh_every_days"], done)
+        batch, settings["refresh_every_days"], done)
     if not pool:
         STAMPS["holders"] = today_et()
         note = "reused cache (at most %d names a full run, again after %d days)" % (
-            settings["batch_per_run"], settings["refresh_every_days"])
+            batch, settings["refresh_every_days"])
+        if full:
+            note = "ownership_full: every name already fetched today"
+            write_ownership_status(cache, {
+                "active": True, "chain": False, "waiting": 0, "fetched_this_run": 0,
+                "done_today": len(done), "universe": len(tickers), "stopped_for_budget": False,
+            })
         log("Institutional 13F and insider (Nasdaq)", "OK", today_et(), note)
         return summary, detail
-    print("Nasdaq refreshing %d names (at most %d a full run)" % (len(pool), settings["batch_per_run"]))
+    if full:
+        print("Nasdaq ownership_full refreshing %d of %d names (cap lifted for this run)" % (len(pool), len(tickers)))
+    else:
+        print("Nasdaq refreshing %d names (at most %d a full run)" % (len(pool), batch))
     lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
     headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     sums, rows, fails = [], [], 0
@@ -2309,7 +2403,16 @@ def load_holders(tickers, cfg, cache, mode):
     todo = list(pool)
     if done:
         print("Nasdaq skipping %d names already fetched today" % len(done))
+    clock = clock or time.monotonic
+    budget = ownership_full_budget_sec() if budget_sec is None else budget_sec
+    started = clock()
+    stopped_for_budget = False
+    fetched_now = 0
     for i, t in enumerate(todo):
+        if full and budget is not None and (clock() - started) >= float(budget):
+            stopped_for_budget = True
+            print("Nasdaq ownership_full: stopping after %d names to finish this run inside the 120-minute limit; %d still waiting" % (i, len(todo) - i))
+            break
         try:
             hurl = "https://api.nasdaq.com/api/company/%s/institutional-holdings?limit=5" % t
             iurl = "https://api.nasdaq.com/api/company/%s/insider-trades?limit=5" % t
@@ -2357,6 +2460,7 @@ def load_holders(tickers, cfg, cache, mode):
                 "as_of": as_of, "insider_buys": buys, "insider_sells": sells,
             })
             done.add(t)
+            fetched_now += 1
         except Exception:
             fails += 1
             if old is not None and t in old.index:
@@ -2375,12 +2479,42 @@ def load_holders(tickers, cfg, cache, mode):
             save_named_cycle(cache, "holders", cycle)
             progress_save(cache, "holders", done)
             checkpoint_progress("nasdaq holders %d/%d" % (i + 1, len(todo)))
+    if sums or rows:
+        # A budget stop can land between 40-name checkpoints; flush what we have.
+        summary = merge_ticker_rows(base_summary, sums)
+        if len(summary) and "ticker" in summary.columns:
+            summary = summary.drop_duplicates("ticker", keep="last")
+            summary.to_csv(path, index=False)
+        detail = merge_ticker_rows(base_detail, rows)
+        if len(detail):
+            detail.to_csv(detail_p, index=False)
+        for name in done:
+            cycle[name] = today_et()
+        save_named_cycle(cache, "holders", cycle)
+        progress_save(cache, "holders", done)
+        if fetched_now:
+            checkpoint_progress("nasdaq holders %d/%d" % (fetched_now, len(todo)))
     fail_rate = fails / max(len(todo), 1)
-    if fail_rate > 0.5:
+    waiting = [name for name in tickers if name not in done]
+    if fail_rate > 0.5 and not fetched_now:
         log("Institutional 13F and insider (Nasdaq)", "CACHED" if len(summary) else "MISSING", "", "%d of %d failed" % (fails, len(tickers)))
     else:
         STAMPS["holders"] = today_et()
-        log("Institutional 13F and insider (Nasdaq)", "OK", today_et(), "%d names, %d failed" % (len(summary), fails))
+        note = "%d names, %d failed" % (len(summary), fails)
+        if stopped_for_budget:
+            note += "; stopped to stay inside the 120-minute job, %d waiting for the next ownership_full run" % len(waiting)
+        log("Institutional 13F and insider (Nasdaq)", "OK" if not stopped_for_budget else "PARTIAL", today_et(), note)
+    if full:
+        write_ownership_status(cache, {
+            "active": True,
+            "chain": ownership_should_chain(len(waiting), fetched_now, ownership_full_run_index(), ownership_full_max_runs()),
+            "waiting": len(waiting),
+            "fetched_this_run": fetched_now,
+            "done_today": len(done),
+            "universe": len(tickers),
+            "stopped_for_budget": stopped_for_budget,
+            "run_index": ownership_full_run_index(),
+        })
     return summary, detail
 
 
@@ -3684,10 +3818,12 @@ def main(argv=None):
         annual, quarters = load_sec(list(universe["ticker"]), cik, cfg, cache, mode, core=daily_names) if cik else (pd.DataFrame(), pd.DataFrame())
         if not cik and score_on:
             log("Fundamentals (SEC EDGAR company facts)", "MISSING", "", "no CIK map")
-        # Profiles and 13F stay on the original daily list. A full run refreshes a
-        # slice of that list (slow_sources), not every name. Hourly reuses the cache.
+        # Yahoo profiles stay on the original daily list. 13F stays on that list
+        # too, unless ownership_full is on for this run, in which the cap is
+        # lifted and every universe name is eligible. Hourly reuses the cache.
         info, earnings = load_yahoo(daily_names, cfg, cache, mode)
-        holders, holder_rows = load_holders(daily_names, cfg, cache, mode)
+        holder_names = list(universe["ticker"]) if (ownership_full_on() and mode == "full") else daily_names
+        holders, holder_rows = load_holders(holder_names, cfg, cache, mode)
         # SEC profiles and the Nasdaq calendar cover the whole universe. They
         # do not add Yahoo calls. Finnhub websites run only when a key already exists.
         profiles_df = load_sec_profiles(list(universe["ticker"]), cik or {}, cfg, cache, mode)

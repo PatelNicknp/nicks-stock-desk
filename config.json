@@ -406,7 +406,7 @@
   },
   "earnings_calendar": {
     "_note": "Nasdaq earnings calendar on a full run. One request per weekday for the next days_ahead calendar days, starting from today so the window crosses into January by itself when the year changes. A failed fetch keeps the saved calendar. Next earnings is filled only where it is still missing.",
-    "days_ahead": 45,
+    "days_ahead": 60,
     "skip_weekends": true
   },
   "scoring": {
