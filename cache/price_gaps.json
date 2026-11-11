@@ -1,0 +1,30 @@
+{
+ "ACCV": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "CTY": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "LYCA": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "MSGR": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ }
+}
