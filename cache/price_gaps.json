@@ -6,7 +6,42 @@
   "reason": "fewer than 30 daily bars",
   "recheck_after": "2026-11-17"
  },
+ "BLFS": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
  "CTY": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "HLX": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "INDV": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "LEG": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "LXP": {
   "attempts": 1,
   "checked": "2026-11-10",
   "kind": "short",
@@ -21,6 +56,27 @@
   "recheck_after": "2026-11-17"
  },
  "MSGR": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "QRVO": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "RAMP": {
+  "attempts": 1,
+  "checked": "2026-11-10",
+  "kind": "short",
+  "reason": "fewer than 30 daily bars",
+  "recheck_after": "2026-11-17"
+ },
+ "VYLR": {
   "attempts": 1,
   "checked": "2026-11-10",
   "kind": "short",
