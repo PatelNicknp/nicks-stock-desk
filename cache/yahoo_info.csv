@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.358591,1.0,,,,14190425088,1793304000.0
-ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.268861,2.70588,14.0,72.0,74.0,26468933632,1793826000.0
-ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,44.152443,2.57692,25.0,296.54,297.0,19095601152,1793131200.0
-ETN,"Eaton Corporation, PLC",Industrials,Specialty Industrial Machinery,21.9401,1.53571,26.0,476.97192,485.0,140277645312,1793712600.0
-ETR,Entergy Corporation,Utilities,Utilities - Regulated Electric,21.959433,1.70833,21.0,120.38095,123.5,53655207936,1793626200.0
-EVRG,"Evergy, Inc.",Utilities,Utilities - Regulated Electric,19.37136,1.8125,14.0,91.5,91.5,20752953344,1793885400.0
-EW,Edwards Lifesciences Corporatio,Healthcare,Medical Devices,30.880018,1.53333,27.0,111.64481,115.0,60409499648,1793826000.0
-EXC,Exelon Corporation,Utilities,Utilities - Regulated Electric,15.121373,2.72727,17.0,47.76471,46.0,47434489856,1793363400.0
-EXE,Expand Energy Corporation,Energy,Oil & Gas E&P,10.471121,1.55172,27.0,123.33333,122.0,19615207424,1793131200.0
-EXPD,Expeditors International of Was,Industrials,Integrated Freight & Logistics,21.573298,3.11111,15.0,193.73334,197.0,24296044544,1793712600.0
 EXPE,"Expedia Group, Inc.",Consumer Cyclical,Travel Services,10.386335,2.18421,35.0,333.14285,330.0,30515691520,1793826000.0
 EXR,Extra Space Storage Inc,Real Estate,REIT - Industrial,33.731785,2.19048,20.0,158.5,156.5,35348393984,1793131200.0
 F,Ford Motor Company,Consumer Cyclical,Auto Manufacturers,6.638024,2.35,18.0,15.14111,14.12,50035015680,1793217600.0
@@ -523,3 +513,13 @@ EMR,Emerson Electric Company,Industrials,Specialty Industrial Machinery,20.78993
 EOG,"EOG Resources, Inc.",Energy,Oil & Gas E&P,9.209003,2.36364,29.0,167.41379,165.0,79727321088,1793912400.0
 EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,51.60957,1.45714,32.0,1234.875,1230.0,105725468672,1793217600.0
 EQT,EQT Corporation,Energy,Oil & Gas E&P,15.2734375,1.5,22.0,66.90909,67.5,32960198656,1793131200.0
+ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.418604,1.0,,,,14232255488,1793304000.0
+ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.323687,2.70588,14.0,72.0,74.0,26570637312,1793826000.0
+ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,43.566334,2.57692,25.0,295.46,295.0,18906537984,1793131200.0
+ETN,"Eaton Corporation, PLC",Industrials,Specialty Industrial Machinery,21.920897,1.53571,27.0,473.93594,485.0,140100861952,1793712600.0
+ETR,Entergy Corporation,Utilities,Utilities - Regulated Electric,21.900764,1.70833,21.0,120.38095,123.5,53511860224,1793626200.0
+EVRG,"Evergy, Inc.",Utilities,Utilities - Regulated Electric,19.336338,1.8125,14.0,91.85714,92.5,20715433984,1793885400.0
+EW,Edwards Lifesciences Corporatio,Healthcare,Medical Devices,31.264587,1.53333,27.0,112.42259,115.0,60840747008,1793826000.0
+EXC,Exelon Corporation,Utilities,Utilities - Regulated Electric,15.041587,2.72727,17.0,47.76471,46.0,47201640448,1793363400.0
+EXE,Expand Energy Corporation,Energy,Oil & Gas E&P,10.927298,1.55172,27.0,122.77778,122.0,20469749760,1793131200.0
+EXPD,Expeditors International of Was,Industrials,Integrated Freight & Logistics,22.308151,3.11111,15.0,193.73334,197.0,25123645440,1793712600.0
