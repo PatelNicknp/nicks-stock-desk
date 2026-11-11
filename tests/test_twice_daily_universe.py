@@ -103,6 +103,38 @@ def test_liquid_names_skip_etfs_and_names_already_held():
     assert desk.select_liquid_names(rows, good, ["AAPL", "BRK-B"], 10_000_000_000, 1) == ["NEW"]
 
 
+def test_liquid_names_require_price_volume_and_skip_funds():
+    listed_nas = "\n".join([
+        "Symbol|Security Name|Market Category|Test Issue|Financial Status|Round Lot Size|ETF|NextShares",
+        "AAPL|Apple Inc. Common Stock|Q|N|N|100|N|N",
+        "NEW|New Co Common Stock|Q|N|N|100|N|N",
+        "CHEAP|Cheap Co Common Stock|Q|N|N|100|N|N",
+        "QUIET|Quiet Co Common Stock|Q|N|N|100|N|N",
+        "FUNDX|Some Equity Fund|Q|N|N|100|N|N",
+        "CEFX|A Closed-End Fund|Q|N|N|100|N|N",
+    ])
+    listed_oth = "\n".join([
+        "ACT Symbol|Security Name|Exchange|CQS Symbol|ETF|Round Lot Size|Test Issue|NASDAQ Symbol",
+        "BRK.B|Berkshire Hathaway Inc. New Common Stock|N|BRK.B|N|40|N|BRK.B",
+    ])
+    good = desk.parse_listed_common(listed_nas, listed_oth)
+    assert "FUNDX" not in good and "CEFX" not in good
+    assert "NEW" in good and "CHEAP" in good and "QUIET" in good
+    rows = [
+        {"symbol": "NEW", "name": "New Co Common Stock", "marketCap": "500000000", "lastsale": "$12.00", "volume": "250000"},
+        {"symbol": "CHEAP", "name": "Cheap Co Common Stock", "marketCap": "800000000", "lastsale": "$4.50", "volume": "500000"},
+        {"symbol": "QUIET", "name": "Quiet Co Common Stock", "marketCap": "800000000", "lastsale": "$15.00", "volume": "50000"},
+        {"symbol": "FUNDX", "name": "Some Equity Fund", "marketCap": "2000000000", "lastsale": "$20.00", "volume": "500000"},
+    ]
+    picked = desk.select_liquid_names(rows, good, [], 300_000_000, 10, min_price=5, min_volume=100000)
+    assert picked == ["NEW"]
+    # Filters are amounts, not a calendar year.
+    src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "stock_desk.py")).read()
+    start = src.find("def select_liquid_names")
+    end = src.find("def liquid_settings")
+    assert "2026" not in src[start:end] and "2027" not in src[start:end]
+
+
 def test_core_list_stays_on_the_original_names():
     import pandas as pd
     universe = pd.DataFrame([
@@ -126,7 +158,11 @@ def test_settings_and_help():
     assert rows["index.sp400"] == "True" and rows["index.sp600"] == "True"
     assert rows["sec_facts.cik_overrides.XOM"] == "0000034088"
     assert rows["incremental_prices.backfill_per_run"] == "40"
-    assert rows["liquid_names.min_market_cap"] == "10000000000"
+    assert rows["liquid_names.min_market_cap"] == "300000000"
+    assert rows["liquid_names.min_price"] == "5"
+    assert rows["liquid_names.min_volume"] == "100000"
+    assert rows["liquid_names.max_stocks"] == "2500"
+    assert cfg["incremental_prices"]["fast_backfill_per_run"] == 600
     help_rows = dict(tables.help_rows())
     for topic in ("Twice a day", "Wider universe", "SEC filings for the wider list"):
         assert topic in help_rows
@@ -147,6 +183,7 @@ if __name__ == "__main__":
     test_xom_override_and_rolling_slice()
     test_backfill_is_capped()
     test_liquid_names_skip_etfs_and_names_already_held()
+    test_liquid_names_require_price_volume_and_skip_funds()
     test_core_list_stays_on_the_original_names()
     test_settings_and_help()
     print("twice daily universe ok")

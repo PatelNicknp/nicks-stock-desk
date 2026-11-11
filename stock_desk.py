@@ -1183,11 +1183,25 @@ def combine_indexes(parts, holdings, watch, switches):
     return df[df.apply(keep, axis=1)].reset_index(drop=True)
 
 
-_LISTED_BAD = ("PREFERRED", "WARRANT", "DEPOSITARY", "NOTES", "RIGHT", "UNIT ", "BOND", "DEBENTURE")
+_LISTED_BAD = (
+    "PREFERRED", "WARRANT", "DEPOSITARY", "NOTES", "RIGHT", "UNIT ", "BOND", "DEBENTURE",
+    "CLOSED-END", "CLOSED END", "MUTUAL FUND", "EXCHANGE-TRADED", "EXCHANGE TRADED",
+)
 
 
 def _norm_symbol(symbol):
     return str(symbol or "").upper().replace(".", "-").replace("$", "-").replace("/", "-").strip()
+
+
+def _listed_name_blocked(name):
+    """True for ETFs, funds, warrants, preferreds, and similar non-common names."""
+    text = (name or "").upper()
+    if any(word in text for word in _LISTED_BAD):
+        return True
+    # "FUND" as a word, not a name like FUNDAMENTAL.
+    if text.endswith(" FUND") or text.endswith(" FUNDS") or text.endswith("-FUND") or " FUND " in text:
+        return True
+    return False
 
 
 def parse_listed_common(nasdaq_text, other_text):
@@ -1204,7 +1218,7 @@ def parse_listed_common(nasdaq_text, other_text):
             if parts[etf_i].strip().upper() == "Y" or parts[test_i].strip().upper() == "Y":
                 continue
             name = parts[name_i].upper()
-            if any(word in name for word in _LISTED_BAD):
+            if _listed_name_blocked(name):
                 continue
             symbol = _norm_symbol(parts[sym_i])
             if symbol:
@@ -1225,8 +1239,28 @@ def _market_cap_number(value):
         return None
 
 
-def select_liquid_names(rows, listed, already, min_market_cap, room):
-    """Screener rows with a large market cap that the symbol file calls a common stock."""
+def _price_number(value):
+    text = str(value or "").replace(",", "").replace("$", "").strip()
+    if not text or text.upper() in ("N/A", "NA", "NONE"):
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _volume_number(value):
+    text = str(value or "").replace(",", "").strip()
+    if not text or text.upper() in ("N/A", "NA", "NONE"):
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def select_liquid_names(rows, listed, already, min_market_cap, room, min_price=0, min_volume=0):
+    """Screener rows that clear the cap, price, and volume floors and are listed common stock."""
     if room <= 0:
         return []
     listed = set(listed or [])
@@ -1238,8 +1272,18 @@ def select_liquid_names(rows, listed, already, min_market_cap, room):
         cap = _market_cap_number(row.get("marketCap"))
         if cap is None or cap < float(min_market_cap):
             continue
+        if float(min_price or 0) > 0:
+            price = _price_number(row.get("lastsale") or row.get("price") or row.get("lastSale"))
+            if price is None or price <= float(min_price):
+                continue
+        if float(min_volume or 0) > 0:
+            volume = _volume_number(row.get("volume"))
+            if volume is None or volume <= float(min_volume):
+                continue
         symbol = _norm_symbol(row.get("symbol"))
         if not symbol or symbol in already or symbol not in listed:
+            continue
+        if _listed_name_blocked(row.get("name") or ""):
             continue
         picked.append((cap, symbol))
     picked.sort(key=lambda item: (-item[0], item[1]))
@@ -1249,17 +1293,27 @@ def select_liquid_names(rows, listed, already, min_market_cap, room):
 def liquid_settings(cfg):
     raw = cfg.get("liquid_names") or {}
     try:
-        floor = float(raw.get("min_market_cap", 10000000000))
+        floor = float(raw.get("min_market_cap", 300000000))
     except (TypeError, ValueError):
-        floor = 10000000000.0
+        floor = 300000000.0
     try:
-        cap = int(raw.get("max_stocks", 2000))
+        cap = int(raw.get("max_stocks", 2500))
     except (TypeError, ValueError):
-        cap = 2000
+        cap = 2500
+    try:
+        min_price = float(raw.get("min_price", 5))
+    except (TypeError, ValueError):
+        min_price = 5.0
+    try:
+        min_volume = float(raw.get("min_volume", 100000))
+    except (TypeError, ValueError):
+        min_volume = 100000.0
     return {
         "on": bool((cfg.get("features") or {}).get("liquid_names", True)) and bool((cfg.get("indexes") or {}).get("liquid", True)),
         "min_market_cap": floor,
         "max_stocks": max(1, cap),
+        "min_price": max(0.0, min_price),
+        "min_volume": max(0.0, min_volume),
     }
 
 
@@ -1310,26 +1364,28 @@ def load_liquid(cfg, cache, mode, already, listed):
     if not settings["on"]:
         log("Liquid names (Nasdaq screener)", "OK", "", "switch is off")
         return pd.DataFrame()
-    allow = mode == "full" and (STAMPS.get("liquid_names") != today_et() or not rows or "--force-slow" in sys.argv)
+    def _screener_has_filters(saved):
+        if not saved or not isinstance(saved, list) or not isinstance(saved[0], dict):
+            return False
+        return "volume" in saved[0] or "lastsale" in saved[0]
+
+    allow = mode == "full" and (STAMPS.get("liquid_names") != today_et() or not rows or not _screener_has_filters(rows) or "--force-slow" in sys.argv)
     if allow:
         try:
             lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
             headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
-            got = []
-            offset = 0
-            total = None
-            while total is None or offset < total:
-                url = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=1000&offset=%d" % offset
-                r = netutil.http_get(requests, url, headers, 40, limiter=lim, max_tries=rl(cfg)["max_retries"])
-                payload = r.json()
-                table = ((payload.get("data") or {}).get("table") or {})
-                batch = table.get("rows") or []
-                total = int((payload.get("data") or {}).get("totalrecords") or 0)
-                got.extend(batch)
-                if not batch:
-                    break
-                offset += len(batch)
-            rows = [{"symbol": row.get("symbol"), "marketCap": row.get("marketCap")} for row in got]
+            # One official screener download includes last sale and volume for every name.
+            url = "https://api.nasdaq.com/api/screener/stocks?download=true"
+            r = netutil.http_get(requests, url, headers, 60, limiter=lim, max_tries=rl(cfg)["max_retries"])
+            payload = r.json()
+            got = ((payload.get("data") or payload).get("rows")) or []
+            rows = [{
+                "symbol": row.get("symbol"),
+                "name": row.get("name"),
+                "marketCap": row.get("marketCap"),
+                "lastsale": row.get("lastsale") or row.get("lastSale"),
+                "volume": row.get("volume"),
+            } for row in got if isinstance(row, dict)]
             json.dump(rows, open(path, "w"))
             STAMPS["liquid_names"] = today_et()
             log("Liquid names (Nasdaq screener)", "OK", today_et(), "%d rows" % len(rows))
@@ -1341,7 +1397,10 @@ def load_liquid(cfg, cache, mode, already, listed):
         log("Liquid names (Nasdaq screener)", "MISSING", "", "no cache and this run does not call the screener")
         return pd.DataFrame()
     room = settings["max_stocks"] - len(set(already or []))
-    picked = select_liquid_names(rows, listed, already, settings["min_market_cap"], room)
+    picked = select_liquid_names(
+        rows, listed, already, settings["min_market_cap"], room,
+        min_price=settings.get("min_price", 0), min_volume=settings.get("min_volume", 0),
+    )
     if not picked:
         return pd.DataFrame()
     return _blank_flags(pd.DataFrame([{"ticker": t, "company": "", "sector": ""} for t in picked]), "in_liquid")
