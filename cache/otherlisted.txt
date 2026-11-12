@@ -1175,8 +1175,8 @@ CFG$H|Citizens Financial Group, Inc. Depositary Shares Each Representing a 1/40t
 CFG$I|Citizens Financial Group, Inc. Depositary Shares, Each Representing a 1/40th Interest in a Share of 6.500% Fixed-Rate Reset Non-Cumulative Perpetual Preferred Stock, Series I|N|CFGpI|N|100|N|CFG-I
 CFIT|Cambria Fixed Income Trend ETF|Z|CFIT|Y|100|N|CFIT
 CFND|C1 Fund Inc. Common Stock|N|CFND|N|100|N|CFND
-CFR|Cullen/Frost Bankers, Inc. Common Stock|N|CFR|N|100|N|CFR
-CFR$B|Cullen/Frost Bankers, Inc. Depositary Shares, each representing a 1/40th ownership interest in a share of 4.450% non-cumulative perpetual preferred stock, Series B|N|CFRpB|N|100|N|CFR-B
+CFR|Cullen/Frost Bankers, Inc. Common Stock|F|CFR|N|100|N|CFR
+CFR$B|Cullen/Frost Bankers, Inc. Depositary Shares, each representing a 1/40th ownership interest in a share of 4.450% non-cumulative perpetual preferred stock, Series B|F|CFRpB|N|100|N|CFR-B
 CFTR$A|Cantor Fitzgerald Income Trust, Inc. 9.50% Series A Cumulative Redeemable Preferred Stock|N|CFTRpA|N|100|N|CFTR-A
 CGAU|Centerra Gold Inc. Common Shares|N|CGAU|N|100|N|CGAU
 CGBL|Capital Group Core Balanced ETF|P|CGBL|Y|100|N|CGBL
@@ -2867,6 +2867,7 @@ GLED.U|GalaxyEdge Acquisition Corporation Units, each consisting of one Ordinary
 GLIN|VanEck India Growth Leaders ETF|P|GLIN|Y|100|N|GLIN
 GLIX|Lazard Listed Infrastructure ETF|P|GLIX|Y|100|N|GLIX
 GLL|ProShares UltraShort Gold|P|GLL|Y|100|N|GLL
+GLLD|MicroSectors Gold 3X Leveraged ETNs due January 29, 2043|P|GLLD|Y|100|N|GLLD
 GLNK|Grayscale Chainlink Trust ETF|P|GLNK|Y|100|N|GLNK
 GLO|Clough Global Opportunities Fund Common Stock|A|GLO|N|100|N|GLO
 GLOB|Globant S.A. Common Shares|N|GLOB|N|100|N|GLOB
@@ -3839,6 +3840,7 @@ KBE|State Street SPDR S&P Bank ETF|P|KBE|Y|100|N|KBE
 KBFR|Innovator U.S. Small Cap Managed 10 Buffer ETF|P|KBFR|Y|100|N|KBFR
 KBH|KB Home Common Stock|N|KBH|N|100|N|KBH
 KBR|KBR, Inc. Common Stock|N|KBR|N|100|N|KBR
+KBTY|Guinness Atkinson K-Beauty ETF|P|KBTY|Y|100|N|KBTY
 KBUF|KraneShares 90% KWEB Defined Outcome January 2027 ETF|P|KBUF|Y|100|N|KBUF
 KCA.U|Kensington Capital Acquisition Corp. VI New Units, each consisting of one Class A Ordinary Share and three-quarters of one Class 2 Redeemable Warrant|N|KCA.U|N|100|N|KCA=
 KCAC.U|Kensington Capital Acquisition Corp. VI Units, each consisting of one Class A ordinary share, one-quarter of one Class 1 redeemable warrant and three-quarters of one Class 2 redeemable warrant|N|KCAC.U|N|100|N|KCAC=
@@ -3916,7 +3918,6 @@ KNOP|KNOT Offshore Partners LP Common Units representing Limited Partner Interes
 KNOV|Innovator U.S. Small Cap Power Buffer ETF - November|Z|KNOV|Y|100|N|KNOV
 KNOW|Fundamentals First ETF|Z|KNOW|Y|100|N|KNOW
 KNRG|Simplify Kayne Anderson Energy and Infrastructure Credit ETF|P|KNRG|Y|100|N|KNRG
-KNRX|KNOREX LTD. Class A Ordinary Shares|A|KNRX|N|100|N|KNRX
 KNSL|Kinsale Capital Group, Inc. Common Stock|N|KNSL|N|40|N|KNSL
 KNTK|Kinetik Holdings Inc. Class A Common Stock|N|KNTK|N|100|N|KNTK
 KNX|Knight-Swift Transportation Holdings Inc.|N|KNX|N|100|N|KNX
@@ -4187,6 +4188,7 @@ MAGA|Truth Social America First ETF|P|MAGA|Y|100|N|MAGA
 MAGC|Roundhill China Magnificent Seven ETF|Z|MAGC|Y|100|N|MAGC
 MAGG|Madison Aggregate Bond ETF|P|MAGG|Y|100|N|MAGG
 MAGN|Magnera Corporation Common Stock|N|MAGN|N|100|N|MAGN
+MAGP|Roundhill Magnificent Seven Plus ETF|Z|MAGP|Y|100|N|MAGP
 MAGS|Roundhill Magnificent Seven ETF|Z|MAGS|Y|100|N|MAGS
 MAGX|Roundhill Daily 2X Long Magnificent Seven ETF|Z|MAGX|Y|100|N|MAGX
 MAGY|Roundhill Magnificent Seven Covered Call ETF|Z|MAGY|Y|100|N|MAGY
@@ -4700,6 +4702,7 @@ NISM|NYLIM International Small-Mid Cap Equity ETF|P|NISM|Y|100|N|NISM
 NITE|The Nightview Fund NITE|P|NITE|Y|100|N|NITE
 NJAN|Innovator Growth-100 Power Buffer ETF - January|Z|NJAN|Y|100|N|NJAN
 NJNK|Columbia U.S. High Yield ETF|P|NJNK|Y|100|N|NJNK
+NJPN|Nomura Japan Equity ETF|P|NJPN|Y|100|N|NJPN
 NJR|NewJersey Resources Corporation Common Stock|N|NJR|N|100|N|NJR
 NJUL|Innovator Growth-100 Power Buffer ETF - July|Z|NJUL|Y|100|N|NJUL
 NJUN|Innovator Growth-100 Power Buffer ETF - June|Z|NJUN|Y|100|N|NJUN
@@ -5417,6 +5420,7 @@ PSUS|Pershing Square USA, Ltd. Common Shares|N|PSUS|N|100|N|PSUS
 PSX|Phillips 66 Common Stock|N|PSX|N|40|N|PSX
 PTA|Cohen & Steers Tax-Advantaged Preferred Securities and Income Fund Common Shares of Beneficial Interest|N|PTA|N|100|N|PTA
 PTBD|Pacer Trendpilot US Bond ETF|P|PTBD|Y|100|N|PTBD
+PTEST|Nyse Arca Test Symbol|P|PTEST|N|100|Y|PTEST
 PTEU|Pacer TrendpilotTM European Index ETF|Z|PTEU|Y|100|N|PTEU
 PTHS|Pelthos Therapeutics Inc. Common Stock|A|PTHS|N|100|N|PTHS
 PTIN|Pacer Trendpilot International ETF|P|PTIN|Y|100|N|PTIN
@@ -6054,7 +6058,6 @@ SHEL|Shell PLC American Depositary Shares (each representing two (2) Ordinary Sh
 SHG|Shinhan Financial Group Co Ltd American Depositary Shares|N|SHG|N|100|N|SHG
 SHLD|Global X Defense Tech ETF|P|SHLD|Y|100|N|SHLD
 SHM|State Street SPDR Nuveen ICE Short Term Municipal Bond ETF|P|SHM|Y|100|N|SHM
-SHNY|MicroSectors Gold 3X Leveraged ETNs due January 29, 2043|P|SHNY|Y|100|N|SHNY
 SHO|Sunstone Hotel Investors, Inc. Sunstone Hotel Investors, Inc. Common Shares|N|SHO|N|100|N|SHO
 SHO$H|Sunstone Hotel Investors, Inc. 6.125% Series H Cumulative Redeemable Preferred Stock|N|SHOpH|N|100|N|SHO-H
 SHO$I|Sunstone Hotel Investors, Inc. 5.70% Series I Cumulative Redeemable Preferred Stock|N|SHOpI|N|100|N|SHO-I
@@ -7075,6 +7078,7 @@ VEGX|International Vegan Climate ETF|Z|VEGX|Y|100|N|VEGX
 VEL|Velocity Financial, Inc. Common Stock|N|VEL|N|100|N|VEL
 VELL|Defiance Daily Target 2X Long VELO ETF|Z|VELL|Y|100|N|VELL
 VEM|Virtus Emerging Markets Dividend ETF|P|VEM|Y|100|N|VEM
+VEMB|Vanguard Emerging Markets Bond Active ETF|Z|VEMB|Y|100|N|VEMB
 VEMY|Virtus Stone Harbor Emerging Markets High Yield Bond ETF|P|VEMY|Y|100|N|VEMY
 VENU|Venu Holding Corporation Common Stock|A|VENU|N|100|N|VENU
 VET|Vermilion Energy Inc. Common (Canada)|N|VET|N|100|N|VET
@@ -7675,4 +7679,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1111202618:01||||||
+File Creation Time: 1112202618:01||||||

@@ -1245,6 +1245,7 @@ CRMD|CorMedix Inc. - Common Stock|G|N|N|100|N|N
 CRMG|Leverage Shares 2X Long CRM Daily ETF|G|N|N|100|Y|N
 CRML|Critical Metals Corp. - Ordinary Shares|G|N|N|100|N|N
 CRMLW|Critical Metals Corp. - Warrants|S|N|N|100|N|N
+CRMN|Skyline Builders Group Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 CRMT|America's Car-Mart, Inc. - Common Stock|Q|N|N|100|N|N
 CRNC|Cerence Inc. - Common Stock|Q|N|N|100|N|N
 CRNT|Ceragon Networks Ltd. - Ordinary Shares|Q|N|N|100|N|N
@@ -2737,7 +2738,6 @@ KALU|Kaiser Aluminum Corporation - Common Stock|Q|N|N|100|N|N
 KARD|Kardigan, Inc. - Common Stock|G|N|N|100|N|N
 KARO|Karooooo Ltd. - Ordinary shares|S|N|N|100|N|N
 KAT|Scharf ETF|G|N|N|100|Y|N
-KAZR|Skyline Builders Group Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 KBON|Karbon Capital Partners Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 KBONU|Karbon Capital Partners Corp. - Units|G|N|N|100|N|N
 KBONW|Karbon Capital Partners Corp. - Warrant|G|N|N|100|N|N
@@ -2813,7 +2813,7 @@ KRSA|Korsana Biosciences, Inc. - Common Stock|S|N|N|100|N|N
 KRT|Karat Packaging Inc. - Common Stock|Q|N|N|100|N|N
 KRUS|Kura Sushi USA, Inc. - Class A Common Stock|G|N|N|100|N|N
 KRYS|Krystal Biotech, Inc. - Common Stock|Q|N|N|40|N|N
-KSCP|Knightscope, Inc. - Class A Common Stock|S|N|N|100|N|N
+KSCP|Knightscope, Inc. - Class A Common Stock|S|N|D|100|N|N
 KSMH|xETFs Korea AI Semiconductor|G|N|N|100|Y|N
 KSPI|Joint Stock Company Kaspi.kz - American Depository Shares|Q|N|N|100|N|N
 KTCC|Key Tronic Corporation - Common Stock|G|N|N|100|N|N
@@ -3562,7 +3562,6 @@ NXTC|NextCure, Inc. - Common Stock|Q|N|N|100|N|N
 NXTG|First Trust Indxx NextG ETF|G|N|N|100|Y|N
 NXTS|Nexentis Technologies Inc. - Common Stock|S|N|D|100|N|N
 NXTT|Next Technology Holding Inc. - Ordinary Shares|S|N|N|100|N|N
-NXXT|NextNRG, Inc. - Common Stock|S|N|D|100|N|N
 NYAX|Nayax Ltd. - Ordinary Shares|Q|N|N|100|N|N
 NYXH|Nyxoah SA - Ordinary Shares|G|N|N|100|N|N
 NZAC|State Street SPDR MSCI ACWI Climate Paris Aligned ETF|G|N|N|100|Y|N
@@ -3794,7 +3793,7 @@ PBSC|Pacer Barings Secured Credit Flex ETF|G|N|N|100|Y|N
 PBUB|Portfolio Building Block US Banks ETF|G|N|N|100|Y|N
 PBWN|Portfolio Building Block World Ex US Industrials ETF|G|N|N|100|Y|N
 PBYI|Puma Biotechnology Inc - Common Stock|Q|N|N|100|N|N
-PC|Premium Catering (Holdings) Limited - Ordinary Shares|S|N|D|100|N|N
+PC|Premium Catering (Holdings) Limited - Ordinary Shares|S|N|H|100|N|N
 PCAP|ProCap Acquisition Corp - Class A Ordinary Shares|G|N|N|100|N|N
 PCAPU|ProCap Acquisition Corp - Unit|G|N|N|100|N|N
 PCAPW|ProCap Acquisition Corp - Warrant|G|N|N|100|N|N
@@ -4167,7 +4166,7 @@ RAND|Rand Capital Corporation - Closed End Fund|S|N|N|100|N|N
 RANG|Range Capital Acquisition Corp. - Ordinary Shares|G|N|D|100|N|N
 RANGR|Range Capital Acquisition Corp. - Rights|G|N|N|100|N|N
 RANGU|Range Capital Acquisition Corp. - Units|G|N|N|100|N|N
-RANI|Rani Therapeutics Holdings, Inc. - Class A Common Stock|G|N|D|100|N|N
+RANI|Rani Therapeutics Holdings, Inc. - Class A Common Stock|S|N|D|100|N|N
 RAPP|Rapport Therapeutics, Inc. - Common Stock|G|N|N|100|N|N
 RARE|Ultragenyx Pharmaceutical Inc. - Common Stock|Q|N|N|100|N|N
 RAUS|RACWI US ETF|G|N|N|100|Y|N
@@ -4224,7 +4223,7 @@ REKR|Rekor Systems, Inc. - Common Stock|S|N|D|100|N|N
 RELL|Richardson Electronics, Ltd. - Common Stock|Q|N|N|100|N|N
 RELY|Remitly Global, Inc. - Common stock|Q|N|N|100|N|N
 REMG|Russell Investments Emerging Markets Equity ETF|G|N|N|100|Y|N
-RENT|Rent the Runway, Inc. - Class A Common Stock|G|N|N|100|N|N
+RENT|Rent the Runway, Inc. - Class A Common Stock|G|N|D|100|N|N
 RENX|RenX Enterprises Corp. - Common Stock|S|N|N|100|N|N
 REPL|Replimune Group, Inc. - Common Stock|Q|N|N|100|N|N
 RETO|ReTo Eco-Solutions, Inc. - Class A Shares|S|N|N|100|N|N
@@ -5605,4 +5604,4 @@ ZXYZ.A|Nasdaq Symbology Test Common Stock|Q|Y|N|100|N|N
 ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
-File Creation Time: 1111202618:01|||||||
+File Creation Time: 1112202618:01|||||||
