@@ -66,13 +66,17 @@ jobs:
       - name: Export scored candles from the saved cache
         if: always()
         run: python3 -c "import stock_desk as desk; print(desk.export_cached_scores())"
+      - name: Save the Nick 360 desk file
+        if: always()
+        continue-on-error: true
+        run: node nick360_build.js
       - name: Save the price cache and exported candles
         if: always()
         run: |
           set -euo pipefail
           git config user.name "stock-desk-bot"
           git config user.email "stock-desk-bot@users.noreply.github.com"
-          git add cache data/scores.csv data/ohlc
+          git add cache data/scores.csv data/ohlc data/nick360
           if git diff --cached --quiet; then
             echo "No price changes."
           else

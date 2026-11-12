@@ -139,6 +139,13 @@ jobs:
             python stock_desk.py --hourly
           fi
           python3 -c "import stock_desk as desk; print(desk.emit_ownership_status_output(desk.paths()[1]))"
+      # Nick 360 reads this one saved desk file instead of every five-year chart, so it opens on a phone.
+      # Built from the files this run just wrote, with the same engine the page runs. No network.
+      # If it fails, the price update still saves and the page says how old the desk file is.
+      - name: Save the Nick 360 desk file
+        if: steps.guard.outputs.skip != 'true'
+        continue-on-error: true
+        run: node nick360_build.js
       - name: Save the new numbers
         if: steps.guard.outputs.skip != 'true'
         run: |

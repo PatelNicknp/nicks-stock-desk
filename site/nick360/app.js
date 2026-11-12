@@ -39,6 +39,7 @@
     desk: null,
     by: new Map(),
     ready: false,
+    packed: null,
   };
 
   function esc(s) {
@@ -171,15 +172,76 @@
     });
     return marks;
   }
+  // Saved desk file: each row carries today's numbers only. The chart and the grader need the
+  // symbol's full stored bars, so those are read when the symbol is opened and recomputed with
+  // the same engine and the saved ranks. A few recent charts stay in memory; older ones go back
+  // to the light row.
+  const FULL_KEEP = 6;
+  const fullOrder = [];
+  const fullLoading = {};
+  function ensureFull(ticker) {
+    const lite = state.by.get(ticker);
+    if (!lite || !lite.lite || lite.fullFailed || fullLoading[ticker] || !window.N360Pack) return;
+    fullLoading[ticker] = true;
+    fetch(csvUrl("ohlc/" + ticker + ".csv")).then((res) => {
+      if (!res.ok) throw new Error("missing");
+      return res.text();
+    }).then((text) => {
+      const full = window.N360Pack.hydrate(lite, parseOhlc(text), E, { price_as_of: state.packed ? state.packed.price_as_of : state.meta.price_as_of }, state.desk.dates);
+      full.liteRow = lite;
+      if (state.by.get(ticker) !== lite) return;
+      state.by.set(ticker, full);
+      fullOrder.push(ticker);
+      while (fullOrder.length > FULL_KEEP) {
+        const k = fullOrder.findIndex((t) => t !== state.symbol);
+        if (k < 0) break;
+        const old = fullOrder.splice(k, 1)[0];
+        const held = state.by.get(old);
+        if (held && held.liteRow) state.by.set(old, held.liteRow);
+      }
+    }).catch(() => {
+      lite.fullFailed = true;
+    }).then(() => {
+      delete fullLoading[ticker];
+      if (ticker !== state.symbol) return;
+      drawnKey = "";
+      if (state.page === "grader") render();
+      else drawActive();
+    });
+  }
+  function waitCanvas(canvas, text) {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(rect.width || canvas.clientWidth || 0, 280);
+    const h = Math.max(rect.height || canvas.clientHeight || 0, 280);
+    canvas.width = Math.max(1, Math.floor(w * dpr));
+    canvas.height = Math.max(1, Math.floor(h * dpr));
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#12151d";
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#8a90a2";
+    ctx.font = "13px Segoe UI, sans-serif";
+    ctx.fillText(text, 16, 32);
+    state.geom = null;
+  }
   let drawnKey = "";
   function drawActive() {
     if (!Chart) return;
     const cv = document.getElementById("cv");
     const gcv = document.getElementById("gcv");
-    const key = [state.page, state.symbol, state.range, state.tf, state.hover, state.marksOn, cv ? cv.clientWidth + "x" + cv.clientHeight : "", gcv ? gcv.clientWidth + "x" + gcv.clientHeight : ""].join("|");
+    const stock = current();
+    const key = [state.page, state.symbol, state.range, state.tf, state.hover, state.marksOn, stock && stock.lite ? "lite" + (stock.fullFailed ? "x" : "") : "full", cv ? cv.clientWidth + "x" + cv.clientHeight : "", gcv ? gcv.clientWidth + "x" + gcv.clientHeight : ""].join("|");
     if (key === drawnKey) return;
     drawnKey = key;
-    const stock = current();
+    if (stock && stock.lite) {
+      ensureFull(stock.ticker);
+      const text = stock.fullFailed ? "No stored daily bars for this symbol." : "Reading stored bars for " + stock.ticker + "…";
+      if (cv) waitCanvas(cv, text);
+      if (gcv) waitCanvas(gcv, text);
+      drawAnalytics();
+      return;
+    }
     if (cv && stock) {
       const shown = state.tf === "W" ? weekly(stock) : stock;
       state.geom = Chart.drawChart(cv, shown, {
@@ -546,7 +608,7 @@
     const closedHere = book.closed.filter((t) => t.ticker === state.symbol);
     const openHere = book.open.filter((t) => t.ticker === state.symbol);
     const missedHere = missed.filter((t) => t.ticker === state.symbol);
-    const bars = s ? s.bars : [];
+    const bars = s && !s.lite ? s.bars : [];
     const check = s ? checklist(s) : "";
     return '<div class="two"><section class="pnl lib"><div class="ph">Trade library <button type="button" class="' + (state.grader === "check" ? "on" : "") + '" data-act="gmode" data-mode="' + (state.grader === "check" ? "trades" : "check") + '">' + (state.grader === "check" ? "Trades" : "Checklist") + "</button></div>" +
       (names.length ? names.map((t) => '<button type="button" class="' + (t === state.symbol ? "sel" : "") + '" data-act="pick" data-ticker="' + esc(t) + '"><b>' + esc(t) + "</b><div class=\"mut\">" + symbols[t] + " fills</div></button>").join("") : '<p class="pad note">No paper fills yet.</p>') +
@@ -555,7 +617,7 @@
       '<section class="pnl"><div class="pad"><p class="note">Grades use the entry, exit, stop, and pivot you typed. A 2R note only looks at bars between those dates and is not a live screen.</p>' +
       "<h3>Graded " + closedHere.filter((t) => t.exit).length + "</h3>" + (closedHere.length ? closedHere.map((t) => "<div class=\"newsitem\"><b>" + esc(t.entryDate) + " → " + esc(t.exitDate) + "</b> " + px(t.entry) + " to " + px(t.exit) + feedbackHtml(t, bars) + "</div>").join("") : '<p class="note">No closed round trip for this symbol.</p>') +
       "<h3>Missed " + missedHere.length + "</h3>" + (missedHere.length ? missedHere.map((m) => {
-        const measured = s ? E.missedResult(m, s.bars) : { available: false, reason: "No stored bars." };
+        const measured = s && s.lite ? { available: false, reason: s.fullFailed ? "No stored bars." : "Reading stored bars." } : s ? E.missedResult(m, s.bars) : { available: false, reason: "No stored bars." };
         return "<div class=\"newsitem\"><b>" + esc(m.date) + "</b> " + esc(m.note || "") + "<p class=\"note\">" + (measured.available ? pct(measured.pct, 1) + " from " + esc(measured.from) + " to " + esc(measured.to) + ". " : "") + esc(measured.reason) + "</p></div>";
       }).join("") : '<p class="note">No missed names logged.</p>') +
       "<h3>Ungraded " + openHere.length + "</h3>" + (openHere.length ? openHere.map((t) => "<p>" + esc(t.date) + " buy " + t.shares + " @ " + px(t.price) + " still open.</p>").join("") : '<p class="note">No open lots.</p>') +
@@ -616,6 +678,12 @@
   function banner() {
     const host = document.getElementById("status");
     if (state.error) { host.className = "statusline"; host.textContent = state.error; return; }
+    const pk = state.packed;
+    if (state.ready && pk && state.meta.updated_pt && pk.updated_pt && pk.updated_pt !== state.meta.updated_pt) {
+      host.className = "statusline";
+      host.textContent = "Ranks and screens are from the desk update of " + pk.updated_pt + ". Stored prices were updated " + state.meta.updated_pt + ". The next desk update saves them again.";
+      return;
+    }
     const s = current();
     if (state.ready && s && s.stale) {
       host.className = "statusline";
@@ -630,7 +698,7 @@
       btn.setAttribute("aria-current", btn.getAttribute("data-page") === state.page ? "page" : "false");
     });
     if (!state.ready) {
-      view.innerHTML = '<div class="page"><div class="card load"><h3>' + esc(state.phase) + '</h3><div class="bar"><i style="width:' + Math.round(state.progress * 100) + '%"></i></div><p class="note">Reading the OHLC files already published for the chart viewer. No new download is requested.</p></div></div>';
+      view.innerHTML = '<div class="page"><div class="card load"><h3>' + esc(state.phase) + '</h3><div class="bar"><i style="width:' + Math.round(state.progress * 100) + '%"></i></div><p class="note">Reading the desk files already published for the chart viewer. No new price download is requested.</p></div></div>';
       footer();
       return;
     }
@@ -707,12 +775,81 @@
     store(key, loadList(key).filter((row) => row.ticker !== ticker));
   }
 
+  // On/off switch: add ?compute=browser to the address to skip the saved desk file and
+  // compute every stored chart in this browser, as before. A missing or older-format file
+  // falls back to that path by itself.
+  async function loadPacked() {
+    if (/[?&]compute=browser(&|$)/.test(location.search) || !window.N360Pack) return null;
+    try {
+      const res = await fetch(csvUrl("nick360/desk.json"));
+      if (!res.ok) return null;
+      const pack = await res.json();
+      const desk = window.N360Pack.unpackDesk(pack, E);
+      return { desk: desk, info: { price_as_of: pack.price_as_of || "", updated_pt: pack.updated_pt || "", built: pack.built_utc || "" } };
+    } catch (err) {
+      return null;
+    }
+  }
+  async function computeInBrowser() {
+    const packed = await Promise.all([
+      loadCsv("scores.csv"),
+      loadCsv("nick360/listings.csv").catch(() => []),
+    ]);
+    const scores = packed[0];
+    const listings = packed[1] || [];
+    const scoreBy = new Map();
+    scores.forEach((row) => {
+      const t = String(row.ticker || "").toUpperCase();
+      if (t) scoreBy.set(t, row);
+    });
+    const tickers = Array.from(scoreBy.keys());
+    const records = [];
+    let done = 0;
+    const workers = 8;
+    let cursor = 0;
+    async function worker() {
+      while (cursor < tickers.length) {
+        const t = tickers[cursor++];
+        try {
+          const res = await fetch(csvUrl("ohlc/" + t + ".csv"));
+          if (!res.ok) { state.missing += 1; }
+          else {
+            const text = await res.text();
+            const row = scoreBy.get(t);
+            records.push({ ticker: t, company: row.company || "", sector: row.sector || "", score: row, bars: parseOhlc(text) });
+          }
+        } catch (err) { state.missing += 1; }
+        done += 1;
+        if (done % 20 === 0 || done === tickers.length) {
+          state.progress = done / tickers.length;
+          state.phase = "Reading stored bars " + done + " / " + tickers.length;
+          render();
+          await delay(0);
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: workers }, worker));
+    state.phase = "Calculating ranks";
+    state.progress = 1;
+    render();
+    await delay(20);
+    const listingMap = {};
+    listings.forEach((row) => {
+      const t = String(row.ticker || "").toUpperCase();
+      if (!t) return;
+      listingMap[t] = { offerDate: row.offer_date, name: row.ipo_name, adr: row.adr, source: row.source, dateKind: row.date_kind, note: row.note };
+    });
+    if (!records.length) throw new Error("None of the published OHLC files could be read.");
+    return E.buildDesk(records, state.meta, listingMap);
+  }
+
   async function boot() {
     readHash();
     try {
+      state.phase = "Reading the saved desk file";
+      render();
+      const packedLoad = loadPacked();
       const packed = await Promise.all([
-        loadCsv("scores.csv"),
-        loadCsv("nick360/listings.csv").catch(() => []),
         loadCsv("index_ohlc/manifest.csv").catch(() => []),
         fetch(csvUrl("meta.json")).then((r) => r.json()),
         loadCsv("market_today.csv"),
@@ -720,67 +857,31 @@
         loadCsv("earnings_history.csv"),
         loadCsv("earnings_calendar.csv"),
       ]);
-      const scores = packed[0];
-      const listings = packed[1] || [];
-      const manifest = packed[2] || [];
-      state.meta = packed[3] || {};
-      state.market = (packed[4] && packed[4][0]) || {};
-      state.news = packed[5] || [];
-      (packed[6] || []).forEach((row) => {
+      const manifest = packed[0] || [];
+      state.meta = packed[1] || {};
+      state.market = (packed[2] && packed[2][0]) || {};
+      state.news = packed[3] || [];
+      (packed[4] || []).forEach((row) => {
         const t = String(row.ticker || "").toUpperCase();
         if (!t) return;
         if (!state.earnings[t]) state.earnings[t] = [];
         state.earnings[t].push(row);
       });
-      (packed[7] || []).forEach((row) => {
+      (packed[5] || []).forEach((row) => {
         const t = String(row.ticker || "").toUpperCase();
         if (t) state.calendar[t] = row;
       });
       state.manifest = manifest;
-      state.listingRows = listings;
-      const scoreBy = new Map();
-      scores.forEach((row) => {
-        const t = String(row.ticker || "").toUpperCase();
-        if (t) scoreBy.set(t, row);
-      });
-      const tickers = Array.from(scoreBy.keys());
-      const records = [];
-      let done = 0;
-      const workers = 8;
-      let cursor = 0;
-      async function worker() {
-        while (cursor < tickers.length) {
-          const t = tickers[cursor++];
-          try {
-            const res = await fetch(csvUrl("ohlc/" + t + ".csv"));
-            if (!res.ok) { state.missing += 1; }
-            else {
-              const text = await res.text();
-              const row = scoreBy.get(t);
-              records.push({ ticker: t, company: row.company || "", sector: row.sector || "", score: row, bars: parseOhlc(text) });
-            }
-          } catch (err) { state.missing += 1; }
-          done += 1;
-          if (done % 20 === 0 || done === tickers.length) {
-            state.progress = done / tickers.length;
-            state.phase = "Reading stored bars " + done + " / " + tickers.length;
-            render();
-            await delay(0);
-          }
-        }
+      const saved = await packedLoad;
+      let desk;
+      if (saved && saved.desk.stocks.length) {
+        desk = saved.desk;
+        state.packed = saved.info;
+        state.missing = desk.missing || 0;
+      } else {
+        state.packed = null;
+        desk = await computeInBrowser();
       }
-      await Promise.all(Array.from({ length: workers }, worker));
-      state.phase = "Calculating ranks";
-      state.progress = 1;
-      render();
-      await delay(20);
-      const listingMap = {};
-      listings.forEach((row) => {
-        const t = String(row.ticker || "").toUpperCase();
-        if (!t) return;
-        listingMap[t] = { offerDate: row.offer_date, name: row.ipo_name, adr: row.adr, source: row.source, dateKind: row.date_kind, note: row.note };
-      });
-      const desk = E.buildDesk(records, state.meta, listingMap);
       state.indexes = new Map();
       for (let i = 0; i < manifest.length; i++) {
         const row = manifest[i];
@@ -799,7 +900,6 @@
           state.indexes.set(row.symbol, series);
         } catch (err) { /* one series missing does not stop the desk */ }
       }
-      if (!records.length) throw new Error("None of the published OHLC files could be read.");
       state.desk = desk;
       desk.stocks.forEach((s) => state.by.set(s.ticker, s));
       if (!state.symbol || !state.by.has(state.symbol)) {
@@ -810,6 +910,7 @@
       if (open) state.open[open.id] = true;
       state.ready = true;
       root.setAttribute("data-ready", "1");
+      root.setAttribute("data-source", state.packed ? "saved" : "browser");
       const flag = document.createElement("div");
       flag.id = "n360-ready";
       flag.hidden = true;

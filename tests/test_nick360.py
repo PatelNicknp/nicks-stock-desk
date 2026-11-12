@@ -102,6 +102,26 @@ def test_formula_file_matches_the_engine_and_marks_gaps():
     assert "nick360 formulas ok" in proc.stdout
 
 
+def test_saved_desk_file_matches_the_browser_desk():
+    proc = _node("tests/nick360_pack.js")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "nick360 pack ok" in proc.stdout
+
+
+def test_saved_desk_file_is_built_by_the_jobs_without_network():
+    build = _read("nick360_build.js")
+    for banned in ("http", "fetch(", "yahoo", "massive", "ohlcv"):
+        assert banned not in build.lower(), banned
+    update = _read(".github", "workflows", "update.yml")
+    step = update[update.index("Save the Nick 360 desk file"):update.index("Save the new numbers")]
+    assert "node nick360_build.js" in step and "continue-on-error: true" in step
+    backfill = _read(".github", "workflows", "backfill.yml")
+    assert "node nick360_build.js" in backfill and "data/nick360" in backfill
+    app = _read("site", "nick360", "app.js")
+    assert 'csvUrl("nick360/desk.json")' in app and "compute=browser" in app
+    assert '<script src="pack.js"></script>' in _read("site", "nick360", "index.html")
+
+
 def test_workspace_ui():
     env = dict(os.environ)
     proc = _node("tests/nick360_ui.mjs", env)
