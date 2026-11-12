@@ -2,6 +2,8 @@
 
 These are our definitions. A reference name is the label from the sample workspace. It is not a claim that a third-party formula was copied. Prices on the sample video are illustrative. This page computes from the desk files already published under data/ohlc and the existing CSV tables. It does not download prices, and it does not read or publish the desk's private price cache.
 
+Saved desk file. The desk job runs this same engine once over every published chart and saves the results to data/nick360/desk.json. The page reads that file, so a phone does not have to open about 2,500 five-year files. A symbol's full chart is read only when it is opened, and it is recomputed with the same engine and the saved ranks. A test checks that every rank, grade, screen, and chart number matches the in-browser calculation. Add ?compute=browser to the page address to calculate everything in the browser as before. A missing or older-format file falls back to that by itself.
+
 SPY and QQQ daily bars are not in the published per-ticker OHLC files. The regime uses market_today.csv breadth and the stored day moves. It is not a SPY 25 model, a QQQ 33 model, or STEM.
 
 | Reference | Our name | Status | Formula | Data | Evidence |
