@@ -129,8 +129,8 @@
       ],
       "spy_day_pct": -0.47,
       "qqq_day_pct": -0.49,
-      "next_day_spy_pct": null,
-      "next_day_direction": null
+      "next_day_spy_pct": 1.32,
+      "next_day_direction": "up"
     },
     {
       "date": "2026-11-10",
@@ -168,21 +168,40 @@
       "qqq_day_pct": 1.93,
       "next_day_spy_pct": null,
       "next_day_direction": null
+    },
+    {
+      "date": "2026-11-11",
+      "slot": "evening_close",
+      "mood": "Mixed",
+      "regime": "uptrend",
+      "causes": [
+        "ai_mood",
+        "oil"
+      ],
+      "sources": [
+        "CNBC",
+        "MarketWatch",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": 1.32,
+      "qqq_day_pct": 2.31,
+      "next_day_spy_pct": null,
+      "next_day_direction": null
     }
   ],
   "aggregates": {
     "by_cause": {
       "election": {
-        "up": 2,
+        "up": 3,
         "down": 2,
         "flat": 0,
-        "n": 4
+        "n": 5
       },
       "ai_mood": {
-        "up": 4,
+        "up": 5,
         "down": 3,
         "flat": 0,
-        "n": 7
+        "n": 8
       },
       "rates": {
         "up": 1,
@@ -229,10 +248,10 @@
         "n": 1
       },
       "CNBC": {
-        "up": 3,
+        "up": 4,
         "down": 1,
         "flat": 0,
-        "n": 4
+        "n": 5
       },
       "MarketWatch": {
         "up": 2,
@@ -241,13 +260,13 @@
         "n": 2
       },
       "Yahoo Finance": {
-        "up": 3,
+        "up": 4,
         "down": 1,
         "flat": 0,
-        "n": 4
+        "n": 5
       }
     },
-    "n_labeled": 7,
+    "n_labeled": 8,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }
