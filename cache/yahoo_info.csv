@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-GD,General Dynamics Corporation,Industrials,Aerospace & Defense,19.220604,2.08333,21.0,418.58856,430.0,98180374528,1793363400.0
-GDDY,GoDaddy Inc.,Technology,Software - Infrastructure,10.092123,2.44444,16.0,117.6875,115.0,13750732800,1793304000.0
-GE,GE Aerospace,Industrials,Aerospace & Defense,35.9001,1.52174,21.0,378.42856,380.0,346888372224,1792499400.0
-GEHC,GE HealthCare Technologies Inc.,Healthcare,Medical Devices,15.3394,1.86364,20.0,87.85,88.5,38110699520,1793190600.0
-GEN,Gen Digital Inc.,Technology,Software - Infrastructure,8.954683,2.09091,10.0,32.275,30.5,17730056192,1793217600.0
-GEV,GE Vernova Inc.,Industrials,Specialty Industrial Machinery,31.911085,1.44737,33.0,1182.8318,1200.0,218456506368,1801056600.0
-GILD,"Gilead Sciences, Inc.",Healthcare,Drug Manufacturers - General,16.739552,1.67857,26.0,174.76923,175.0,210138152960,1793304000.0
-GIS,"General Mills, Inc.",Consumer Defensive,Packaged Foods,11.165005,3.05263,17.0,36.88235,37.0,18818314240,1790166600.0
-GL,Globe Life Inc.,Financial Services,Insurance - Life,9.827446,2.0,11.0,185.18182,182.0,12142780416,1792612800.0
-GLW,Corning Incorporated,Technology,Electronic Components,25.399103,1.5,17.0,177.35294,180.0,99005128704,1793104200.0
-GM,General Motors Company,Consumer Cyclical,Auto Manufacturers,6.044713,1.625,23.0,101.08696,100.0,75968520192,1801056600.0
-GNRC,Generac Holdlings Inc.,Industrials,Specialty Industrial Machinery,13.634999,1.63636,18.0,289.22223,283.0,11210266624,1793190600.0
-GOOG,Alphabet Inc.,Communication Services,Internet Content & Information,18.652605,1.38333,15.0,402.66666,410.0,3539503939584,1793217600.0
-GOOGL,Alphabet Inc.,Communication Services,Internet Content & Information,18.790277,1.34483,53.0,400.37357,400.0,3565628686336,1793217600.0
-GPC,Genuine Parts Company,Consumer Cyclical,Auto Parts,15.61997,2.18182,9.0,140.0,131.0,17525358592,1792499400.0
-GPN,Global Payments Inc.,Industrials,Specialty Business Services,6.0967493,2.19444,33.0,108.21212,106.0,26063980544,1793885400.0
-GRMN,Garmin Ltd.,Technology,Scientific & Technical Instruments,25.58623,2.44444,8.0,299.0,302.5,56523309056,1793190600.0
-GS,"Goldman Sachs Group, Inc. (The)",Financial Services,Capital Markets,12.211148,2.46154,21.0,1030.6666,1000.0,261509234688,1800365400.0
-GWW,"W.W. Grainger, Inc.",Industrials,Industrial Distribution,28.016226,2.77778,14.0,1435.1428,1416.5,68377681920,1801575000.0
-HAL,Halliburton Company,Energy,Oil & Gas Equipment & Services,10.844211,1.67857,25.0,43.64,43.0,26339837952,1792499400.0
-HAS,"Hasbro, Inc.",Consumer Cyclical,Leisure,17.42571,1.5,13.0,119.07692,120.0,17003794432,1792499400.0
-HBAN,Huntington Bancshares Incorpora,Financial Services,Banks - Regional,9.1686535,1.80952,19.0,18.77895,19.0,32327014400,1792672200.0
-HCA,"HCA Healthcare, Inc.",Healthcare,Medical Care Facilities,16.206383,2.0,22.0,477.27274,488.0,105880289280,1793104200.0
-HD,"Home Depot, Inc. (The)",Consumer Cyclical,Home Improvement Retail,22.30322,1.88889,32.0,379.0,392.5,354878193664,1794922200.0
-HIG,"The Hartford Insurance Group, I",Financial Services,Insurance - Diversified,9.941898,2.41667,21.0,146.14285,145.0,36193734656,1793044800.0
 HII,"Huntington Ingalls Industries, ",Industrials,Aerospace & Defense,14.884917,2.08333,12.0,358.33334,353.0,11994811392,1793277000.0
 HLT,Hilton Worldwide Holdings Inc.,Consumer Cyclical,Lodging,35.410896,1.86207,27.0,369.62964,375.0,82426740736,1793104200.0
 HON,Honeywell International Inc.,Industrials,Conglomerates,23.392511,2.0,23.0,253.91304,254.0,73054666752,1792672200.0
@@ -523,3 +498,28 @@ FRT,Federal Realty Investment Trust,Real Estate,REIT - Retail,35.21515,1.89474,1
 FSLR,"First Solar, Inc.",Technology,Solar,7.4273357,1.75,30.0,252.57133,254.0,18519003136,1793304000.0
 FTNT,"Fortinet, Inc.",Technology,Software - Infrastructure,33.203293,2.88372,37.0,145.03432,140.0,95174295552,1793217600.0
 FTV,Fortive Corporation,Technology,Scientific & Technical Instruments,20.422167,2.75,14.0,67.07143,67.5,20195174400,1793190600.0
+GD,General Dynamics Corporation,Industrials,Aerospace & Defense,19.158922,2.08333,21.0,419.29428,430.0,98110128128,1793363400.0
+GDDY,GoDaddy Inc.,Technology,Software - Infrastructure,9.99822,2.44444,16.0,117.6875,115.0,13622788096,1793304000.0
+GE,GE Aerospace,Industrials,Aerospace & Defense,35.527485,1.52174,21.0,378.42856,380.0,343287922688,1792499400.0
+GEHC,GE HealthCare Technologies Inc.,Healthcare,Medical Devices,14.873239,1.86364,20.0,87.85,88.5,37002956800,1793190600.0
+GEN,Gen Digital Inc.,Technology,Software - Infrastructure,8.896254,2.09091,10.0,32.275,30.5,17614366720,1793217600.0
+GEV,GE Vernova Inc.,Industrials,Specialty Industrial Machinery,31.40294,1.45946,32.0,1178.389,1200.0,216635539456,1801056600.0
+GILD,"Gilead Sciences, Inc.",Healthcare,Drug Manufacturers - General,16.582167,1.67857,26.0,174.76923,175.0,208314859520,1793304000.0
+GIS,"General Mills, Inc.",Consumer Defensive,Packaged Foods,10.651414,3.10526,17.0,36.52941,35.0,17922713600,1790166600.0
+GL,Globe Life Inc.,Financial Services,Insurance - Life,9.775549,,11.0,185.18182,182.0,12078656512,1792612800.0
+GLW,Corning Incorporated,Technology,Electronic Components,26.30548,1.47368,18.0,174.94444,177.5,102937427968,1793104200.0
+GM,General Motors Company,Consumer Cyclical,Auto Manufacturers,5.862346,1.625,23.0,101.08696,100.0,72756142080,1801056600.0
+GNRC,Generac Holdlings Inc.,Industrials,Specialty Industrial Machinery,13.801632,1.63636,18.0,286.6111,283.0,11377795072,1793190600.0
+GOOG,Alphabet Inc.,Communication Services,Internet Content & Information,19.134947,1.38333,14.0,393.92856,380.0,3631032827904,1793217600.0
+GOOGL,Alphabet Inc.,Communication Services,Internet Content & Information,19.351984,1.34483,53.0,400.37357,400.0,3672217747456,1793217600.0
+GPC,Genuine Parts Company,Consumer Cyclical,Auto Parts,15.094061,,9.0,140.0,131.0,16935298048,1792499400.0
+GPN,Global Payments Inc.,Industrials,Specialty Business Services,5.4469004,2.19444,33.0,109.09091,106.0,23338231808,1793885400.0
+GRMN,Garmin Ltd.,Technology,Scientific & Technical Instruments,24.962557,2.55556,8.0,299.0,302.5,55145537536,1793190600.0
+GS,"Goldman Sachs Group, Inc. (The)",Financial Services,Capital Markets,12.304753,2.46154,21.0,1030.6666,1000.0,263513833472,1800365400.0
+GWW,"W.W. Grainger, Inc.",Industrials,Industrial Distribution,28.871479,2.78947,14.0,1435.1428,1416.5,70343409664,1801575000.0
+HAL,Halliburton Company,Energy,Oil & Gas Equipment & Services,11.155796,1.67857,25.0,43.56,43.0,27096657920,1792499400.0
+HAS,"Hasbro, Inc.",Consumer Cyclical,Leisure,17.412094,1.5,13.0,119.07692,120.0,16990508032,1792499400.0
+HBAN,Huntington Bancshares Incorpora,Financial Services,Banks - Regional,8.991397,1.80952,19.0,18.77895,19.0,31702040576,1792672200.0
+HCA,"HCA Healthcare, Inc.",Healthcare,Medical Care Facilities,16.007986,2.0,22.0,477.27274,488.0,104584118272,1793104200.0
+HD,"Home Depot, Inc. (The)",Consumer Cyclical,Home Improvement Retail,21.88029,1.88889,32.0,378.8125,392.5,347455389696,1794922200.0
+HIG,"The Hartford Insurance Group, I",Financial Services,Insurance - Diversified,10.0525465,2.41667,21.0,145.2381,144.0,36608892928,1793044800.0
