@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-MA,Mastercard Incorporated,Financial Services,Credit Services,28.499601,1.5,37.0,716.38947,726.0,575080759296,1793277000.0
-MAA,Mid-America Apartment Communiti,Real Estate,REIT - Residential,36.65343,2.53846,25.0,134.44,132.0,14295460864,1793217600.0
-MAR,Marriott International,Consumer Cyclical,Lodging,31.342913,2.27586,26.0,415.80768,420.0,108392611840,1793626200.0
-MAS,Masco Corporation,Industrials,Building Products & Equipment,18.32784,2.5,19.0,82.73684,82.0,16610913280,1793190600.0
-MCD,McDonald's Corporation,Consumer Cyclical,Restaurants,20.663792,2.14706,29.0,299.0,300.0,199428866048,1793799000.0
-MCHP,Microchip Technology Incorporat,Technology,Semiconductors,13.80285,1.5,25.0,86.48,85.0,33382676480,1793912400.0
-MCK,McKesson Corporation,Healthcare,Medical Distribution,20.453243,1.5625,14.0,1129.0714,1160.0,122971734016,1793826000.0
-MCO,Moody's Corporation,Financial Services,Financial Data & Stock Exchanges,27.339266,1.75,21.0,552.4762,560.0,87784546304,1792585800.0
-MDLZ,"Mondelez International, Inc.",Consumer Defensive,Confectioners,19.786451,1.82609,22.0,70.45455,72.0,84235206656,1793304000.0
-MDT,Medtronic plc.,Healthcare,Medical Devices,16.130014,1.76667,26.0,104.61538,106.0,132173324288,1795527000.0
-MELI,"MercadoLibre, Inc.",Consumer Cyclical,Internet Retail,28.41487,1.5,26.0,2232.6243,2250.0,78031503360,1793826000.0
-MET,"MetLife, Inc.",Financial Services,Insurance - Life,9.22392,1.88889,16.0,108.875,110.5,64701259776,1793826000.0
-META,"Meta Platforms, Inc.",Communication Services,Internet Content & Information,18.018873,1.40984,57.0,850.1025,850.0,1639576633344,1792612800.0
-MGM,MGM Resorts International,Consumer Cyclical,Resorts & Casinos,23.836136,2.30435,19.0,38.42105,39.0,8363263488,1793217600.0
-MKC,"McCormick & Company, Incorporat",Consumer Defensive,Packaged Foods,15.027675,2.26667,14.0,54.455,55.0,13025411072,1790857800.0
-MLM,"Martin Marietta Materials, Inc.",Basic Materials,Building Materials,29.309795,1.75,24.0,634.625,639.5,37800189952,1793799000.0
-MMM,3M Company,Industrials,Conglomerates,19.125168,2.21053,18.0,194.51334,197.5,98064932864,1792499400.0
-MNST,Monster Beverage Corporation,Consumer Defensive,Beverages - Non-Alcoholic,34.919525,2.04,23.0,50.13043,50.0,88802533376,1793912400.0
-MO,"Altria Group, Inc.",Consumer Defensive,Tobacco,12.775223,2.64286,11.0,73.45455,73.0,125847322624,1793277000.0
-MOS,Mosaic Company (The),Basic Materials,Agricultural Inputs,16.116,2.4,18.0,25.21667,24.95,7418281472,1793739600.0
-MPC,Marathon Petroleum Corporation,Energy,Oil & Gas Refining & Marketing,6.3266487,2.33333,17.0,466.9412,466.0,105802768384,1793712600.0
-MPWR,"Monolithic Power Systems, Inc.",Technology,Semiconductors,29.467472,1.1875,14.0,1820.6428,1810.0,66600509440,1793304000.0
-MRK,"Merck & Company, Inc.",Healthcare,Drug Manufacturers - General,16.54888,1.82143,26.0,161.525,165.0,366397128704,1793277000.0
-MRNA,"Moderna, Inc.",Healthcare,Biotechnology,-62.969894,2.91304,19.0,154.47368,125.0,112646471680,1793971800.0
-MRSH,Marsh,Financial Services,Insurance Brokers,18.01144,2.43478,21.0,206.61905,201.0,98188959744,1792067400.0
 MRVL,"Marvell Technology, Inc.",Technology,Semiconductors,21.047523,1.38636,41.0,310.0666,300.0,139144298496,1796158800.0
 MS,Morgan Stanley,Financial Services,Capital Markets,13.869666,2.30769,22.0,211.5,206.5,296353136640,1791981000.0
 MSCI,MSCI Inc.,Financial Services,Financial Data & Stock Exchanges,29.013025,1.5,17.0,686.17645,684.0,47301529600,1800970200.0
@@ -523,3 +498,28 @@ LUV,Southwest Airlines Company,Industrials,Airlines,10.845586,2.46154,24.0,50.01
 LVS,Las Vegas Sands Corp.,Consumer Cyclical,Resorts & Casinos,12.827831,1.80952,19.0,49.56842,50.0,25474088960,1792612800.0
 LYB,LyondellBasell Industries NV,Basic Materials,Specialty Chemicals,9.993587,2.85,18.0,72.27778,72.0,20648730624,1793363400.0
 LYV,"Live Nation Entertainment, Inc.",Communication Services,Entertainment,91.88847,1.64,23.0,203.91304,212.0,42458374144,1793912400.0
+MA,Mastercard Incorporated,Financial Services,Credit Services,28.172052,1.5,37.0,720.68677,726.0,568529518592,1793277000.0
+MAA,Mid-America Apartment Communiti,Real Estate,REIT - Residential,35.538197,2.57692,25.0,133.6,131.0,13860500480,1793217600.0
+MAR,Marriott International,Consumer Cyclical,Lodging,31.577297,2.27586,26.0,420.42307,425.5,109351821312,1793626200.0
+MAS,Masco Corporation,Industrials,Building Products & Equipment,17.958687,2.5,19.0,82.73684,82.0,16285134848,1793190600.0
+MCD,McDonald's Corporation,Consumer Cyclical,Restaurants,20.027506,2.14706,29.0,299.0,300.0,193123893248,1793799000.0
+MCHP,Microchip Technology Incorporat,Technology,Semiconductors,14.003398,1.5,25.0,86.48,85.0,33785403392,1793912400.0
+MCK,McKesson Corporation,Healthcare,Medical Distribution,20.607609,1.5625,14.0,1144.2858,1200.0,124352602112,1793826000.0
+MCO,Moody's Corporation,Financial Services,Financial Data & Stock Exchanges,27.225159,1.75,21.0,552.4762,560.0,87343144960,1792585800.0
+MDLZ,"Mondelez International, Inc.",Consumer Defensive,Confectioners,19.79091,1.82609,22.0,70.45455,72.0,84254195712,1793304000.0
+MDT,Medtronic plc.,Healthcare,Medical Devices,15.764734,1.8,26.0,105.0,106.0,129180139520,1795527000.0
+MELI,"MercadoLibre, Inc.",Consumer Cyclical,Internet Retail,27.519098,1.5,26.0,2216.0857,2225.0,74782343168,1793826000.0
+MET,"MetLife, Inc.",Financial Services,Insurance - Life,9.110234,1.88889,16.0,110.625,111.0,64019398656,1793826000.0
+META,"Meta Platforms, Inc.",Communication Services,Internet Content & Information,17.523115,1.40984,57.0,850.1025,850.0,1594466631680,1792612800.0
+MGM,MGM Resorts International,Consumer Cyclical,Resorts & Casinos,23.649443,2.30435,19.0,38.42105,39.0,8410071040,1793217600.0
+MKC,"McCormick & Company, Incorporat",Consumer Defensive,Packaged Foods,14.462945,2.26667,14.0,54.09786,53.0,12487282688,1790857800.0
+MLM,"Martin Marietta Materials, Inc.",Basic Materials,Building Materials,28.978178,1.75,24.0,627.0417,634.0,36791730176,1793799000.0
+MMM,3M Company,Industrials,Conglomerates,18.772623,2.21053,17.0,193.42587,197.0,96235716608,1792499400.0
+MNST,Monster Beverage Corporation,Consumer Defensive,Beverages - Non-Alcoholic,34.982536,2.04,23.0,50.13043,50.0,89203818496,1793912400.0
+MO,"Altria Group, Inc.",Consumer Defensive,Tobacco,13.157695,2.64286,11.0,73.45455,73.0,129615003648,1793277000.0
+MOS,Mosaic Company (The),Basic Materials,Agricultural Inputs,15.541303,2.5,18.0,25.16111,24.95,6917583360,1793739600.0
+MPC,Marathon Petroleum Corporation,Energy,Oil & Gas Refining & Marketing,6.721843,2.33333,17.0,461.9412,458.0,112411738112,1793712600.0
+MPWR,"Monolithic Power Systems, Inc.",Technology,Semiconductors,31.027893,1.1875,14.0,1820.6428,1810.0,70586802176,1793304000.0
+MRK,"Merck & Company, Inc.",Healthcare,Drug Manufacturers - General,16.362373,1.82143,26.0,161.525,165.0,362267836416,1793277000.0
+MRNA,"Moderna, Inc.",Healthcare,Biotechnology,-56.032146,2.91304,19.0,158.47368,125.0,93609058304,1793971800.0
+MRSH,Marsh,Financial Services,Insurance Brokers,17.94166,2.43478,21.0,206.61905,201.0,97808547840,1792067400.0
