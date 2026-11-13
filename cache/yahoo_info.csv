@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-PNC,"PNC Financial Services Group, I",Financial Services,Banks - Regional,10.922418,1.82609,21.0,263.57144,265.0,92425469952,1800019800.0
-PNR,Pentair plc.,Industrials,Specialty Industrial Machinery,13.277101,2.05882,15.0,73.6,74.0,11233303552,1793104200.0
-PNW,Pinnacle West Capital Corporati,Utilities,Utilities - Regulated Electric,18.895645,2.44444,15.0,105.7,107.0,12781879296,1793712600.0
-PODD,Insulet Corporation,Healthcare,Medical Devices,18.908382,2.0,23.0,178.34782,180.0,10359524352,1793799000.0
-PPG,"PPG Industries, Inc.",Basic Materials,Specialty Chemicals,14.565957,2.12,22.0,130.13635,130.5,27844446208,1793131200.0
-PPL,PPL Corporation,Utilities,Utilities - Regulated Electric,17.046152,1.57895,18.0,39.77778,40.5,27162904576,1793971800.0
-PRU,"Prudential Financial, Inc.",Financial Services,Insurance - Life,8.991146,3.44444,15.0,111.66667,111.0,42322767872,1793739600.0
-PSA,Public Storage,Real Estate,REIT - Industrial,36.9051,2.54545,18.0,338.1111,340.5,63878041600,1793044800.0
-PSX,Phillips 66,Energy,Oil & Gas Refining & Marketing,7.794427,2.1,19.0,292.3684,297.0,98138300416,1793190600.0
-PTC,PTC Inc.,Technology,Software - Application,19.539185,2.88235,15.0,201.26666,205.0,21276706816,1793826000.0
-PWR,"Quanta Services, Inc.",Industrials,Engineering & Construction,27.224253,1.36667,29.0,770.42,800.0,88760901632,1793277000.0
-PYPL,"PayPal Holdings, Inc.",Financial Services,Credit Services,10.236398,2.97674,33.0,57.13182,58.0,50180067328,1793104200.0
-Q,"Qnity Electronics, Inc.",Technology,Semiconductor Equipment & Materials,21.025238,1.3,10.0,173.3,172.5,26314377216,1793799000.0
-QCOM,QUALCOMM Incorporated,Technology,Semiconductors,14.335047,2.56757,28.0,185.7857,175.0,187870707712,1793826000.0
-RCL,Royal Caribbean Cruises Ltd.,Consumer Cyclical,Travel Services,16.53043,1.51724,26.0,353.5,359.0,90568327168,1793104200.0
-RDDT,"Reddit, Inc.",Communication Services,Internet Content & Information,10.471959,2.21875,29.0,151.04828,150.0,18776434688,1793304000.0
-REG,Regency Centers Corporation,Real Estate,REIT - Retail,30.354792,2.05,18.0,84.27778,84.5,14186428416,1793912400.0
-REGN,"Regeneron Pharmaceuticals, Inc.",Healthcare,Biotechnology,13.166614,1.78571,27.0,977.9259,982.0,96327540736,1793363400.0
-RF,Regions Financial Corporation,Financial Services,Banks - Regional,10.255582,2.69565,21.0,31.22143,31.0,24836999168,1800624600.0
-RJF,"Raymond James Financial, Inc.",Financial Services,Asset Management,10.261199,2.4375,14.0,182.2143,182.0,32333119488,1801083600.0
-RKLB,Rocket Lab Corporation,Industrials,Aerospace & Defense,1016.5246,1.59091,20.0,102.15,102.5,37367177216,1794258000.0
-RL,Ralph Lauren Corporation,Consumer Cyclical,Apparel Manufacturing,18.938059,1.55556,16.0,446.625,460.0,23687077888,1793885400.0
-RMD,ResMed Inc.,Healthcare,Medical Instruments & Supplies,17.893879,2.3,17.0,264.33472,270.0,33289308160,1793304000.0
-ROK,"Rockwell Automation, Inc.",Industrials,Specialty Industrial Machinery,23.524424,2.28571,25.0,448.76,452.0,43591602176,1793885400.0
-ROL,"Rollins, Inc.",Consumer Cyclical,Personal Services,31.277918,2.47368,17.0,38.23529,37.0,18528909312,1792612800.0
 ROP,"Roper Technologies, Inc.",Technology,Software - Application,19.226856,2.36842,14.0,466.7857,474.0,46791245824,1792672200.0
 ROST,"Ross Stores, Inc.",Consumer Cyclical,Apparel Retail,26.405783,1.65,18.0,271.83334,279.5,75949981696,1795122000.0
 RSG,"Republic Services, Inc.",Industrials,Waste Management,30.849636,2.03704,24.0,256.0,263.5,75247517696,1793304000.0
@@ -523,3 +498,28 @@ PKG,Packaging Corporation of Americ,Consumer Cyclical,Packaging & Containers,17.
 PLD,"Prologis, Inc.",Real Estate,REIT - Industrial,35.71686,1.70588,14.0,152.07143,151.5,125102104576,1792067400.0
 PLTR,Palantir Technologies Inc.,Technology,Software - Infrastructure,66.16984,1.84848,28.0,222.25357,235.0,404771504128,1793653200.0
 PM,Philip Morris International Inc,Consumer Defensive,Tobacco,22.001476,1.76471,16.0,212.4375,217.5,310110126080,1792585800.0
+PNC,"PNC Financial Services Group, I",Financial Services,Banks - Regional,10.882759,1.82609,21.0,263.57144,265.0,92167561216,1800019800.0
+PNR,Pentair plc.,Industrials,Specialty Industrial Machinery,12.877027,2.05882,15.0,73.73333,74.0,10904415232,1793104200.0
+PNW,Pinnacle West Capital Corporati,Utilities,Utilities - Regulated Electric,19.171574,2.44444,15.0,105.7,107.0,12968528896,1793712600.0
+PODD,Insulet Corporation,Healthcare,Medical Devices,19.276352,2.0,23.0,178.56522,180.0,10577695744,1793799000.0
+PPG,"PPG Industries, Inc.",Basic Materials,Specialty Chemicals,14.1626625,2.12,22.0,130.13635,130.5,27073503232,1793131200.0
+PPL,PPL Corporation,Utilities,Utilities - Regulated Electric,16.848757,1.63158,18.0,40.0,40.5,26850514944,1793971800.0
+PRU,"Prudential Financial, Inc.",Financial Services,Insurance - Life,9.046657,3.44444,15.0,114.06667,112.0,42377650176,1793739600.0
+PSA,Public Storage,Real Estate,REIT - Industrial,35.979946,2.54545,18.0,341.3889,343.5,62142263296,1793044800.0
+PSX,Phillips 66,Energy,Oil & Gas Refining & Marketing,8.2067795,2.1,19.0,291.3158,297.0,103330160640,1793190600.0
+PTC,PTC Inc.,Technology,Software - Application,19.55315,3.0,14.0,201.7143,205.0,21291915264,1793826000.0
+PWR,"Quanta Services, Inc.",Industrials,Engineering & Construction,27.699215,1.4,29.0,769.97174,800.0,90709155840,1793277000.0
+PYPL,"PayPal Holdings, Inc.",Financial Services,Credit Services,10.041365,2.97674,33.0,57.31364,58.0,49241423872,1793104200.0
+Q,"Qnity Electronics, Inc.",Technology,Semiconductor Equipment & Materials,19.769203,1.3,10.0,173.3,172.5,24742371328,1793799000.0
+QCOM,QUALCOMM Incorporated,Technology,Semiconductors,14.129126,2.62162,28.0,185.9643,175.0,184542904320,1793826000.0
+RCL,Royal Caribbean Cruises Ltd.,Consumer Cyclical,Travel Services,15.759136,1.51724,27.0,357.7037,361.0,86465323008,1793104200.0
+RDDT,"Reddit, Inc.",Communication Services,Internet Content & Information,10.602266,2.21875,29.0,150.0138,145.0,19010076672,1793304000.0
+REG,Regency Centers Corporation,Real Estate,REIT - Retail,30.157265,2.05,18.0,84.55556,84.5,14229774336,1793912400.0
+REGN,"Regeneron Pharmaceuticals, Inc.",Healthcare,Biotechnology,13.510213,1.78571,27.0,977.9259,982.0,98841321472,1793363400.0
+RF,Regions Financial Corporation,Financial Services,Banks - Regional,10.1292305,2.69565,21.0,31.22143,31.0,24497735680,1800624600.0
+RJF,"Raymond James Financial, Inc.",Financial Services,Asset Management,10.287098,2.4375,14.0,182.2143,182.0,32395743232,1801083600.0
+RKLB,Rocket Lab Corporation,Industrials,Aerospace & Defense,859.59766,1.61905,20.0,93.1,100.0,41407975424,1794258000.0
+RL,Ralph Lauren Corporation,Consumer Cyclical,Apparel Manufacturing,18.263332,1.57895,17.0,447.64706,460.0,22830989312,1793885400.0
+RMD,ResMed Inc.,Healthcare,Medical Instruments & Supplies,18.110115,2.3,17.0,264.33472,270.0,33691588608,1793304000.0
+ROK,"Rockwell Automation, Inc.",Industrials,Specialty Industrial Machinery,24.05061,2.28571,25.0,445.64,447.0,44783312896,1793885400.0
+ROL,"Rollins, Inc.",Consumer Cyclical,Personal Services,31.578436,2.47368,17.0,38.47059,37.0,18586400768,1792612800.0
