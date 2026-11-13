@@ -65,6 +65,9 @@
     "scanner_eps_rs": true,
     "scanner_minervini_1m": true,
     "scanner_minervini_5m": true,
+    "eps_fill": true,
+    "eps_fill_nasdaq": true,
+    "sec_share_class_cik": true,
     "scanner_ep": true,
     "scanner_gap_up": true,
     "chart_viewer": true,
@@ -114,6 +117,16 @@
     "weight_q4": 0.2,
     "min_bars": 253,
     "leader_min": 70
+  },
+  "eps_fill": {
+    "_note": "EPS fill for the EPS Rating (feature.eps_fill). Rebuilds each company's quarterly and yearly EPS from the SEC companyfacts file the desk already downloads: more EPS tags tried period by period, periods with no SEC frame, fiscal Q4 worked out as the full year minus the 9-month year to date, net income divided by diluted shares when no EPS tag exists, and stock splits fixed from restated filings. Saved in cache/eps_history.csv on each full run. Rating rules when on: the 3 to 5 year growth span skips a loss at its start (shorter_span_on_loss), a company with a loss year still gets a yearly part ranked below every real growth rate (rank_loss_makers), and a latest quarter more than max_quarter_age quarters old counts as missing. Highest EPS and RS still needs a real multi-year growth rate. Companies the SEC has no recent quarters for (mostly foreign 20-F and 40-F filers) use the saved Yahoo earnings history (use_yahoo_saved, no new download) or a saved Nasdaq earnings-surprise history (feature.eps_fill_nasdaq): one free Nasdaq request per such name, at most nasdaq_per_run names a full run, each at most every nasdaq_refresh_days days (nasdaq_empty_retry_days when the page was empty). That page has 4 quarters, so a year-over-year change appears once a fifth quarter is saved. One company's quarters always come from one source. feature.sec_share_class_cik lets a share-class ticker missing from the SEC list (CWEN-A) use its base ticker's CIK.",
+    "max_quarter_age": 3,
+    "shorter_span_on_loss": true,
+    "rank_loss_makers": true,
+    "use_yahoo_saved": true,
+    "nasdaq_per_run": 150,
+    "nasdaq_refresh_days": 7,
+    "nasdaq_empty_retry_days": 30
   },
   "marketsmith_screens": {
     "_note": "MarketSmith style screens: Highest EPS and RS (eps-rs.html, under Fundamental), Minervini 1-Month (minervini-1m.html) and Minervini 5-Month (minervini-5m.html, under Technical). Saved daily bars, saved SEC EDGAR EPS (cache/quarters.csv and cache/annual.csv, split-adjusted) and the RS Rating only. No new downloads and no paid data. EPS Rating is 1 to 99: the latest quarter's EPS versus a year ago, the quarter before that versus its year ago (when on file; require_prior_quarter makes it required), and yearly EPS growth over the longest span from max_years down to min_years. The three parts are ranked across the desk, averaged with equal weight, and ranked again. Highest EPS and RS lists EPS Rating at or above min_eps_rating and RS Rating at or above min_rs, best EPS plus RS first, at most max_rows. A stock more than extended_past_pivot_pct above its buy point (from VCP, Box, Flag, Qullamaggie or Marios), or with no buy point more than extended_above_sma50_pct above its 50-day, is extended and left out. Minervini 1-Month and 5-Month: price above the 50, 150 and 200-day, the 50-day above the 150 and 200, the 150-day above the 200, price at least template_above_low_pct above the 52-week low and within template_within_high_pct of the 52-week high, RS Rating at least template_rs_min, and the 200-day higher than rising_1m_sessions (1-Month) or rising_5m_sessions (5-Month) sessions ago. Each screen has its own switch: feature.scanner_eps_rs, feature.scanner_minervini_1m and feature.scanner_minervini_5m.",

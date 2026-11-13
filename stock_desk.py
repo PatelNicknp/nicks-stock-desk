@@ -29,6 +29,7 @@ import trading_floor
 import trading_floor_paper
 import relative_strength
 import ms_screens
+import eps_inputs
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -1473,6 +1474,24 @@ def resolve_cik(ticker_to_cik, overrides):
     return out
 
 
+def share_class_ciks(cik, tickers, on=True):
+    """A share-class ticker the SEC file lacks (CWEN-A) borrows the CIK of its base ticker (CWEN).
+
+    features.sec_share_class_cik. Only fills names that have no CIK; never replaces one.
+    """
+    out = dict(cik or {})
+    if not on:
+        return out
+    for t in tickers or []:
+        t = str(t)
+        if t in out or "-" not in t:
+            continue
+        base = t.rsplit("-", 1)[0]
+        if base in out and len(t.rsplit("-", 1)[1]) == 1:
+            out[t] = out[base]
+    return out
+
+
 def sec_rolling_settings(cfg):
     raw = cfg.get("sec_facts") or {}
     try:
@@ -1800,11 +1819,18 @@ def apply_companyfacts_zip(tickers, cik, cfg, cache, annual, quarters, annual_p,
     path = _download_sec_zip(cfg, cache, profiles.COMPANYFACTS_ZIP_URL, "companyfacts.zip", "sec_companyfacts_zip", timeout=600)
     if not path:
         return False, annual, quarters, list(wanted)
+    eps_parts = []
+    hook = None
+    if eps_fill_on(cfg):
+        def hook(ticker, payload):
+            eps_parts.append(eps_inputs.parse_eps_history(payload, ticker))
     try:
-        fresh_a, fresh_q, found, missing = profiles.parse_companyfacts_from_zip(path, wanted, fund.parse_companyfacts)
+        fresh_a, fresh_q, found, missing = profiles.parse_companyfacts_from_zip(path, wanted, fund.parse_companyfacts, on_payload=hook)
     except Exception as exc:
         print("SEC companyfacts zip parse failed:", str(exc)[:160])
         return False, annual, quarters, list(wanted)
+    if eps_parts:
+        save_eps_history(cache, eps_parts)
     if found:
         if len(fresh_a):
             keep = annual[~annual["ticker"].isin(fresh_a["ticker"])] if len(annual) and "ticker" in annual.columns else annual
@@ -1889,6 +1915,7 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
     if mode == "full" and (sheet_blank or flow_gap) and not gaps and zip_leftover is None:
         done = set()
     new_a, new_q, fails = [], [], 0
+    eps_new = []
     pool = gaps if gaps else [t for t in tickers if t in cik]
     if zip_leftover is not None:
         pool = zip_leftover
@@ -1908,7 +1935,13 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
         url = "https://data.sec.gov/api/xbrl/companyfacts/CIK%s.json" % cik[t]
         try:
             r = netutil.http_get(requests, url, headers, 60, limiter=lim, max_tries=rl(cfg)["max_retries"])
-            a, q = fund.parse_companyfacts(r.json())
+            payload = r.json()
+            a, q = fund.parse_companyfacts(payload)
+            if eps_fill_on(cfg):
+                try:
+                    eps_new.append(eps_inputs.parse_eps_history(payload, t))
+                except Exception:
+                    pass
             if len(a):
                 a = a.copy()
                 a["ticker"] = t
@@ -1926,8 +1959,13 @@ def load_sec(tickers, cik, cfg, cache, mode, core=None):
             print("SEC %d / %d" % (i + 1, len(todo)))
             annual, quarters = _flush_sec(annual, quarters, new_a, new_q, annual_p, quarter_p)
             progress_save(cache, "sec", done)
+            if eps_new:
+                save_eps_history(cache, eps_new)
+                eps_new.clear()
     annual, quarters = _flush_sec(annual, quarters, new_a, new_q, annual_p, quarter_p)
     progress_save(cache, "sec", done)
+    if eps_new:
+        save_eps_history(cache, eps_new)
     for t in todo:
         if t in done:
             cycle[t] = today_et()
@@ -3525,7 +3563,157 @@ def load_rs_table(close, universe, cfg, cache, asof="", log_it=True):
     return table
 
 
-def build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof=""):
+
+# ---------------------------------------------------------------- EPS fill (features.eps_fill)
+EPS_HISTORY_FILE = "eps_history.csv"
+NASDAQ_EPS_FILE = "nasdaq_eps.csv"
+
+
+def eps_fill_on(cfg):
+    return bool(((cfg or {}).get("features") or {}).get("eps_fill", True))
+
+
+def eps_fill_config(cfg):
+    raw = (cfg or {}).get("eps_fill") or {}
+
+    def num(key, default):
+        try:
+            return max(0, int(raw.get(key, default)))
+        except (TypeError, ValueError):
+            return default
+    return {
+        "nasdaq_on": bool(((cfg or {}).get("features") or {}).get("eps_fill_nasdaq", True)),
+        "nasdaq_per_run": num("nasdaq_per_run", 150),
+        "nasdaq_refresh_days": max(1, num("nasdaq_refresh_days", 7)),
+        "nasdaq_empty_retry_days": max(1, num("nasdaq_empty_retry_days", 30)),
+        "use_yahoo_saved": bool(raw.get("use_yahoo_saved", True)),
+        "max_quarter_age": num("max_quarter_age", 3),
+    }
+
+
+def save_eps_history(cache, parts):
+    """Write the SEC EPS history, replacing only the tickers in `parts`."""
+    parts = [p for p in parts if p is not None and len(p)]
+    if not parts:
+        return
+    fresh = pd.concat(parts, ignore_index=True)
+    path = os.path.join(cache, EPS_HISTORY_FILE)
+    old = read_csv(path)
+    if len(old) and "ticker" in old.columns:
+        old = old[~old["ticker"].astype(str).isin(set(fresh["ticker"].astype(str)))]
+        fresh = pd.concat([old, fresh], ignore_index=True)
+    fresh = fresh[eps_inputs.COLUMNS].sort_values(["ticker", "kind", "frame"]).reset_index(drop=True)
+    fresh.to_csv(path, index=False)
+
+
+def load_nasdaq_eps(need, cfg, cache, mode):
+    """Saved Nasdaq earnings-surprise quarters, grown run by run (features.eps_fill_nasdaq).
+
+    Only for desk names the SEC has no recent quarters for (mostly foreign 20-F and
+    40-F filers). One request per name, at most nasdaq_per_run names a full run,
+    each name at most once every nasdaq_refresh_days. Hourly and offline runs reuse
+    the saved file. Free Nasdaq page the desk already uses; no key, no new provider.
+    """
+    path = os.path.join(cache, NASDAQ_EPS_FILE)
+    cyc_path = os.path.join(cache, "nasdaq_eps_cycle.json")
+    saved = read_csv(path)
+    spec = eps_fill_config(cfg)
+    if not spec["nasdaq_on"] or mode != "full" or not need or spec["nasdaq_per_run"] == 0:
+        return saved
+    try:
+        cycle = json.load(open(cyc_path)) if os.path.exists(cyc_path) else {}
+    except Exception:
+        cycle = {}
+    today = pd.Timestamp(today_et())
+
+    def due(t):
+        rec = cycle.get(t) or {}
+        last = rec.get("date")
+        if not last:
+            return True
+        wait = spec["nasdaq_refresh_days"] if rec.get("rows") else spec["nasdaq_empty_retry_days"]
+        try:
+            return (today - pd.Timestamp(last)).days >= wait
+        except Exception:
+            return True
+    todo = [t for t in need if due(t)]
+    todo.sort(key=lambda t: (cycle.get(t) or {}).get("date") or "")
+    todo = todo[:spec["nasdaq_per_run"]]
+    if not todo:
+        log("EPS history (Nasdaq earnings surprise)", "OK", STAMPS.get("nasdaq_eps", ""), "reused saved quarters; no name due")
+        return saved
+    lim = netutil.RateLimiter(rl(cfg)["nasdaq_requests_per_second"])
+    headers = session_headers(cfg)
+    fresh, fails = [], 0
+    for t in todo:
+        url = "https://api.nasdaq.com/api/company/%s/earnings-surprise" % t.replace("-", ".")
+        try:
+            r = netutil.http_get(requests, url, headers, 30, limiter=lim, max_tries=rl(cfg)["max_retries"])
+            got = eps_inputs.parse_nasdaq_surprise(r.json(), t)
+            if len(got):
+                fresh.append(got)
+            cycle[t] = {"date": today_et(), "rows": int(len(got))}
+        except Exception as exc:
+            fails += 1
+            if fails <= 3:
+                print("nasdaq eps fail", t, str(exc)[:100])
+    merged = eps_inputs.merge_saved(saved, pd.concat(fresh, ignore_index=True) if fresh else None, "nasdaq")
+    if len(merged):
+        merged.to_csv(path, index=False)
+    with open(cyc_path, "w") as f:
+        json.dump(cycle, f, indent=1, sort_keys=True)
+    STAMPS["nasdaq_eps"] = today_et()
+    log("EPS history (Nasdaq earnings surprise)", "OK" if fails < len(todo) else "CACHED", today_et(),
+        "%d names asked, %d had quarters, %d failed. Saved history now %d names." % (
+            len(todo), len(fresh), fails, merged["ticker"].nunique() if len(merged) else 0))
+    return merged
+
+
+def eps_skip_tickers(universe, cache, cfg=None):
+    """ETFs and funds: no Nasdaq EPS request for them (same list the RS Rating leaves out)."""
+    try:
+        etfs = relative_strength.etf_symbols(_read_text(os.path.join(cache, "nasdaqlisted.txt")),
+                                             _read_text(os.path.join(cache, "otherlisted.txt")))
+        extra = [e.get("ticker") for e in ((cfg or {}).get("sector_etfs") or []) if isinstance(e, dict)] + ["SPY", "QQQ"]
+        return set(relative_strength.fund_tickers(universe, etfs, extra))
+    except Exception:
+        return set()
+
+
+def load_eps_inputs(universe, cfg, cache, mode, asof=None, skip=None):
+    """EPS history for the EPS Rating (features.eps_fill). Returns (history, info) or (None, info) when off."""
+    info = {"on": eps_fill_on(cfg)}
+    if not info["on"]:
+        return None, info
+    sec = read_csv(os.path.join(cache, EPS_HISTORY_FILE))
+    if not len(sec):
+        info["note"] = "no saved SEC EPS history yet; it is built on the next full run from the SEC file the desk already downloads"
+        return None, info
+    spec = eps_fill_config(cfg)
+    asof = pd.Timestamp(asof or today_et())
+    names = [str(t) for t in universe["ticker"]] if universe is not None and len(universe) else []
+    skip = set(skip or ())
+    sec_q = sec[sec["kind"] == "Q"]
+    by_t = {t: g for t, g in sec_q.groupby("ticker")}
+    need = [t for t in names if t not in skip and not eps_inputs.usable_quarters(by_t.get(t), asof, spec["max_quarter_age"])]
+    extra = []
+    try:
+        nas = load_nasdaq_eps(need, cfg, cache, mode)
+        if nas is not None and len(nas):
+            extra.append(nas)
+    except Exception as exc:
+        log("EPS history (Nasdaq earnings surprise)", "CACHED", "", ("kept the saved file. " + str(exc))[:160])
+    if spec["use_yahoo_saved"]:
+        try:
+            extra.append(eps_inputs.yahoo_quarters(read_csv(os.path.join(cache, "earnings.csv"))))
+        except Exception:
+            pass
+    hist, replaced = eps_inputs.combine(sec, extra, asof=asof, max_age_quarters=spec["max_quarter_age"])
+    info.update({"sec_names": int(sec["ticker"].nunique()), "need": len(need), "replaced": replaced})
+    return hist, info
+
+
+def build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof="", eps_history=None, eps_info=None):
     """MarketSmith style screens: Highest EPS and RS, Minervini 1-Month and 5-Month.
 
     Saved bars, saved SEC EPS and the RS Rating only. Each has its own switch and
@@ -3550,10 +3738,28 @@ def build_ms_screens(close, high, low, universe, quarters, annual, setup_frames,
     eps_lookup = {}
     eps_table = pd.DataFrame()
     try:
-        eps_table = ms_screens.eps_ratings(quarters, annual, list(universe["ticker"].astype(str)), cfg)
+        fill = eps_history is not None and len(eps_history) > 0
+        if fill:
+            eq, ea = eps_inputs.as_rating_frames(eps_history)
+            # A name the EPS history has not reached yet keeps its plain SEC numbers.
+            eq, ea = eps_inputs.add_plain_rows(eq, ea, quarters, annual, universe["ticker"].astype(str))
+            eps_table = ms_screens.eps_ratings(eq, ea, list(universe["ticker"].astype(str)), cfg, fill=True, asof=asof or None)
+        else:
+            eps_table = ms_screens.eps_ratings(quarters, annual, list(universe["ticker"].astype(str)), cfg)
         eps_lookup = {t: v for t, v in zip(eps_table["ticker"], eps_table["eps_rating"]) if pd.notna(v) and v != ""}
-        log("EPS Rating", "OK" if eps_lookup else "MISSING", asof,
-            "%d of %d stocks rated 1 to 99 from saved SEC quarterly and yearly EPS. A stock without the latest quarter or the yearly growth is left blank. No new download." % (len(eps_lookup), len(universe)))
+        if fill:
+            info = eps_info or {}
+            n_loss = int(((eps_table["eps_annual_basis"] == "loss") & eps_table["eps_rating"].notna()).sum())
+            other = info.get("replaced") or {}
+            note = ("%d of %d stocks rated 1 to 99 (EPS fill on). SEC EPS history with fiscal Q4 worked out from the full year, "
+                    "more EPS tags and split fixes; %d rated with a loss year ranked at the bottom of the yearly part; "
+                    "%d use Nasdaq or saved Yahoo quarters because the SEC has none recent." % (
+                        len(eps_lookup), len(universe), n_loss, len(other)))
+        else:
+            note = "%d of %d stocks rated 1 to 99 from saved SEC quarterly and yearly EPS. A stock without the latest quarter or the yearly growth is left blank. No new download." % (len(eps_lookup), len(universe))
+            if eps_info and eps_info.get("on") and eps_info.get("note"):
+                note += " EPS fill: " + eps_info["note"] + "."
+        log("EPS Rating", "OK" if eps_lookup else "MISSING", asof, note[:400])
     except Exception as exc:
         log("EPS Rating", "MISSING", asof, ("The EPS Rating was not built. " + str(exc))[:200])
     if eps_on:
@@ -3958,6 +4164,8 @@ def main(argv=None):
 
     score_on = features.get("score_breakdown", True) or features.get("scorecard", True) or features.get("top_stocks", True)
     cik = cik_map(cfg, cache, mode) if score_on else {}
+    if cik:
+        cik = share_class_ciks(cik, list(universe["ticker"]), features.get("sec_share_class_cik", True))
     sec_tickers = [t for t in universe["ticker"] if t in (cik or {})]
     if not score_on:
         annual, quarters = pd.DataFrame(), pd.DataFrame()
@@ -4233,7 +4441,14 @@ def main(argv=None):
         if _rs_key not in ("highs_lows_history", "scorecard_canslim"):
             setup_frames[_rs_key] = relative_strength.attach(setup_frames.get(_rs_key), rs_table)
     buy = relative_strength.attach(buy, rs_table)
-    ms_frames, ms_notes = build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof)
+    eps_history, eps_info = None, {}
+    if features.get("scanner_eps_rs", True) or features.get("scanner_minervini_1m", True) or features.get("scanner_minervini_5m", True):
+        try:
+            eps_history, eps_info = load_eps_inputs(universe, cfg, cache, mode, asof=asof or None, skip=eps_skip_tickers(universe, cache, cfg))
+        except Exception as exc:
+            eps_history, eps_info = None, {"on": True, "note": ("EPS fill failed, kept the plain SEC numbers. " + str(exc))[:160]}
+    ms_frames, ms_notes = build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof,
+                                           eps_history=eps_history, eps_info=eps_info)
     floor_on = features.get("trading_floor", True)
     floor = pd.DataFrame()
     if floor_on and len(close):

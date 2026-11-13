@@ -163,48 +163,109 @@ def quarter_parts(qmap):
     return a, b, latest
 
 
-def annual_growth(amap, min_years=3, max_years=5):
+def annual_growth(amap, min_years=3, max_years=5, skip_loss_start=False):
     """(compound yearly % growth, years) over the longest span from max_years down to min_years.
 
     Needs a positive EPS at both ends. None when no span fits.
+    skip_loss_start (EPS fill switch): a loss or zero at the start of the longest
+    span tries the next shorter span (5, then 4, then 3 years) before giving up.
     """
     if not amap:
         return None, None
     years = sorted(k[0] for k in amap)
     last = years[-1]
     end = amap[(last, 0)]
+    first_span = None
     for span in range(int(max_years), int(min_years) - 1, -1):
         start = amap.get((last - span, 0))
         if start is None:
             continue
+        if first_span is None:
+            first_span = span
         if start <= 0 or end <= 0:
+            if skip_loss_start and end > 0:
+                continue
             return None, span
         return ((end / start) ** (1.0 / span) - 1.0) * 100.0, span
-    return None, None
+    return None, first_span
 
 
-def eps_ratings(quarters, annual, tickers=None, cfg=None):
-    """One row per ticker with EPS parts and a 1 to 99 EPS Rating (blank when a part is missing)."""
+LOSS_FLOOR = -20000.0
+
+
+def loss_rank_key(amap, min_years=3, max_years=5):
+    """Ranking stand-in when no growth rate fits because of a loss (EPS fill switch).
+
+    Always below every real growth rate (those are above -100), so a company
+    with a loss at either end ranks at the bottom of the yearly part. Among those,
+    a loss that shrank ranks above one that grew. None when under min_years of history.
+    """
+    if not amap:
+        return None
+    last = max(k[0] for k in amap)
+    end = amap[(last, 0)]
+    for span in range(int(max_years), int(min_years) - 1, -1):
+        start = amap.get((last - span, 0))
+        if start is None:
+            continue
+        if start == 0:
+            chg = 9999.0 if end > 0 else -9999.0
+        else:
+            chg = (end - start) / abs(start) * 100.0
+        return LOSS_FLOOR + float(np.clip(chg, -9999.0, 9999.0))
+    return None
+
+
+def _quarter_age(latest, asof):
+    if latest is None or asof is None:
+        return None
+    now = (asof.year, (asof.month - 1) // 3 + 1)
+    return (now[0] * 4 + now[1]) - (latest[0] * 4 + latest[1])
+
+
+def eps_ratings(quarters, annual, tickers=None, cfg=None, fill=False, asof=None):
+    """One row per ticker with EPS parts and a 1 to 99 EPS Rating (blank when a part is missing).
+
+    fill (features.eps_fill): the yearly span skips a loss at its start, a company
+    with a loss still gets a yearly part ranked at the bottom (eps_annual_basis
+    'loss', eps_annual_growth stays blank), and a latest quarter older than
+    eps_fill.max_quarter_age quarters is treated as missing.
+    """
     spec = settings(cfg)
+    fspec = fill_settings(cfg)
+    asof = pd.Timestamp(asof) if asof is not None else pd.Timestamp.today()
     qmaps = _eps_by_ticker(quarters, True)
     amaps = _eps_by_ticker(annual, False)
     names = list(dict.fromkeys(str(t) for t in (tickers if tickers is not None else list(qmaps) + list(amaps))))
     rows = []
     for t in names:
-        a, b, latest = quarter_parts(qmaps.get(t))
-        g, yrs = annual_growth(amaps.get(t), spec["min_years"], spec["max_years"])
+        qmap = qmaps.get(t)
+        a, b, latest = quarter_parts(qmap)
+        stale = False
+        if fill and latest is not None:
+            age = _quarter_age(latest, asof)
+            if age is not None and age > fspec["max_quarter_age"]:
+                a, b, stale = None, None, True
+        g, yrs = annual_growth(amaps.get(t), spec["min_years"], spec["max_years"],
+                               skip_loss_start=fill and fspec["shorter_span_on_loss"])
+        key, basis = g, ("growth" if g is not None else "")
+        if fill and g is None and fspec["rank_loss_makers"]:
+            key = loss_rank_key(amaps.get(t), spec["min_years"], spec["max_years"])
+            basis = "loss" if key is not None else ""
         rows.append({
             "ticker": t, "eps_q_yoy": a, "eps_prev_q_yoy": b, "eps_annual_growth": g,
             "eps_growth_years": yrs if g is not None else None,
             "latest_quarter": "" if latest is None else "CY%dQ%d" % latest,
+            "eps_annual_key": key, "eps_annual_basis": basis, "eps_quarter_stale": stale,
         })
-    out = pd.DataFrame(rows, columns=["ticker", "eps_q_yoy", "eps_prev_q_yoy", "eps_annual_growth", "eps_growth_years", "latest_quarter"])
+    out = pd.DataFrame(rows, columns=["ticker", "eps_q_yoy", "eps_prev_q_yoy", "eps_annual_growth", "eps_growth_years",
+                                      "latest_quarter", "eps_annual_key", "eps_annual_basis", "eps_quarter_stale"])
     out["eps_rating"] = np.nan
     out["eps_parts"] = np.nan
     if len(out) == 0:
         return out
-    parts = ["eps_q_yoy", "eps_prev_q_yoy", "eps_annual_growth"]
-    required = parts if spec["require_prior_quarter"] else ["eps_q_yoy", "eps_annual_growth"]
+    parts = ["eps_q_yoy", "eps_prev_q_yoy", "eps_annual_key"]
+    required = parts if spec["require_prior_quarter"] else ["eps_q_yoy", "eps_annual_key"]
     pool = out.dropna(subset=required)
     if len(pool):
         ranks = pd.concat([pd.to_numeric(pool[p], errors="coerce").rank(method="average", pct=True) for p in parts], axis=1)
@@ -212,6 +273,29 @@ def eps_ratings(quarters, annual, tickers=None, cfg=None):
         rated = relative_strength.rank_1_to_99(mean)
         out.loc[rated.index, "eps_rating"] = rated.astype(float)
         out.loc[pool.index, "eps_parts"] = ranks.notna().sum(axis=1).astype(float)
+    return out
+
+
+FILL_DEFAULTS = {
+    "max_quarter_age": 3,
+    "shorter_span_on_loss": True,
+    "rank_loss_makers": True,
+}
+
+
+def fill_settings(cfg):
+    out = dict(FILL_DEFAULTS)
+    block = (cfg or {}).get("eps_fill") if isinstance(cfg, dict) else None
+    for k, v in (block or {}).items():
+        if k not in FILL_DEFAULTS:
+            continue
+        if isinstance(FILL_DEFAULTS[k], bool):
+            out[k] = v if isinstance(v, bool) else str(v).strip().lower() == "true"
+        else:
+            try:
+                out[k] = int(v)
+            except (TypeError, ValueError):
+                pass
     return out
 
 
@@ -384,6 +468,8 @@ def build_eps_rs(close, universe, eps_table, rs_lookup, pivots=None, cfg=None):
         e = eps.loc[t]
         if isinstance(e, pd.DataFrame):
             e = e.iloc[-1]
+        if pd.isna(e.get("eps_annual_growth")) or pd.isna(e.get("eps_growth_years")):
+            continue  # rated on a loss year (EPS fill); this screen wants real multi-year growth
         er = int(e["eps_rating"])
         counts["rated_both"] += 1
         if er < int(spec["min_eps_rating"]) or int(rs) < int(spec["min_rs"]):
