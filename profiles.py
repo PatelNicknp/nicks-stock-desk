@@ -407,8 +407,12 @@ def zip_member_for_cik(names, cik):
     return ""
 
 
-def parse_companyfacts_from_zip(zip_path, cik_by_ticker, parse_companyfacts):
-    """Parse annual and quarterly statements for the given tickers out of companyfacts.zip."""
+def parse_companyfacts_from_zip(zip_path, cik_by_ticker, parse_companyfacts, on_payload=None):
+    """Parse annual and quarterly statements for the given tickers out of companyfacts.zip.
+
+    on_payload(ticker, payload), when given, sees each company's JSON once more
+    (the EPS fill uses it) so the zip is still read only one time.
+    """
     annual_parts, quarter_parts = [], []
     found, missing = [], []
     with zipfile.ZipFile(zip_path) as zf:
@@ -424,6 +428,11 @@ def parse_companyfacts_from_zip(zip_path, cik_by_ticker, parse_companyfacts):
             except Exception:
                 missing.append(ticker)
                 continue
+            if on_payload is not None:
+                try:
+                    on_payload(ticker, payload)
+                except Exception:
+                    pass
             if annual is not None and len(annual):
                 annual = annual.copy()
                 annual["ticker"] = ticker
