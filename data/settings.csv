@@ -59,6 +59,10 @@ feature.self_heal_keeper,True
 feature.scanner_descriptions,True
 feature.scanner_qullamaggie,True
 feature.scanner_marios,True
+feature.rs_rank,True
+feature.scanner_eps_rs,True
+feature.scanner_minervini_1m,True
+feature.scanner_minervini_5m,True
 feature.scanner_ep,True
 feature.scanner_gap_up,True
 feature.chart_viewer,True
@@ -421,6 +425,8 @@ scanner_groups.qullamaggie,technical
 scanner_groups.marios,technical
 scanner_groups.ep,technical
 scanner_groups.gapup,technical
+scanner_groups.min1m,technical
+scanner_groups.min5m,technical
 scanner_groups.week52,technical
 scanner_groups.breakouts,technical
 scanner_groups.volume,technical
@@ -430,6 +436,7 @@ scanner_groups.trends,technical
 scanner_groups.wheel,technical
 scanner_groups.canslim,fundamental
 scanner_groups.leaders,fundamental
+scanner_groups.epsrs,fundamental
 scanner_groups.growth,fundamental
 scanner_groups.quality,fundamental
 scanner_groups.dividend,fundamental
@@ -466,4 +473,24 @@ sec_facts.refresh_every_days,7
 sec_facts.cik_overrides.XOM,0000034088
 earnings_calendar.days_ahead,60
 earnings_calendar.skip_weekends,True
+relative_strength.quarter_sessions,63
+relative_strength.weight_q1,0.4
+relative_strength.weight_q2,0.2
+relative_strength.weight_q3,0.2
+relative_strength.weight_q4,0.2
+relative_strength.min_bars,253
+relative_strength.leader_min,70
+marketsmith_screens.min_eps_rating,80
+marketsmith_screens.min_rs,80
+marketsmith_screens.max_rows,50
+marketsmith_screens.extended_past_pivot_pct,5.0
+marketsmith_screens.extended_above_sma50_pct,25.0
+marketsmith_screens.require_prior_quarter,False
+marketsmith_screens.min_years,3
+marketsmith_screens.max_years,5
+marketsmith_screens.template_rs_min,70
+marketsmith_screens.template_above_low_pct,30.0
+marketsmith_screens.template_within_high_pct,25.0
+marketsmith_screens.rising_1m_sessions,21
+marketsmith_screens.rising_5m_sessions,105
 label,"Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts."

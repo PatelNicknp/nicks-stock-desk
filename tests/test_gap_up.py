@@ -220,7 +220,7 @@ def test_row_columns_and_other_scanners():
     assert row["above_sma50"] == "yes" and row["above_sma200"] == ""  # 120 bars: no 200-day yet
     assert "Gapped up" in row["reason"] and "\u2014" not in row["reason"]
     for col in tables.COLS["scanner_gap_up"]:
-        if col not in ("disclaimer",):
+        if col not in ("disclaimer", "rs", "rs_label", "rs_note"):  # RS is stamped later by stock_desk
             assert col in row.index, col
     gap = _scan({"AAA": _tape(), "BBB": _tape()})
     frames = {

@@ -48,7 +48,7 @@ const off = V.buildLists(files, base);
 eq(JSON.stringify(V.buildLists(files, Object.assign({}, base, { group: "" }))), JSON.stringify(off), "no group is the old behavior");
 eq(JSON.stringify(V.buildLists(files, Object.assign({}, base, { group: "sideways" }))), JSON.stringify(off), "an unknown group is the old behavior");
 eq(off.lists[0].label, "All scanner stocks", "old All label");
-eq(off.lists.map((l) => l.id), ["all", "buysetups", "watchlist", "vcp", "canslim", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "leaders",
+eq(off.lists.map((l) => l.id), ["all", "buysetups", "watchlist", "vcp", "canslim", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "min1m", "min5m", "leaders", "epsrs",
   "breakdowns", "volume", "week52", "trends", "growth", "quality", "dividend", "wheel"], "old list set: every list, both sides");
 eq(off.lists[0].items, ["AAA", "CCC", "BBB", "DDD"], "old All mixes both sides");
 eq(off.info.AAA.count, 3, "old count is every scanner");

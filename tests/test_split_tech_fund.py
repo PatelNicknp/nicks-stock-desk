@@ -24,9 +24,9 @@ sys.path.insert(0, os.path.join(ROOT, "site"))
 import tables  # noqa: E402
 import build_pages  # noqa: E402
 
-TECHNICAL = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "week52", "breakouts", "volume", "pullbacks",
+TECHNICAL = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "min1m", "min5m", "week52", "breakouts", "volume", "pullbacks",
              "breakdowns", "trends", "wheel"]
-FUNDAMENTAL = ["canslim", "leaders", "growth", "quality", "dividend", "scorecard", "top"]
+FUNDAMENTAL = ["canslim", "leaders", "epsrs", "growth", "quality", "dividend", "scorecard", "top"]
 NOT_SCREENERS = ["today", "watchlist", "buysetups", "tradingfloor", "papertest", "alerts", "backtest", "options", "rotation", "chartviewer", "gainers",
                  "breadth", "secperf", "heatmaps", "calendar", "heatmap", "cards", "putcall", "walls", "analysts", "thirteen",
                  "aaii", "insiders", "headlines", "xly", "financials", "tracker", "company", "divfund", "macro", "secmacro",

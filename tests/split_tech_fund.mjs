@@ -37,13 +37,13 @@ function eq(got, want, what) {
 }
 const OLD_NAV = ["Overview", "Chart Viewer", "Scanners", "Options", "Earnings", "Sentiment", "Financials", "Macro", "Technicals", "System"];
 const NEW_NAV = ["Overview", "Chart Viewer", "Technical", "Fundamental", "Options", "Earnings", "Sentiment", "Financials", "Macro", "Market", "System"];
-const TECH = ["VCP", "Box breakout", "Flag breakout", "Qullamaggie breakout", "Marios breakout", "Episodic pivot", "Gap Up", "52-week",
+const TECH = ["VCP", "Box breakout", "Flag breakout", "Qullamaggie breakout", "Marios breakout", "Episodic pivot", "Gap Up", "Minervini 1-Month", "Minervini 5-Month", "52-week",
   "52-week breakouts", "High volume", "Pullbacks", "Breakdowns", "Trends", "Wheel (stocks only)"];
-const FUND = ["CANSLIM", "Leaders", "Growth", "Quality", "Dividend", "Stock scorecard", "Top stocks"];
-const TECH_LISTS = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "week52", "trends", "wheel"];
-const FUND_LISTS = ["canslim", "leaders", "growth", "quality", "dividend"];
-const TECH_SHORT = ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "Gap Up", "Breakdown", "High volume", "52-week", "Trends", "Wheel"];
-const FUND_SHORT = ["CANSLIM", "Leaders", "Growth", "Quality", "Dividend"];
+const FUND = ["CANSLIM", "Leaders", "Highest EPS and RS", "Growth", "Quality", "Dividend", "Stock scorecard", "Top stocks"];
+const TECH_LISTS = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "min1m", "min5m", "breakdowns", "volume", "week52", "trends", "wheel"];
+const FUND_LISTS = ["canslim", "leaders", "epsrs", "growth", "quality", "dividend"];
+const TECH_SHORT = ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "Gap Up", "Minervini 1M", "Minervini 5M", "Breakdown", "High volume", "52-week", "Trends", "Wheel"];
+const FUND_SHORT = ["CANSLIM", "Leaders", "EPS and RS", "Growth", "Quality", "Dividend"];
 const BOTH_SHORT = ["Buy setup", "Watchlist"];
 
 async function open(ctx, url) {

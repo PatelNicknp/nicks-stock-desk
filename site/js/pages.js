@@ -8,6 +8,22 @@
   const SC = T("score", "Score", "score");
   const VE = T("verdict", "Verdict", "verdict");
   const PR = T("price", "Price", "num", { dec: 2 });
+  // RS Rating (relative_strength.py): 1 to 99 versus every stock on the desk, MarketSmith style.
+  // feature.rs_rank shows or hides only this column and the RS 70 filter. The screens still use it.
+  const RS_TITLE = "RS Rating, 1 to 99. 99 beat the most stocks on the desk over the past year.";
+  function withRs(cols) {
+    if (!D.featureOn("feature.rs_rank")) return cols;
+    if ((cols || []).some((c) => c.key === "rs")) return cols;
+    const col = T("rs", "RS", "rs", { dec: 0, title: RS_TITLE });
+    const at = cols.findIndex((c) => c.key === "ticker");
+    if (at < 0) return [col].concat(cols);
+    return cols.slice(0, at + 1).concat([col], cols.slice(at + 1));
+  }
+  function rsFilterHtml() {
+    if (!D.featureOn("feature.rs_rank")) return "";
+    const cut = D.rsLeaderMin();
+    return D.selectHtml("rsmin", "RS", [{ value: String(cut), label: cut + " or higher" }], "");
+  }
 
   function card(label, valueHtml, subHtml, bg) {
     return '<div class="card"' + (bg ? ' style="background:' + bg + '"' : "") + "><div class=\"l\">" +
@@ -70,7 +86,11 @@
     if (opts.index) bag.index = D.multiHtml("index", "Index", D.indexTokens(all));
     if (opts.trend) bag.timing = D.multiHtml("timing", "Trend", D.uniq(all, "timing"));
     if (opts.ticker) bag.ticker = D.searchHtml("ticker", "Ticker", "tick-list-" + (opts.list || "a"), D.uniq(all, "ticker"));
-    const order = opts.order || ["ticker", "passes", "status", "verdict", "sector", "confidence", "index", "timing"];
+    if (opts.rs) {
+      const html = rsFilterHtml();
+      if (html) bag.rsmin = html;
+    }
+    const order = opts.order || ["ticker", "passes", "status", "rsmin", "verdict", "sector", "confidence", "index", "timing"];
     const parts = [];
     order.forEach((k) => { if (bag[k]) parts.push(bag[k]); });
     Object.keys(bag).forEach((k) => { if (order.indexOf(k) < 0) parts.push(bag[k]); });
@@ -95,17 +115,29 @@
     if (!D.matchContains(row, "index_membership", index)) return false;
     if (!D.matchMulti(row, "timing", timing)) return false;
     if (!D.matchText(row, "ticker", ticker)) return false;
+    const rsMin = D.fieldVal(box, "rsmin");
+    if (rsMin) {
+      const rs = D.num(row.rs);
+      if (rs == null || rs < Number(rsMin)) return false;
+    }
     const nodes = box.querySelectorAll("select[data-filter]");
     for (let i = 0; i < nodes.length; i++) {
       const key = nodes[i].getAttribute("data-filter");
       const val = nodes[i].value;
-      if (!val || key === "passes") continue;
+      if (!val || key === "passes" || key === "rsmin") continue;
       if (!Object.prototype.hasOwnProperty.call(row, key)) continue;
       if (String(row[key] == null ? "" : row[key]) !== val) return false;
     }
     return true;
   }
 
+  // The RS 70 filter on pages that do not use readCommon.
+  function rsOk(box, row) {
+    const rsMin = D.fieldVal(box, "rsmin");
+    if (!rsMin) return true;
+    const rs = D.num(row.rs);
+    return rs != null && rs >= Number(rsMin);
+  }
   function hook(box, state, draw) {
     D.wireFilters(box, () => { state.page = 0; draw(); });
   }
@@ -125,14 +157,14 @@
           (cfg.captionAbove ? "" : cap);
         if (cfg.noticeAbove) document.getElementById("notice").innerHTML = notice || "";
         const box = document.getElementById("ctrls");
-        standardFilters(box, all, cfg.filters);
+        standardFilters(box, all, Object.assign({ rs: true }, cfg.filters || {}));
         D.placeFeed(box, raw);
         document.getElementById("cards").innerHTML = cfg.cards(all);
         const state = { sort: cfg.sort || "score", dir: cfg.dir || "desc", sort2: cfg.sort2 || "", dir2: cfg.dir2 || "desc", page: 0 };
         const draw = () => {
           const rows = all.filter((r) => readCommon(box, r) && (!cfg.match || cfg.match(r, box)));
           D.drawTable(document.getElementById("tbl"), {
-            rows: rows, columns: cfg.columns, state: state, pageSize: cfg.pageSize || 25, foot: cfg.foot, title: cfg.tableTitle, sub: cfg.tableSub,
+            rows: rows, columns: withRs(cfg.columns), state: state, pageSize: cfg.pageSize || 25, foot: cfg.foot, title: cfg.tableTitle, sub: cfg.tableSub,
             expandable: true, lines: cfg.lines, priceSub: cfg.priceSub, detail: cfg.detail,
           });
         };
@@ -154,7 +186,7 @@
         if (cfg.strip) document.getElementById("strip").innerHTML = cfg.strip(all);
         ctx.page.querySelector(".cap").textContent = cfg.caption || D.noteOf(raw);
         const box = document.getElementById("ctrls");
-        standardFilters(box, all, cfg.filters);
+        standardFilters(box, all, Object.assign({ rs: true }, cfg.filters || {}));
         if (cfg.chips) box.insertAdjacentHTML("afterbegin", cfg.chips(all));
         D.placeFeed(box, raw);
         document.getElementById("cards").innerHTML = cfg.cards(all);
@@ -162,7 +194,7 @@
         const draw = () => {
           const rows = all.filter((r) => readCommon(box, r) && (!cfg.match || cfg.match(r, box)));
           D.drawTable(document.getElementById("tbl"), {
-            rows: rows, columns: cfg.columns, state: state, pageSize: 12,
+            rows: rows, columns: withRs(cfg.columns), state: state, pageSize: 12,
             expandable: true,
             lines: cfg.price || setupLines,
             priceSub: cfg.priceSub || "Buy point, stop, and target when the scan has them",
@@ -347,14 +379,14 @@
     const all = D.realRows(raw);
     ctx.page.innerHTML = D.banner(raw) + '<div class="ctrls" id="ctrls"></div><div class="panel" id="tbl"></div>';
     const box = document.getElementById("ctrls");
-    standardFilters(box, all, { verdict: true, sector: true, confidence: true, index: true, ticker: true, order: ["verdict", "sector", "confidence", "index", "ticker"] });
+    standardFilters(box, all, { verdict: true, sector: true, confidence: true, index: true, ticker: true, rs: true, order: ["verdict", "sector", "confidence", "index", "rsmin", "ticker"] });
     const state = { sort: "score", dir: "desc", page: 0 };
     const cols = [T("rank", "#", "num", { dec: 0, width: "40px" }), TK, CO, T("sector", "Sector", "text", { hide: "md" }), SC, VE, PR, T("day_pct", "Day %", "pct", Object.assign({ dec: 2 }, RET)),
       T("timing", "Trend", "trend"), T("entry_low", "Entry low", "num", { dec: 2 }), T("entry_high", "Entry high", "num", { dec: 2, hide: "md" }),
       T("stop", "Stop", "num", { dec: 2 }), T("trade_target", "Target", "num", { dec: 2 })];
     const draw = () => {
       D.drawTable(document.getElementById("tbl"), {
-        rows: all.filter((r) => readCommon(box, r)), columns: cols, state: state, pageSize: 25,
+        rows: all.filter((r) => readCommon(box, r)), columns: withRs(cols), state: state, pageSize: 25,
         expandable: true, lines: zoneLines, priceSub: "Entry zone, stop, and target when the score has them",
       });
     };
@@ -418,7 +450,7 @@
     a: "Passes when annual EPS is at least 25% above last year.",
     n: "Passes when the close is within 15% of the 52-week closing high.",
     s: "Passes when 20-day average volume is 200,000 shares or more.",
-    l: "Passes when the RS percentile is 80 or higher.",
+    l: "Passes when the RS Rating is 80 or higher.",
     i: "Passes when 13F holders bought more shares than they sold.",
     m: "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
   };
@@ -1125,7 +1157,7 @@
       T("strength", "CANSLIM strength (raw)", "num", { dec: 0 }), T("qualify", "Qualify", "pass"),
       T("c_quarterly_eps", "C: quarter EPS vs yr ago %", "pct", { dec: 1 }), T("a_annual_eps", "A: annual EPS %", "pct", { dec: 1 }),
       T("n_pct_from_high", "N: % from 52w high", "pct", { dec: 1 }), T("s_adv", "S: avg daily volume", "compact"),
-      T("l_rs_percentile", "L: RS percentile", "num", { dec: 0 }), T("i_trend", "I: holders trend", "itrend"), T("freshness", "Data", "fresh")],
+      T("rs", "L: RS Rating", "rs", { dec: 0, title: RS_TITLE }), T("i_trend", "I: holders trend", "itrend"), T("freshness", "Data", "fresh")],
     cards(all) {
       return card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
         card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
@@ -1396,6 +1428,72 @@
       return '<div class="panel pad"><div class="ptitle">Why this name</div>' + whyLines(row ? [row] : []) + "</div>";
     },
   });
+
+  // MarketSmith style screens. Rows come from ms_screens.py. Every row passes, so there is no
+  // status filter. Numbers live in the marketsmith_screens block of config.json.
+  function msNotice(all, raw) {
+    const asOf = (all[0] && all[0].price_as_of) || "";
+    const empty = all.length ? "" : (D.noteOf(raw) || "No stock passes today.");
+    return '<p class="cap">' + (asOf ? "Prices to the " + D.esc(asOf) + " close. " : "") + D.esc(empty) +
+      " Tap a row to see the chart. Research only.</p>";
+  }
+  const RS_RATING_COL = T("rs", "RS Rating", "rs", { dec: 0, title: RS_TITLE });
+  const epsrs = passesPage({
+    file: "scanner_eps_rs.csv",
+    caption: "Stocks with an EPS Rating and an RS Rating of 80 or higher, ranked by the two added together. Stocks already too far past their buy point are left out.",
+    sort: "combined",
+    noticeAbove: true,
+    notice: msNotice,
+    filters: { sector: true, ticker: true, index: true },
+    columns: [TK, T("company", "Company", "text", { ellipsis: true, width: "200px" }), SE,
+      T("eps_rating", "EPS Rating", "num", { dec: 0, title: "1 to 99. 99 is the strongest earnings growth on the desk." }), RS_RATING_COL,
+      T("combined", "EPS + RS", "num", { dec: 0 }),
+      T("eps_q_yoy", "Latest quarter EPS vs year ago %", "pct", { dec: 0, color: true }),
+      T("eps_prev_q_yoy", "Quarter before vs year ago %", "pct", { dec: 0, color: true }),
+      T("eps_annual_growth", "Yearly EPS growth %", "pct", { dec: 0, color: true }),
+      T("eps_growth_years", "Years", "num", { dec: 0, hide: "md" }),
+      T("eps_parts", "EPS parts used", "num", { dec: 0, hide: "md", title: "3 when the quarter before the latest had a year-ago match on file, else 2." }),
+      T("price", "Last close", "num", { dec: 2 }),
+      T("above_sma50_pct", "Above 50-day %", "pct", { dec: 1, color: true }),
+      T("extended_check", "Extended check", "text", { wrap: true })],
+    lines: (row) => setupLines(row ? Object.assign({}, row, { pivot: row.buy_point }) : row),
+    priceSub: "Daily price. The orange line is the buy point when a pattern scanner has one.",
+    cards(all) {
+      return card("Stocks listed", String(all.length)) +
+        card("Average EPS Rating", ntext(avg(all, "eps_rating"), 0)) +
+        card("Average RS Rating", ntext(avg(all, "rs"), 0)) +
+        card("With a buy point on file", String(countWhere(all, (r) => !D.isBlank(r.buy_point))));
+    },
+  });
+  function templatePage(file, months) {
+    return passesPage({
+      file: file,
+      caption: "All 8 of Mark Minervini's trend template rules pass, with the 200-day average rising for at least " + months + ". Strongest RS first.",
+      sort: "rs",
+      noticeAbove: true,
+      notice: msNotice,
+      filters: { sector: true, ticker: true, index: true },
+      columns: [TK, T("company", "Company", "text", { ellipsis: true, width: "200px" }), SE, RS_RATING_COL,
+        T("price", "Last close", "num", { dec: 2 }),
+        T("above_low_pct", "Above 52-week low %", "pct", { dec: 0, color: true }),
+        T("off_high_pct", "From 52-week high %", "pct", { dec: 1, color: true }),
+        T("sma200_change_pct", "200-day change %", "pct", { dec: 2, color: true }),
+        T("sma50", "50-day", "num", { dec: 2, hide: "md" }),
+        T("sma150", "150-day", "num", { dec: 2, hide: "md" }),
+        T("sma200", "200-day", "num", { dec: 2, hide: "md" }),
+        T("eps_rating", "EPS Rating", "num", { dec: 0 }),
+        T("reason", "Why", "text", { wrap: true })],
+      priceSub: "Daily price with the 50, 150, and 200-day averages.",
+      cards(all) {
+        return card("Stocks passing", String(all.length)) +
+          card("RS 90 or higher", String(countWhere(all, (r) => (D.num(r.rs) || 0) >= 90))) +
+          card("Within 5% of the 52-week high", String(countWhere(all, (r) => (D.num(r.off_high_pct) ?? -99) >= -5))) +
+          card("Average RS Rating", ntext(avg(all, "rs"), 0));
+      },
+    });
+  }
+  const min1m = templatePage("scanner_minervini_1m.csv", "1 month (21 trading days)");
+  const min5m = templatePage("scanner_minervini_5m.csv", "5 months (105 trading days)");
 
   function renderCalendar(ctx) {
     const raw = ctx.files["earnings_calendar.csv"];
@@ -2132,19 +2230,19 @@
       all: "All stocks",
     };
     const box = document.getElementById("ctrls");
-    standardFilters(box, all, { index: true, sector: true, verdict: true, ticker: true, order: ["index", "sector", "verdict", "ticker"], list: "w52" });
+    standardFilters(box, all, { index: true, sector: true, verdict: true, ticker: true, rs: true, order: ["index", "sector", "verdict", "rsmin", "ticker"], list: "w52" });
     box.insertAdjacentHTML("afterbegin", '<div class="w52tabs" id="w52tabs">' + tabs.map((t, i) =>
       '<button type="button" data-tab="' + t[0] + '"' + (i === 0 ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") + "</div>");
     D.placeFeed(box, raw);
     let tab = "highs";
     let days = 183;
     const state = { sort: "range_position_pct", dir: "desc", sort2: "score", dir2: "desc", page: 0 };
-    const columns = [TK, CO, SE, PR,
+    const columns = withRs([TK, CO, SE, PR,
       T("high_52w", "52w high", "num", { dec: 2 }), T("low_52w", "52w low", "num", { dec: 2 }),
       T("pct_from_high", "% from high", "pct", { dec: 1, color: true }),
       T("pct_above_low", "% above low", "pct", { dec: 1, color: true }),
       T("range_position_pct", "Range", "rangepos"),
-      T("volume_ratio", "Vol ×", "volx", { dec: 2 }), SC, VE];
+      T("volume_ratio", "Vol ×", "volx", { dec: 2 }), SC, VE]);
     const inTab = (r) => {
       if (tab === "highs") return yes(r, "new_high_today");
       if (tab === "lows") return yes(r, "new_low_today");
@@ -2233,7 +2331,7 @@
       quiet: "When trading gets very quiet near a high, it sometimes comes before a bigger move. The move can go either way.",
     };
     const box = document.getElementById("ctrls");
-    standardFilters(box, all, { index: true, sector: true, ticker: true, order: ["index", "sector", "ticker"], list: "hv" });
+    standardFilters(box, all, { index: true, sector: true, ticker: true, rs: true, order: ["index", "sector", "rsmin", "ticker"], list: "hv" });
     const seg = (id, items, on) => '<div class="w52tabs hvseg" id="' + id + '">' + items.map((t) =>
       '<button type="button" data-v="' + t[0] + '"' + (t[0] === on ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") + "</div>";
     box.insertAdjacentHTML("afterbegin",
@@ -2293,7 +2391,7 @@
         title: titles[tab],
         sub: subs[tab],
         rows: all.filter((r) => inTab(r) && readCommon(box, r)),
-        columns: columns[tab],
+        columns: withRs(columns[tab]),
         state: state,
         pageSize: 25,
         expandable: true,
@@ -2422,11 +2520,12 @@
       D.multiHtml("sector", "Sector", D.uniq(named, "sector")) +
       D.multiHtml("source", "Setup", ["VCP", "Box", "Flag", "Qullamaggie", "Marios", "EP", "CANSLIM"]) +
       D.multiHtml("status", "Status", D.uniq(named, "status")) +
+      rsFilterHtml() +
       D.searchHtml("ticker", "Ticker", "tick-list-buy", D.uniq(named, "ticker"));
     D.placeFeed(box, raw);
     let showAnyway = false;
     const state = { sort: "_ord", dir: "asc", page: 0 };
-    const columns = [
+    const columns = withRs([
       T("_ord", "", "num", { hidden: true }),
       TK, T("company", "Company", "text", { ellipsis: true }),
       T("setup_sources", "Setup", "text", { ellipsis: true }),
@@ -2439,7 +2538,7 @@
       T("reward_risk", "Reward/risk", "multiple", { dec: 2 }),
       T("dist_to_entry_pct", "Dist. to entry", "pct", { dec: 1, color: true }),
       SC, VE,
-    ];
+    ]);
     const sourceOk = (row) => {
       const picked = D.selectedMulti(box, "source");
       if (!picked) return true;
@@ -2731,12 +2830,12 @@
       card("With volume above average", String(countWhere(all, (r) => (D.num(r.volume_ratio) || 0) >= 1))) +
       card("Of those, BUY", String(countWhere(all, (r) => r.verdict === "BUY")));
     const box = document.getElementById("ctrls");
-    standardFilters(box, all, { sector: true, verdict: true, ticker: true });
+    standardFilters(box, all, { sector: true, verdict: true, ticker: true, rs: true });
     const state = { sort: "dist_52w_high_pct", dir: "asc", page: 0 };
     const draw = () => D.drawTable(document.getElementById("tbl"), {
       rows: all.filter((r) => readCommon(box, r)),
-      columns: [TK, CO, SE, PR, T("dist_52w_high_pct", "From 52-week high %", "pct", { dec: 2, color: false, abs: true }),
-        T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }), SC, VE],
+      columns: withRs([TK, CO, SE, PR, T("dist_52w_high_pct", "From 52-week high %", "pct", { dec: 2, color: false, abs: true }),
+        T("volume_ratio", "Volume vs 50-day", "volx", { dec: 2 }), SC, VE]),
       state: state, pageSize: 15, expandable: true,
       priceSub: "Daily price. Distance to the 52-week high stays in the row.",
     });
@@ -2756,6 +2855,7 @@
     const labels = ["Uptrend", "Mixed", "Downtrend"];
     box.innerHTML = '<div class="toggles" data-filter="trend">' + labels.map((o) =>
       '<button type="button" data-v="' + o + '"' + (o === "Uptrend" ? ' class="on"' : "") + ">" + o + "</button>").join("") + "</div>" +
+      rsFilterHtml() +
       D.multiHtml("sector", "Sector", D.uniq(all, "sector")) +
       D.searchHtml("ticker", "Ticker", "trd", D.uniq(all, "ticker"));
     box.querySelectorAll(".toggles button").forEach((btn) => {
@@ -2771,10 +2871,10 @@
       const on = pickedTrend();
       D.drawTable(document.getElementById("tbl"), {
         rows: all.filter((r) => (on.length === labels.length || on.indexOf(r.trend_label) >= 0) &&
-          D.matchMulti(r, "sector", D.selectedMulti(box, "sector")) && D.matchText(r, "ticker", D.fieldVal(box, "ticker"))),
-        columns: [TK, CO, T("trend_label", "Trend", "trend"),
+          D.matchMulti(r, "sector", D.selectedMulti(box, "sector")) && D.matchText(r, "ticker", D.fieldVal(box, "ticker")) && rsOk(box, r)),
+        columns: withRs([TK, CO, T("trend_label", "Trend", "trend"),
           T("above_sma20", "Above 20d", "flag", { no: "#EF4444" }), T("above_sma50", "Above 50d", "flag", { no: "#EF4444" }),
-          T("above_sma100", "Above 100d", "flag", { no: "#EF4444" }), T("above_sma200", "Above 200d", "flag", { no: "#EF4444" }), SC],
+          T("above_sma100", "Above 100d", "flag", { no: "#EF4444" }), T("above_sma200", "Above 200d", "flag", { no: "#EF4444" }), SC]),
         state: state, pageSize: 25, expandable: true,
         priceSub: "Daily price. Turn the moving averages on or off above the chart.",
       });
@@ -3416,7 +3516,10 @@
     dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
     wheel: "A stock screen only, not an options trade. It finds stocks above their 200-day average, with RSI under 70, at least {wheel_min_dollar_volume} of shares traded a day, not rated AVOID, and not stretched or in a downtrend. These are steady, busy stocks you would not mind owning.",
     vcp: "Looks for stocks in a strong uptrend (all 8 of Minervini's trend checks) whose pullbacks keep getting smaller, like a spring tightening. A stock is listed only when all 8 trend checks pass and it has at least two tightening pullbacks. READY means it has at least two tightening pullbacks (the green VCP tag on Nick's chart) and is still under the buy point; BROKEN OUT today means it closed above it on big volume. WATCHING means it is 8 of 8 with at least two tightening pullbacks but not ready yet: above the buy point without that big-volume close today, or a trade still open from a buy made at 8 of 8. A stock with only one pullback stays off the list.",
-    canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, strength versus SPY, fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and beating at least 55% of the desk's stocks. Any letter we could not check says not verified.",
+    canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, the RS Rating (L, the same 1 to 99 number as the RS column), fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and an RS Rating of 55 or higher. A stock with under a year of prices has no RS Rating, so it is not listed. Any letter we could not check says not verified.",
+    epsrs: "Our copy of MarketSmith's Highest EPS and RS list. MarketSmith's own EPS and RS Ratings are private, so these are close copies built from the desk's own data. EPS Rating is 1 to 99: it ranks three things across every stock on the desk, equally: the latest quarter's EPS versus a year ago, the quarter before that versus its year ago, and yearly EPS growth over 3 to 5 years, all from the SEC filings the desk already saves. The latest quarter and the yearly growth are needed; the quarter before counts when its year-ago numbers are saved. Both ratings must be 80 or higher, ranked by EPS Rating plus RS Rating, at most 50. Stocks that have run too far are left out: more than 5% above a VCP, Box, Flag, Qullamaggie or Marios buy point, or, with no buy point, more than 25% above the 50-day average.",
+    min1m: "Mark Minervini's trend template, the early version. He calls it his heads up list, because it catches stocks just turning into uptrends. All 8 rules must pass: price above the 150 and 200-day averages, the 150-day above the 200-day, the 200-day higher than 1 month (21 trading days) ago, the 50-day above the 150 and 200-day, price above the 50-day, at least 30% above the 52-week low, within 25% of the 52-week high, and an RS Rating of 70 or higher. Strongest RS first.",
+    min5m: "Mark Minervini's trend template, the main version. The 200-day average must be higher than about 5 months (105 trading days) ago, so these are steadier uptrends. All 8 rules must pass: price above the 150 and 200-day averages, the 150-day above the 200-day, the 200-day rising over 105 trading days, the 50-day above the 150 and 200-day, price above the 50-day, at least 30% above the 52-week low, within 25% of the 52-week high, and an RS Rating of 70 or higher. Strongest RS first.",
     box: "Stocks that moved sideways in a tight range (10% or less) for 15 to 40 days. A tight range means buyers and sellers are in balance. BROKEN OUT today means it closed above the top of the box on at least 1.5 times normal volume; the stop is the bottom of the box.",
     flag: "Stocks that jumped at least 15% in 3 to 12 days, then rested for 3 to 15 days without giving back half of that jump. A short rest after a big run often comes before another leg up. BROKEN OUT today means it closed above the rest area on at least 1.5 times normal volume.",
     qullamaggie: "Finds fast-moving leader stocks the way trader Kristjan Kullamagi (Qullamaggie) does. The stock must be in the top 3% of gainers over 1, 3, or 6 months, move at least 3.5% a day on average, have run up at least 30%, and then rest for 2 to 8 weeks in a tight range with higher lows. READY means the price is just under the top of that rest area. BROKEN OUT today means today's high went above it; the stop is today's low. If that stop is more than one normal day's move away, it says Too wide, skip. IN TRADE and CLOSED follow each breakout: sell 1/3 to 1/2 after 3 to 5 days, move the stop to the buy price, then sell the rest on the first close under the 10-day average.",
@@ -3454,7 +3557,7 @@
     breadth: "The share of desk stocks trading above their 20, 50, 100, and 200-day averages. When most stocks are above their averages, the market is healthy. A falling line warns that fewer stocks are holding up.",
     secperf: "How each sector's stocks did over a day, week, month, 3 months, and the year so far, as an equal-weight average of the desk's stocks. It shows where money is flowing. Strong sectors make it easier for their stocks to rise.",
     chartviewer: "Shows one big chart at a time so you can flip through stocks fast. Pick a list: All scanner stocks puts every stock from every scanner in one list, once, with the stocks on the most scanners first. Tap Full screen. Drag the chart with one finger to look at older days (about five years are saved) and pinch to zoom. Flick quickly sideways, or swipe on the stock name, for the next chart (the Swipe button swaps the way; the Drag button makes any drag change the chart). Daily or Weekly picks the candle size, and Candles or Bars picks the shape. The MA buttons turn the average lines on and off, and the box at the top left says which scanners picked the stock and why. Tap that box to read more.",
-    "chartviewer:split": "Shows one big chart at a time so you can flip through stocks fast. Pick Technical (chart patterns, breakouts, gaps, volume) or Fundamental (CANSLIM, Leaders, Growth, Quality, Dividend) at the top; the list and the reason box then show only that side, and your pick is saved on this device. All technical stocks or All fundamental stocks puts every stock from that side in one list, once, with the stocks on the most scanners first. Tap Full screen. Drag the chart with one finger to look at older days (about five years are saved) and pinch to zoom. Flick quickly sideways, or swipe on the stock name, for the next chart (the Swipe button swaps the way; the Drag button makes any drag change the chart). Daily or Weekly picks the candle size, and Candles or Bars picks the shape. The MA buttons turn the average lines on and off, and the box at the top left says which scanners on that side picked the stock and why. Tap that box to read more.",
+    "chartviewer:split": "Shows one big chart at a time so you can flip through stocks fast. Pick Technical (chart patterns, breakouts, gaps, volume, Minervini 1-Month and 5-Month) or Fundamental (CANSLIM, Leaders, Highest EPS and RS, Growth, Quality, Dividend) at the top; the list and the reason box then show only that side, and your pick is saved on this device. All technical stocks or All fundamental stocks puts every stock from that side in one list, once, with the stocks on the most scanners first. Tap Full screen. Drag the chart with one finger to look at older days (about five years are saved) and pinch to zoom. Flick quickly sideways, or swipe on the stock name, for the next chart (the Swipe button swaps the way; the Drag button makes any drag change the chart). Daily or Weekly picks the candle size, and Candles or Bars picks the shape. The MA buttons turn the average lines on and off, and the box at the top left says which scanners on that side picked the stock and why. Tap that box to read more.",
     heatmaps: "Each stock's return over 1 day, 1 week, 1 month, and the year so far, colored green for up and red for down. The table on the right is each sector's average 1-day move. Use it to spot what is hot or cold at a glance.",
   };
   // Where a tab's or section's box goes. tabs: the active button decides the text. secs: extra boxes inside the page.
@@ -3504,6 +3607,10 @@
     return '<p class="secnote">' + D.esc(text) + "</p>";
   }
   // The box sits above #page (outside it), like the India desk, so a filter redraw never wipes it.
+  // Pages with the RS column get one more line in the help box (feature.rs_rank).
+  const RS_DESC_PAGES = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "epsrs", "min1m", "min5m", "canslim", "leaders",
+    "buysetups", "week52", "breakouts", "pullbacks", "volume", "growth", "quality", "dividend", "wheel", "trends", "breakdowns"];
+  const RS_DESC_LINE = "RS is the RS Rating, a 1 to 99 rank of the past year's price move against every stock on the desk (MarketSmith style, the latest quarter counts double). 99 is the strongest. RS 85 means it beat 85% of stocks. Under a year of prices, the cell is blank. The RS filter shows RS 70 or higher.";
   function addDescriptions(pages) {
     Object.keys(pages).forEach((id) => {
       const spec = pages[id];
@@ -3518,7 +3625,9 @@
           const title = DESC_PAGE_KIND[id] === "page" ? "What this page does" : "What this scanner does";
           // With the Technical | Fundamental switch on, the Chart Viewer box describes the switch.
           const split = id === "chartviewer" && D.splitOn && D.splitOn() && D.viewerOn("group_toggle") && DESC[id + ":split"];
-          ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, descFill(split || DESC[id], ctx)) + "</div>");
+          let text = descFill(split || DESC[id], ctx);
+          if (RS_DESC_PAGES.indexOf(id) >= 0 && D.featureOn("feature.rs_rank")) text += " " + RS_DESC_LINE;
+          ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, text) + "</div>");
           const wrap = document.getElementById("about");
           if (id === "papertest") {
             // The FAKE MONEY label stays the first thing on the page, above the description.
@@ -3608,6 +3717,9 @@
     breakdowns: breakdowns,
     volume: { files: ["scanner_volume.csv"], render: renderVolume },
     leaders: leaders,
+    epsrs: epsrs,
+    min1m: min1m,
+    min5m: min5m,
     week52: { files: ["scanner_52w.csv", "highs_lows_history.csv"], render: renderWeek52 },
     calendar: { files: ["earnings_calendar.csv"], render: renderCalendar },
     heatmap: { files: ["earnings_heatmap.csv"], render: renderHeat },

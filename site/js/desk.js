@@ -140,9 +140,12 @@
       ["Marios breakout", "marios.html", "marios"],
       ["Episodic pivot", "episodic-pivot.html", "ep"],
       ["Gap Up", "gap-up.html", "gapup"],
+      ["Minervini 1-Month", "minervini-1m.html", "min1m"],
+      ["Minervini 5-Month", "minervini-5m.html", "min5m"],
       ["Breakdowns", "breakdowns.html", "breakdowns"],
       ["High volume", "volume.html", "volume"],
       ["Leaders", "leaders.html", "leaders"],
+      ["Highest EPS and RS", "eps-rs.html", "epsrs"],
       ["52-week", "52-week.html", "week52"],
     ]],
     ["Options", [
@@ -518,6 +521,15 @@
       case "ticker": return tickerHtml(v);
       case "etf": return etfHtml(v);
       case "score": return scoreFill(v);
+      case "rs": {
+        // RS Rating, 1 to 99. Green at the RS 70 line (relative_strength.leader_min) or higher.
+        const n = num(v);
+        if (n == null) return na();
+        const shown = String(Math.round(n));
+        const tip = isBlank(row.rs_label) ? "RS " + shown : String(row.rs_label);
+        const hot = n >= rsLeaderMin();
+        return '<span class="rspill' + (hot ? " hot" : "") + '" title="' + esc(tip) + '">' + esc(shown) + "</span>";
+      }
       case "scorejump": {
         const a = isBlank(row.score_prev) ? na() : esc(String(row.score_prev).replace(/\.0$/, ""));
         const b = isBlank(row.score) ? na() : esc(String(row.score).replace(/\.0$/, ""));
@@ -730,14 +742,14 @@
   function align(col) {
     if (col.align) return col.align;
     if (["num", "pct", "money", "compact", "dist", "heatpct"].indexOf(col.kind) >= 0) return "num";
-    if (["score", "points", "plabel", "grade", "flag", "tone", "signal"].indexOf(col.kind) >= 0) return "c";
+    if (["score", "points", "plabel", "grade", "flag", "tone", "signal", "rs"].indexOf(col.kind) >= 0) return "c";
     return "";
   }
 
   function compare(a, b, col, dir) {
     const va = a[col.key];
     const vb = b[col.key];
-    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar", "daybar", "rangepos", "scorejump", "count", "signedcompact", "of8", "owncap"].indexOf(col.kind) >= 0;
+    const numeric = ["num", "pct", "money", "compact", "dollars", "dist", "score", "points", "tone", "signal", "flag", "heatpct", "delta", "multiple", "volx", "retrace", "strengthbar", "daybar", "rangepos", "scorejump", "count", "signedcompact", "of8", "owncap", "rs"].indexOf(col.kind) >= 0;
     let c = 0;
     if (numeric) {
       const pull = (value) => {
@@ -863,7 +875,8 @@
     const head = (hasDetail ? '<th class="exp"></th>' : "") + shown.map((c) => {
       const mark = state.sort === c.key ? '<span class="sort">' + (state.dir === "asc" ? "▲" : "▼") + "</span>" : "";
       const cls = [align(c), c.hide === "md" ? "hide-md" : "", c.ellipsis ? "ellip" : ""].filter(Boolean).join(" ");
-      return '<th class="' + cls + '" data-k="' + esc(c.key) + '">' + esc(c.label) + mark + "</th>";
+      const tip = c.title ? ' title="' + esc(c.title) + '"' : "";
+      return '<th class="' + cls + '"' + tip + ' data-k="' + esc(c.key) + '">' + esc(c.label) + mark + "</th>";
     }).join("");
     const body = view.map((r, i) => {
       const tds = shown.map((c) => {
@@ -1858,9 +1871,9 @@
   // Defaults match the scanner_groups block in config.json; a settings.csv row wins. Keys are page ids.
   const SCANNER_GROUPS = {
     vcp: "technical", box: "technical", flag: "technical", qullamaggie: "technical", marios: "technical", ep: "technical",
-    gapup: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
+    gapup: "technical", min1m: "technical", min5m: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
     breakdowns: "technical", trends: "technical", wheel: "technical",
-    canslim: "fundamental", leaders: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
+    canslim: "fundamental", leaders: "fundamental", epsrs: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
     scorecard: "fundamental", top: "fundamental",
   };
   // Off unless settings.csv says true, so a settings file from before the split keeps the old menu and viewer.
@@ -2238,6 +2251,9 @@
     breakdowns: "feature.scanner_breakdown",
     volume: "feature.scanner_volume",
     leaders: "feature.scanner_leaders",
+    epsrs: "feature.scanner_eps_rs",
+    min1m: "feature.scanner_minervini_1m",
+    min5m: "feature.scanner_minervini_5m",
     options: "feature.options",
     week52: "feature.scanner_52w",
     calendar: "feature.earnings_calendar",
@@ -2272,7 +2288,7 @@
   };
   // Lists the Chart Viewer can open. The key is the page id, so a scanner page links to its own list.
   const VIEWER_LISTS = ["buysetups", "watchlist", "growth", "quality", "dividend", "wheel", "vcp", "canslim", "box", "flag",
-    "qullamaggie", "marios", "ep", "gapup", "breakdowns", "volume", "leaders", "week52", "trends"];
+    "qullamaggie", "marios", "ep", "gapup", "min1m", "min5m", "breakdowns", "volume", "leaders", "epsrs", "week52", "trends"];
   function settingVal(key) {
     const row = SETTINGS.find((r) => r.setting === key);
     return row ? row.value : null;
@@ -2294,6 +2310,19 @@
     return '<p class="cvrow"><a class="cvlink" href="' + esc(viewerHref(page, ticker)) + '">Open in Chart Viewer</a></p>';
   }
   let SETTINGS = [];
+  // RS 70 line for the filter and the green pill (relative_strength.leader_min in config.json).
+  function rsLeaderMin() {
+    const row = SETTINGS.find((r) => r.setting === "relative_strength.leader_min");
+    const n = row ? Number(row.value) : 70;
+    return Number.isFinite(n) && n > 0 ? n : 70;
+  }
+  // Plain sentence from the row, e.g. "RS 85: beat 85% of stocks over the past year". Blank with no rank.
+  function rsSentence(row) {
+    if (!featureOn("feature.rs_rank") || !row) return "";
+    if (!isBlank(row.rs_label)) return String(row.rs_label);
+    if (!isBlank(row.rs_note)) return String(row.rs_note);
+    return "";
+  }
   function featureOn(key) {
     if (!key) return true;
     const row = SETTINGS.find((r) => r.setting === key);
@@ -2358,7 +2387,7 @@
     selectedMulti: selectedMulti, fieldVal: fieldVal,
     multiHtml: multiHtml, selectHtml: selectHtml, searchHtml: searchHtml, rangeHtml: rangeHtml,
     pairHtml: pairHtml, dateHtml: dateHtml, feedHtml: feedHtml, placeFeed: placeFeed,
-    featureOn: featureOn, blurbOf: blurbOf, blurbHtml: blurbHtml, monthLabel: monthLabel, ptsColor: ptsColor,
+    featureOn: featureOn, rsLeaderMin: rsLeaderMin, rsSentence: rsSentence, blurbOf: blurbOf, blurbHtml: blurbHtml, monthLabel: monthLabel, ptsColor: ptsColor,
     wireFilters: wireFilters, matchMulti: matchMulti, matchContains: matchContains,
     matchText: matchText, matchMin: matchMin,
     destroyCharts: destroyCharts, lineChart: lineChart, barChart: barChart, comboChart: comboChart, makeChart: makeChart,

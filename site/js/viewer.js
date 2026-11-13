@@ -12,7 +12,11 @@
     { id: "marios", label: "Marios breakout", short: "Marios", file: "scanner_marios.csv", kind: "pattern", feature: "feature.scanner_marios", scanner: true },
     { id: "ep", label: "Episodic pivot", short: "EP", file: "scanner_ep.csv", kind: "pattern", feature: "feature.scanner_ep", scanner: true },
     { id: "gapup", label: "Gap Up", short: "Gap Up", file: "scanner_gap_up.csv", kind: "gap", feature: "feature.scanner_gap_up", scanner: true },
+    // MarketSmith style screens (ms_screens.py). Every row passes (status PASSES).
+    { id: "min1m", label: "Minervini 1-Month", short: "Minervini 1M", file: "scanner_minervini_1m.csv", kind: "pattern", feature: "feature.scanner_minervini_1m", scanner: true },
+    { id: "min5m", label: "Minervini 5-Month", short: "Minervini 5M", file: "scanner_minervini_5m.csv", kind: "pattern", feature: "feature.scanner_minervini_5m", scanner: true },
     { id: "leaders", label: "Leaders", short: "Leaders", file: "scanner_leaders.csv", kind: "pattern", feature: "feature.scanner_leaders", scanner: true },
+    { id: "epsrs", label: "Highest EPS and RS", short: "EPS and RS", file: "scanner_eps_rs.csv", kind: "pattern", feature: "feature.scanner_eps_rs", scanner: true },
     { id: "breakdowns", label: "Breakdowns", short: "Breakdown", file: "scanner_breakdown.csv", kind: "pattern", feature: "feature.scanner_breakdown", scanner: true },
     { id: "volume", label: "High volume", short: "High volume", file: "scanner_volume.csv", kind: "volume", feature: "feature.scanner_volume", scanner: true },
     { id: "week52", label: "52-week", short: "52-week", file: "scanner_52w.csv", kind: "w52", feature: "feature.scanner_52w", scanner: true },
@@ -134,9 +138,9 @@
   const GROUP_LABEL = { technical: "Technical", fundamental: "Fundamental" };
   const DEFAULT_GROUPS = {
     vcp: "technical", box: "technical", flag: "technical", qullamaggie: "technical", marios: "technical", ep: "technical",
-    gapup: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
+    gapup: "technical", min1m: "technical", min5m: "technical", week52: "technical", breakouts: "technical", volume: "technical", pullbacks: "technical",
     breakdowns: "technical", trends: "technical", wheel: "technical",
-    canslim: "fundamental", leaders: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
+    canslim: "fundamental", leaders: "fundamental", epsrs: "fundamental", growth: "fundamental", quality: "fundamental", dividend: "fundamental",
     scorecard: "fundamental", top: "fundamental",
   };
   function cleanGroup(v) {
@@ -176,9 +180,10 @@
       if (!info[t]) {
         const s = scores[t] || {};
         info[t] = { ticker: t, company: txt(s.company) || txt(row && row.company), score: numOf(s.score), price: numOf(s.price),
-          dayPct: numOf(s.day_pct), strength: null, count: 0, entries: [] };
+          dayPct: numOf(s.day_pct), rs: numOf(s.rs), strength: null, count: 0, entries: [] };
       }
       if (!info[t].company && row) info[t].company = txt(row.company);
+      if (info[t].rs == null && row) info[t].rs = numOf(row.rs);
       return info[t];
     };
     const lists = [];
@@ -731,7 +736,9 @@
     function header(t, rows) {
       const it = built.info[t] || {};
       document.getElementById("cvtk").textContent = t || "";
-      document.getElementById("cvco").textContent = it.company || "";
+      // RS Rating (1 to 99 versus every stock on the desk) next to the company. feature.rs_rank hides it.
+      const rsBit = it.rs != null && D.featureOn("feature.rs_rank") ? "RS " + Math.round(it.rs) : "";
+      document.getElementById("cvco").textContent = [it.company || "", rsBit].filter(Boolean).join(" · ");
       const blurb = document.getElementById("cvblurb");
       if (blurb) blurb.textContent = D.blurbOf(t) || "";
       let close = null, change = null;

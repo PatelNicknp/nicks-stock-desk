@@ -90,6 +90,9 @@ td.hm span{display:block;height:28px;line-height:28px;text-align:center;font-siz
 .track{display:inline-block;width:88px;height:6px;border-radius:3px;background:var(--line);vertical-align:middle}
 .track .fill{display:block;height:6px;border-radius:3px}
 .gradechip{display:inline-flex;min-width:28px;height:22px;align-items:center;justify-content:center;border-radius:4px;font-size:13px;font-weight:700;color:var(--tx);padding:0 4px}
+/* RS Rating pill (1 to 99). Green at relative_strength.leader_min or higher. Same variables in light and dark. */
+.rspill{display:inline-flex;min-width:28px;height:22px;padding:0 6px;align-items:center;justify-content:center;border-radius:11px;background:var(--cs-nodata-bg);color:var(--tx2);font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
+.rspill.hot{background:var(--cs-pass-bg);color:var(--cs-pass-fg)}
 .tk{color:var(--ac);font-weight:700}
 .mut{color:var(--tx2)}
 .m2{color:var(--mu)}
