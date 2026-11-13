@@ -3612,6 +3612,7 @@
     "buysetups", "week52", "breakouts", "pullbacks", "volume", "growth", "quality", "dividend", "wheel", "trends", "breakdowns"];
   const RS_DESC_LINE = "RS is the RS Rating, a 1 to 99 rank of the past year's price move against every stock on the desk (MarketSmith style, the latest quarter counts double). 99 is the strongest. RS 85 means it beat 85% of stocks. Under a year of prices, the cell is blank. The RS filter shows RS 70 or higher.";
   // Chart Viewer RS line (chart_viewer.rs_line), drawn like the India desk but against SPY.
+  const RS_BADGE_DESC = "The RS chip at the start of the chip bar is the 1 to 99 RS Rating, green at 70 or higher (relative_strength.leader_min). RS 85 means it beat 85% of stocks over the past year. A stock with less than a year of prices has no chip.";
   const RS_LINE_DESC = "The RS line in the lower part of the price chart, below the candles and above the volume, is the stock close divided by SPY. A blue dot is a new 52-week high in that line. An amber dot means the line made that high before the price did. The RS line chip turns it off on this device.";
   function addDescriptions(pages) {
     Object.keys(pages).forEach((id) => {
@@ -3629,6 +3630,7 @@
           const split = id === "chartviewer" && D.splitOn && D.splitOn() && D.viewerOn("group_toggle") && DESC[id + ":split"];
           let text = descFill(split || DESC[id], ctx);
           if (RS_DESC_PAGES.indexOf(id) >= 0 && D.featureOn("feature.rs_rank")) text += " " + RS_DESC_LINE;
+          if (id === "chartviewer" && D.featureOn("feature.rs_rank")) text += " " + RS_BADGE_DESC;
           if (id === "chartviewer" && D.viewerOn && D.viewerOn("rs_line")) text += " " + RS_LINE_DESC;
           ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, text) + "</div>");
           const wrap = document.getElementById("about");
