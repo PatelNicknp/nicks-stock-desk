@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-HSY,The Hershey Company,Consumer Defensive,Confectioners,18.404467,2.56522,21.0,180.90475,173.0,35059523584,1793277000.0
-HUBB,Hubbell Inc,Industrials,Electrical Equipment & Parts,19.330715,2.0,13.0,538.8461,540.0,23545141248,1793104200.0
-HUM,Humana Inc.,Healthcare,Healthcare Plans,24.93832,1.96154,24.0,469.29166,487.5,52008308736,1793971800.0
-HWM,Howmet Aerospace Inc.,Industrials,Aerospace & Defense,32.62472,1.36364,21.0,296.2857,298.0,86232678400,1793277000.0
-IBKR,"Interactive Brokers Group, Inc.",Financial Services,Capital Markets,23.586031,1.70588,16.0,104.1625,104.3,133104074752,1792094400.0
-IBM,International Business Machines,Technology,Information Technology Services,18.707062,2.28,23.0,259.30347,265.0,233983574016,1792612800.0
-ICE,Intercontinental Exchange Inc.,Financial Services,Financial Data & Stock Exchanges,19.558434,1.8125,15.0,192.2,190.0,97663311872,1793277000.0
-IDXX,"IDEXX Laboratories, Inc.",Healthcare,Diagnostics & Research,41.68387,2.14286,12.0,717.1667,717.5,55445831680,1793626200.0
-IEX,IDEX Corporation,Industrials,Specialty Industrial Machinery,24.048431,1.73333,14.0,262.92856,269.0,17366444032,1793190600.0
-IFF,International Flavors & Fragran,Basic Materials,Specialty Chemicals,22.023502,1.9,17.0,98.23529,100.0,21318313984,1793739600.0
-ILMN,"Illumina, Inc.",Healthcare,Diagnostics & Research,35.793644,2.47619,20.0,259.85,272.5,33465853952,1793304000.0
-INCY,Incyte Corporation,Healthcare,Biotechnology,14.11537,2.17857,24.0,131.5,130.0,24855334912,1793277000.0
-INTC,Intel Corporation,Technology,Semiconductors,32.692715,2.55102,43.0,91.11628,88.0,311113515008,1793304000.0
-INTU,Intuit Inc.,Technology,Software - Application,12.642045,2.05882,31.0,407.75934,400.0,91027259392,1795122000.0
-INVH,Invitation Homes Inc.,Real Estate,REIT - Residential,37.36976,2.08,23.0,32.69565,33.0,15806336000,1793217600.0
-IONQ,"IonQ, Inc.",Technology,Computer Hardware,-26.130213,1.38462,14.0,54.275,50.0,16598939648,1793912400.0
-IP,International Paper Company,Consumer Cyclical,Packaging & Containers,12.901865,1.54545,10.0,42.3,41.5,18790297600,1793190600.0
-IQV,"IQVIA Holdings, Inc.",Healthcare,Diagnostics & Research,19.674023,1.3,18.0,311.8889,310.0,46053363712,1793104200.0
-IR,Ingersoll Rand Inc.,Industrials,Specialty Industrial Machinery,22.142162,2.0,13.0,94.92308,93.0,33609408512,1793304000.0
-IRM,Iron Mountain Incorporated (Del,Real Estate,REIT - Specialty,41.45603,1.66667,11.0,138.54546,136.0,33534597120,1793885400.0
-ISRG,"Intuitive Surgical, Inc.",Healthcare,Medical Instruments & Supplies,37.04455,1.76471,30.0,486.56668,500.0,160114720768,1792526400.0
-IT,"Gartner, Inc.",Technology,Information Technology Services,11.473513,3.0,13.0,201.46153,198.0,12031191040,1793712600.0
-ITW,Illinois Tool Works Inc.,Industrials,Specialty Industrial Machinery,23.388254,3.3125,14.0,294.14285,298.5,82085478400,1793104200.0
-IVZ,Invesco Ltd,Financial Services,Asset Management,8.810339,2.33333,14.0,35.0,34.5,12770512896,1793104200.0
-J,Jacobs Solutions Inc.,Industrials,Engineering & Construction,19.16374,1.9375,15.0,162.8,163.0,18639067136,1795467600.0
 JBHT,"J.B. Hunt Transport Services, I",Industrials,Integrated Freight & Logistics,22.82582,2.0,23.0,279.52173,285.0,20948639744,1800046800.0
 JBL,Jabil Inc.,Technology,Electronic Components,11.413252,1.4,9.0,425.0,430.0,26053570560,1790771400.0
 JCI,Johnson Controls International ,Industrials,Building Products & Equipment,19.098507,2.0,20.0,174.85,173.5,85663285248,1793104200.0
@@ -523,3 +498,28 @@ HPQ,HP Inc.,Technology,Computer Hardware,9.157352,3.33333,17.0,27.43529,29.0,260
 HRL,Hormel Foods Corporation,Consumer Defensive,Packaged Foods,13.944071,2.6,8.0,24.9375,25.0,12014157824,1796304600.0
 HSIC,"Henry Schein, Inc.",Healthcare,Medical Distribution,14.336786,2.375,15.0,96.6,100.0,9521789952,1793712600.0
 HST,"Host Hotels & Resorts, Inc.",Real Estate,REIT - Hotel & Motel,22.036283,1.90476,20.0,26.17783,27.0,17725014016,1793826000.0
+HSY,The Hershey Company,Consumer Defensive,Confectioners,18.300423,2.56522,21.0,180.90475,173.0,34827890688,1793277000.0
+HUBB,Hubbell Inc,Industrials,Electrical Equipment & Parts,18.988771,2.0,13.0,537.61536,540.0,23140689920,1793104200.0
+HUM,Humana Inc.,Healthcare,Healthcare Plans,24.53776,1.96154,24.0,490.08334,502.0,53287407616,1793971800.0
+HWM,Howmet Aerospace Inc.,Industrials,Aerospace & Defense,33.56653,1.36364,21.0,296.2857,298.0,88722030592,1793277000.0
+IBKR,"Interactive Brokers Group, Inc.",Financial Services,Capital Markets,24.57523,1.70588,16.0,104.0375,104.3,138573398016,1792094400.0
+IBM,International Business Machines,Technology,Information Technology Services,18.48152,2.28,23.0,259.84738,265.0,231242711040,1792612800.0
+ICE,Intercontinental Exchange Inc.,Financial Services,Financial Data & Stock Exchanges,19.908907,1.8125,15.0,193.53333,192.0,99398557696,1793277000.0
+IDXX,"IDEXX Laboratories, Inc.",Healthcare,Diagnostics & Research,41.320316,2.14286,12.0,717.1667,717.5,54994391040,1793626200.0
+IEX,IDEX Corporation,Industrials,Specialty Industrial Machinery,24.211176,1.73333,14.0,262.92856,269.0,17483970560,1793190600.0
+IFF,International Flavors & Fragran,Basic Materials,Specialty Chemicals,20.789848,1.9,17.0,98.23529,100.0,20126451712,1793739600.0
+ILMN,"Illumina, Inc.",Healthcare,Diagnostics & Research,33.89307,2.47619,20.0,261.45,272.5,31683960832,1793304000.0
+INCY,Incyte Corporation,Healthcare,Biotechnology,14.087588,2.17857,24.0,131.5,130.0,24806414336,1793277000.0
+INTC,Intel Corporation,Technology,Semiconductors,34.18116,2.5102,43.0,90.65116,86.0,325278007296,1793304000.0
+INTU,Intuit Inc.,Technology,Software - Application,12.6324215,2.05882,31.0,407.8884,400.0,90905673728,1795122000.0
+INVH,Invitation Homes Inc.,Real Estate,REIT - Residential,37.865334,2.08,23.0,32.69565,33.0,15413056512,1793217600.0
+IONQ,"IonQ, Inc.",Technology,Computer Hardware,-21.720615,1.35714,14.0,54.275,50.0,14340516864,1793912400.0
+IP,International Paper Company,Consumer Cyclical,Packaging & Containers,12.341863,1.54545,10.0,42.3,41.5,17974708224,1793190600.0
+IQV,"IQVIA Holdings, Inc.",Healthcare,Diagnostics & Research,19.086863,1.3,18.0,311.8889,310.0,44678926336,1793104200.0
+IR,Ingersoll Rand Inc.,Industrials,Specialty Industrial Machinery,21.51815,2.0,13.0,95.07692,93.0,32760725504,1793304000.0
+IRM,Iron Mountain Incorporated (Del,Real Estate,REIT - Specialty,42.186882,1.66667,11.0,138.72726,137.0,34125797376,1793885400.0
+ISRG,"Intuitive Surgical, Inc.",Healthcare,Medical Instruments & Supplies,35.279343,1.76471,30.0,486.56668,500.0,152485101568,1792526400.0
+IT,"Gartner, Inc.",Technology,Information Technology Services,11.480431,3.0,13.0,201.46153,198.0,12038445056,1793712600.0
+ITW,Illinois Tool Works Inc.,Industrials,Specialty Industrial Machinery,23.227896,3.3125,14.0,294.14285,298.5,81494351872,1793104200.0
+IVZ,Invesco Ltd,Financial Services,Asset Management,8.615523,2.33333,14.0,35.0,34.5,12513388544,1793104200.0
+J,Jacobs Solutions Inc.,Industrials,Engineering & Construction,19.26572,,15.0,162.8,163.0,18572857344,1795467600.0
