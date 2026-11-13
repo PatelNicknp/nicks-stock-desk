@@ -452,6 +452,8 @@ body.cv-lock{overflow:hidden;overscroll-behavior:none}
 .cvchip i{display:inline-block;width:10px;height:3px;border-radius:2px;opacity:.45}
 .cvchip.on{color:var(--tx);border-color:var(--line5);background:var(--hover)}
 .cvchip.on i{opacity:1}
+.cvchip.rschip{cursor:default;font-weight:700;color:var(--tx)}
+.cvchip.rschip.hot{color:var(--up);border-color:var(--up)}
 .cv-body{position:relative;flex:1;min-height:0;touch-action:pan-y}
 .cv.full .cv-body{touch-action:none}
 .cv-top{touch-action:pan-y}

@@ -285,6 +285,19 @@ def test_rs_line_math_switch_and_help():
     assert 'D.viewerOn("rs_line")' in pages and "is the stock close divided by SPY" in pages
 
 
+def test_rs_rating_badge_is_first_in_the_chip_bar():
+    # Like the India desk: a green "RS 92" chip first in the chart toolbar, from scores.csv rs.
+    js = _read("site", "js", "viewer.js")
+    assert '<span class="cvchip rschip" id="cvrs" hidden></span>' in js
+    assert "const chips = rsBadge + " in js
+    assert 'D.featureOn("feature.rs_rank") ? \'<span class="cvchip rschip"' in js
+    assert '"RS " + Math.round(it.rs)' in js and 'badge.classList.toggle("hot", has && it.rs >= D.rsLeaderMin())' in js
+    assert "rsLabel: txt(s.rs_label)" in js
+    css = _read("site", "css", "desk.css")
+    assert ".cvchip.rschip{" in css and ".cvchip.rschip.hot{" in css
+    assert "The RS chip at the start of the chip bar" in dict(tables.help_rows())["Chart Viewer RS line"]
+
+
 def test_scripts_parse():
     for name in ("viewer.js", "desk.js", "pages.js", "rs_line.js"):
         proc = _node("--check", os.path.join("site", "js", name))
@@ -321,6 +334,7 @@ if __name__ == "__main__":
     except _Skip as exc:
         print("iphone touch check skipped: " + str(exc))
     test_rs_line_math_switch_and_help()
+    test_rs_rating_badge_is_first_in_the_chip_bar()
     try:
         test_scripts_parse()
         test_list_and_swipe_rules()

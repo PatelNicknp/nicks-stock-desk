@@ -180,10 +180,11 @@
       if (!info[t]) {
         const s = scores[t] || {};
         info[t] = { ticker: t, company: txt(s.company) || txt(row && row.company), score: numOf(s.score), price: numOf(s.price),
-          dayPct: numOf(s.day_pct), rs: numOf(s.rs), strength: null, count: 0, entries: [] };
+          dayPct: numOf(s.day_pct), rs: numOf(s.rs), rsLabel: txt(s.rs_label), strength: null, count: 0, entries: [] };
       }
       if (!info[t].company && row) info[t].company = txt(row.company);
       if (info[t].rs == null && row) info[t].rs = numOf(row.rs);
+      if (!info[t].rsLabel && row) info[t].rsLabel = txt(row.rs_label);
       return info[t];
     };
     const lists = [];
@@ -542,7 +543,10 @@
         optionsHtml() + "</select></label>"
       : "";
     const fsBtn = on("fullscreen") ? '<button type="button" class="cvbtn cvgo" id="cvgo">Full screen</button>' : "";
-    const chips = (on("ma_chips") ? MAS.map((m) =>
+    // RS Rating badge, first in the chip bar like the India desk: "RS 92", green at relative_strength.leader_min or higher.
+    // feature.rs_rank hides it. It is a label, not a button.
+    const rsBadge = D.featureOn("feature.rs_rank") ? '<span class="cvchip rschip" id="cvrs" hidden></span>' : "";
+    const chips = rsBadge + (on("ma_chips") ? MAS.map((m) =>
       '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i>MA ' + m.n + "</button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
@@ -760,9 +764,17 @@
     function header(t, rows) {
       const it = built.info[t] || {};
       document.getElementById("cvtk").textContent = t || "";
-      // RS Rating (1 to 99 versus every stock on the desk) next to the company. feature.rs_rank hides it.
-      const rsBit = it.rs != null && D.featureOn("feature.rs_rank") ? "RS " + Math.round(it.rs) : "";
-      document.getElementById("cvco").textContent = [it.company || "", rsBit].filter(Boolean).join(" · ");
+      document.getElementById("cvco").textContent = it.company || "";
+      // RS Rating (1 to 99 versus every stock on the desk) in the badge at the start of the chip bar.
+      const badge = document.getElementById("cvrs");
+      if (badge) {
+        const has = it.rs != null && D.featureOn("feature.rs_rank");
+        badge.hidden = !has;
+        badge.textContent = has ? "RS " + Math.round(it.rs) : "";
+        if (has) badge.title = it.rsLabel || ("RS Rating " + Math.round(it.rs) + " of 99");
+        else badge.removeAttribute("title");
+        badge.classList.toggle("hot", has && it.rs >= D.rsLeaderMin());
+      }
       const blurb = document.getElementById("cvblurb");
       if (blurb) blurb.textContent = D.blurbOf(t) || "";
       let close = null, change = null;
