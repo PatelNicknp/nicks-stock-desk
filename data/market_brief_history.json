@@ -221,6 +221,24 @@
       ],
       "spy_day_pct": -0.35,
       "qqq_day_pct": -0.32,
+      "next_day_spy_pct": -0.91,
+      "next_day_direction": "down"
+    },
+    {
+      "date": "2026-11-13",
+      "slot": "morning_open",
+      "mood": "Fear",
+      "regime": "chop",
+      "causes": [
+        "ai_mood",
+        "oil"
+      ],
+      "sources": [
+        "MarketWatch",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": -0.91,
+      "qqq_day_pct": -1.83,
       "next_day_spy_pct": null,
       "next_day_direction": null
     }
@@ -235,9 +253,9 @@
       },
       "ai_mood": {
         "up": 5,
-        "down": 5,
+        "down": 6,
         "flat": 0,
-        "n": 10
+        "n": 11
       },
       "rates": {
         "up": 1,
@@ -253,9 +271,9 @@
       },
       "oil": {
         "up": 0,
-        "down": 1,
+        "down": 2,
         "flat": 0,
-        "n": 1
+        "n": 2
       }
     },
     "by_source": {
@@ -297,18 +315,18 @@
       },
       "MarketWatch": {
         "up": 2,
-        "down": 1,
+        "down": 2,
         "flat": 0,
-        "n": 3
+        "n": 4
       },
       "Yahoo Finance": {
         "up": 4,
-        "down": 3,
+        "down": 4,
         "flat": 0,
-        "n": 7
+        "n": 8
       }
     },
-    "n_labeled": 10,
+    "n_labeled": 11,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }

@@ -63,6 +63,9 @@ feature.rs_rank,True
 feature.scanner_eps_rs,True
 feature.scanner_minervini_1m,True
 feature.scanner_minervini_5m,True
+feature.eps_fill,True
+feature.eps_fill_nasdaq,True
+feature.sec_share_class_cik,True
 feature.scanner_ep,True
 feature.scanner_gap_up,True
 feature.chart_viewer,True
