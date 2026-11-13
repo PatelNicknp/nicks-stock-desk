@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-NU,Nu Holdings Ltd.,Financial Services,Banks - Regional,11.118835,1.6087,23.0,18.55652,19.0,59489931264,1794517200.0
-NUE,Nucor Corporation,Basic Materials,Steel,11.247308,1.64706,16.0,296.8125,300.5,56215257088,1793044800.0
-NVDA,NVIDIA Corporation,Technology,Semiconductors,11.115712,1.29032,57.0,326.91754,315.0,4273770070016,1794949200.0
-NVR,"NVR, Inc.",Consumer Cyclical,Residential Construction,18.360676,3.42857,6.0,6229.6665,6150.0,16826047488,1792672200.0
-NWS,News Corporation,Communication Services,Entertainment,18.791464,1.55556,,,,15570705408,1793826000.0
-NWSA,News Corporation,Communication Services,Entertainment,17.145874,1.55556,9.0,36.42222,36.5,14207162368,1793826000.0
-NXPI,NXP Semiconductors N.V.,Technology,Semiconductors,14.192469,1.86667,29.0,299.93103,300.0,65613176832,1793131200.0
-O,Realty Income Corporation,Real Estate,REIT - Retail,38.373623,2.52,21.0,63.25,63.0,56834490368,1793653200.0
-ODFL,"Old Dominion Freight Line, Inc.",Industrials,Trucking,25.439608,2.25,21.0,213.38095,215.0,35391471616,1793190600.0
-OKE,"ONEOK, Inc.",Energy,Oil & Gas Midstream,13.954208,2.22727,20.0,102.75,100.5,54078459904,1793131200.0
 OKTA,"Okta, Inc.",Technology,Software - Infrastructure,40.513905,1.65909,43.0,214.7165,225.0,31009736704,1796158800.0
 OMC,Omnicom Group Inc.,Communication Services,Advertising Agencies,7.9779987,2.07692,12.0,102.25,100.0,25300000768,1792699200.0
 ON,ON Semiconductor Corporation,Technology,Semiconductors,14.597908,2.03448,25.0,96.16,90.0,26911234048,1793653200.0
@@ -523,3 +513,13 @@ NRG,"NRG Energy, Inc.",Utilities,Utilities - Independent Power Producers,9.75621
 NSC,Norfolk Southern Corporation,Industrials,Railroads,22.884815,2.57143,18.0,357.44443,352.5,74851262464,1792672200.0
 NTAP,"NetApp, Inc.",Technology,Software - Infrastructure,16.65609,2.28571,16.0,211.6875,197.0,36549648384,1796158800.0
 NTRS,Northern Trust Corporation,Financial Services,Asset Management,13.613089,2.9375,14.0,180.75,180.0,32179200000,1800538200.0
+NU,Nu Holdings Ltd.,Financial Services,Banks - Regional,10.820452,1.6087,23.0,18.2087,18.9,57147047936,1794517200.0
+NUE,Nucor Corporation,Basic Materials,Steel,11.836046,1.64706,16.0,298.375,300.5,58654195712,1793044800.0
+NVDA,NVIDIA Corporation,Technology,Semiconductors,10.485418,1.3871,56.0,309.71964,302.5,4012989743104,1794949200.0
+NVR,"NVR, Inc.",Consumer Cyclical,Residential Construction,16.786572,3.42857,6.0,6229.6665,6150.0,15383511040,1792672200.0
+NWS,News Corporation,Communication Services,Entertainment,18.925337,1.55556,,,,15656893440,1793826000.0
+NWSA,News Corporation,Communication Services,Entertainment,17.043833,1.55556,9.0,36.36667,36.5,14100329472,1793826000.0
+NXPI,NXP Semiconductors N.V.,Technology,Semiconductors,14.567864,1.86667,29.0,299.93103,300.0,67371245568,1793131200.0
+O,Realty Income Corporation,Real Estate,REIT - Retail,38.15791,2.52,21.0,63.53571,63.0,56515006464,1793653200.0
+ODFL,"Old Dominion Freight Line, Inc.",Industrials,Trucking,25.401083,2.25,21.0,213.38095,215.0,35368808448,1793190600.0
+OKE,"ONEOK, Inc.",Energy,Oil & Gas Midstream,14.517378,2.26087,21.0,102.33333,100.0,56021827584,1793131200.0
