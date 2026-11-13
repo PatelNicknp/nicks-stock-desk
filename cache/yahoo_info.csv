@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-OKTA,"Okta, Inc.",Technology,Software - Infrastructure,40.513905,1.65909,43.0,214.7165,225.0,31009736704,1796158800.0
-OMC,Omnicom Group Inc.,Communication Services,Advertising Agencies,7.9779987,2.07692,12.0,102.25,100.0,25300000768,1792699200.0
-ON,ON Semiconductor Corporation,Technology,Semiconductors,14.597908,2.03448,25.0,96.16,90.0,26911234048,1793653200.0
-ORCL,Oracle Corporation,Technology,Software - Infrastructure,10.759647,1.54762,40.0,235.7735,225.0,371131973632,1797282000.0
-ORLY,"O'Reilly Automotive, Inc.",Consumer Cyclical,Auto Parts,24.589766,1.58621,26.0,106.46154,108.0,72211415040,1793217600.0
-OTIS,Otis Worldwide Corporation,Industrials,Specialty Industrial Machinery,17.739588,2.33333,13.0,85.84615,90.0,30315978752,1793190600.0
-OXY,Occidental Petroleum Corporatio,Energy,Oil & Gas E&P,11.110114,2.21429,27.0,70.74074,70.0,55699795968,1794258000.0
-P,"Everpure, Inc.",Technology,Computer Hardware,25.034512,1.55,19.0,151.10526,155.0,34745606144,1795035600.0
-PANW,"Palo Alto Networks, Inc.",Technology,Software - Infrastructure,66.96958,1.69091,50.0,399.9994,415.0,267671814144,1795035600.0
-PAYX,"Paychex, Inc.",Technology,Software - Application,18.151196,3.0,14.0,114.57143,111.5,41279496192,1790166600.0
-PCAR,PACCAR Inc.,Industrials,Farm & Heavy Construction Machinery,15.455604,2.10526,16.0,126.875,121.5,55851687936,1793104200.0
-PCG,Pacific Gas & Electric Co.,Utilities,Utilities - Regulated Electric,7.312092,2.11111,17.0,17.61765,17.0,29017012224,1792672200.0
-PDD,PDD Holdings Inc.,Consumer Cyclical,Internet Retail,6.5031295,2.0,33.0,113.813126,112.51764,114412601344,1787574600.0
-PEG,Public Service Enterprise Group,Utilities,Utilities - Regulated Electric,16.231478,2.34783,19.0,81.21053,80.0,37543194624,1793626200.0
-PEP,"Pepsico, Inc.",Consumer Defensive,Beverages - Non-Alcoholic,16.540472,2.70833,22.0,141.59091,140.5,194722070528,1791462600.0
-PFE,"Pfizer, Inc.",Healthcare,Drug Manufacturers - General,10.045828,2.5,26.0,30.25962,30.0,168174174208,1793712600.0
-PFG,Principal Financial Group Inc,Financial Services,Asset Management,11.512193,3.0,12.0,109.41667,111.5,24578328576,1793044800.0
-PG,Procter & Gamble Company (The),Consumer Defensive,Household & Personal Products,22.71382,2.08,23.0,174.04349,176.0,389561384960,1792672200.0
-PGR,Progressive Corporation (The),Financial Services,Insurance - Property & Casualty,14.090475,2.64,21.0,232.38095,233.0,132259692544,1791981000.0
-PH,Parker-Hannifin Corporation,Industrials,Specialty Industrial Machinery,23.531176,1.69231,24.0,1138.2887,1176.0,121255936000,1793885400.0
-PHM,"PulteGroup, Inc.",Consumer Cyclical,Residential Construction,14.531584,2.11111,17.0,132.41176,136.0,26045198336,1792672200.0
-PKG,Packaging Corporation of Americ,Consumer Cyclical,Packaging & Containers,18.124094,1.9,9.0,269.22223,272.0,22983749632,1792612800.0
-PLD,"Prologis, Inc.",Real Estate,REIT - Industrial,36.333103,1.70588,14.0,152.07143,151.5,127260549120,1792067400.0
-PLTR,Palantir Technologies Inc.,Technology,Software - Infrastructure,66.629326,1.84848,28.0,222.25357,235.0,407012343808,1793653200.0
-PM,Philip Morris International Inc,Consumer Defensive,Tobacco,21.479263,1.6875,15.0,213.26666,220.0,302713896960,1792585800.0
 PNC,"PNC Financial Services Group, I",Financial Services,Banks - Regional,10.922418,1.82609,21.0,263.57144,265.0,92425469952,1800019800.0
 PNR,Pentair plc.,Industrials,Specialty Industrial Machinery,13.277101,2.05882,15.0,73.6,74.0,11233303552,1793104200.0
 PNW,Pinnacle West Capital Corporati,Utilities,Utilities - Regulated Electric,18.895645,2.44444,15.0,105.7,107.0,12781879296,1793712600.0
@@ -523,3 +498,28 @@ NXPI,NXP Semiconductors N.V.,Technology,Semiconductors,14.567864,1.86667,29.0,29
 O,Realty Income Corporation,Real Estate,REIT - Retail,38.15791,2.52,21.0,63.53571,63.0,56515006464,1793653200.0
 ODFL,"Old Dominion Freight Line, Inc.",Industrials,Trucking,25.401083,2.25,21.0,213.38095,215.0,35368808448,1793190600.0
 OKE,"ONEOK, Inc.",Energy,Oil & Gas Midstream,14.517378,2.26087,21.0,102.33333,100.0,56021827584,1793131200.0
+OKTA,"Okta, Inc.",Technology,Software - Infrastructure,41.767826,1.65909,43.0,214.7165,225.0,31969503232,1796158800.0
+OMC,Omnicom Group Inc.,Communication Services,Advertising Agencies,7.960658,2.07692,12.0,102.25,100.0,24005120000,1792699200.0
+ON,ON Semiconductor Corporation,Technology,Semiconductors,15.005458,2.03448,25.0,96.16,90.0,27662555136,1793653200.0
+ORCL,Oracle Corporation,Technology,Software - Infrastructure,11.334854,1.5,40.0,236.184,225.0,390804701184,1797282000.0
+ORLY,"O'Reilly Automotive, Inc.",Consumer Cyclical,Auto Parts,25.168858,1.58621,26.0,106.46154,108.0,73940869120,1793217600.0
+OTIS,Otis Worldwide Corporation,Industrials,Specialty Industrial Machinery,17.295324,2.4,13.0,86.23077,90.0,29505064960,1793190600.0
+OXY,Occidental Petroleum Corporatio,Energy,Oil & Gas E&P,10.991273,2.21429,27.0,71.03704,71.0,58743816192,1794258000.0
+P,"Everpure, Inc.",Technology,Computer Hardware,25.601452,1.55,19.0,151.52632,155.0,35985211392,1795035600.0
+PANW,"Palo Alto Networks, Inc.",Technology,Software - Infrastructure,65.98465,1.69091,51.0,398.62686,415.0,263735115776,1795035600.0
+PAYX,"Paychex, Inc.",Technology,Software - Application,18.107367,,14.0,114.57143,111.5,41179820032,1790166600.0
+PCAR,PACCAR Inc.,Industrials,Farm & Heavy Construction Machinery,15.636293,2.10526,16.0,126.875,121.5,56157061120,1793104200.0
+PCG,Pacific Gas & Electric Co.,Utilities,Utilities - Regulated Electric,7.3537164,2.11111,17.0,17.61765,17.0,29182193664,1792672200.0
+PDD,PDD Holdings Inc.,Consumer Cyclical,Internet Retail,6.394129,2.02857,33.0,113.558846,112.37763,112405618688,1795095000.0
+PEG,Public Service Enterprise Group,Utilities,Utilities - Regulated Electric,16.382292,2.31818,19.0,81.21053,80.0,37827350528,1793626200.0
+PEP,"Pepsico, Inc.",Consumer Defensive,Beverages - Non-Alcoholic,16.86791,2.70833,22.0,141.59091,140.5,198197067776,1791462600.0
+PFE,"Pfizer, Inc.",Healthcare,Drug Manufacturers - General,9.7989,2.5,26.0,30.22115,30.0,164668768256,1793712600.0
+PFG,Principal Financial Group Inc,Financial Services,Asset Management,11.295338,3.0,12.0,109.41667,111.5,24115347456,1793044800.0
+PG,Procter & Gamble Company (The),Consumer Defensive,Household & Personal Products,22.950256,2.12,23.0,174.04349,176.0,393559572480,1792672200.0
+PGR,Progressive Corporation (The),Financial Services,Insurance - Property & Casualty,14.55309,2.64,21.0,232.38095,233.0,136602009600,1791981000.0
+PH,Parker-Hannifin Corporation,Industrials,Specialty Industrial Machinery,23.316622,1.68,24.0,1138.2887,1176.0,120508178432,1793885400.0
+PHM,"PulteGroup, Inc.",Consumer Cyclical,Residential Construction,13.4985485,2.11111,17.0,132.41176,136.0,23380858880,1792672200.0
+PKG,Packaging Corporation of Americ,Consumer Cyclical,Packaging & Containers,17.438448,1.9,9.0,269.22223,272.0,22364542976,1792612800.0
+PLD,"Prologis, Inc.",Real Estate,REIT - Industrial,35.71686,1.70588,14.0,152.07143,151.5,125102104576,1792067400.0
+PLTR,Palantir Technologies Inc.,Technology,Software - Infrastructure,66.16984,1.84848,28.0,222.25357,235.0,404771504128,1793653200.0
+PM,Philip Morris International Inc,Consumer Defensive,Tobacco,22.001476,1.76471,16.0,212.4375,217.5,310110126080,1792585800.0
