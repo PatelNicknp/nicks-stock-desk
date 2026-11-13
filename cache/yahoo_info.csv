@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-MRVL,"Marvell Technology, Inc.",Technology,Semiconductors,21.047523,1.38636,41.0,310.0666,300.0,139144298496,1796158800.0
-MS,Morgan Stanley,Financial Services,Capital Markets,13.869666,2.30769,22.0,211.5,206.5,296353136640,1791981000.0
-MSCI,MSCI Inc.,Financial Services,Financial Data & Stock Exchanges,29.013025,1.5,17.0,686.17645,684.0,47301529600,1800970200.0
-MSFT,Microsoft Corporation,Technology,Software - Infrastructure,22.475904,1.37931,54.0,636.12427,631.0,4038513131520,1793217600.0
-MSI,"Motorola Solutions, Inc.",Technology,Communication Equipment,26.910341,1.64286,11.0,547.1818,550.0,86981763072,1793826000.0
-MSTR,Strategy Inc,Technology,Software - Application,7.2737823,1.25,15.0,233.26666,215.0,53079519232,1793304000.0
-MTB,M&T Bank Corporation,Financial Services,Banks - Regional,10.637724,2.77273,21.0,245.92857,245.0,32213223424,1800365400.0
-MTD,"Mettler-Toledo International, I",Healthcare,Diagnostics & Research,33.105495,2.61538,12.0,1624.8334,1606.5,34997563392,1793912400.0
-MU,"Micron Technology, Inc.",Technology,Semiconductors,3.513517,1.34694,45.0,1561.9111,1550.0,825904988160,1790798400.0
-NBIS,Nebius Group N.V.,Communication Services,Internet Content & Information,-40.12605,1.81818,20.0,278.05,287.5,35434029056,1794490200.0
-NCLH,Norwegian Cruise Line Holdings ,Consumer Cyclical,Travel Services,12.976016,2.30769,23.0,19.6087,19.0,8480521216,1793277000.0
-NDAQ,"Nasdaq, Inc.",Financial Services,Financial Data & Stock Exchanges,22.95001,1.83333,16.0,115.375,119.0,60906172416,1792672200.0
-NDSN,Nordson Corporation,Industrials,Specialty Industrial Machinery,25.051105,,7.0,349.7143,360.0,18121426944,1797368400.0
-NEE,"NextEra Energy, Inc.",Utilities,Utilities - Regulated Electric,19.965626,1.90909,19.0,94.0,99.0,183210180608,1792585800.0
-NEM,Newmont Corporation,Basic Materials,Gold,12.731212,1.65217,21.0,135.46667,140.0,131172163584,1792699200.0
-NET,"Cloudflare, Inc.",Technology,Software - Infrastructure,159.88525,1.91176,31.0,341.2258,350.0,105467674624,1793912400.0
-NFLX,"Netflix, Inc.",Communication Services,Entertainment,16.881268,1.92157,43.0,84.76326,82.0,261429248000,1792526400.0
-NI,NiSource Inc,Utilities,Utilities - Regulated Gas,19.999115,1.64706,16.0,48.21875,49.0,21657038848,1793190600.0
-NKE,"Nike, Inc.",Consumer Cyclical,Footwear & Accessories,25.898718,2.93023,37.0,36.41892,34.0,59538599936,1790884800.0
-NOC,Northrop Grumman Corporation,Industrials,Aerospace & Defense,18.067673,1.92308,24.0,635.25,625.0,76851216384,1792499400.0
-NOW,"ServiceNow, Inc.",Technology,Software - Application,21.577162,1.44898,46.0,155.8187,155.0,107548958720,1793217600.0
-NRG,"NRG Energy, Inc.",Utilities,Utilities - Independent Power Producers,9.1160755,1.44444,18.0,166.94444,164.0,20137111552,1794231000.0
-NSC,Norfolk Southern Corporation,Industrials,Railroads,22.466133,2.57143,18.0,357.44443,352.5,73229533184,1792672200.0
-NTAP,"NetApp, Inc.",Technology,Software - Infrastructure,15.90107,2.28571,16.0,211.6875,197.0,34892857344,1796158800.0
-NTRS,Northern Trust Corporation,Financial Services,Asset Management,13.63158,2.9375,14.0,181.67857,182.0,32257083392,1800538200.0
 NU,Nu Holdings Ltd.,Financial Services,Banks - Regional,11.118835,1.6087,23.0,18.55652,19.0,59489931264,1794517200.0
 NUE,Nucor Corporation,Basic Materials,Steel,11.247308,1.64706,16.0,296.8125,300.5,56215257088,1793044800.0
 NVDA,NVIDIA Corporation,Technology,Semiconductors,11.115712,1.29032,57.0,326.91754,315.0,4273770070016,1794949200.0
@@ -523,3 +498,28 @@ MPWR,"Monolithic Power Systems, Inc.",Technology,Semiconductors,31.027893,1.1875
 MRK,"Merck & Company, Inc.",Healthcare,Drug Manufacturers - General,16.362373,1.82143,26.0,161.525,165.0,362267836416,1793277000.0
 MRNA,"Moderna, Inc.",Healthcare,Biotechnology,-56.032146,2.91304,19.0,158.47368,125.0,93609058304,1793971800.0
 MRSH,Marsh,Financial Services,Insurance Brokers,17.94166,2.43478,21.0,206.61905,201.0,97808547840,1792067400.0
+MRVL,"Marvell Technology, Inc.",Technology,Semiconductors,22.374454,1.39535,40.0,310.31824,300.0,147966492672,1796158800.0
+MS,Morgan Stanley,Financial Services,Capital Markets,13.83821,2.30769,22.0,211.5,206.5,295680999424,1791981000.0
+MSCI,MSCI Inc.,Financial Services,Financial Data & Stock Exchanges,29.051819,1.5,17.0,686.17645,684.0,46582964224,1800970200.0
+MSFT,Microsoft Corporation,Technology,Software - Infrastructure,21.61542,1.37931,54.0,636.12427,631.0,3883899813888,1793217600.0
+MSI,"Motorola Solutions, Inc.",Technology,Communication Equipment,27.131683,1.64286,11.0,547.1818,550.0,87693123584,1793826000.0
+MSTR,Strategy Inc,Technology,Software - Application,6.636311,1.25,15.0,233.26666,215.0,48427651072,1793304000.0
+MTB,M&T Bank Corporation,Financial Services,Banks - Regional,10.41013,2.77273,21.0,245.92857,245.0,31524020224,1800365400.0
+MTD,"Mettler-Toledo International, I",Healthcare,Diagnostics & Research,32.521774,2.61538,12.0,1712.5,1807.5,34428899328,1793912400.0
+MU,"Micron Technology, Inc.",Technology,Semiconductors,3.8430793,1.34694,45.0,1561.9111,1550.0,903373586432,1790798400.0
+NBIS,Nebius Group N.V.,Communication Services,Internet Content & Information,-35.756676,1.81818,20.0,278.05,287.5,34971455488,1794490200.0
+NCLH,Norwegian Cruise Line Holdings ,Consumer Cyclical,Travel Services,12.687929,2.30769,24.0,19.66667,19.5,8294514688,1793277000.0
+NDAQ,"Nasdaq, Inc.",Financial Services,Financial Data & Stock Exchanges,22.884716,1.83333,16.0,115.375,119.0,60296704000,1792672200.0
+NDSN,Nordson Corporation,Industrials,Specialty Industrial Machinery,25.156246,,7.0,349.7143,360.0,18191413248,1797368400.0
+NEE,"NextEra Energy, Inc.",Utilities,Utilities - Regulated Electric,19.493654,1.90909,19.0,94.0,99.0,178879234048,1792585800.0
+NEM,Newmont Corporation,Basic Materials,Gold,11.154684,1.68182,20.0,135.39,140.0,117054726144,1792699200.0
+NET,"Cloudflare, Inc.",Technology,Software - Infrastructure,172.22174,1.88571,32.0,341.09375,350.0,114147934208,1793912400.0
+NFLX,"Netflix, Inc.",Communication Services,Entertainment,16.62274,,43.0,84.76326,82.0,257425571840,1792526400.0
+NI,NiSource Inc,Utilities,Utilities - Regulated Gas,20.29146,1.64706,16.0,48.21875,49.0,21973620736,1793190600.0
+NKE,"Nike, Inc.",Consumer Cyclical,Footwear & Accessories,24.43744,2.93182,38.0,36.46053,34.0,56085258240,1790884800.0
+NOC,Northrop Grumman Corporation,Industrials,Aerospace & Defense,18.340544,1.92308,24.0,635.25,625.0,78011875328,1792499400.0
+NOW,"ServiceNow, Inc.",Technology,Software - Application,20.96079,1.44898,46.0,155.8187,155.0,104476729344,1793217600.0
+NRG,"NRG Energy, Inc.",Utilities,Utilities - Independent Power Producers,9.756219,1.41176,17.0,164.5294,165.0,20592586752,1794231000.0
+NSC,Norfolk Southern Corporation,Industrials,Railroads,22.884815,2.57143,18.0,357.44443,352.5,74851262464,1792672200.0
+NTAP,"NetApp, Inc.",Technology,Software - Infrastructure,16.65609,2.28571,16.0,211.6875,197.0,36549648384,1796158800.0
+NTRS,Northern Trust Corporation,Financial Services,Asset Management,13.613089,2.9375,14.0,180.75,180.0,32179200000,1800538200.0
