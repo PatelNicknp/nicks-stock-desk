@@ -3,10 +3,10 @@
   "feature": "market_news",
   "session": "2026-11-12",
   "slot": "evening_close",
-  "updated_pt": "2026-11-12 16:26 PT",
+  "updated_pt": "2026-11-12 19:38 PT",
   "price_as_of": "2026-11-12",
-  "why_moved": "The market fell: S&P -0.3%, Nasdaq -0.3%, Dow-heavy groups (Financials/Industrials) about -0.8%. Biggest driver: AI / Tech mood; lagging sectors were Materials (-1.3%) and Communication Services (-1.0%); leading sectors Energy (1.5%) and Utilities (-0.0%) held up. The move was broad: 1946 stocks fell and 521 rose.",
-  "why_moved_short": "The S&P slipped -0.3% (Nasdaq -0.3%), dragged by Materials (-1.3%), while Energy (1.5%) held up (521 stocks up, 1946 down).",
+  "why_moved": "The market fell: S&P -0.3%, Nasdaq -0.3%, Dow-heavy groups (Financials/Industrials) about -0.8%. Biggest driver: AI / Tech mood; lagging sectors were Materials (-1.3%) and Communication Services (-1.0%); leading sectors Energy (1.5%) and Utilities (-0.0%) held up. The move was broad: 1939 stocks fell and 528 rose.",
+  "why_moved_short": "The S&P slipped -0.3% (Nasdaq -0.3%), dragged by Materials (-1.3%), while Energy (1.5%) held up (528 stocks up, 1939 down).",
   "story": {
     "direction": "down",
     "date_label": "November 12, 2026",
@@ -24,7 +24,7 @@
       },
       {
         "lead": "More stocks fell than rose.",
-        "rest": "1946 stocks fell and 521 rose.",
+        "rest": "1939 stocks fell and 528 rose.",
         "ref": null
       },
       {
@@ -86,7 +86,7 @@
         "published": "2026-11-12",
         "published_at": "2026-11-13T00:19:00+00:00",
         "date_label": "Nov 12, 4:19 PM PT",
-        "age_label": "just now",
+        "age_label": "3h ago",
         "region": "US",
         "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move."
       },
@@ -99,7 +99,7 @@
         "published": "2026-11-12",
         "published_at": "2026-11-12T22:33:21+00:00",
         "date_label": "Nov 12, 2:33 PM PT",
-        "age_label": "1h ago",
+        "age_label": "5h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
@@ -112,19 +112,19 @@
         "published": "2026-11-12",
         "published_at": "2026-11-12T21:08:00+00:00",
         "date_label": "Nov 12, 1:08 PM PT",
-        "age_label": "3h ago",
+        "age_label": "6h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 4,
-        "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields; SpaceX-Tesla Merger Deal Close",
+        "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
         "source": "Yahoo Finance",
         "via": "",
         "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
         "published": "2026-11-12",
-        "published_at": "2026-11-13T00:25:57+00:00",
-        "date_label": "Nov 12, 4:25 PM PT",
+        "published_at": "2026-11-13T03:21:37+00:00",
+        "date_label": "Nov 12, 7:21 PM PT",
         "age_label": "just now",
         "region": "US",
         "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
@@ -138,35 +138,35 @@
         "published": "2026-11-12",
         "published_at": "2026-11-12T23:11:19+00:00",
         "date_label": "Nov 12, 3:11 PM PT",
-        "age_label": "1h ago",
+        "age_label": "4h ago",
         "region": "US",
         "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
       },
       {
         "n": 6,
-        "title": "What If You Had Invested $10,000 in Bitcoin 5 Years Ago?",
+        "title": "Treasury Bonds Now Pay More Than Stocks Earn by a Gap Last Seen in 2009. Warren Buffett Warned in 1999 What That Does to Stock Prices",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://247wallst.com/investing/cryptocurrency/2026/11/12/what-if-you-had-invested-10000-in-bitcoin-5-years-ago/?.tsrc=rss",
+        "url": "https://247wallst.com/investing/2026/11/12/treasury-bonds-now-pay-more-than-stocks-earn-by-a-gap-last-seen-in-2009-warren-buffett-warned-in-1999-what-that-does-to-stock-prices/?.tsrc=rss",
         "published": "2026-11-12",
-        "published_at": "2026-11-12T23:29:56+00:00",
-        "date_label": "Nov 12, 3:29 PM PT",
-        "age_label": "1h ago",
+        "published_at": "2026-11-13T02:47:00+00:00",
+        "date_label": "Nov 12, 6:47 PM PT",
+        "age_label": "just now",
         "region": "US",
-        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
+        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 7,
-        "title": "BC-Select Stock Indices",
+        "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/world-indices/articles/bc-select-stock-indices-223013394.html?.tsrc=rss",
+        "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
         "published": "2026-11-12",
-        "published_at": "2026-11-12T22:30:13+00:00",
-        "date_label": "Nov 12, 2:30 PM PT",
-        "age_label": "2h ago",
+        "published_at": "2026-11-13T03:07:45+00:00",
+        "date_label": "Nov 12, 7:07 PM PT",
+        "age_label": "just now",
         "region": "US",
-        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
@@ -176,9 +176,9 @@
     "vix": 18.7,
     "put_call_zone": "Greed",
     "put_call": 0.59,
-    "advancers": 521,
-    "decliners": 1946,
-    "why": "VIX 18.7, put/call Greed, 521 up / 1946 down"
+    "advancers": 528,
+    "decliners": 1939,
+    "why": "VIX 18.7, put/call Greed, 528 up / 1939 down"
   },
   "headlines": [
     {
@@ -195,7 +195,7 @@
       "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
       "published_pt": "Nov 12, 2:33 PM PT",
-      "age_label": "1h ago",
+      "age_label": "5h ago",
       "wrap": 20.0,
       "rank": 26.0
     },
@@ -213,16 +213,16 @@
       "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
       "published_pt": "Nov 12, 1:08 PM PT",
-      "age_label": "3h ago",
+      "age_label": "6h ago",
       "wrap": 10.0,
       "rank": 12.5
     },
     {
-      "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields; SpaceX-Tesla Merger Deal Close",
+      "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
       "source": "Yahoo Finance",
       "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
       "published": "2026-11-12",
-      "published_at": "2026-11-13T00:25:57+00:00",
+      "published_at": "2026-11-13T03:21:37+00:00",
       "trusted": true,
       "causes": [
         "rates",
@@ -231,7 +231,7 @@
       "via": "",
       "region": "US",
       "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 4:25 PM PT",
+      "published_pt": "Nov 12, 7:21 PM PT",
       "age_label": "just now",
       "wrap": 10.0,
       "rank": 11.0
@@ -251,7 +251,7 @@
       "region": "US",
       "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
       "published_pt": "Nov 12, 3:11 PM PT",
-      "age_label": "1h ago",
+      "age_label": "4h ago",
       "wrap": 5.0,
       "rank": 16.0
     },
@@ -270,48 +270,52 @@
       "region": "US",
       "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
       "published_pt": "Nov 12, 4:19 PM PT",
-      "age_label": "just now",
+      "age_label": "3h ago",
       "wrap": 5.0,
       "rank": 12.5
     },
     {
-      "title": "What If You Had Invested $10,000 in Bitcoin 5 Years Ago?",
+      "title": "Treasury Bonds Now Pay More Than Stocks Earn by a Gap Last Seen in 2009. Warren Buffett Warned in 1999 What That Does to Stock Prices",
       "source": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/12/what-if-you-had-invested-10000-in-bitcoin-5-years-ago/?.tsrc=rss",
+      "url": "https://247wallst.com/investing/2026/11/12/treasury-bonds-now-pay-more-than-stocks-earn-by-a-gap-last-seen-in-2009-warren-buffett-warned-in-1999-what-that-does-to-stock-prices/?.tsrc=rss",
       "published": "2026-11-12",
-      "published_at": "2026-11-12T23:29:56+00:00",
+      "published_at": "2026-11-13T02:47:00+00:00",
       "trusted": true,
-      "causes": [],
+      "causes": [
+        "rates"
+      ],
       "via": "",
       "region": "US",
-      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 3:29 PM PT",
-      "age_label": "1h ago",
+      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 12, 6:47 PM PT",
+      "age_label": "just now",
       "wrap": 5.0,
-      "rank": 7.0
+      "rank": 11.0
     },
     {
-      "title": "BC-Select Stock Indices",
+      "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/world-indices/articles/bc-select-stock-indices-223013394.html?.tsrc=rss",
+      "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
       "published": "2026-11-12",
-      "published_at": "2026-11-12T22:30:13+00:00",
+      "published_at": "2026-11-13T03:07:45+00:00",
       "trusted": true,
-      "causes": [],
+      "causes": [
+        "ai_mood"
+      ],
       "via": "",
       "region": "US",
-      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 2:30 PM PT",
-      "age_label": "2h ago",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 12, 7:07 PM PT",
+      "age_label": "just now",
       "wrap": 5.0,
-      "rank": 5.0
+      "rank": 9.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 7.5,
+      "score": 9.0,
       "headlines": [
         {
           "title": "5 Unrivaled Stocks to Buy for the Next Decade",
@@ -327,7 +331,7 @@
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
           "published_pt": "Nov 12, 2:33 PM PT",
-          "age_label": "1h ago",
+          "age_label": "5h ago",
           "wrap": 20.0,
           "rank": 26.0
         },
@@ -345,16 +349,16 @@
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
           "published_pt": "Nov 12, 1:08 PM PT",
-          "age_label": "3h ago",
+          "age_label": "6h ago",
           "wrap": 10.0,
           "rank": 12.5
         },
         {
-          "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields; SpaceX-Tesla Merger Deal Close",
+          "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
           "source": "Yahoo Finance",
           "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
           "published": "2026-11-12",
-          "published_at": "2026-11-13T00:25:57+00:00",
+          "published_at": "2026-11-13T03:21:37+00:00",
           "trusted": true,
           "causes": [
             "rates",
@@ -363,7 +367,7 @@
           "via": "",
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 4:25 PM PT",
+          "published_pt": "Nov 12, 7:21 PM PT",
           "age_label": "just now",
           "wrap": 10.0,
           "rank": 11.0
@@ -383,7 +387,7 @@
           "region": "US",
           "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
           "published_pt": "Nov 12, 3:11 PM PT",
-          "age_label": "1h ago",
+          "age_label": "4h ago",
           "wrap": 5.0,
           "rank": 16.0
         },
@@ -402,9 +406,27 @@
           "region": "US",
           "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
           "published_pt": "Nov 12, 4:19 PM PT",
-          "age_label": "just now",
+          "age_label": "3h ago",
           "wrap": 5.0,
           "rank": 12.5
+        },
+        {
+          "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
+          "source": "Yahoo Finance",
+          "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
+          "published": "2026-11-12",
+          "published_at": "2026-11-13T03:07:45+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 12, 7:07 PM PT",
+          "age_label": "just now",
+          "wrap": 5.0,
+          "rank": 9.5
         }
       ]
     },
@@ -428,7 +450,7 @@
           "region": "US",
           "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
           "published_pt": "Nov 12, 4:19 PM PT",
-          "age_label": "just now",
+          "age_label": "3h ago",
           "wrap": 5.0,
           "rank": 12.5
         }
@@ -449,7 +471,7 @@
   },
   "regime": {
     "label": "chop",
-    "pct_above_50day": 54.1,
+    "pct_above_50day": 54.2,
     "pct_above_200day": 56.1,
     "text": "Breadth is split — not a clean uptrend or selloff."
   },
@@ -470,8 +492,8 @@
   },
   "prior_brief": {
     "session": "2026-11-12",
-    "slot": "morning_open",
-    "why_moved": "The S&P slipped -0.4% (Nasdaq -0.7%), dragged by Technology (-1.1%), while Energy (0.8%) held up (606 stocks up, 1866 down).",
+    "slot": "evening_close",
+    "why_moved": "The S&P slipped -0.3% (Nasdaq -0.3%), dragged by Materials (-1.3%), while Energy (1.5%) held up (521 stocks up, 1946 down).",
     "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
@@ -484,9 +506,9 @@
     "qqq_day_pct": -0.32,
     "dia_day_pct": null,
     "vix": 18.7,
-    "advancers": 521,
-    "decliners": 1946,
-    "breadth_sma50": 54.1,
+    "advancers": 528,
+    "decliners": 1939,
+    "breadth_sma50": 54.2,
     "breadth_sma200": 56.1,
     "put_call": 0.59,
     "put_call_zone": "Greed",
@@ -601,7 +623,7 @@
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-13T00:33:01.957125+00:00",
+    "retrieved_at": "2026-11-13T03:42:36.539230+00:00",
     "summary": "Not enough verified index closes to call a worldwide move.",
     "breadth": "unknown",
     "missing": [
@@ -622,7 +644,7 @@
         "pct": -0.35,
         "verified": true,
         "session_date": "2026-11-12",
-        "quote_at": "2026-11-12T16:26:00-08:00",
+        "quote_at": "2026-11-12T19:38:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",
@@ -794,7 +816,7 @@
         "pct": -0.35,
         "verified": true,
         "session_date": "2026-11-12",
-        "quote_at": "2026-11-12T16:26:00-08:00",
+        "quote_at": "2026-11-12T19:38:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",
@@ -811,7 +833,7 @@
         "pct": -0.32,
         "verified": true,
         "session_date": "2026-11-12",
-        "quote_at": "2026-11-12T16:26:00-08:00",
+        "quote_at": "2026-11-12T19:38:00-08:00",
         "status": "closed",
         "source": "Desk price file",
         "source_url": "",
