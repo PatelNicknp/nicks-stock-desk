@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-JBHT,"J.B. Hunt Transport Services, I",Industrials,Integrated Freight & Logistics,22.82582,2.0,23.0,279.52173,285.0,20948639744,1800046800.0
-JBL,Jabil Inc.,Technology,Electronic Components,11.413252,1.4,9.0,425.0,430.0,26053570560,1790771400.0
-JCI,Johnson Controls International ,Industrials,Building Products & Equipment,19.098507,2.0,20.0,174.85,173.5,85663285248,1793104200.0
-JKHY,"Jack Henry & Associates, Inc.",Technology,Information Technology Services,21.667046,1.7619,19.0,200.0,197.0,12064226304,1793739600.0
-JNJ,Johnson & Johnson,Healthcare,Drug Manufacturers - General,24.309553,1.91304,22.0,279.4091,280.5,679884619776,1800970200.0
-JPM,JP Morgan Chase & Co.,Financial Services,Banks - Diversified,13.409815,2.03846,23.0,373.47827,372.0,910688190464,1799933400.0
-KDP,Keurig Dr Pepper Inc.,Consumer Defensive,Beverages - Non-Alcoholic,14.509809,1.89474,18.0,38.08333,40.0,50089402368,1793712600.0
-KEY,KeyCorp,Financial Services,Banks - Regional,9.923818,2.0,20.0,25.13,24.0,22793322496,1800451800.0
-KEYS,Keysight Technologies Inc.,Technology,Scientific & Technical Instruments,20.795433,1.5,12.0,419.66666,425.0,49330974720,1795122000.0
-KHC,The Kraft Heinz Company,Consumer Defensive,Packaged Foods,11.94839,3.05263,17.0,25.14706,24.0,29139949568,1793799000.0
-KIM,Kimco Realty Corporation (HC),Real Estate,REIT - Retail,29.211267,2.34783,21.0,26.27381,26.0,17226866688,1793277000.0
-KKR,KKR & Co. Inc.,Financial Services,Asset Management,13.700471,1.6087,21.0,120.57286,120.03,90904403968,1794231000.0
-KLAC,KLA Corporation,Technology,Semiconductor Equipment & Materials,21.23727,1.75862,26.0,219.61539,220.0,196434608128,1793217600.0
-KMB,Kimberly-Clark Corporation,Consumer Defensive,Household & Personal Products,15.754983,2.4375,15.0,118.4,115.0,68885053440,1793885400.0
-KMI,"Kinder Morgan, Inc.",Energy,Oil & Gas Midstream,19.854727,2.0,22.0,37.5,38.0,67956453376,1792612800.0
-KO,Coca-Cola Company (The),Consumer Defensive,Beverages - Non-Alcoholic,27.167149,1.72,24.0,97.75,100.0,412294316032,1793104200.0
-KR,Kroger Company (The),Consumer Defensive,Grocery Stores,12.372542,1.95833,22.0,69.0,69.0,39994667008,1796304600.0
-L,Loews Corporation,Financial Services,Insurance - Property & Casualty,37.92586,,,,,22241742848,1793626200.0
-LDOS,"Leidos Holdings, Inc.",Technology,Information Technology Services,11.633582,2.41176,15.0,152.0,145.0,16749872128,1793712600.0
-LEN,Lennar Corporation,Consumer Cyclical,Residential Construction,17.7067,3.57143,15.0,77.6,73.0,21995067392,1789588800.0
-LH,Labcorp Holdings Inc.,Healthcare,Diagnostics & Research,19.002409,1.58824,16.0,390.0625,395.5,30225076224,1793190600.0
-LHX,"L3Harris Technologies, Inc.",Industrials,Aerospace & Defense,20.02862,1.95455,20.0,335.2,338.5,50819764224,1793277000.0
-LII,"Lennox International, Inc.",Industrials,Building Products & Equipment,14.96246,2.94444,13.0,371.92307,359.0,12011264000,1793190600.0
-LIN,Linde plc,Basic Materials,Specialty Chemicals,26.710108,1.68966,27.0,551.03705,560.0,239678472192,1793277000.0
-LITE,Lumentum Holdings Inc.,Technology,Communication Equipment,15.099016,1.6,25.0,1077.554,1150.0,54352908288,1793626200.0
 LLY,Eli Lilly and Company,Healthcare,Drug Manufacturers - General,27.930393,1.6129,29.0,1453.4014,1557.0,1257353379840,1793277000.0
 LMT,Lockheed Martin Corporation,Industrials,Aerospace & Defense,17.66478,2.20833,22.0,660.86365,661.5,135821492224,1792672200.0
 LNT,Alliant Energy Corporation,Utilities,Utilities - Regulated Electric,19.950706,2.0,13.0,76.65385,77.0,19042332672,1793304000.0
@@ -523,3 +498,28 @@ IT,"Gartner, Inc.",Technology,Information Technology Services,11.480431,3.0,13.0
 ITW,Illinois Tool Works Inc.,Industrials,Specialty Industrial Machinery,23.227896,3.3125,14.0,294.14285,298.5,81494351872,1793104200.0
 IVZ,Invesco Ltd,Financial Services,Asset Management,8.615523,2.33333,14.0,35.0,34.5,12513388544,1793104200.0
 J,Jacobs Solutions Inc.,Industrials,Engineering & Construction,19.26572,,15.0,162.8,163.0,18572857344,1795467600.0
+JBHT,"J.B. Hunt Transport Services, I",Industrials,Integrated Freight & Logistics,23.123936,,23.0,279.52173,285.0,21222238208,1800046800.0
+JBL,Jabil Inc.,Technology,Electronic Components,11.726765,,9.0,425.0,430.0,26769242112,1790771400.0
+JCI,Johnson Controls International ,Industrials,Building Products & Equipment,19.23404,2.04348,21.0,174.14285,172.0,86348447744,1793104200.0
+JKHY,"Jack Henry & Associates, Inc.",Technology,Information Technology Services,22.009638,1.7619,19.0,200.0,197.0,12254982144,1793739600.0
+JNJ,Johnson & Johnson,Healthcare,Drug Manufacturers - General,24.394272,1.91304,22.0,279.4091,280.5,682520608768,1800970200.0
+JPM,JP Morgan Chase & Co.,Financial Services,Banks - Diversified,13.405514,2.03846,23.0,373.47827,372.0,910396096512,1799933400.0
+KDP,Keurig Dr Pepper Inc.,Consumer Defensive,Beverages - Non-Alcoholic,13.99292,1.94737,18.0,38.08333,40.0,48204787712,1793712600.0
+KEY,KeyCorp,Financial Services,Banks - Regional,9.806581,2.0,20.0,25.13,24.0,22524049408,1800451800.0
+KEYS,Keysight Technologies Inc.,Technology,Scientific & Technical Instruments,21.833536,1.5,12.0,419.66666,425.0,51793563648,1795122000.0
+KHC,The Kraft Heinz Company,Consumer Defensive,Packaged Foods,11.88286,3.05263,17.0,25.14706,24.0,28980133888,1793799000.0
+KIM,Kimco Realty Corporation (HC),Real Estate,REIT - Retail,28.687323,2.34783,21.0,26.5119,27.0,16917879808,1793277000.0
+KKR,KKR & Co. Inc.,Financial Services,Asset Management,13.488964,1.6087,21.0,121.09667,120.03,89238781952,1794231000.0
+KLAC,KLA Corporation,Technology,Semiconductor Equipment & Materials,22.15855,1.75862,26.0,219.61539,220.0,204955992064,1793217600.0
+KMB,Kimberly-Clark Corporation,Consumer Defensive,Household & Personal Products,15.047907,2.4375,15.0,118.66667,115.0,65779859456,1793885400.0
+KMI,"Kinder Morgan, Inc.",Energy,Oil & Gas Midstream,20.82073,2.0,22.0,37.5,38.0,71309164544,1792612800.0
+KO,Coca-Cola Company (The),Consumer Defensive,Beverages - Non-Alcoholic,27.611614,1.66667,23.0,98.43478,100.0,419177365504,1793104200.0
+KR,Kroger Company (The),Consumer Defensive,Grocery Stores,12.737191,2.0,22.0,69.27273,69.0,41228992512,1796304600.0
+L,Loews Corporation,Financial Services,Insurance - Property & Casualty,38.56207,,,,,22614847488,1793626200.0
+LDOS,"Leidos Holdings, Inc.",Technology,Information Technology Services,11.109097,2.41176,15.0,153.46667,150.0,15994724352,1793712600.0
+LEN,Lennar Corporation,Consumer Cyclical,Residential Construction,16.006987,3.57143,15.0,77.6,73.0,19883702272,1789588800.0
+LH,Labcorp Holdings Inc.,Healthcare,Diagnostics & Research,18.99623,1.58824,16.0,390.0625,395.5,30232385536,1793190600.0
+LHX,"L3Harris Technologies, Inc.",Industrials,Aerospace & Defense,19.948631,1.91304,21.0,336.33334,342.0,50616807424,1793277000.0
+LII,"Lennox International, Inc.",Industrials,Building Products & Equipment,14.888606,2.94444,13.0,371.92307,359.0,11907270656,1793190600.0
+LIN,Linde plc,Basic Materials,Specialty Chemicals,26.731081,1.68966,27.0,551.03705,560.0,239866675200,1793277000.0
+LITE,Lumentum Holdings Inc.,Technology,Communication Equipment,15.563906,1.6,25.0,1069.194,1150.0,56646332416,1793626200.0
