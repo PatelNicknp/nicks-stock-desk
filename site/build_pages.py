@@ -93,7 +93,7 @@ HEAD_EXTRA = {
     "today": '<link rel="stylesheet" href="css/market_news.css">\n',
 }
 EXTRA = {
-    "chartviewer": '<script src="js/viewer.js"></script>\n',
+    "chartviewer": '<script src="js/rs_line.js"></script>\n<script src="js/viewer.js"></script>\n',
     "today": '<script src="js/market_news.js"></script>\n',
 }
 

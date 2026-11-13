@@ -515,6 +515,8 @@
     const state = {
       ma: maState(),
       vol: on("volume_toggle") ? stored("desk-cv-vol", on("volume")) : on("volume"),
+      // RS line: stock close divided by SPY (chart_viewer.rs_line). The RS line chip saves a pick on this device.
+      rsLine: on("rs_line") && stored("desk-cv-rs-line", true),
       why: on("reason_box") && (on("reason_box_toggle") ? stored("desk-cv-why", true) : true),
       // Drag: move chart (true) or Drag: next chart (false). chart_touch_pan is the default; the chip saves a pick.
       pan: on("drag_mode_toggle") ? stored("desk-cv-drag-pan", on("chart_touch_pan")) : on("chart_touch_pan"),
@@ -543,6 +545,7 @@
     const chips = (on("ma_chips") ? MAS.map((m) =>
       '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i>MA ' + m.n + "</button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
+      (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
       (on("reason_box") && on("reason_box_toggle") ? '<button type="button" class="cvchip" data-tool="why" aria-pressed="false">Why</button>' : "") +
       (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "") +
       (on("drag_mode_toggle") ? '<button type="button" class="cvchip" data-tool="drag" title="Pick what a one-finger drag on the chart does"></button>' : "") +
@@ -573,6 +576,7 @@
             '<button type="button" class="cv-arrow cv-next" id="cvnext" aria-label="Next chart">›</button>' : "") +
         "</div>" +
       "</div>" +
+      '<p class="cap cv-rsnote" id="cvrsnote" hidden></p>' +
       '<p class="cap">Daily bars saved by the desk. Weekly bars and averages are worked out in your browser. Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.</p>';
 
     const cv = document.getElementById("cv");
@@ -584,6 +588,24 @@
     let maSeries = {};
     let bars = [];
     let token = 0;
+    // SPY closes already saved by the desk (data/index_ohlc/SPY.csv). One load for the whole viewer.
+    let spy = [];
+    let spyJob = null;
+    let rsCount = 0;
+    function loadSpy() {
+      if (!on("rs_line")) return Promise.resolve([]);
+      if (!spyJob) spyJob = D.loadCsv("index_ohlc/SPY.csv").then((rows) => D.barsFromRows(rows || [])).catch(() => []);
+      return spyJob;
+    }
+    function paintRsNote() {
+      const el = document.getElementById("cvrsnote");
+      if (!el) return;
+      if (!on("rs_line") || !state.rsLine) { el.hidden = true; el.textContent = ""; return; }
+      el.hidden = false;
+      if (!spy.length) { el.textContent = "RS line: stock vs SPY. The SPY prices are not on this chart yet."; return; }
+      if (!rsCount) { el.textContent = "RS line: stock vs SPY. Not enough overlapping prices to draw it."; return; }
+      el.textContent = "RS line: stock vs SPY. Blue dot: new 52-week high. Amber dot: the line made that high before the price.";
+    }
 
     function syncTools() {
       document.querySelectorAll("#cvtools [data-ma]").forEach((b) => {
@@ -593,6 +615,8 @@
       });
       const vol = document.querySelector('#cvtools [data-tool="vol"]');
       if (vol) { vol.classList.toggle("on", state.vol); vol.setAttribute("aria-pressed", state.vol ? "true" : "false"); }
+      const rsb = document.querySelector('#cvtools [data-tool="rsline"]');
+      if (rsb) { rsb.classList.toggle("on", state.rsLine); rsb.setAttribute("aria-pressed", state.rsLine ? "true" : "false"); }
       const w = document.querySelector('#cvtools [data-tool="why"]');
       if (w) { w.classList.toggle("on", state.why); w.setAttribute("aria-pressed", state.why ? "true" : "false"); }
       const flip = document.querySelector('#cvtools [data-tool="flip"]');
@@ -811,6 +835,38 @@
         s.setData(data);
         maSeries[m.n] = s;
       });
+      // RS line overlaid in the price pane, below the candles and above the volume (as on the India desk).
+      // Its own hidden scale (priceScaleId "") so the ratio does not move the price.
+      // Same line for Candles and Bars, Daily and Weekly.
+      rsCount = 0;
+      let rsSeries = null;
+      if (state.rsLine && window.rsLine && spy.length) {
+        const line = window.rsLine.build(daily, spy, { weekly: state.tf === "weekly" });
+        rsCount = line.points.length;
+        if (line.points.length) {
+          rsSeries = chart.addSeries(LC.LineSeries, {
+            color: "#7C9CFF", lineWidth: 2, priceLineVisible: false, lastValueVisible: false,
+            crosshairMarkerVisible: false, title: "",
+            priceFormat: { type: "price", precision: 3, minMove: 0.001 },
+            priceScaleId: "",
+          }, 0);
+          rsSeries.setData(line.points.map((p) => ({ time: p.time, value: p.value })));
+          if (line.markers.length && LC.createSeriesMarkers) {
+            try {
+              LC.createSeriesMarkers(rsSeries, line.markers.map((m) => ({
+                time: m.time, position: "inBar", shape: "circle", size: 2,
+                color: D.themed(m.kind === "before" ? "#F59E0B" : "#7C9CFF"),
+              })));
+            } catch (e) { /* the line still shows if a dot cannot be drawn */ }
+          }
+          try {
+            // Candles use the top of the pane. The RS line autoscales in the strip below them.
+            chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: 0.26 } });
+            chart.priceScale("").applyOptions({ visible: false, borderVisible: false, scaleMargins: { top: 0.76, bottom: 0.04 } });
+          } catch (e) { /* the line still autoscales */ }
+        }
+      }
+      paintRsNote();
       if (state.vol) {
         const vol = chart.addSeries(LC.HistogramSeries, { priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false }, 1);
         vol.setData(bars.filter((b) => b.v != null).map((b) => ({ time: b.date, value: b.v,
@@ -840,8 +896,8 @@
       history.replaceState(null, "", url);
       header(t, null);
       remember("ohlc/" + t + ".csv");
-      Promise.all([D.ensureTv(), D.loadCsv("ohlc/" + t + ".csv").catch(() => [])])
-        .then((res) => draw(t, res[1], my))
+      Promise.all([D.ensureTv(), D.loadCsv("ohlc/" + t + ".csv").catch(() => []), loadSpy()])
+        .then((res) => { spy = res[2] || []; draw(t, res[1], my); })
         .catch(() => {
           if (my !== token) return;
           dropChart();
@@ -987,6 +1043,12 @@
         state.vol = !state.vol;
         store("desk-cv-vol", state.vol);
         carryRange = userRange;
+        show();
+      } else if (tool === "rsline") {
+        state.rsLine = !state.rsLine;
+        store("desk-cv-rs-line", state.rsLine);
+        carryRange = userRange;
+        syncTools();
         show();
       } else if (tool === "why") {
         state.why = !state.why;

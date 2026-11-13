@@ -379,6 +379,7 @@ chart_viewer.ma_150,True
 chart_viewer.ma_200,True
 chart_viewer.volume,True
 chart_viewer.volume_toggle,True
+chart_viewer.rs_line,True
 chart_viewer.reason_box,True
 chart_viewer.reason_box_toggle,True
 chart_viewer.reason_max_chars,110

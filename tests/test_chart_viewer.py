@@ -110,7 +110,9 @@ def test_no_new_market_requests():
     js = _read("site", "js", "viewer.js")
     assert "fetch(" not in js and "XMLHttpRequest" not in js
     assert "yahoo" not in js.lower()
-    assert re.findall(r'loadCsv\("([^"+]+)', js) == ["ohlc/", "ohlc/"]
+    # Stock bars, plus the SPY closes the desk already saves for the RS line.
+    assert sorted(re.findall(r'loadCsv\("([^"+]+)', js)) == ["index_ohlc/SPY.csv", "ohlc/", "ohlc/"]
+    assert "fetch(" not in _read("site", "js", "rs_line.js") and "loadCsv" not in _read("site", "js", "rs_line.js")
 
 
 def test_ios_full_screen_uses_the_overlay():
@@ -261,8 +263,30 @@ def _node(*args):
         _skip("node is not installed: " + str(exc))
 
 
+def test_rs_line_math_switch_and_help():
+    proc = _node(os.path.join("tests", "rs_line_check.js"))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "rs line ok" in proc.stdout
+    cv = _cfg()["chart_viewer"]
+    assert cv["rs_line"] is True and "rs_line" in cv["_note"] and "SPY" in cv["_note"]
+    js = _read("site", "js", "viewer.js")
+    assert "RS line: stock vs SPY." in js and 'data-tool="rsline"' in js and 'priceScaleId: ""' in js
+    assert "below the candles and above the volume" in js
+    assert 'on("rs_line")' in js and "desk-cv-rs-line" in js
+    html = _read("site", "chart-viewer.html")
+    assert html.index("js/rs_line.js") < html.index("js/viewer.js")
+    help = dict(tables.help_rows())["Chart Viewer RS line"]
+    assert "below the candles and above the volume" in help and "hidden scale" in help and "SPY" in help
+    assert "\u2014" not in help and "chart_viewer.rs_line" in help
+    assert "\nChart Viewer RS line," in _read("data", "help.csv")
+    assert "\nchart_viewer.rs_line,True\n" in _read("data", "settings.csv")
+    assert os.path.exists(os.path.join(ROOT, "data", "index_ohlc", "SPY.csv"))
+    pages = _read("site", "js", "pages.js")
+    assert 'D.viewerOn("rs_line")' in pages and "is the stock close divided by SPY" in pages
+
+
 def test_scripts_parse():
-    for name in ("viewer.js", "desk.js", "pages.js"):
+    for name in ("viewer.js", "desk.js", "pages.js", "rs_line.js"):
         proc = _node("--check", os.path.join("site", "js", name))
         assert proc.returncode == 0, name + ": " + proc.stderr
 
@@ -296,6 +320,7 @@ if __name__ == "__main__":
         test_iphone_portrait_chip_bar_and_header_swipes()
     except _Skip as exc:
         print("iphone touch check skipped: " + str(exc))
+    test_rs_line_math_switch_and_help()
     try:
         test_scripts_parse()
         test_list_and_swipe_rules()

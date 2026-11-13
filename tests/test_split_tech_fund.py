@@ -118,7 +118,7 @@ def test_off_switch_is_the_old_code_path():
     assert 'let group = grouped ? pickGroup(' in viewer and ': "";' in viewer
     assert 'label: group ? "All " + group + " stocks" : "All scanner stocks"' in viewer
     # No new downloads: the viewer still reads only the saved bar files; the pick is saved with localStorage.
-    assert re.findall(r'loadCsv\("([^"+]+)', viewer) == ["ohlc/", "ohlc/"]
+    assert sorted(re.findall(r'loadCsv\("([^"+]+)', viewer)) == ["index_ohlc/SPY.csv", "ohlc/", "ohlc/"]  # + saved SPY for the RS line
     assert 'const GROUP_KEY = "desk-cv-group";' in viewer and "localStorage.setItem(GROUP_KEY, next)" in viewer
     assert ".cvgroup{" in _read("site", "css", "desk.css")
 
