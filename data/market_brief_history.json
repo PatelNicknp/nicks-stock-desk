@@ -166,8 +166,8 @@
       ],
       "spy_day_pct": 0.91,
       "qqq_day_pct": 1.93,
-      "next_day_spy_pct": null,
-      "next_day_direction": null
+      "next_day_spy_pct": -0.35,
+      "next_day_direction": "down"
     },
     {
       "date": "2026-11-11",
@@ -205,6 +205,24 @@
       "qqq_day_pct": -0.69,
       "next_day_spy_pct": null,
       "next_day_direction": null
+    },
+    {
+      "date": "2026-11-12",
+      "slot": "evening_close",
+      "mood": "Mixed",
+      "regime": "chop",
+      "causes": [
+        "ai_mood",
+        "oil"
+      ],
+      "sources": [
+        "MarketWatch",
+        "Yahoo Finance"
+      ],
+      "spy_day_pct": -0.35,
+      "qqq_day_pct": -0.32,
+      "next_day_spy_pct": null,
+      "next_day_direction": null
     }
   ],
   "aggregates": {
@@ -217,9 +235,9 @@
       },
       "ai_mood": {
         "up": 5,
-        "down": 4,
+        "down": 5,
         "flat": 0,
-        "n": 9
+        "n": 10
       },
       "rates": {
         "up": 1,
@@ -229,9 +247,9 @@
       },
       "inflation": {
         "up": 1,
-        "down": 0,
+        "down": 1,
         "flat": 0,
-        "n": 1
+        "n": 2
       },
       "oil": {
         "up": 0,
@@ -243,9 +261,9 @@
     "by_source": {
       "Reuters": {
         "up": 3,
-        "down": 2,
+        "down": 3,
         "flat": 0,
-        "n": 5
+        "n": 6
       },
       "Federal Reserve": {
         "up": 1,
@@ -285,12 +303,12 @@
       },
       "Yahoo Finance": {
         "up": 4,
-        "down": 2,
+        "down": 3,
         "flat": 0,
-        "n": 6
+        "n": 7
       }
     },
-    "n_labeled": 9,
+    "n_labeled": 10,
     "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
   }
 }
