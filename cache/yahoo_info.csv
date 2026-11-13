@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-ROP,"Roper Technologies, Inc.",Technology,Software - Application,19.226856,2.36842,14.0,466.7857,474.0,46791245824,1792672200.0
-ROST,"Ross Stores, Inc.",Consumer Cyclical,Apparel Retail,26.405783,1.65,18.0,271.83334,279.5,75949981696,1795122000.0
-RSG,"Republic Services, Inc.",Industrials,Waste Management,30.849636,2.03704,24.0,256.0,263.5,75247517696,1793304000.0
-RTX,RTX Corporation,Industrials,Aerospace & Defense,24.247278,1.91667,23.0,227.91304,235.0,264760229888,1792499400.0
-RVTY,"Revvity, Inc.",Healthcare,Diagnostics & Research,26.973612,2.38889,15.0,171.06667,175.0,17939746816,1793712600.0
-SBAC,SBA Communications Corporation,Real Estate,REIT - Specialty,24.094894,2.14286,20.0,222.75,220.0,19929036800,1793653200.0
-SBUX,Starbucks Corporation,Consumer Cyclical,Restaurants,29.506603,2.37143,30.0,111.06667,110.5,125296992256,1793304000.0
-SCHW,Charles Schwab Corporation (The,Financial Services,Capital Markets,11.955428,1.83333,22.0,116.86364,118.5,161019265024,1792067400.0
-SE,Sea Limited,Consumer Cyclical,Internet Retail,15.490285,1.2963,28.0,148.25285,152.0,48092348416,1794317400.0
-SHOP,Shopify Inc.,Technology,Software - Application,61.78575,1.69091,49.0,177.4902,180.0,194895216640,1793712600.0
 SHW,Sherwin-Williams Company (The),Basic Materials,Specialty Chemicals,27.109047,2.06897,24.0,374.25,374.0,86528393216,1793104200.0
 SJM,The J.M. Smucker Company,Consumer Defensive,Packaged Foods,12.19144,2.10526,16.0,141.8125,145.0,14316443648,1795527000.0
 SKYD,Skydance Corporation,Communication Services,Entertainment,155.62308,3.16667,18.0,9.14667,9.0,43008266240,1794258000.0
@@ -523,3 +513,13 @@ RL,Ralph Lauren Corporation,Consumer Cyclical,Apparel Manufacturing,18.263332,1.
 RMD,ResMed Inc.,Healthcare,Medical Instruments & Supplies,18.110115,2.3,17.0,264.33472,270.0,33691588608,1793304000.0
 ROK,"Rockwell Automation, Inc.",Industrials,Specialty Industrial Machinery,24.05061,2.28571,25.0,445.64,447.0,44783312896,1793885400.0
 ROL,"Rollins, Inc.",Consumer Cyclical,Personal Services,31.578436,2.47368,17.0,38.47059,37.0,18586400768,1792612800.0
+ROP,"Roper Technologies, Inc.",Technology,Software - Application,19.532475,2.36842,14.0,469.17786,474.0,47535013888,1792672200.0
+ROST,"Ross Stores, Inc.",Consumer Cyclical,Apparel Retail,25.661274,1.61905,19.0,273.3684,279.0,74318561280,1795122000.0
+RSG,"Republic Services, Inc.",Industrials,Waste Management,31.565865,1.92593,24.0,257.41666,263.5,77070786560,1793304000.0
+RTX,RTX Corporation,Industrials,Aerospace & Defense,24.541409,1.91667,23.0,227.91304,235.0,267971903488,1792499400.0
+RVTY,"Revvity, Inc.",Healthcare,Diagnostics & Research,25.903189,2.38889,15.0,171.06667,175.0,17235908608,1793712600.0
+SBAC,SBA Communications Corporation,Real Estate,REIT - Specialty,23.906773,2.14286,20.0,222.75,220.0,19773440000,1793653200.0
+SBUX,Starbucks Corporation,Consumer Cyclical,Restaurants,28.573807,2.33333,30.0,111.06667,110.5,121352241152,1793304000.0
+SCHW,Charles Schwab Corporation (The,Financial Services,Capital Markets,11.915701,,22.0,116.86364,118.5,160484196352,1792067400.0
+SE,Sea Limited,Consumer Cyclical,Internet Retail,15.754946,1.33333,27.0,134.49927,136.0,46156836864,1794317400.0
+SHOP,Shopify Inc.,Technology,Software - Application,59.794384,1.69091,49.0,177.28612,180.0,189234511872,1793712600.0
