@@ -67,6 +67,8 @@ h1{font-size:32px;font-weight:700;line-height:36px}
 .psub{font-size:12px;color:var(--mu);line-height:17px;margin-top:4px}
 .cap{font-size:12px;color:var(--mu);line-height:17px;margin:8px 0 12px}
 .ctrls + .cap{margin-top:-4px}
+.cv-rsnote{margin:8px 0 0;font-size:13px;line-height:18px;overflow-wrap:anywhere}
+@media (max-width:600px){.cv-rsnote{font-size:12px;line-height:16px;margin-top:6px}}
 .psub.note{text-align:right;font-size:11px;color:var(--mu2)}
 .scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -90,6 +92,9 @@ td.hm span{display:block;height:28px;line-height:28px;text-align:center;font-siz
 .track{display:inline-block;width:88px;height:6px;border-radius:3px;background:var(--line);vertical-align:middle}
 .track .fill{display:block;height:6px;border-radius:3px}
 .gradechip{display:inline-flex;min-width:28px;height:22px;align-items:center;justify-content:center;border-radius:4px;font-size:13px;font-weight:700;color:var(--tx);padding:0 4px}
+/* RS Rating pill (1 to 99). Green at relative_strength.leader_min or higher. Same variables in light and dark. */
+.rspill{display:inline-flex;min-width:28px;height:22px;padding:0 6px;align-items:center;justify-content:center;border-radius:11px;background:var(--cs-nodata-bg);color:var(--tx2);font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
+.rspill.hot{background:var(--cs-pass-bg);color:var(--cs-pass-fg)}
 .tk{color:var(--ac);font-weight:700}
 .mut{color:var(--tx2)}
 .m2{color:var(--mu)}

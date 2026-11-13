@@ -211,7 +211,8 @@ def test_canslim_does_not_invent_missing_letters():
         {"ticker": "AAA", "inst_up": 10, "inst_down": 4, "ownership_pct": 60},
     ])
     uni = _uni(["AAA", "BBB"])
-    out, market = setups.scan_canslim(close_w, high_w, low_w, vol_w, uni, quarters, annual, holders)
+    # L reads the desk RS Rating (1 to 99). A name without one is not listed.
+    out, market = setups.scan_canslim(close_w, high_w, low_w, vol_w, uni, quarters, annual, holders, rs_map={"AAA": 90, "BBB": 90})
     assert market["qqq"] == "not verified"
     assert "QQQ" in market["text"]
     assert "not verified" in market["text"]
@@ -225,6 +226,10 @@ def test_canslim_does_not_invent_missing_letters():
     assert aaa.iloc[0]["target"] == ""
     assert "not verified" in aaa.iloc[0]["reason"]
     assert "SP500" in aaa.iloc[0]["index_membership"]
+    assert int(aaa.iloc[0]["rs"]) == 90 and int(aaa.iloc[0]["l_rs_percentile"]) == 90
+    assert "RS Rating 90" in aaa.iloc[0]["l_status"]
+    none, _m = setups.scan_canslim(close_w, high_w, low_w, vol_w, uni, quarters, annual, holders)
+    assert len(none) == 0, "no RS Rating means L cannot pass"
     if len(bbb):
         assert bbb.iloc[0]["c_status"] == "not verified"
         assert bbb.iloc[0]["c_quarterly_eps"] == ""
@@ -310,13 +315,13 @@ def test_leaders_prefers_the_vcp_plan():
         "ticker": "AAA", "company": "Alpha", "sector": "Tech", "index_membership": "SP500 / NDX100",
         "status": "READY", "pivot": 110, "stop": "", "target": "", "strength": 140,
         "reason": "can", "freshness": "FRESH", "price": 99, "price_as_of": "2026-10-23",
-        "qualify": "strict", "l_rs_percentile": 88, "c_status": "not verified",
+        "qualify": "strict", "l_rs_percentile": 88, "rs": 88, "c_status": "not verified",
         "a_status": "20%", "i_trend": "up",
     }, {
         "ticker": "BBB", "company": "Beta", "sector": "Tech", "index_membership": "NDX100",
         "status": "WATCHING", "pivot": 50, "stop": "", "target": "", "strength": 100,
         "reason": "can", "freshness": "PARTIAL", "price": 40, "price_as_of": "2026-10-23",
-        "qualify": "soft", "l_rs_percentile": 50, "c_status": "not verified",
+        "qualify": "soft", "l_rs_percentile": 50, "rs": 50, "c_status": "not verified",
         "a_status": "not verified", "i_trend": "not verified",
     }])
     out = setups.combine_leaders(vcp, cans)
@@ -825,7 +830,7 @@ def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
         {"ticker": "LOSE", "inst_up": 2, "inst_down": 9, "ownership_pct": 40, "nasdaq_so_m": 50},
     ])
     uni = _uni(["WIN", "LOSE", "THIN", "MISS"])
-    out = setups.scorecard_canslim(close, high, low, vol, uni, quarters, annual, holders).set_index("ticker")
+    out = setups.scorecard_canslim(close, high, low, vol, uni, quarters, annual, holders, rs_map={"WIN": 95, "LOSE": 30}).set_index("ticker")
     assert list(out.index) == ["WIN", "LOSE", "THIN", "MISS"]
     win = out.loc["WIN"]
     lose = out.loc["LOSE"]
@@ -846,7 +851,10 @@ def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
     )
     assert win["i_result"] == "pass"
     assert win["m_result"] == "pass"
-    assert win["l_result"] in ("pass", "fail")
+    assert win["l_result"] == "pass" and win["l_value"] == "RS 95"
+    assert out.loc["LOSE"]["l_result"] == "fail"
+    assert out.loc["THIN"]["l_result"] == "no_data"
+    assert setups.SCORECARD_RULES["l"] == "Passes when the RS Rating is 80 or higher."
     assert lose["c_result"] == "fail"  # 5% growth
     assert lose["a_result"] == "fail"
     assert lose["n_result"] == "fail"  # about 20% below the high

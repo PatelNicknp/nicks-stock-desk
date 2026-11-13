@@ -33,9 +33,9 @@ PINE = {
 
 # NSE scan constants, kept so the US page matches that method.
 NSE_ADV_MIN = 200_000
-NSE_RS_LONG = 126
-NSE_RS_SHORT = 63
 NSE_NEAR_HIGH = -15.0  # percent from the 52-week closing high
+# L uses the desk's one RS Rating (relative_strength.py, 1 to 99 versus every
+# stock in the universe, MarketSmith style). Same cut lines as before.
 NSE_RS_STRICT = 55.0
 NSE_RS_SOFT = 40.0
 # Scorecard CAN SLIM (every stock). Separate from the scanner's qualify rules.
@@ -49,7 +49,7 @@ SCORECARD_RULES = {
     "a": "Passes when annual EPS is at least 25% above last year.",
     "n": "Passes when the close is within 15% of the 52-week closing high.",
     "s": "Passes when 20-day average volume is 200,000 shares or more.",
-    "l": "Passes when the RS percentile is 80 or higher.",
+    "l": "Passes when the RS Rating is 80 or higher.",
     "i": "Passes when 13F holders bought more shares than they sold.",
     "m": "Passes when SPY is above its 50-day and 200-day, and the 50-day is above the 200-day.",
 }
@@ -59,8 +59,8 @@ SCORECARD_NOTE = (
     "the scanner's READY line is 5%). S passes when the 20-day average volume is at least "
     "200,000 shares (the existing liquidity line) and shows shares outstanding from the "
     "Nasdaq 13F file when that figure is on file, plus today's volume versus the 50-day average. "
-    "L is an RS percentile of 80 or higher (Nick; the scanner's strict qualify still uses 55), "
-    "ranked among names with enough price history versus SPY. "
+    "L is an RS Rating of 80 or higher (Nick; the scanner's strict qualify still uses 55). "
+    "The RS Rating is the desk's 1 to 99 rank of the past year against every stock on the desk. "
     "I is more institutional shares bought than sold in the cached 13F summary; missing data "
     "is not a fail. M is SPY in an uptrend: close above the 50-day and the 200-day, and the "
     "50-day above the 200-day (the same market rule as Buy setups). "
@@ -843,7 +843,12 @@ def _range_pct(close, win):
     return (float(seg.max()) - float(seg.min())) / mean * 100.0
 
 
-def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
+def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None):
+    """CANSLIM scanner. L is the desk's 1 to 99 RS Rating from rs_map ({TICKER: rs}).
+
+    A stock with no RS Rating (under a year of prices) cannot pass L, so it is not listed.
+    """
+    rs_map = {str(k).strip().upper(): v for k, v in (rs_map or {}).items()}
     rows = []
     if close is None or len(close) == 0 or universe is None or len(universe) == 0:
         return pd.DataFrame(), {}
@@ -853,27 +858,18 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
     spy_m = _market_one(spy, "SPY") if spy is not None else None
     qqq_m = _market_one(qqq, "QQQ") if qqq is not None else None
     market = _combine_market(spy_m, qqq_m)
-    bench = spy if spy is not None else None
-    bench_r63 = _ret(bench, NSE_RS_SHORT) if bench is not None else None
-    bench_r126 = _ret(bench, NSE_RS_LONG) if bench is not None else None
 
     screened = []
     for ticker in list(universe["ticker"]):
-        got = _bars(close, high, low, vol, ticker, bench)
+        rs_val = _num(rs_map.get(str(ticker).strip().upper()))
+        if rs_val is None:
+            continue
+        got = _bars(close, high, low, vol, ticker, None)
         if got is None:
             continue
         frame, _spy_aligned = got
         c = frame["close"]
-        if len(c) < 150 or bench is None or bench_r63 is None or bench_r126 is None:
-            continue
-        aligned = bench.reindex(c.index).ffill()
-        common = c.index.intersection(aligned.dropna().index)
-        c = c.loc[common]
         if len(c) < 150:
-            continue
-        r63 = _ret(c, NSE_RS_SHORT)
-        r126 = _ret(c, NSE_RS_LONG)
-        if r63 is None or r126 is None:
             continue
         e21, e50, e200 = _ema(c, 21), _ema(c, 50), _ema(c, 200)
         last = float(c.iloc[-1])
@@ -927,8 +923,7 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
         big_vol = bool(np.isfinite(vol_s.iloc[-1]) and np.isfinite(avg50.iloc[-1]) and float(vol_s.iloc[-1]) > float(avg50.iloc[-1]) * VOL_MULT)
         screened.append({
             "ticker": ticker, "last": last, "liquid": liquid, "adv": adv,
-            "rs63": (r63 - bench_r63) * 100.0, "rs126": (r126 - bench_r126) * 100.0,
-            "rs_rel": (0.6 * (r126 - bench_r126) + 0.4 * (r63 - bench_r63)) * 100.0,
+            "rs": rs_val,
             "pct_from_high": pct_from_high, "hi52": hi52, "near": near,
             "above50": above50, "above200": above200, "above21": above21, "rising": rising,
             "e21": e21v, "e50": e50v, "e200": e200v, "trend": trend,
@@ -940,16 +935,13 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
     df = pd.DataFrame(screened)
     if len(df) == 0:
         return pd.DataFrame(), market
-    liquid = df[df["liquid"]].copy()
-    if len(liquid) == 0:
+    if not df["liquid"].any():
         return pd.DataFrame(), market
-    liquid["rs_percentile"] = liquid["rs_rel"].rank(pct=True, method="average") * 100.0
-    pct_map = liquid.set_index("ticker")["rs_percentile"]
 
     for rec in screened:
-        if not rec["liquid"] or rec["ticker"] not in pct_map.index:
+        if not rec["liquid"]:
             continue
-        rs_p = float(pct_map.loc[rec["ticker"]])
+        rs_p = float(rec["rs"])
         strict = (
             rec["above50"] and rec["above200"] and rec["rising"]
             and rs_p >= NSE_RS_STRICT and (rec["vcp_score"] >= 2 or rec["near"])
@@ -978,7 +970,7 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
             % rec["pct_from_high"]
         )
         s_txt = "20-day average volume %s shares. Float tightness is not verified." % _round(rec["adv"], 0)
-        l_txt = "RS percentile %.0f in this liquid universe versus SPY. Industry group rank is not verified." % rs_p
+        l_txt = "RS Rating %.0f of 99 versus every stock on the desk. Industry group rank is not verified." % rs_p
         if rec["contracting"]:
             vcp_txt = "20/40/60 day ranges %.1f%% / %.1f%% / %.1f%%, contracting." % (rec["r20"], rec["r40"], rec["r60"])
         elif rec["mild"]:
@@ -993,7 +985,7 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
             vcp_txt += " Higher lows on the 10-day rolling low."
         qualify = "strict" if strict else "soft"
         reason = (
-            "%s versus SPY. %s %s %s %s %s Market: %s "
+            "%s. %s %s %s %s %s Market: %s "
             "Pivot is the 52-week closing high from the NSE method, not the VCP buy point. "
             "Stop: not verified. Target: not verified. That scan does not set either one. "
             "A close under EMA50 (%s) would fail its trend rule."
@@ -1046,7 +1038,9 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders):
             "n_status": n_txt,
             "s_adv": _round(rec["adv"], 0),
             "s_status": s_txt,
-            "l_rs_percentile": round(rs_p, 1),
+            # Same number as rs. The old header stays for the Sheet.
+            "l_rs_percentile": int(round(rs_p)),
+            "rs": int(round(rs_p)),
             "l_status": l_txt,
             "i_trend": i_trend,
             "i_status": i_text,
@@ -1100,11 +1094,13 @@ def _fmt_shares(n):
     return "%s shares" % _round(x, 0)
 
 
-def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders):
+def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None):
     """CAN SLIM letters for every stock on the scorecard. No network calls.
 
     Missing inputs stay no_data (not a fail). Does not change scan_canslim.
+    L is the desk's 1 to 99 RS Rating from rs_map ({TICKER: rs}); pass at 80.
     """
+    rs_map = {str(k).strip().upper(): v for k, v in (rs_map or {}).items()}
     rows = []
     if close is None or len(close) == 0 or universe is None or len(universe) == 0:
         return pd.DataFrame()
@@ -1129,16 +1125,11 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
             SCORECARD_RULES["m"],
             m_det,
         )
-    bench = spy
-    bench_r63 = _ret(bench, NSE_RS_SHORT) if bench is not None else None
-    bench_r126 = _ret(bench, NSE_RS_LONG) if bench is not None else None
-
     holder_map = {}
     if holders is not None and len(holders) and "ticker" in holders.columns:
         for _, hr in holders.iterrows():
             holder_map[str(hr.get("ticker") or "")] = hr
 
-    rs_vals = {}
     recs = []
     for ticker in names:
         rec = {"ticker": ticker}
@@ -1165,23 +1156,7 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
                 last_v = float(vol_s.iloc[-1])
                 if np.isfinite(avg50) and avg50 > 0 and np.isfinite(last_v):
                     rec["vol_ratio"] = last_v / avg50
-        if bench is not None and bench_r63 is not None and bench_r126 is not None and len(c) >= 150:
-            aligned = bench.reindex(c.index).ffill()
-            common = c.index.intersection(aligned.dropna().index)
-            cc = c.loc[common]
-            if len(cc) >= 150:
-                r63 = _ret(cc, NSE_RS_SHORT)
-                r126 = _ret(cc, NSE_RS_LONG)
-                if r63 is not None and r126 is not None:
-                    rec["rs_rel"] = (0.6 * (r126 - bench_r126) + 0.4 * (r63 - bench_r63)) * 100.0
-                    rs_vals[ticker] = rec["rs_rel"]
         recs.append(rec)
-
-    pct_map = {}
-    if rs_vals:
-        ranked = pd.Series(rs_vals)
-        pct_s = ranked.rank(pct=True, method="average") * 100.0
-        pct_map = pct_s.to_dict()
 
     c_rule = SCORECARD_RULES["c"]
     a_rule = SCORECARD_RULES["a"]
@@ -1242,15 +1217,15 @@ def scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders
         else:
             s_det = "%s 20-day average volume." % _fmt_shares(adv).replace(" shares", "")
             s_res, s_val, _s_rule, s_det = _sc_letter(adv >= NSE_ADV_MIN, s_val, s_rule, s_det)
-        rs_p = pct_map.get(ticker)
+        rs_p = _num(rs_map.get(str(ticker).strip().upper()))
         if rs_p is None:
             l_res, l_val, _l_rule, l_det = _sc_blank(
-                l_rule, "Not enough saved history versus SPY to rank relative strength.",
+                l_rule, "No RS Rating yet. It needs a full year of saved daily prices.",
             )
         else:
             l_res, l_val, _l_rule, l_det = _sc_letter(
                 rs_p >= SCORECARD_RS_MIN, "RS %.0f" % rs_p, l_rule,
-                "RS percentile %.1f among names with enough history versus SPY." % rs_p,
+                "RS Rating %.0f of 99 versus every stock on the desk (past year, latest quarter counts double)." % rs_p,
             )
         i_trend, i_text = _holder_trend(holders, ticker)
         if i_trend == NOT_VERIFIED or i_trend == "":
@@ -2570,7 +2545,9 @@ def combine_leaders(vcp, canslim):
         use_v = vr is not None and vr.get("pivot") not in ("", None)
         src = vr if use_v else cr
         v_strength = _num(vr["strength"]) if vr is not None else None
-        c_rs = _num(cr["l_rs_percentile"]) if cr is not None else None
+        c_rs = _num(cr.get("rs")) if cr is not None else None
+        if c_rs is None and cr is not None:
+            c_rs = _num(cr.get("l_rs_percentile"))
         if v_strength is not None and c_rs is not None:
             strength = round(0.5 * v_strength + 0.5 * min(c_rs, 100.0), 1)
         elif v_strength is not None:
@@ -2583,8 +2560,8 @@ def combine_leaders(vcp, canslim):
         if vr is not None:
             parts.append("VCP %s, trend %s, buy point %s." % (vr["status"], vr.get("trend_score", ""), vr.get("pivot", "")))
         if cr is not None:
-            parts.append("CANSLIM %s, RS percentile %s. C %s. A %s. I %s." % (
-                cr["status"], cr.get("l_rs_percentile", ""), cr.get("c_status", NOT_VERIFIED),
+            parts.append("CANSLIM %s, RS %s. C %s. A %s. I %s." % (
+                cr["status"], cr.get("rs", cr.get("l_rs_percentile", "")), cr.get("c_status", NOT_VERIFIED),
                 cr.get("a_status", NOT_VERIFIED), cr.get("i_trend", NOT_VERIFIED)))
         if use_v:
             parts.append("Stop and target come from the VCP buy rules.")
@@ -3148,8 +3125,11 @@ def _buy_market_row(market_ok, qqq_flag):
     }])
 
 
-def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None, cfg=None, opn=None):
-    """Return the scanner frames. Each is empty when that switch is off."""
+def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None, cfg=None, opn=None, rs_map=None):
+    """Return the scanner frames. Each is empty when that switch is off.
+
+    rs_map: {TICKER: RS Rating 1 to 99} from relative_strength.py. CANSLIM's L and the scorecard L use it.
+    """
     features = features or {}
     want_v = features.get("scanner_vcp", True)
     want_c = features.get("scanner_canslim", True)
@@ -3163,7 +3143,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_m = features.get("scanner_marios", True)
     want_sc = features.get("scorecard_canslim", True)
     vcp = scan_vcp(close, high, low, vol, universe, cfg) if (want_v or want_l) else pd.DataFrame()
-    canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders) if (want_c or want_l) else (pd.DataFrame(), {})
+    canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()
@@ -3171,7 +3151,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     qull = scan_qullamaggie(close, high, low, vol, universe, cfg, opn=opn, scores=scores) if want_q else pd.DataFrame()
     mar = scan_marios(close, high, low, vol, universe, cfg, opn=opn, scores=scores) if want_m else pd.DataFrame()
     leaders = combine_leaders(vcp, canslim) if want_l else pd.DataFrame()
-    sc_letters = scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders) if want_sc else pd.DataFrame()
+    sc_letters = scorecard_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map) if want_sc else pd.DataFrame()
     if want_w:
         week, week_hist = scan_52w(close, high, low, vol, universe, scores)
     else:

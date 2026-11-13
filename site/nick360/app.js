@@ -349,7 +349,7 @@
       '<p class="note">' + gaps.map((r) => esc(r.symbol) + " unavailable. " + esc(r.note)).join(" ") + "</p></div>";
     const head = indexBox + '<div class="ph">Screens <input id="qsym" aria-label="Filter symbols" placeholder="Filter" value="' + esc(state.query) + '"></div>' +
       '<div class="legend">Rank is our 1–99 twelve-month score. Grade is our A–D checklist. Neither is a third-party rating. A screen with missing inputs is counted as not evaluated, not as a miss.</div>' +
-      '<div class="cols"><button type="button" data-act="sort" data-key="ticker">Symbol</button><button type="button" data-act="sort" data-key="chg">Chg %</button><button type="button" data-act="sort" data-key="last">Last</button><button type="button" data-act="sort" data-key="rank">Rank</button><button type="button" data-act="sort" data-key="grade">Grade</button><button type="button" data-act="sort" data-key="off">% off high</button></div>';
+      '<div class="cols"><button type="button" data-act="sort" data-key="ticker">Symbol</button><button type="button" data-act="sort" data-key="chg">Chg %</button><button type="button" data-act="sort" data-key="last">Last</button><button type="button" data-act="sort" data-key="rank">RS</button><button type="button" data-act="sort" data-key="grade">Grade</button><button type="button" data-act="sort" data-key="off">% off high</button></div>';
     const body = screens.map((screen) => {
       const open = !!state.open[screen.id];
       if (screen.status !== "enabled") {
@@ -442,7 +442,7 @@
       badge(s.stage.stage ? "Stage " + s.stage.stage : "Stage —", "bp") +
       badge(p ? "Pressure " + p.color : "Pressure —", p && p.color === "red" ? "br" : p && p.color === "yellow" ? "by" : "bg") +
       badge(risk ? "Entry " + risk.color : "Entry —", risk && risk.color === "red" ? "br" : risk && risk.color === "yellow" ? "by" : "bg") +
-      badge(E.finite(rankOf(s)) ? "Rank " + rankOf(s) : "Rank —", "bp") +
+      badge(E.finite(rankOf(s)) ? "RS " + rankOf(s) : "RS —", "bp") +
       badge(g ? "Grade " + g : "Grade —", g === "D" ? "br" : g === "C" ? "by" : "bg") +
       "</span>";
   }
@@ -573,14 +573,14 @@
     return '<div class="page">' + indexCards() + '<div class="dash"><section class="card"><h3>Market status <small>Our regime</small></h3><div class="big ' + (regime.label === "DEFENSIVE" ? "dn" : regime.label === "UPTREND" ? "up" : "") + '">' + esc(regime.label) + "</div><p class=\"note\">" + esc(regime.reason || regime.note) + "</p><p class=\"note\">" + esc(regime.note) + "</p></section>" +
       '<section class="card"><h3>From your paper log <small>not a universal stop</small></h3>' + (hint.available ? '<div class="big">' + pct(hint.pct, 1) + "</div>" : '<div class="big mut">—</div>') + '<p class="note">' + esc(hint.reason) + "</p></section>" +
       '<section class="card"><h3>Desk notes <small>stored facts</small></h3>' + noteList().map((n) => '<p class="note">' + esc(n) + "</p>").join("") + "</section></div>" +
-      '<div class="split2"><section class="card"><h3>Paper portfolio <small>this browser only</small></h3>' + (port ? '<div class="scroll"><table><thead><tr><th>Symbol</th><th>Chg</th><th>Last</th><th>Rank</th><th>Grade</th><th>Entry</th><th>Avg cost</th><th>Stop</th><th>Stop %</th><th>P&amp;L %</th><th>R</th><th>Alerts</th></tr></thead><tbody>' + port + "</tbody></table></div>" : '<p class="note">No paper positions yet. Groups appear when a fill is marked full, half, or quarter. Unmarked fills stay under Unclassified. No stop is filled in for you.</p>') +
+      '<div class="split2"><section class="card"><h3>Paper portfolio <small>this browser only</small></h3>' + (port ? '<div class="scroll"><table><thead><tr><th>Symbol</th><th>Chg</th><th>Last</th><th>RS</th><th>Grade</th><th>Entry</th><th>Avg cost</th><th>Stop</th><th>Stop %</th><th>P&amp;L %</th><th>R</th><th>Alerts</th></tr></thead><tbody>' + port + "</tbody></table></div>" : '<p class="note">No paper positions yet. Groups appear when a fill is marked full, half, or quarter. Unmarked fills stay under Unclassified. No stop is filled in for you.</p>') +
       '<p class="note">Coverage: ' + state.desk.stocks.length + " symbols, " + with252 + " with 252 sessions, " + state.missing + " files missing, " + stale + " older than " + esc(state.meta.price_as_of || "the desk date") + ".</p></section>" +
       '<section class="card"><h3>Focus list <small>this browser</small></h3>' + focusTable() + "</section></div></div>";
   }
   function focusTable() {
     const focus = loadList("n360-focus");
     return '<form id="focusadd" class="form" style="grid-template-columns:1fr auto;margin-bottom:8px"><label>Symbol<input name="ticker" aria-label="Focus symbol"></label><button class="btn" type="submit">Add</button></form>' +
-      (focus.length ? '<table><thead><tr><th>Symbol</th><th>Last</th><th>Rank</th><th>Grade</th><th>Entry risk</th><th>Note</th><th></th></tr></thead><tbody>' + focus.map((row) => {
+      (focus.length ? '<table><thead><tr><th>Symbol</th><th>Last</th><th>RS</th><th>Grade</th><th>Entry risk</th><th>Note</th><th></th></tr></thead><tbody>' + focus.map((row) => {
         const s = state.by.get(row.ticker);
         const risk = s && s.last >= 0 ? s.risk[s.last] : null;
         return "<tr><td><button type=\"button\" data-act=\"pick\" data-ticker=\"" + esc(row.ticker) + "\">" + esc(row.ticker) + "</button></td><td>" + (s ? px(s.close) : "—") + "</td><td>" + (s && E.finite(rankOf(s)) ? rankOf(s) : "—") + "</td><td>" + esc(s ? gradeLetter(s) || "—" : "—") + "</td><td>" + (risk ? esc(risk.color) : "—") + "</td><td>" + esc(row.note || "") + '</td><td><button type="button" data-act="remove" data-list="n360-focus" data-ticker="' + esc(row.ticker) + '">Remove</button></td></tr>';

@@ -24,9 +24,12 @@ PAGES = [
     ("marios.html", "marios", "Marios breakout"),
     ("episodic-pivot.html", "ep", "Episodic pivot"),
     ("gap-up.html", "gapup", "Gap Up"),
+    ("minervini-1m.html", "min1m", "Minervini 1-Month"),
+    ("minervini-5m.html", "min5m", "Minervini 5-Month"),
     ("breakdowns.html", "breakdowns", "Breakdowns"),
     ("volume.html", "volume", "High volume"),
     ("leaders.html", "leaders", "Leaders"),
+    ("eps-rs.html", "epsrs", "Highest EPS and RS"),
     ("52-week.html", "week52", "52-week"),
     ("options.html", "options", "Debit spreads"),
     ("earnings-calendar.html", "calendar", "Calendar"),
@@ -90,7 +93,7 @@ HEAD_EXTRA = {
     "today": '<link rel="stylesheet" href="css/market_news.css">\n',
 }
 EXTRA = {
-    "chartviewer": '<script src="js/viewer.js"></script>\n',
+    "chartviewer": '<script src="js/rs_line.js"></script>\n<script src="js/viewer.js"></script>\n',
     "today": '<script src="js/market_news.js"></script>\n',
 }
 

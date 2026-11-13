@@ -24,9 +24,9 @@ sys.path.insert(0, os.path.join(ROOT, "site"))
 import tables  # noqa: E402
 import build_pages  # noqa: E402
 
-TECHNICAL = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "week52", "breakouts", "volume", "pullbacks",
+TECHNICAL = ["vcp", "box", "flag", "qullamaggie", "marios", "ep", "gapup", "min1m", "min5m", "week52", "breakouts", "volume", "pullbacks",
              "breakdowns", "trends", "wheel"]
-FUNDAMENTAL = ["canslim", "leaders", "growth", "quality", "dividend", "scorecard", "top"]
+FUNDAMENTAL = ["canslim", "leaders", "epsrs", "growth", "quality", "dividend", "scorecard", "top"]
 NOT_SCREENERS = ["today", "watchlist", "buysetups", "tradingfloor", "papertest", "alerts", "backtest", "options", "rotation", "chartviewer", "gainers",
                  "breadth", "secperf", "heatmaps", "calendar", "heatmap", "cards", "putcall", "walls", "analysts", "thirteen",
                  "aaii", "insiders", "headlines", "xly", "financials", "tracker", "company", "divfund", "macro", "secmacro",
@@ -118,7 +118,7 @@ def test_off_switch_is_the_old_code_path():
     assert 'let group = grouped ? pickGroup(' in viewer and ': "";' in viewer
     assert 'label: group ? "All " + group + " stocks" : "All scanner stocks"' in viewer
     # No new downloads: the viewer still reads only the saved bar files; the pick is saved with localStorage.
-    assert re.findall(r'loadCsv\("([^"+]+)', viewer) == ["ohlc/", "ohlc/"]
+    assert sorted(re.findall(r'loadCsv\("([^"+]+)', viewer)) == ["index_ohlc/SPY.csv", "ohlc/", "ohlc/"]  # + saved SPY for the RS line
     assert 'const GROUP_KEY = "desk-cv-group";' in viewer and "localStorage.setItem(GROUP_KEY, next)" in viewer
     assert ".cvgroup{" in _read("site", "css", "desk.css")
 

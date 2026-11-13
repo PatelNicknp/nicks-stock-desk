@@ -14,12 +14,17 @@
   const TARGET_COLOR = "#22C55E";
   const PIVOT_COLOR = "#a5b4fc";
   const GRADE_ORDER = { A: 4, B: 3, C: 2, D: 1 };
+  // RS Rating, MarketSmith / O'Neil style, the same as the desk's relative_strength.py.
+  // Discrete quarters: [sessions back to the quarter's end, weight]. Q1 runs from 63 sessions ago to
+  // today, Q2 from 126 to 63 ago, Q3 from 189 to 126, Q4 from 252 to 189. Each quarter's change is
+  // its own end / start - 1, so the latest quarter really counts double.
   const RS_WEIGHTS = [
-    [63, 0.4],
+    [0, 0.4],
+    [63, 0.2],
     [126, 0.2],
     [189, 0.2],
-    [252, 0.2],
   ];
+  const RS_QUARTER = 63;
 
   function finite(n) {
     return typeof n === "number" && Number.isFinite(n);
@@ -172,11 +177,12 @@
         let score = 0;
         let ok = true;
         for (let w = 0; w < RS_WEIGHTS.length; w++) {
-          const back = RS_WEIGHTS[w][0];
+          const endBack = RS_WEIGHTS[w][0];
           const weight = RS_WEIGHTS[w][1];
-          const prev = bars[i - back].c;
-          if (!pos(prev) || !pos(bars[i].c)) { ok = false; break; }
-          score += weight * (bars[i].c / prev - 1);
+          const end = bars[i - endBack].c;
+          const start = bars[i - endBack - RS_QUARTER].c;
+          if (!pos(start) || !pos(end)) { ok = false; break; }
+          score += weight * (end / start - 1);
         }
         if (ok) wscore[i] = score;
       }
@@ -288,7 +294,7 @@
     const rank = s.rank[i];
     checks.push({
       id: "rank80",
-      label: "12-month rank at least 80",
+      label: "RS Rating at least 80",
       state: finite(rank) ? (rank >= 80 ? "pass" : "fail") : "missing",
     });
     const known = checks.filter((x) => x.state !== "missing");
@@ -334,7 +340,7 @@
       { id: "t5", label: "Close above the 50-day", state: pos(sma[50][i]) ? (c > sma[50][i] ? "pass" : "fail") : "missing" },
       { id: "t6", label: "Close at least 30% above the 252-session low", state: hl ? (c >= hl.lo * 1.3 ? "pass" : "fail") : "missing" },
       { id: "t7", label: "Close within 25% of the 252-session high", state: hl ? (c >= hl.hi * 0.75 ? "pass" : "fail") : "missing" },
-      { id: "t8", label: "Our 12-month rank at least 70 (not a published third-party RS rating)", state: finite(s.rank[i]) ? (s.rank[i] >= 70 ? "pass" : "fail") : "missing" },
+      { id: "t8", label: "RS Rating at least 70 (our MarketSmith-style copy, not the published IBD rating)", state: finite(s.rank[i]) ? (s.rank[i] >= 70 ? "pass" : "fail") : "missing" },
     ];
     return {
       items: items,
@@ -381,7 +387,7 @@
         if (finite(rv) && rv >= 1.5) out.push({ side: "neg", net: true, text: "Largest down day on high volume" });
       }
     }
-    if (finite(s.rank[i]) && s.rank[i] >= 70) out.push({ side: "pos", net: false, text: "Rank 70+" });
+    if (finite(s.rank[i]) && s.rank[i] >= 70) out.push({ side: "pos", net: false, text: "RS 70+" });
     if (i >= 252 && pos(s.bars[i - 252].c)) {
       const y = b.c / s.bars[i - 252].c - 1;
       if (y >= 0.25) out.push({ side: "neg", net: false, text: "Extended vs 252 sessions ago" });
@@ -849,6 +855,18 @@
     return { state: "no", reason: "No base in the 35 to 125 session band met the depth, plateau, advance, and volume checks." };
   }
 
+  // The latest bar uses the desk's own RS Rating (scores.csv column rs, built by relative_strength.py
+  // across every stock on the desk) when it is on file, so Nick 360 and the Stock Box show one number.
+  // Older bars keep the rank worked out here with the same formula. A blank desk RS leaves this rank.
+  function useDeskRs(s) {
+    if (!s || s.last < 0 || !s.score) return;
+    const raw = s.score.rs;
+    if (raw == null || String(raw).trim() === "") return;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return;
+    s.rank[s.last] = clamp(Math.round(n), 1, 99);
+  }
+
   function buildDesk(records, meta, listings) {
     const stocks = (records || []).map((r) => {
       const parsed = parseBars(r.bars || r.rows || []);
@@ -862,6 +880,7 @@
     }).filter((s) => s.ticker);
     const dates = calendar(stocks, 252);
     rankDates(stocks, dates);
+    stocks.forEach(useDeskRs);
     stocks.forEach((s) => finalizeStock(s, meta || {}));
     attachListings(stocks, listings, modeDate(stocks));
     stocks.forEach((s) => {
@@ -899,7 +918,7 @@
     { id: "bread", ref: "Bread & Butter", ourName: "Bread & Butter", status: "enabled",
       evidence: "UI label only. The published formula was not found. This is our checklist.",
       formula: "Trend template 8 of 8, stage 2, leadership grade A or B, and the close within 15% of the 252-session high.",
-      data: "252 sessions, 200-day average, 12-month rank.",
+      data: "252 sessions, 200-day average, RS Rating.",
       match: (s) => tri(s, () => !s.template || s.template.missing ? "skip" : (s.template.complete && s.stage.stage === 2 && (gradeNow(s) === "A" || gradeNow(s) === "B") && finite(s.offHigh) && s.offHigh >= -0.15) ? "match" : "no") },
     { id: "gradeA", ref: "Grade A", ourName: "Grade A", status: "enabled",
       evidence: "Sample grade letters. The third-party grade formula is not published.",
@@ -923,7 +942,7 @@
       match: (s) => s.patterns.tight.state === "match" ? "match" : s.patterns.tight.state },
     { id: "rank89", ref: "RPR 89+ Grade C+", ourName: "Rank 89+ and grade C+", status: "enabled",
       evidence: "RPR is not published. The number here is our 1–99 rank.",
-      formula: "12-month rank at least 89 and grade A, B, or C.",
+      formula: "RS Rating at least 89 and grade A, B, or C.",
       data: "Rank and grade.",
       match: (s) => { const r = rankNow(s); const g = gradeNow(s); if (!finite(r) || !g) return "skip"; return r >= 89 && g !== "D" ? "match" : "no"; } },
     { id: "lead5", ref: "Fab 5 (RPR 70+)", ourName: "Leadership Five", status: "enabled",
@@ -954,7 +973,7 @@
       match: (s) => powerIpoState(s) },
     { id: "top5", ref: "Top 5% RPR", ourName: "Top 5% rank", status: "enabled",
       evidence: "Our rank, scaled 1 to 99. Ranks 95 through 99 are the top slice.",
-      formula: "12-month rank at least 95.",
+      formula: "RS Rating at least 95.",
       data: "Rank.",
       match: (s) => finite(rankNow(s)) ? (rankNow(s) >= 95 ? "match" : "no") : "skip" },
     { id: "newTop5", ref: "New Top 5% RPR", ourName: "New top 5% rank", status: "enabled",
@@ -1010,7 +1029,7 @@
       data: "200-day average and its value 21 sessions ago.",
       match: (s) => s.stage.stage == null || !pos(s.close) ? "skip" : (s.stage.stage === 2 && s.close >= 10 ? "match" : "no") },
     { id: "template", ref: "Trend Template", ourName: "Trend template", status: "enabled",
-      evidence: "The eight-point checklist is the published trend template. Measurement choices (simple averages, 21 sessions, 252-session high and low, our rank for the RS line) are stated. Our rank is not a third-party RS rating.",
+      evidence: "The eight-point checklist is the published trend template. Measurement choices (simple averages, 21 sessions, 252-session high and low, the desk RS Rating for the RS rule) are stated. The RS Rating is our MarketSmith-style copy, not the published IBD rating.",
       formula: "All eight template checks pass. A missing check keeps the stock out rather than failing it.",
       data: "150, 200, and 50-day averages, 252-session high and low, rank.",
       match: (s) => !s.template || s.template.missing ? "skip" : (s.template.complete ? "match" : "no") },
@@ -1096,7 +1115,7 @@
     data: d.data,
     tested: d.status === "enabled",
   })).concat([
-    { ref: "RPR", ourName: "12-month rank", id: "rank", status: "enabled", evidence: "Weighting matches the published 40/20/20/20 quarter method. The universe is this desk, so the number is not a third-party RS or RPR.", formula: "0.40 times the 63-session return, plus 0.20 times each of the three prior 63-session returns. Percentile rank from 1 to 99 with tie midpoints. A missing leg leaves the score out of the ranking.", data: "252 stored sessions and at least two names.", tested: true },
+    { ref: "RPR", ourName: "RS Rating", id: "rank", status: "enabled", evidence: "The desk's one RS score, MarketSmith / O'Neil style: the published 40/20/20/20 quarter weighting on discrete 63-session quarters. The universe is this desk (ETFs and funds left out), so the number is not the published IBD RS or RPR. The latest bar uses the desk's RS Rating from scores.csv; older bars are worked out here with the same formula.", formula: "0.40 times the latest 63-session return, plus 0.20 times each of the three earlier, separate 63-session returns (3 to 6, 6 to 9, and 9 to 12 months ago). Percentile rank from 1 to 99 with tie midpoints. A missing leg leaves the score out of the ranking.", data: "253 stored sessions and at least two names.", tested: true },
     { ref: "TPR / grade", ourName: "Leadership grade", id: "grade", status: "enabled", evidence: "Letter formulas are not published.", formula: "Six pass/fail checks. Fewer than five known checks leaves the grade blank. A is 5 or more passes and no fails. B is at least 4 passes and at most 1 fail. C is at least 3 passes and at most 2 fails. Otherwise D.", data: "Averages, 252-session high and low, rank.", tested: true },
     { ref: "Pressure", ourName: "Price-volume pressure", id: "pressure", status: "enabled", evidence: "Not a published pressure formula and not a read of institutional intent.", formula: "Over 20 sessions, up-close volume versus down-close volume. A flat close splits that session's volume in half. Green at or above 55% up volume, red at or below 45%, yellow between. A missing volume session leaves the window blank.", data: "20 sessions with volume and a prior close.", tested: true },
     { ref: "Buy Risk", ourName: "Entry risk", id: "risk", status: "enabled", evidence: "Not a published buy-risk formula.", formula: "Percent the close sits above the 50-day simple average. Green: above it and at most 8%. Yellow: more than 8% and at most 15%. Red: more than 15%, or below the average.", data: "50-day average.", tested: true },
@@ -1169,7 +1188,7 @@
     const g = gradeNow(s);
     bits.push(g ? "Leadership grade " + g + "." : "Leadership grade is unavailable.");
     const r = rankNow(s);
-    bits.push(finite(r) ? "12-month rank " + r + " inside this desk (not a third-party RS rating)." : "12-month rank is unavailable.");
+    bits.push(finite(r) ? "RS Rating " + r + " versus every stock on this desk (our MarketSmith-style copy, not the published IBD rating)." : "RS Rating is unavailable (it needs a full year of prices).");
     const p = s.pressure[i];
     if (p) {
       bits.push("Pressure " + p.color + ", " + (p.buy * 100).toFixed(1) + "% of the 20-session price-volume on up closes. This is not an institutional-intent reading.");
