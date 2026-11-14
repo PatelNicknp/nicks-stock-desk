@@ -1,9 +1,9 @@
 {
- "updated_pt": "2026-11-13 07:34 PT",
+ "updated_pt": "2026-11-13 16:11 PT",
  "price_as_of": "2026-11-13",
- "mode": "hourly",
+ "mode": "full",
  "label": "Research only. Not a recommendation to buy or sell. This desk never places trades. Stocks only, no option contracts.",
- "n_stocks": 2486,
+ "n_stocks": 2488,
  "tabs": [
   "aaii_sentiment",
   "alerts",

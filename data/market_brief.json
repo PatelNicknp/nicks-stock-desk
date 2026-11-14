@@ -2,34 +2,34 @@
   "schema_version": 2,
   "feature": "market_news",
   "session": "2026-11-13",
-  "slot": "morning_open",
-  "updated_pt": "2026-11-13 07:34 PT",
+  "slot": "evening_close",
+  "updated_pt": "2026-11-13 16:11 PT",
   "price_as_of": "2026-11-13",
-  "why_moved": "The market fell: S&P -0.9%, Nasdaq -1.8%, Dow-heavy groups (Financials/Industrials) about -0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-2.8%) and Industrials (-0.7%); leading sectors Consumer Staples (0.7%) and Communication Services (0.4%) held up. The move was broad: 1599 stocks fell and 866 rose; VIX is firm at 20.6.",
-  "why_moved_short": "The S&P slipped -0.9% (Nasdaq -1.8%), dragged by Technology (-2.8%), while Consumer Staples (0.7%) and Communication Services (0.4%) held up (866 stocks up, 1599 down); VIX at 20.6.",
+  "why_moved": "The market fell: S&P -0.4%, Nasdaq -1.2%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-2.0%) and Consumer Discretionary (-0.4%); leading sectors Consumer Staples (1.4%) and Communication Services (1.1%) held up. The move was fairly broad: 1332 stocks rose and 1130 fell.",
+  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1332 stocks up, 1130 down).",
   "story": {
     "direction": "down",
     "date_label": "November 13, 2026",
-    "summary": "U.S. morning summary",
+    "summary": "U.S. closing summary",
     "clear_cause": true,
     "cause": "ai_mood",
-    "lead": "Tech led stocks lower.",
-    "support": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus.",
+    "lead": "Chip and tech shares led stocks lower.",
+    "support": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang.",
     "support_ref": 1,
     "bullets": [
       {
         "lead": "Technology took the biggest hit.",
-        "rest": "Tech fell 2.75%.",
+        "rest": "Tech fell 2.01%.",
         "ref": 1
       },
       {
-        "lead": "More stocks fell than rose.",
-        "rest": "1599 stocks fell and 866 rose.",
+        "lead": "More stocks rose than fell.",
+        "rest": "1332 stocks rose and 1130 fell.",
         "ref": null
       },
       {
         "lead": "Staples held up.",
-        "rest": "Staples rose 0.71%.",
+        "rest": "Staples rose 1.42%.",
         "ref": null
       }
     ],
@@ -37,22 +37,22 @@
     "chips": [
       {
         "name": "Tech",
-        "pct": -2.75,
-        "pct_text": "2.75%",
+        "pct": -2.01,
+        "pct_text": "2.01%",
         "arrow": "down",
         "kind": "move",
         "bar": 67
       },
       {
         "name": "Chips",
-        "pct": -4.13,
-        "pct_text": "4.13%",
+        "pct": -2.99,
+        "pct_text": "2.99%",
         "arrow": "down",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "6 of 11 sectors down",
+        "name": "4 of 11 sectors down",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -63,15 +63,15 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": -0.91,
-        "pct_text": "0.91%",
+        "pct": -0.36,
+        "pct_text": "0.36%",
         "arrow": "down",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": -1.83,
-        "pct_text": "1.83%",
+        "pct": -1.2,
+        "pct_text": "1.2%",
         "arrow": "down",
         "source": "qqq"
       }
@@ -79,88 +79,114 @@
     "news": [
       {
         "n": 1,
-        "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
-        "source": "Yahoo Finance",
+        "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
+        "source": "MarketWatch",
         "via": "",
-        "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
-        "published": "2026-11-12",
-        "published_at": "2026-11-13T03:07:45+00:00",
-        "date_label": "Nov 12, 7:07 PM PT",
-        "age_label": "12h ago",
+        "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T21:10:00+00:00",
+        "date_label": "Nov 13, 1:10 PM PT",
+        "age_label": "3h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 2,
-        "title": "The S&P 500 is shrugging off Nvidia’s selloff this week. Here’s what’s keeping the rest of the market afloat.",
-        "source": "MarketWatch",
+        "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+        "source": "CNBC",
         "via": "",
-        "url": "https://www.marketwatch.com/story/the-s-p-500-is-shrugging-off-nvidias-selloff-heres-whats-keeping-the-rest-of-the-market-afloat-7cdf2f05?mod=mw_rss_topstories",
-        "published": "2026-11-12",
-        "published_at": "2026-11-12T21:08:00+00:00",
-        "date_label": "Nov 12, 1:08 PM PT",
-        "age_label": "18h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      },
-      {
-        "n": 3,
-        "title": "S&P 500, Dow, Nasdaq Futures Recover After Markets End Lower On Jensen Huang’s Exit, Oil Price Pressure  —  CRWV, CBRS, NVDA, TSLA In Focus",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-futures-recover-after-markets-end-lower-on-jensen-huang-s-exit-oil-price-pressure-crwv-cbrs-nvda-tsla-in-focus/cNbbkHFR9OI?.tsrc=rss",
-        "published": "2026-11-12",
-        "published_at": "2026-11-13T00:19:00+00:00",
-        "date_label": "Nov 12, 4:19 PM PT",
-        "age_label": "15h ago",
-        "region": "US",
-        "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move."
-      },
-      {
-        "n": 4,
-        "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
-        "published": "2026-11-12",
-        "published_at": "2026-11-13T03:21:37+00:00",
-        "date_label": "Nov 12, 7:21 PM PT",
-        "age_label": "12h ago",
+        "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T21:18:30+00:00",
+        "date_label": "Nov 13, 1:18 PM PT",
+        "age_label": "3h ago",
         "region": "US",
         "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
-        "n": 5,
-        "title": "5 Unrivaled Stocks to Buy for the Next Decade",
+        "n": 3,
+        "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/5-unrivaled-stocks-buy-next-223321955.html?.tsrc=rss",
-        "published": "2026-11-12",
-        "published_at": "2026-11-12T22:33:21+00:00",
-        "date_label": "Nov 12, 2:33 PM PT",
-        "age_label": "17h ago",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T21:49:35+00:00",
+        "date_label": "Nov 13, 1:49 PM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 4,
+        "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T21:49:53+00:00",
+        "date_label": "Nov 13, 1:49 PM PT",
+        "age_label": "2h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 5,
+        "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T22:20:02+00:00",
+        "date_label": "Nov 13, 2:20 PM PT",
+        "age_label": "2h ago",
         "region": "Global",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 6,
+        "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T22:13:55+00:00",
+        "date_label": "Nov 13, 2:13 PM PT",
+        "age_label": "2h ago",
+        "region": "Global",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+      },
+      {
+        "n": 7,
+        "title": "Stock Market Today, Nov. 13: CoreWeave Falls Over 6% on AI-Cloud Selling and Reported $4 Billion Loan Talks",
+        "source": "Yahoo Finance",
+        "via": "",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-coreweave-falls-over-6-on-ai-cloud-selling-and-reported-usd4-billion-loan-talks/?.tsrc=rss",
+        "published": "2026-11-13",
+        "published_at": "2026-11-13T23:04:29+00:00",
+        "date_label": "Nov 13, 3:04 PM PT",
+        "age_label": "1h ago",
+        "region": "Global",
+        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
-    "label": "Fear",
-    "vix": 20.58,
+    "label": "Mixed",
+    "vix": 19.3,
     "put_call_zone": "Greed",
-    "put_call": 0.59,
-    "advancers": 866,
-    "decliners": 1599,
-    "why": "VIX 20.6, put/call Greed, 866 up / 1599 down"
+    "put_call": 0.72,
+    "advancers": 1332,
+    "decliners": 1130,
+    "why": "VIX 19.3, put/call Greed, 1332 up / 1130 down"
   },
   "headlines": [
     {
-      "title": "The S&P 500 is shrugging off Nvidia’s selloff this week. Here’s what’s keeping the rest of the market afloat.",
+      "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
       "source": "MarketWatch",
-      "url": "https://www.marketwatch.com/story/the-s-p-500-is-shrugging-off-nvidias-selloff-heres-whats-keeping-the-rest-of-the-market-afloat-7cdf2f05?mod=mw_rss_topstories",
-      "published": "2026-11-12",
-      "published_at": "2026-11-12T21:08:00+00:00",
+      "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T21:10:00+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
@@ -168,54 +194,17 @@
       "via": "",
       "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 1:08 PM PT",
-      "age_label": "18h ago",
-      "wrap": 10.0,
-      "rank": 12.5
+      "published_pt": "Nov 13, 1:10 PM PT",
+      "age_label": "3h ago",
+      "wrap": 15.0,
+      "rank": 17.0
     },
     {
-      "title": "S&P 500, Dow, Nasdaq Futures Recover After Markets End Lower On Jensen Huang’s Exit, Oil Price Pressure  —  CRWV, CBRS, NVDA, TSLA In Focus",
-      "source": "Yahoo Finance",
-      "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-futures-recover-after-markets-end-lower-on-jensen-huang-s-exit-oil-price-pressure-crwv-cbrs-nvda-tsla-in-focus/cNbbkHFR9OI?.tsrc=rss",
-      "published": "2026-11-12",
-      "published_at": "2026-11-13T00:19:00+00:00",
-      "trusted": true,
-      "causes": [
-        "oil",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 4:19 PM PT",
-      "age_label": "15h ago",
-      "wrap": 5.0,
-      "rank": 12.5
-    },
-    {
-      "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
-      "source": "Yahoo Finance",
-      "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
-      "published": "2026-11-12",
-      "published_at": "2026-11-13T03:07:45+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 7:07 PM PT",
-      "age_label": "12h ago",
-      "wrap": 5.0,
-      "rank": 9.5
-    },
-    {
-      "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
-      "published": "2026-11-12",
-      "published_at": "2026-11-13T03:21:37+00:00",
+      "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+      "source": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T21:18:30+00:00",
       "trusted": true,
       "causes": [
         "rates",
@@ -224,17 +213,54 @@
       "via": "",
       "region": "US",
       "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 7:21 PM PT",
-      "age_label": "12h ago",
-      "wrap": 5.0,
-      "rank": 6.0
+      "published_pt": "Nov 13, 1:18 PM PT",
+      "age_label": "3h ago",
+      "wrap": 13.0,
+      "rank": 15.5
     },
     {
-      "title": "5 Unrivaled Stocks to Buy for the Next Decade",
+      "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/5-unrivaled-stocks-buy-next-223321955.html?.tsrc=rss",
-      "published": "2026-11-12",
-      "published_at": "2026-11-12T22:33:21+00:00",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T21:49:35+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 1:49 PM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 14.0
+    },
+    {
+      "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T21:49:53+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood",
+        "inflation"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 1:49 PM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 14.0
+    },
+    {
+      "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T22:20:02+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
@@ -242,24 +268,58 @@
       "via": "",
       "region": "Global",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 12, 2:33 PM PT",
-      "age_label": "17h ago",
-      "wrap": 5.0,
-      "rank": 5.5
+      "published_pt": "Nov 13, 2:20 PM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 10.5
+    },
+    {
+      "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T22:13:55+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "Global",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 2:13 PM PT",
+      "age_label": "2h ago",
+      "wrap": 10.0,
+      "rank": 10.5
+    },
+    {
+      "title": "Stock Market Today, Nov. 13: CoreWeave Falls Over 6% on AI-Cloud Selling and Reported $4 Billion Loan Talks",
+      "source": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-coreweave-falls-over-6-on-ai-cloud-selling-and-reported-usd4-billion-loan-talks/?.tsrc=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T23:04:29+00:00",
+      "trusted": true,
+      "causes": [],
+      "via": "",
+      "region": "Global",
+      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 3:04 PM PT",
+      "age_label": "1h ago",
+      "wrap": 10.0,
+      "rank": 10.0
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 11.79,
+      "score": 12.67,
       "headlines": [
         {
-          "title": "The S&P 500 is shrugging off Nvidia’s selloff this week. Here’s what’s keeping the rest of the market afloat.",
+          "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
           "source": "MarketWatch",
-          "url": "https://www.marketwatch.com/story/the-s-p-500-is-shrugging-off-nvidias-selloff-heres-whats-keeping-the-rest-of-the-market-afloat-7cdf2f05?mod=mw_rss_topstories",
-          "published": "2026-11-12",
-          "published_at": "2026-11-12T21:08:00+00:00",
+          "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T21:10:00+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
@@ -267,54 +327,17 @@
           "via": "",
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 1:08 PM PT",
-          "age_label": "18h ago",
-          "wrap": 10.0,
-          "rank": 12.5
+          "published_pt": "Nov 13, 1:10 PM PT",
+          "age_label": "3h ago",
+          "wrap": 15.0,
+          "rank": 17.0
         },
         {
-          "title": "S&P 500, Dow, Nasdaq Futures Recover After Markets End Lower On Jensen Huang’s Exit, Oil Price Pressure  —  CRWV, CBRS, NVDA, TSLA In Focus",
-          "source": "Yahoo Finance",
-          "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-futures-recover-after-markets-end-lower-on-jensen-huang-s-exit-oil-price-pressure-crwv-cbrs-nvda-tsla-in-focus/cNbbkHFR9OI?.tsrc=rss",
-          "published": "2026-11-12",
-          "published_at": "2026-11-13T00:19:00+00:00",
-          "trusted": true,
-          "causes": [
-            "oil",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 4:19 PM PT",
-          "age_label": "15h ago",
-          "wrap": 5.0,
-          "rank": 12.5
-        },
-        {
-          "title": "Dow, S&P 500, Nasdaq Futures Edge Higher As Markets Attempt To Recover From Nvidia Rout: SLS, MSFT, CADL, MSTR In Focus",
-          "source": "Yahoo Finance",
-          "url": "https://stocktwits.com/news-articles/markets/equity/dow-s-and-p-500-nasdaq-futures-edge-higher-as-markets-attempt-to-recover-from-nvidia-rout-sls-msft-cadl-mstr-in-focus/cNbb8QDR9OW?.tsrc=rss",
-          "published": "2026-11-12",
-          "published_at": "2026-11-13T03:07:45+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 7:07 PM PT",
-          "age_label": "12h ago",
-          "wrap": 5.0,
-          "rank": 9.5
-        },
-        {
-          "title": "Dow Jones Futures Rise After Market Weathers Nvidia CEO Huang's Exit, Surging Yields",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/4a3dff17-3e8e-33ca-823f-8ac12eff6a4a/dow-jones-futures-rise-after.html?.tsrc=rss",
-          "published": "2026-11-12",
-          "published_at": "2026-11-13T03:21:37+00:00",
+          "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T21:18:30+00:00",
           "trusted": true,
           "causes": [
             "rates",
@@ -323,17 +346,54 @@
           "via": "",
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 7:21 PM PT",
-          "age_label": "12h ago",
-          "wrap": 5.0,
-          "rank": 6.0
+          "published_pt": "Nov 13, 1:18 PM PT",
+          "age_label": "3h ago",
+          "wrap": 13.0,
+          "rank": 15.5
         },
         {
-          "title": "5 Unrivaled Stocks to Buy for the Next Decade",
+          "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/5-unrivaled-stocks-buy-next-223321955.html?.tsrc=rss",
-          "published": "2026-11-12",
-          "published_at": "2026-11-12T22:33:21+00:00",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T21:49:35+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 1:49 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 14.0
+        },
+        {
+          "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T21:49:53+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood",
+            "inflation"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 1:49 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 14.0
+        },
+        {
+          "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T22:20:02+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
@@ -341,63 +401,81 @@
           "via": "",
           "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 2:33 PM PT",
-          "age_label": "17h ago",
-          "wrap": 5.0,
-          "rank": 5.5
+          "published_pt": "Nov 13, 2:20 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 10.5
+        },
+        {
+          "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T22:13:55+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "Global",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 2:13 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 10.5
         }
       ]
     },
     {
-      "cause": "oil",
-      "label": "Oil / Energy",
+      "cause": "inflation",
+      "label": "Inflation",
       "score": 1.5,
       "headlines": [
         {
-          "title": "S&P 500, Dow, Nasdaq Futures Recover After Markets End Lower On Jensen Huang’s Exit, Oil Price Pressure  —  CRWV, CBRS, NVDA, TSLA In Focus",
+          "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
           "source": "Yahoo Finance",
-          "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-futures-recover-after-markets-end-lower-on-jensen-huang-s-exit-oil-price-pressure-crwv-cbrs-nvda-tsla-in-focus/cNbbkHFR9OI?.tsrc=rss",
-          "published": "2026-11-12",
-          "published_at": "2026-11-13T00:19:00+00:00",
+          "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T21:49:53+00:00",
           "trusted": true,
           "causes": [
-            "oil",
-            "ai_mood"
+            "ai_mood",
+            "inflation"
           ],
           "via": "",
           "region": "US",
-          "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
-          "published_pt": "Nov 12, 4:19 PM PT",
-          "age_label": "15h ago",
-          "wrap": 5.0,
-          "rank": 12.5
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 1:49 PM PT",
+          "age_label": "2h ago",
+          "wrap": 10.0,
+          "rank": 14.0
         }
       ]
     }
   ],
   "vs_yesterday": {
-    "prior_mood": "Mixed",
-    "prior_session": "2026-11-12",
-    "text": "Mood flipped: was Mixed, now Fear.",
+    "prior_mood": "Fear",
+    "prior_session": "2026-11-13",
+    "text": "Mood flipped: was Fear, now Mixed.",
     "flipped": true,
     "same_fear": false
   },
   "breadth_check": {
-    "aligned": true,
-    "flag": "broad_decline",
-    "text": "Index and breadth agree: a broad down day."
+    "aligned": false,
+    "flag": "index_down_stocks_up",
+    "text": "SPY is down, but more stocks rose than fell — a narrow decline."
   },
   "regime": {
     "label": "chop",
-    "pct_above_50day": 52.5,
-    "pct_above_200day": 54.8,
+    "pct_above_50day": 54.5,
+    "pct_above_200day": 55.9,
     "text": "Breadth is split — not a clean uptrend or selloff."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
-      "Fear is high today. Big swings are more common — go slow with new buys.",
-      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
+      "Choppy day, small moves are normal; be patient with new buys.",
+      "The index is down, but most stocks held up. The weak print may be narrow.",
       "The desk is in chop — not a clean uptrend or selloff. Expect back-and-forth days."
     ],
     "disclaimer": "Research only. Not advice to buy or sell any stock."
@@ -409,45 +487,46 @@
     "source": "nasdaq_economicevents"
   },
   "prior_brief": {
-    "session": "2026-11-12",
-    "slot": "evening_close",
-    "why_moved": "The S&P slipped -0.3% (Nasdaq -0.3%), dragged by Materials (-1.3%), while Energy (1.5%) held up (528 stocks up, 1939 down).",
-    "mood": "Mixed",
+    "session": "2026-11-13",
+    "slot": "morning_open",
+    "why_moved": "The S&P slipped -0.9% (Nasdaq -1.8%), dragged by Technology (-2.8%), while Consumer Staples (0.7%) and Communication Services (0.4%) held up (866 stocks up, 1599 down); VIX at 20.6.",
+    "mood": "Fear",
     "causes": [
       "AI / Tech mood",
       "Oil / Energy"
     ]
   },
   "stats": {
-    "spy_price": 750.25,
-    "spy_day_pct": -0.91,
-    "qqq_day_pct": -1.83,
+    "spy_price": 754.37,
+    "spy_day_pct": -0.36,
+    "qqq_day_pct": -1.2,
     "dia_day_pct": null,
-    "vix": 20.58,
-    "advancers": 866,
-    "decliners": 1599,
-    "breadth_sma50": 52.5,
-    "breadth_sma200": 54.8,
-    "put_call": 0.59,
+    "vix": 19.3,
+    "advancers": 1332,
+    "decliners": 1130,
+    "breadth_sma50": 54.5,
+    "breadth_sma200": 55.9,
+    "put_call": 0.72,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
       "date": "2026-11-13",
-      "slot": "morning_open",
-      "mood": "Fear",
+      "slot": "evening_close",
+      "mood": "Mixed",
       "regime": "chop",
       "causes": [
         "ai_mood",
-        "oil"
+        "inflation"
       ],
       "sources": [
+        "CNBC",
         "MarketWatch",
         "Yahoo Finance"
       ],
-      "spy_day_pct": -0.91,
-      "qqq_day_pct": -1.83,
+      "spy_day_pct": -0.36,
+      "qqq_day_pct": -1.2,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
@@ -461,9 +540,9 @@
         },
         "ai_mood": {
           "up": 5,
-          "down": 6,
+          "down": 7,
           "flat": 0,
-          "n": 11
+          "n": 12
         },
         "rates": {
           "up": 1,
@@ -479,9 +558,9 @@
         },
         "oil": {
           "up": 0,
-          "down": 2,
+          "down": 3,
           "flat": 0,
-          "n": 2
+          "n": 3
         }
       },
       "by_source": {
@@ -523,29 +602,32 @@
         },
         "MarketWatch": {
           "up": 2,
-          "down": 2,
+          "down": 3,
           "flat": 0,
-          "n": 4
+          "n": 5
         },
         "Yahoo Finance": {
           "up": 4,
-          "down": 4,
+          "down": 5,
           "flat": 0,
-          "n": 8
+          "n": 9
         }
       },
-      "n_labeled": 11,
+      "n_labeled": 12,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-13T15:38:42.081162+00:00",
-    "summary": "Verified indexes on file did not all move the same way.",
-    "breadth": "mixed",
+    "retrieved_at": "2026-11-14T00:20:40.979162+00:00",
+    "summary": "Not enough verified index closes to call a worldwide move.",
+    "breadth": "unknown",
     "missing": [
       "S&P 500",
+      "STOXX Europe 600",
+      "DAX",
+      "FTSE 100",
       "Nikkei 225",
       "Shanghai Composite",
       "Hang Seng"
@@ -556,51 +638,17 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -0.91,
+        "pct": -0.36,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T07:34:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-13T16:11:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
-        "cause": "Possible context from MarketWatch: The S&P 500 is shrugging off Nvidia’s selloff this week. Here’s what’s keeping the rest of the market afloat.. Not proof this caused the percent.",
-        "cause_source": "MarketWatch",
-        "cause_url": "https://www.marketwatch.com/story/the-s-p-500-is-shrugging-off-nvidias-selloff-heres-whats-keeping-the-rest-of-the-market-afloat-7cdf2f05?mod=mw_rss_topstories"
-      },
-      {
-        "id": "sxxp",
-        "name": "STOXX Europe 600",
-        "region": "Europe",
-        "kind": "index",
-        "pct": 0.17,
-        "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:38:23+01:00",
-        "status": "intraday",
-        "source": "Boerse Frankfurt",
-        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
-        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
-        "cause": "",
-        "cause_source": "",
-        "cause_url": ""
-      },
-      {
-        "id": "ukx",
-        "name": "FTSE 100",
-        "region": "UK",
-        "kind": "index",
-        "pct": 0.48,
-        "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:41:00+01:00",
-        "status": "intraday",
-        "source": "Boerse Frankfurt",
-        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
-        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
-        "cause": "",
-        "cause_source": "",
-        "cause_url": ""
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
+        "cause": "Possible context from Yahoo Finance: S&P 500, Dow, Nasdaq End Lower Amid Nvidia Turmoil, But Record Best Week Since August —  SPCX, NVDA, ARM, AZN In Focus. Not proof this caused the percent.",
+        "cause_source": "Yahoo Finance",
+        "cause_url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-end-lower-amid-nvidia-turmoil-but-record-best-week-since-august-spcx-nvda-arm-azn-in-focus/cNbRj3uR9Q2?.tsrc=rss"
       },
       {
         "id": "nifty",
@@ -611,7 +659,7 @@
         "verified": true,
         "session_date": "2026-11-13",
         "quote_at": "2026-11-13T15:30:00+05:30",
-        "status": "closed",
+        "status": "prior_local_close",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -643,14 +691,14 @@
         "name": "STOXX Europe 600",
         "region": "Europe",
         "kind": "index",
-        "pct": 0.17,
-        "verified": true,
+        "pct": null,
+        "verified": false,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:38:23+01:00",
-        "status": "intraday",
+        "quote_at": "2026-11-13T21:58:22+01:00",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
-        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
-        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "source_url": "",
+        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -660,14 +708,14 @@
         "name": "DAX",
         "region": "Europe",
         "kind": "index",
-        "pct": 0.17,
-        "verified": true,
+        "pct": null,
+        "verified": false,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:40:54+01:00",
-        "status": "intraday",
+        "quote_at": "2026-11-13T22:00:19+01:00",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
-        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
-        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "source_url": "",
+        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -677,14 +725,14 @@
         "name": "FTSE 100",
         "region": "UK",
         "kind": "index",
-        "pct": 0.48,
-        "verified": true,
+        "pct": null,
+        "verified": false,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:41:00+01:00",
-        "status": "intraday",
+        "quote_at": "2026-11-13T22:00:14+01:00",
+        "status": "prior_local_close",
         "source": "Boerse Frankfurt",
-        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
-        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "source_url": "",
+        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -749,7 +797,7 @@
         "verified": true,
         "session_date": "2026-11-13",
         "quote_at": "2026-11-13T15:30:00+05:30",
-        "status": "closed",
+        "status": "prior_local_close",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -762,31 +810,31 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -0.91,
+        "pct": -0.36,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T07:34:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-13T16:11:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
-        "cause": "Possible context from MarketWatch: The S&P 500 is shrugging off Nvidia’s selloff this week. Here’s what’s keeping the rest of the market afloat.. Not proof this caused the percent.",
-        "cause_source": "MarketWatch",
-        "cause_url": "https://www.marketwatch.com/story/the-s-p-500-is-shrugging-off-nvidias-selloff-heres-whats-keeping-the-rest-of-the-market-afloat-7cdf2f05?mod=mw_rss_topstories"
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
+        "cause": "Possible context from Yahoo Finance: S&P 500, Dow, Nasdaq End Lower Amid Nvidia Turmoil, But Record Best Week Since August —  SPCX, NVDA, ARM, AZN In Focus. Not proof this caused the percent.",
+        "cause_source": "Yahoo Finance",
+        "cause_url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-end-lower-amid-nvidia-turmoil-but-record-best-week-since-august-spcx-nvda-arm-azn-in-focus/cNbRj3uR9Q2?.tsrc=rss"
       },
       {
         "id": "qqq",
         "name": "QQQ",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.83,
+        "pct": -1.2,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T07:34:00-08:00",
-        "status": "open_print",
+        "quote_at": "2026-11-13T16:11:00-08:00",
+        "status": "closed",
         "source": "Desk price file",
         "source_url": "",
-        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -794,5 +842,12 @@
     ]
   },
   "watch_next": null,
-  "weekly_recap": null
+  "weekly_recap": {
+    "text": "This week was driven by AI / Tech mood and Oil / Energy. Mood is steady.",
+    "causes": [
+      "ai_mood",
+      "oil"
+    ],
+    "mood": "steady"
+  }
 }
