@@ -54,7 +54,7 @@ Also added, when we have them:
 
 The desk score is the sum of the pieces we actually have. `scores.csv` has every component in its own column. `score_details.csv` is the same breakdown in a long list for the scorecard.
 
-The stock scorecard can also show a CAN SLIM card for every stock (`features.scorecard_canslim`, on by default, separate from `scanner_canslim`). The letters are written to `scorecard_canslim.csv` from cached prices, SEC EPS, and the Nasdaq 13F summary. No new downloads. C and A need 25% growth. N is within 15% of the 52-week closing high (the existing CANSLIM near-high line). S passes at a 20-day average volume of 200,000 shares and shows shares outstanding plus volume versus the 50-day average when those are on file. L needs an RS percentile of 80 or higher (Nick; the scanner's strict qualify still uses 55). I is more institutional shares bought than sold; a missing 13F row is no data yet, not a fail. M is SPY in an uptrend using the same 50-day / 200-day rule as Buy setups. A blank letter does not count as a pass or a fail.
+The stock scorecard can also show a CAN SLIM card for every stock (`features.scorecard_canslim`, on by default, separate from `scanner_canslim`). The letters are written to `scorecard_canslim.csv` from cached prices, SEC EPS, and the Nasdaq 13F summary. No new downloads. C and A need 25% growth. N is within 15% of the 52-week closing high (the existing CANSLIM near-high line). S passes at a 20-day average volume of 200,000 shares and shows shares outstanding plus volume versus the 50-day average when those are on file. L needs an RS Rating of 80 or higher (Nick; the CANSLIM scanner uses 80 too). I is more institutional shares bought than sold; a missing 13F row is no data yet, not a fail. M is SPY in an uptrend using the same 50-day / 200-day rule as Buy setups. A blank letter does not count as a pass or a fail.
 
 
 Forward P/E has no free history. Its baseline is the 3-year average of year-end trailing P/E. The column `forward_pe_avg_basis` says so.
@@ -95,16 +95,23 @@ What is not a separate rule, or not a perfect copy:
 
 The method is `reference/canslim_vcp_nse_run.py` and `reference/canslim_vcp_nse_SCAN.md`, pointed at US stocks.
 
-- Relative strength is the stock's return minus SPY's return over 126 and 63 sessions, blended 60/40, then ranked inside the liquid names on this desk. The NSE scan did this against the Nifty.
-- Market direction uses the same three labels (confirmation, mixed, correction) from price versus the 21, 50, and 200 day averages. SPY is always the benchmark. QQQ is added when its prices are already cached. Both have to be constructive for a joint confirmation, and either one under its 200-day average is a correction. If QQQ is absent, the label follows SPY and QQQ stays not verified.
-- Strict qualify is the NSE rule: above the 50 and 200, the 21-day average rising, RS percentile at least 55, and either the range-contraction score at least 2 or within 15% of the 52-week closing high.
-- C is the latest reported quarter versus the same quarter a year earlier, from the cached SEC EPS. A is the latest year versus the prior year. I is whether cached institutional shares increased or decreased. If the two periods or the increase/decrease pair are missing, that letter is not verified.
-- N's product or news catalyst, S's float, and L's industry-group rank are not verified. The NSE write-up left those the same way. S does show the 20-day average share volume. The liquidity line is still 200,000 shares.
-- BROKEN OUT today means a strict name closed at a new high on volume above 1.5 times the 50-day average. READY means strict and within 5% of that high. Other strict or soft names are WATCHING.
-- The pivot is the 52-week closing high, which is what the NSE scan used. It is not the VCP buy point. Stop and target are blank. That scan never set them. The reason mentions the 50-day average only as the line that would drop the trend qualify, not as an order.
-- The NSE script kept a top 12 and backfilled with stretch names. This page lists every strict or soft name and marks `qualify` as `strict` or `soft`. It does not cut the list at 12.
-- The 20/40/60 day range score on this page is the NSE heuristic. Nick's contraction count is the VCP page.
-- Strength is the NSE ranking formula: `0.45 × RS percentile + 8 × trend + 7 × contraction score`, plus a small bonus for being near the high.
+Strict screen (`features.canslim_strict`, on by default; Nick, Nov 2026). A stock is listed only when it passes every rule below. The numbers live in the `canslim` block of `config.json`.
+
+- C: the latest quarter's EPS is up 25% or more versus the same quarter a year earlier, from the cached SEC EPS. Required: no quarterly EPS means the stock is not listed. Sales: when revenue for that same quarter and its year-ago quarter are on file, sales must be up 25% or more, or growing faster than the quarter before (that quarter versus its own year ago). No sales on file is not a fail; it says sales not verified.
+- A: the latest year's EPS is up 25% or more versus the year before. Required. ROE is that year's net income over year-end equity. When it is on file (and equity is positive) it must be 17% or more; otherwise it says ROE not verified and does not fail.
+- N: the close is within 15% of the 52-week closing high.
+- S: the 20-day average volume is at least 200,000 shares. Accumulation: over the last 50 sessions, total volume on up-close days divided by total volume on down-close days (unchanged days count for neither) must be at least 1.0, so more shares traded on up days. Fewer than 50 sessions with volume means accumulation not verified, not a fail. BROKEN OUT today still needs a new closing high on volume at least 1.5 times the 50-day average.
+- L: RS Rating 80 or higher (the desk's one 1 to 99 RS Rating; 55 before).
+- I: the cached Nasdaq 13F summary shows institutions bought at least as many shares as they sold (flat or rising). No 13F row is not a fail. The holder count is only saved as one snapshot, so its own trend is not on file; the share flow is the trend used.
+- Trend check (light, not the full Minervini template): close above the 50-day and 200-day simple averages, and the 50-day above the 200-day.
+- M never blocks or demotes a stock (Nick). Market direction keeps the three labels (confirmation, mixed, correction) from price versus the 21, 50, and 200 day EMAs for SPY, and QQQ when its prices are cached. When SPY or QQQ closes under its 200-day EMA the CANSLIM page shows a market-in-correction banner (`features.canslim_market_banner`). READY is still allowed.
+- Status: BROKEN OUT today (new closing high on 1.5x volume), READY (within 5% of the 52-week closing high), otherwise WATCHING. There is no soft tier; `qualify` is `strict` on every row.
+- Ranking: inside each status, rows sort by `rs_score = 0.6 × RS6m + 0.4 × RS3m`, where RS6m and RS3m are the stock's return minus SPY's return, in percentage points, over 126 and 63 sessions. A blank `rs_score` sorts last.
+- N's product or news catalyst, S's float, and L's industry-group rank are not verified. The NSE write-up left those the same way.
+- The pivot is the 52-week closing high, which is what the NSE scan used. It is not the VCP buy point. Stop and target are blank. That scan never set them.
+- The 20/40/60 day range score and `strength` (`0.45 × RS + 8 × trend + 7 × contraction score`, plus a small bonus near the high) are kept as columns for reference; they no longer decide who is listed or the order.
+
+Turn `features.canslim_strict` off for the old screen: above the 50 and 200, the 21-day average rising, RS at least 55 (soft watch 40), and either the range-contraction score at least 2 or within 15% of the 52-week closing high; C, A and I were display only.
 
 ### Box and flag
 
