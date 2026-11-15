@@ -35,12 +35,14 @@ PINE = {
 NSE_ADV_MIN = 200_000
 NSE_NEAR_HIGH = -15.0  # percent from the 52-week closing high
 # L uses the desk's one RS Rating (relative_strength.py, 1 to 99 versus every
-# stock in the universe, MarketSmith style). Same cut lines as before.
+# stock in the universe, MarketSmith style). 55 and 40 are the old screen's lines,
+# used only when features.canslim_strict is off. The strict screen uses
+# CANSLIM_DEFAULTS["l_rs_min"] (80) or canslim.l_rs_min in config.json.
 NSE_RS_STRICT = 55.0
 NSE_RS_SOFT = 40.0
 # Scorecard CAN SLIM (every stock). Separate from the scanner's qualify rules.
-# C/A use 25% growth. L uses 80 because Nick chose the classic line; the scanner
-# still qualifies at NSE_RS_STRICT (55). N reuses NSE_NEAR_HIGH (-15). S reuses
+# C/A use 25% growth. L uses 80 because Nick chose the classic line (the strict
+# scanner uses 80 too). N reuses NSE_NEAR_HIGH (-15). S reuses
 # NSE_ADV_MIN (200,000). M uses uptrend() on SPY, the same market rule as Buy setups.
 SCORECARD_EPS_MIN = 25.0
 SCORECARD_RS_MIN = 80.0
@@ -59,7 +61,7 @@ SCORECARD_NOTE = (
     "the scanner's READY line is 5%). S passes when the 20-day average volume is at least "
     "200,000 shares (the existing liquidity line) and shows shares outstanding from the "
     "Nasdaq 13F file when that figure is on file, plus today's volume versus the 50-day average. "
-    "L is an RS Rating of 80 or higher (Nick; the scanner's strict qualify still uses 55). "
+    "L is an RS Rating of 80 or higher (Nick; the CANSLIM scanner uses 80 too). "
     "The RS Rating is the desk's 1 to 99 rank of the past year against every stock on the desk. "
     "I is more institutional shares bought than sold in the cached 13F summary; missing data "
     "is not a fail. M is SPY in an uptrend: close above the 50-day and the 200-day, and the "
@@ -843,8 +845,444 @@ def _range_pct(close, win):
     return (float(seg.max()) - float(seg.min())) / mean * 100.0
 
 
-def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None):
+# CANSLIM strict screen (Nick, Nov 2026). Every number is in the canslim block of
+# config.json; these are the defaults when that block or a key is missing.
+# features.canslim_strict turns the strict screen on (default). Off gives back the
+# old price-and-RS screen with its soft tier (RS 55 strict, 40 soft).
+CANSLIM_DEFAULTS = {
+    "c_eps_min": 25.0,          # C: latest quarter EPS vs the year-ago quarter, percent
+    "c_sales_min": 25.0,        # C: same quarter sales vs a year ago, percent (or speeding up)
+    "a_eps_min": 25.0,          # A: latest year EPS vs the year before, percent
+    "a_roe_min": 17.0,          # A: return on equity, percent, only when on file
+    "eps_positive_gate": True,  # C/A: latest quarterly EPS and latest annual EPS must both be above 0 (Nick)
+    "a_roe_gate": False,        # A: ROE is shown only; True makes a_roe_min a pass/fail rule (Nick: loosen it)
+    "n_near_high_pct": 15.0,    # N: within this many percent of the 52-week closing high
+    "ready_near_high_pct": 5.0, # READY: within this many percent of that high
+    "s_adv_min": float(NSE_ADV_MIN),  # S: 20-day average volume floor, shares
+    "s_breakout_vol_mult": VOL_MULT,  # S: BROKEN OUT needs volume at least this times the 50-day average
+    "s_accum_sessions": 50,     # S: up-volume vs down-volume window, sessions
+    "s_accum_min_ratio": 1.0,   # S: up-day volume / down-day volume, the line for the label
+    "s_accum_gate": False,      # S: accumulation is shown only; True makes s_accum_min_ratio a pass/fail rule
+    "l_rs_min": 80.0,           # L: RS Rating floor (1 to 99)
+    "rs_score_w6": 0.6,         # rank: rs_score = w6*RS6m + w3*RS3m
+    "rs_score_w3": 0.4,
+    "rs_6m_sessions": 126,
+    "rs_3m_sessions": 63,
+}
+CANSLIM_CORRECTION_BANNER = (
+    "Market in correction: {who} closed below its 200-day EMA. "
+    "This is a warning only. CANSLIM statuses, READY included, are not changed by it."
+)
+
+
+def canslim_settings(cfg=None):
+    """The canslim block of config.json over CANSLIM_DEFAULTS. Bad values fall back to the default."""
+    out = dict(CANSLIM_DEFAULTS)
+    raw = (cfg or {}).get("canslim") if isinstance(cfg, dict) else None
+    for k, v in (raw or {}).items():
+        if k in ("a_roe_gate", "s_accum_gate", "eps_positive_gate"):
+            if isinstance(v, bool):
+                out[k] = v
+            continue
+        if k in out:
+            x = _num(v)
+            if x is not None:
+                out[k] = x
+    out["s_accum_sessions"] = int(out["s_accum_sessions"])
+    out["rs_6m_sessions"] = int(out["rs_6m_sessions"])
+    out["rs_3m_sessions"] = int(out["rs_3m_sessions"])
+    return out
+
+
+def canslim_strict_on(cfg=None):
+    feats = (cfg or {}).get("features") if isinstance(cfg, dict) else None
+    return bool((feats or {}).get("canslim_strict", True))
+
+
+def canslim_market_correction(market):
+    """Who is below its EMA200 (SPY, QQQ, both), or "" when neither is. Banner only, never a block."""
+    if not market:
+        return ""
+    who = [n for n, k in (("SPY", "spy"), ("QQQ", "qqq")) if str(market.get(k) or "").startswith("CORRECTION")]
+    return " and ".join(who)
+
+
+def canslim_banner_text(market):
+    who = canslim_market_correction(market)
+    return CANSLIM_CORRECTION_BANNER.format(who=who) if who else ""
+
+
+def _qkey_prev(k):
+    """Quarter key year*10+q to the quarter before it."""
+    year, q = divmod(int(k), 10)
+    return (year - 1) * 10 + 4 if q == 1 else year * 10 + q - 1
+
+
+def _latest_eps_key(frame_df, ticker, quarterly):
+    """Frame key of the latest row with EPS (the same row _yoy_eps reads)."""
+    if frame_df is None or len(frame_df) == 0 or "eps" not in frame_df.columns:
+        return None, None
+    sub = frame_df[frame_df["ticker"] == ticker].copy()
+    if len(sub) == 0:
+        return None, None
+    sub["k"] = sub["frame"].map(_frame_key)
+    sub["eps_n"] = pd.to_numeric(sub["eps"], errors="coerce")
+    sub = sub.dropna(subset=["k", "eps_n"])
+    has_q = sub["frame"].astype(str).str.contains("Q")
+    sub = sub[has_q] if quarterly else sub[~has_q]
+    if len(sub) == 0:
+        return None, None
+    sub = sub.sort_values("k")
+    return int(sub.iloc[-1]["k"]), sub
+
+
+def _value_at(frame_df, ticker, col):
+    """{frame key: value} for one ticker and one column, numbers only."""
+    if frame_df is None or len(frame_df) == 0 or col not in frame_df.columns:
+        return {}
+    sub = frame_df[frame_df["ticker"] == ticker]
+    out = {}
+    for fr, v in zip(sub["frame"], sub[col]):
+        k = _frame_key(fr)
+        x = _num(v)
+        if k is not None and x is not None:
+            out[k] = x
+    return out
+
+
+def _sales_check(quarters, ticker):
+    """Sales growth for the same quarter C uses. Returns (growth, prior_growth, now, then) or Nones.
+
+    growth is that quarter's revenue versus the year-ago quarter. prior_growth is the
+    quarter before, versus its own year ago, so growth > prior_growth means sales growth
+    is speeding up. Anything not on file stays None (not verified), never filled in.
+    """
+    k, _sub = _latest_eps_key(quarters, ticker, True)
+    if k is None:
+        return None, None, None, None
+    rev = _value_at(quarters, ticker, "revenue")
+    now, then = rev.get(k), rev.get(k - 10)
+    if now is None or then is None or then <= 0:
+        return None, None, None, None
+    growth = (now - then) / then * 100.0
+    kp = _qkey_prev(k)
+    p_now, p_then = rev.get(kp), rev.get(kp - 10)
+    prior = None
+    if p_now is not None and p_then is not None and p_then > 0:
+        prior = (p_now - p_then) / p_then * 100.0
+    return growth, prior, now, then
+
+
+def _roe_check(annual, ticker):
+    """ROE for the same year A uses: net income over year-end equity, percent.
+
+    None (not verified) when either number is missing or equity is zero or negative,
+    because a ROE on negative equity has no meaning.
+    """
+    k, _sub = _latest_eps_key(annual, ticker, False)
+    if k is None:
+        return None
+    ni = _value_at(annual, ticker, "net_income").get(k)
+    eq = _value_at(annual, ticker, "equity").get(k)
+    if ni is None or eq is None or eq <= 0:
+        return None
+    return ni / eq * 100.0
+
+
+def _accumulation(close_s, vol_s, sessions):
+    """Up-day volume over down-day volume for the last `sessions` sessions.
+
+    An up day closes above the day before, a down day below it; unchanged days count
+    for neither. Returns (ratio, up_volume, down_volume) or Nones when fewer than
+    `sessions` sessions have both a close change and a volume. Above 1 means more
+    shares changed hands on up days (accumulation); below 1 means distribution.
+    """
+    c = pd.to_numeric(close_s, errors="coerce")
+    v = pd.to_numeric(vol_s, errors="coerce").reindex(c.index)
+    chg = c.diff()
+    ok = chg.notna() & v.notna()
+    chg, v = chg[ok], v[ok]
+    if len(chg) < sessions:
+        return None, None, None
+    chg, v = chg.iloc[-sessions:], v.iloc[-sessions:]
+    up = float(v[chg > 0].sum())
+    down = float(v[chg < 0].sum())
+    if up == 0 and down == 0:
+        return None, None, None
+    ratio = float("inf") if down == 0 else up / down
+    return ratio, up, down
+
+
+def _rs_vs_spy(c, spy, bars):
+    """Stock return minus SPY return over `bars` sessions, in percentage points."""
+    if spy is None:
+        return None
+    s = spy.reindex(c.index).ffill()
+    a, b = _ret(c, bars), _ret(s, bars)
+    if a is None or b is None:
+        return None
+    return (a - b) * 100.0
+
+
+def _sma_last(c, n):
+    if len(c) < n:
+        return None
+    return float(c.iloc[-n:].mean())
+
+
+def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None, cfg=None, strict=None):
     """CANSLIM scanner. L is the desk's 1 to 99 RS Rating from rs_map ({TICKER: rs}).
+
+    With features.canslim_strict on (the default, or strict=True) every listed stock
+    passes all of: C (quarterly EPS +25%, sales +25% or speeding up when on file),
+    A (annual EPS +25%, ROE 17%+ when on file), N (within 15% of the 52-week closing
+    high), S (20-day volume floor, up/down volume accumulation when on file), L (RS
+    Rating 80+), I (13F holders flat or buying when on file), and a light trend check
+    (close over SMA50 and SMA200, SMA50 over SMA200). M never blocks: a SPY or QQQ
+    close under its EMA200 only sets a banner. Rows rank by rs_score inside each status.
+    A stock with no RS Rating (under a year of prices) cannot pass L, so it is not listed.
+    """
+    if strict is None:
+        strict = canslim_strict_on(cfg)
+    if not strict:
+        return _scan_canslim_legacy(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map)
+    p = canslim_settings(cfg)
+    rs_map = {str(k).strip().upper(): v for k, v in (rs_map or {}).items()}
+    rows = []
+    if close is None or len(close) == 0 or universe is None or len(universe) == 0:
+        return pd.DataFrame(), {}
+    panel = _panel_date(close)
+    spy = close["SPY"].dropna() if "SPY" in close.columns else None
+    qqq = close["QQQ"].dropna() if "QQQ" in close.columns else None
+    spy_m = _market_one(spy, "SPY") if spy is not None else None
+    qqq_m = _market_one(qqq, "QQQ") if qqq is not None else None
+    market = _combine_market(spy_m, qqq_m)
+    market["correction"] = canslim_market_correction(market)
+    market["banner"] = canslim_banner_text(market)
+    near_line = -abs(p["n_near_high_pct"])
+    ready_line = -abs(p["ready_near_high_pct"])
+    win = p["s_accum_sessions"]
+
+    for ticker in list(universe["ticker"]):
+        rs_val = _num(rs_map.get(str(ticker).strip().upper()))
+        if rs_val is None or rs_val < p["l_rs_min"]:
+            continue
+        got = _bars(close, high, low, vol, ticker, None)
+        if got is None:
+            continue
+        frame, _spy_aligned = got
+        c = frame["close"]
+        if len(c) < 200:
+            continue
+        vol_s = frame["volume"].reindex(c.index)
+        adv = float(vol_s.iloc[-20:].mean()) if vol_s.notna().any() else None
+        if adv is None or not np.isfinite(adv) or adv < p["s_adv_min"]:
+            continue
+        last = float(c.iloc[-1])
+        # Light trend check (not the full Minervini template).
+        sma50, sma200 = _sma_last(c, 50), _sma_last(c, 200)
+        if sma50 is None or sma200 is None or not (last > sma50 and last > sma200 and sma50 > sma200):
+            continue
+        hi52 = float(c.iloc[-252:].max()) if len(c) >= 252 else float(c.max())
+        pct_from_high = (last / hi52 - 1.0) * 100.0 if hi52 else None
+        if pct_from_high is None or pct_from_high < near_line:
+            continue
+        # C: quarterly EPS is required. Sales only when on file.
+        c_pct, c_now, c_old = _yoy_eps(quarters, ticker, True)
+        if c_pct is None or c_pct < p["c_eps_min"]:
+            continue
+        s_g, s_prior, s_now, s_then = _sales_check(quarters, ticker)
+        s_accel = None if (s_g is None or s_prior is None) else s_g > s_prior
+        if s_g is not None and not (s_g >= p["c_sales_min"] or s_accel is True):
+            continue
+        # A: annual EPS is required. ROE only when on file.
+        a_pct, a_now, a_old = _yoy_eps(annual, ticker, False)
+        if a_pct is None or a_pct < p["a_eps_min"]:
+            continue
+        # Latest earnings must be positive: a shrinking loss is not growth here.
+        if p["eps_positive_gate"] and not (c_now > 0 and a_now > 0):
+            continue
+        roe = _roe_check(annual, ticker)
+        if p["a_roe_gate"] and roe is not None and roe < p["a_roe_min"]:
+            continue
+        # S: accumulation only when enough sessions have a volume.
+        acc, acc_up, acc_down = _accumulation(c, vol_s, win)
+        if p["s_accum_gate"] and acc is not None and acc < p["s_accum_min_ratio"]:
+            continue
+        # I: holders flat or buying. Missing 13F data does not fail.
+        i_trend, i_text = _holder_trend(holders, ticker)
+        if i_trend == "down":
+            continue
+
+        rs6 = _rs_vs_spy(c, spy, p["rs_6m_sessions"])
+        rs3 = _rs_vs_spy(c, spy, p["rs_3m_sessions"])
+        rs_score = None if (rs6 is None or rs3 is None) else p["rs_score_w6"] * rs6 + p["rs_score_w3"] * rs3
+
+        e21, e50 = _ema(c, 21), _ema(c, 50)
+        e21v, e50v = float(e21.iloc[-1]), float(e50.iloc[-1])
+        r20, r40, r60 = _range_pct(c, 20), _range_pct(c, 40), _range_pct(c, 60)
+        contracting = r20 is not None and r40 is not None and r60 is not None and r20 < r40 < r60
+        mild = r20 is not None and r60 is not None and r20 < r60 * 0.75
+        roll = c.rolling(10).min()
+        higher_lows = False
+        if len(roll.dropna()) > 40:
+            ra, rb, rd = float(roll.iloc[-35]), float(roll.iloc[-20]), float(roll.iloc[-5])
+            higher_lows = rd > rb > ra * 0.98
+        trend = 2 + 2 + (1 if last > e21v else 0) + (1 if e21v > float(e21.iloc[-5]) else 0) + 1
+        vcp_score = (3 if contracting else (2 if mild else 0)) + (2 if higher_lows else 0) + 1 + (1 if (r20 is not None and r20 < 8) else 0)
+        prior = c.iloc[:-1]
+        prior_hi = float(prior.iloc[-252:].max()) if len(prior) >= 252 else (float(prior.max()) if len(prior) else None)
+        new_high = prior_hi is not None and last > prior_hi
+        avg50 = vol_s.rolling(VOL_LEN, min_periods=VOL_LEN).mean()
+        big_vol = bool(np.isfinite(vol_s.iloc[-1]) and np.isfinite(avg50.iloc[-1])
+                       and float(vol_s.iloc[-1]) >= float(avg50.iloc[-1]) * p["s_breakout_vol_mult"])
+        if new_high and big_vol:
+            status = "BROKEN OUT today"
+        elif pct_from_high >= ready_line:
+            status = "READY"
+        else:
+            status = "WATCHING"
+        strength = (
+            rs_val * 0.45 + trend * 8 + vcp_score * 7 + 5
+            + max(0.0, 10 + pct_from_high) * 0.3
+        )
+
+        c_txt = "%.1f%% versus the year-ago quarter (%.2f vs %.2f)." % (c_pct, c_now, c_old)
+        if s_g is None:
+            c_txt += " Sales not verified."
+        else:
+            c_txt += " Sales %+.1f%% versus the year-ago quarter" % s_g
+            if s_prior is None:
+                c_txt += "; the quarter before is not on file, so speeding up is not verified."
+            else:
+                c_txt += " (quarter before %+.1f%%, %s)." % (s_prior, "speeding up" if s_accel else "not speeding up")
+        a_txt = "%.1f%% versus the prior year (%.2f vs %.2f)." % (a_pct, a_now, a_old)
+        if p["eps_positive_gate"]:
+            c_txt += " Latest quarterly EPS is positive."
+            a_txt += " Latest annual EPS is positive."
+        if roe is None:
+            a_txt += " ROE not verified."
+        else:
+            a_txt += " ROE %.1f%% (%s %s%%%s)." % (
+                roe, "at or above" if roe >= p["a_roe_min"] else "below", _round(p["a_roe_min"], 1),
+                "" if p["a_roe_gate"] else ", shown for information, not a pass rule")
+        n_txt = "%.1f%% from the 52-week closing high. Product or news catalyst is not verified." % pct_from_high
+        s_txt = "20-day average volume %s shares." % _round(adv, 0)
+        if acc is None:
+            s_txt += " Accumulation (up-day vs down-day volume) not verified."
+        else:
+            s_txt += " Up-day volume %s down-day volume over %d sessions, %s%s." % (
+                "with no down-day volume" if not np.isfinite(acc) else "%.2fx" % acc, win,
+                "accumulation" if acc >= p["s_accum_min_ratio"] else "distribution",
+                "" if p["s_accum_gate"] else " (shown for information, not a pass rule)")
+        s_txt += " Float tightness is not verified."
+        l_txt = "RS Rating %.0f of 99 versus every stock on the desk." % rs_val
+        if rs_score is None:
+            l_txt += " RS score versus SPY not verified."
+        else:
+            l_txt += " RS score %+.1f (6-month %+.1f, 3-month %+.1f points versus SPY)." % (rs_score, rs6, rs3)
+        l_txt += " Industry group rank is not verified."
+        if contracting:
+            vcp_txt = "20/40/60 day ranges %.1f%% / %.1f%% / %.1f%%, contracting." % (r20, r40, r60)
+        elif mild:
+            vcp_txt = "Mild range contraction, 20-day %.1f%% versus 60-day %.1f%%." % (r20, r60)
+        else:
+            vcp_txt = "20/40/60 day ranges %s / %s / %s." % (
+                _round(r20, 1) if r20 is not None else NOT_VERIFIED,
+                _round(r40, 1) if r40 is not None else NOT_VERIFIED,
+                _round(r60, 1) if r60 is not None else NOT_VERIFIED,
+            )
+        if higher_lows:
+            vcp_txt += " Higher lows on the 10-day rolling low."
+        trend_txt = "Trend check passed: close %s over the 50-day (%s) and the 200-day (%s), 50-day over the 200-day." % (
+            _round(last), _round(sma50), _round(sma200))
+        m_txt = market["text"]
+        if market["banner"]:
+            m_txt += " " + market["banner"]
+        reason = (
+            "Strict qualify. C %s A %s N %s S %s L %s %s Market: %s "
+            "Pivot is the 52-week closing high from the NSE method, not the VCP buy point. "
+            "Stop: not verified. Target: not verified. That scan does not set either one."
+            % (c_txt, a_txt, n_txt, s_txt, l_txt, trend_txt, m_txt)
+        )
+        if status == "BROKEN OUT today":
+            reason = "Closed at a new high on volume at least %s times the 50-day average. " % _round(p["s_breakout_vol_mult"], 2) + reason
+        elif new_high and not big_vol:
+            reason = "Closed at a new high, but volume was under %s times the 50-day average. " % _round(p["s_breakout_vol_mult"], 2) + reason
+        meta = _meta_row(universe, ticker)
+        gaps = []
+        if s_g is None:
+            gaps.append("sales not verified")
+        elif s_prior is None:
+            gaps.append("sales speeding up not verified")
+        if roe is None:
+            gaps.append("ROE not verified")
+        if acc is None:
+            gaps.append("accumulation not verified")
+        if rs_score is None:
+            gaps.append("RS score not verified")
+        gaps.append("product catalyst not verified")
+        gaps.append("float not verified")
+        gaps.append("industry rank not verified")
+        if i_trend == NOT_VERIFIED:
+            gaps.append("I not verified")
+        if market["qqq"] == NOT_VERIFIED:
+            gaps.append("QQQ not verified")
+        if market["spy"] == NOT_VERIFIED:
+            gaps.append("SPY not verified")
+        if len(c) < 252:
+            gaps.append("52-week window is shorter than 252 sessions")
+        rows.append({
+            "ticker": ticker,
+            "company": meta["company"],
+            "sector": meta["sector"],
+            "index_membership": meta["index_membership"],
+            "status": status,
+            "pivot": _round(hi52),
+            "stop": "",
+            "target": "",
+            "strength": round(strength, 1),
+            "reason": reason + " " + vcp_txt,
+            "freshness": _freshness(c.index[-1], panel, len(c), 252),
+            "price": _round(last),
+            "price_as_of": str(pd.Timestamp(c.index[-1]).date()),
+            "c_quarterly_eps": round(c_pct, 1),
+            "c_status": c_txt,
+            "a_annual_eps": round(a_pct, 1),
+            "a_status": a_txt,
+            "n_pct_from_high": round(pct_from_high, 1),
+            "n_status": n_txt,
+            "s_adv": _round(adv, 0),
+            "s_status": s_txt,
+            # Same number as rs. The old header stays for the Sheet.
+            "l_rs_percentile": int(round(rs_val)),
+            "rs": int(round(rs_val)),
+            "l_status": l_txt,
+            "i_trend": i_trend,
+            "i_status": i_text or "Institutional trend is not verified. Missing 13F data does not fail the stock.",
+            "m_market": market["label"],
+            "m_spy": market["spy"],
+            "m_qqq": market["qqq"],
+            "m_status": m_txt,
+            "qualify": "strict",
+            "vcp_heuristic": vcp_score,
+            "rs_score": "" if rs_score is None else round(rs_score, 1),
+            "data_status": "OK",
+            "note": "; ".join(gaps) + ".",
+        })
+    out = pd.DataFrame(rows)
+    if len(out) == 0:
+        return out, market
+    rank = {"BROKEN OUT today": 0, "READY": 1, "WATCHING": 2}
+    out["_k"] = out["status"].map(rank)
+    out["_r"] = pd.to_numeric(out["rs_score"], errors="coerce")
+    # Inside each status, highest rs_score first. A blank rs_score sorts last.
+    out = out.sort_values(["_k", "_r"], ascending=[True, False], na_position="last").drop(columns=["_k", "_r"])
+    return out, market
+
+
+def _scan_canslim_legacy(close, high, low, vol, universe, quarters, annual, holders, rs_map=None):
+    """Old CANSLIM screen, used when features.canslim_strict is off: price and RS only, soft tier kept. L is the desk's 1 to 99 RS Rating from rs_map ({TICKER: rs}).
 
     A stock with no RS Rating (under a year of prices) cannot pass L, so it is not listed.
     """
@@ -3143,7 +3581,8 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_m = features.get("scanner_marios", True)
     want_sc = features.get("scorecard_canslim", True)
     vcp = scan_vcp(close, high, low, vol, universe, cfg) if (want_v or want_l) else pd.DataFrame()
-    canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map) if (want_c or want_l) else (pd.DataFrame(), {})
+    canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map, cfg=cfg,
+                                     strict=features.get("canslim_strict", True)) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()

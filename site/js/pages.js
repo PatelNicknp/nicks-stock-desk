@@ -1140,9 +1140,26 @@
     },
   });
 
+  // Market-in-correction banner (features.canslim_market_banner). A warning only:
+  // it never hides a row or changes a status. Reads the m_spy and m_qqq columns.
+  function canslimCorrection(all) {
+    const row = (all && all[0]) || {};
+    return [["SPY", row.m_spy], ["QQQ", row.m_qqq]]
+      .filter((p) => String(p[1] || "").indexOf("CORRECTION") === 0).map((p) => p[0]);
+  }
+  function canslimBanner(all) {
+    if (!D.featureOn("feature.canslim_market_banner")) return "";
+    const who = canslimCorrection(all);
+    if (!who.length) return "";
+    return '<div class="banner canslim-banner"><b>Market in correction</b>' + D.esc(who.join(" and ")) +
+      " closed below its 200-day EMA. This is a warning only. READY and the other statuses are not changed by it.</div>";
+  }
+
   const canslim = patternPage({
     file: "scanner_canslim.csv",
-    caption: "Stop and target are blank on every row on purpose. A dash is missing, not zero. Product, float and industry rank are not verified.",
+    caption: "Every row passed all the CANSLIM rules: C, A (latest quarterly and yearly EPS above zero), N, S, L, I and the trend check. Rows rank by RS score (60% of the 6-month and 40% of the 3-month return versus SPY) inside each status. Stop and target are blank on every row on purpose. A dash is missing, not zero. Sales and fund holders are checked only when on file. ROE and up-day versus down-day volume are shown in each row's details for information and do not remove a stock. Anything not on file says not verified. Product, float and industry rank are not verified.",
+    strip: canslimBanner,
+    sort2: "rs_score",
     filters: {
       status: true, statusDefault: readyDefault, index: true, ticker: true,
       order: ["status", "qualify", "index", "ticker"],
@@ -1157,7 +1174,8 @@
       T("strength", "CANSLIM strength (raw)", "num", { dec: 0 }), T("qualify", "Qualify", "pass"),
       T("c_quarterly_eps", "C: quarter EPS vs yr ago %", "pct", { dec: 1 }), T("a_annual_eps", "A: annual EPS %", "pct", { dec: 1 }),
       T("n_pct_from_high", "N: % from 52w high", "pct", { dec: 1 }), T("s_adv", "S: avg daily volume", "compact"),
-      T("rs", "L: RS Rating", "rs", { dec: 0, title: RS_TITLE }), T("i_trend", "I: holders trend", "itrend"), T("freshness", "Data", "fresh")],
+      T("rs", "L: RS Rating", "rs", { dec: 0, title: RS_TITLE }), T("rs_score", "RS score vs SPY", "num", { dec: 1 }),
+      T("i_trend", "I: holders trend", "itrend"), T("freshness", "Data", "fresh")],
     cards(all) {
       return card("Ready", String(countWhere(all, (r) => r.status === "READY"))) +
         card("Broken out today", String(countWhere(all, (r) => r.status === "BROKEN OUT today"))) +
@@ -3516,7 +3534,7 @@
     dividend: "Stocks with a dividend yield of at least {dividend_min_pct}%, leaving out anything rated AVOID. A dividend pays you cash just for holding the stock. Compare with the company's own average yield: higher than usual can mean the price is cheap, or that the market is worried.",
     wheel: "A stock screen only, not an options trade. It finds stocks above their 200-day average, with RSI under 70, at least {wheel_min_dollar_volume} of shares traded a day, not rated AVOID, and not stretched or in a downtrend. These are steady, busy stocks you would not mind owning.",
     vcp: "Looks for stocks in a strong uptrend (all 8 of Minervini's trend checks) whose pullbacks keep getting smaller, like a spring tightening. A stock is listed only when all 8 trend checks pass and it has at least two tightening pullbacks. READY means it has at least two tightening pullbacks (the green VCP tag on Nick's chart) and is still under the buy point; BROKEN OUT today means it closed above it on big volume. WATCHING means it is 8 of 8 with at least two tightening pullbacks but not ready yet: above the buy point without that big-volume close today, or a trade still open from a buy made at 8 of 8. A stock with only one pullback stays off the list.",
-    canslim: "Checks stocks with the CANSLIM method: earnings growth, a price near its 52-week high, volume, the RS Rating (L, the same 1 to 99 number as the RS column), fund buying, and the market trend. A strict qualify needs the price above its 50-day and 200-day averages, a rising 21-day average, and an RS Rating of 55 or higher. A stock with under a year of prices has no RS Rating, so it is not listed. Any letter we could not check says not verified.",
+    canslim: "Stocks that pass every CANSLIM rule. C: quarterly earnings up 25% or more versus a year ago, and sales up 25% or more or growing faster when sales are on file. A: yearly earnings up 25% or more (return on equity is shown, for information only). The latest quarterly and yearly earnings must both be above zero, so a smaller loss does not count. N: within 15% of the 52-week high. S: enough daily volume (up-day versus down-day volume over the last 50 sessions is shown, for information only). L: RS Rating 80 or higher. I: funds holding or adding shares when that data is on file. Plus a trend check: price above the 50-day and 200-day averages, and the 50-day above the 200-day. Broken out today needs a new high on volume at least 1.5 times the 50-day average. When SPY or QQQ is below its 200-day average a market-in-correction banner shows, but no stock is removed or changed. Rows rank by RS score versus SPY. Anything we could not check says not verified.",
     epsrs: "Our copy of MarketSmith's Highest EPS and RS list. MarketSmith's own EPS and RS Ratings are private, so these are close copies built from the desk's own data. EPS Rating is 1 to 99: it ranks three things across every stock on the desk, equally: the latest quarter's EPS versus a year ago, the quarter before that versus its year ago, and yearly EPS growth over 3 to 5 years, all from the SEC filings the desk already saves. The latest quarter and the yearly growth are needed; the quarter before counts when its year-ago numbers are saved. Both ratings must be 80 or higher, ranked by EPS Rating plus RS Rating, at most 50. Stocks that have run too far are left out: more than 5% above a VCP, Box, Flag, Qullamaggie or Marios buy point, or, with no buy point, more than 25% above the 50-day average.",
     min1m: "Mark Minervini's trend template, the early version. He calls it his heads up list, because it catches stocks just turning into uptrends. All 8 rules must pass: price above the 150 and 200-day averages, the 150-day above the 200-day, the 200-day higher than 1 month (21 trading days) ago, the 50-day above the 150 and 200-day, price above the 50-day, at least 30% above the 52-week low, within 25% of the 52-week high, and an RS Rating of 70 or higher. Strongest RS first.",
     min5m: "Mark Minervini's trend template, the main version. The 200-day average must be higher than about 5 months (105 trading days) ago, so these are steadier uptrends. All 8 rules must pass: price above the 150 and 200-day averages, the 150-day above the 200-day, the 200-day rising over 105 trading days, the 50-day above the 150 and 200-day, price above the 50-day, at least 30% above the 52-week low, within 25% of the 52-week high, and an RS Rating of 70 or higher. Strongest RS first.",

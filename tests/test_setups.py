@@ -868,7 +868,7 @@ def test_scorecard_canslim_letters_and_blank_is_not_a_fail():
     # Blank letters do not count as a fail and do not inflate the pass count.
     assert int(thin["pass_count"]) == sum(thin[k] == "pass" for k in ("c_result", "a_result", "n_result", "s_result", "l_result", "i_result", "m_result"))
     assert "no_data" not in [thin["c_result"], thin["n_result"]] or int(thin["pass_count"]) < 7
-    # The CANSLIM scanner page is unchanged: it still lists only qualify names and uses 55, not 80.
+    # The scorecard L uses 80. NSE_RS_STRICT (55) is now only the old screen behind features.canslim_strict off.
     scanned, _market = setups.scan_canslim(close, high, low, vol, uni, quarters, annual, holders)
     assert setups.SCORECARD_RS_MIN == 80.0
     assert setups.NSE_RS_STRICT == 55.0
