@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-SHW,Sherwin-Williams Company (The),Basic Materials,Specialty Chemicals,27.109047,2.06897,24.0,374.25,374.0,86528393216,1793104200.0
-SJM,The J.M. Smucker Company,Consumer Defensive,Packaged Foods,12.19144,2.10526,16.0,141.8125,145.0,14316443648,1795527000.0
-SKYD,Skydance Corporation,Communication Services,Entertainment,155.62308,3.16667,18.0,9.14667,9.0,43008266240,1794258000.0
-SLB,SLB Limited,Energy,Oil & Gas Equipment & Services,16.414026,1.53333,29.0,62.24138,63.0,74576396288,1792758600.0
-SMCI,"Super Micro Computer, Inc.",Technology,Computer Hardware,4.2762723,2.94444,15.0,43.4,45.0,19061561344,1793739600.0
-SNA,Snap-On Incorporated,Industrials,Tools & Accessories,18.084126,2.45455,9.0,404.1111,405.0,19404601344,1792672200.0
-SNDK,Sandisk Corporation,Technology,Computer Hardware,3.0686312,1.48,24.0,2047.375,2050.0,126210662400,1793304000.0
-SNOW,Snowflake Inc.,Technology,Software - Application,95.94917,1.46154,48.0,427.33353,443.5,102985850880,1796245200.0
-SNPS,"Synopsys, Inc.",Technology,Software - Infrastructure,25.103645,1.28,25.0,589.546,600.0,89699360768,1796763600.0
-SO,Southern Company (The),Utilities,Utilities - Regulated Electric,18.995653,2.56522,20.0,96.1,96.5,109114540032,1793885400.0
-SOLV,Solventum Corporation,Healthcare,Medical Instruments & Supplies,12.149008,2.2,13.0,97.69231,100.0,15420189696,1793912400.0
-SPCX,Space Exploration Technologies ,Industrials,Aerospace & Defense,52.978962,1.7,37.0,255.0627,245.0,1916424028160,1792526400.0
-SPG,"Simon Property Group, Inc.",Real Estate,REIT - Retail,34.43068,2.47619,19.0,230.60526,225.0,88365015040,1793912400.0
-SPGI,S&P Global Inc.,Financial Services,Financial Data & Stock Exchanges,23.428196,1.34783,20.0,526.7,525.0,137029926912,1793104200.0
-SRE,DBA Sempra,Utilities,Utilities - Diversified,14.294507,1.57143,19.0,97.15789,98.0,51655827456,1793885400.0
-STE,STERIS plc (Ireland),Healthcare,Medical Devices,20.80328,1.875,7.0,270.7143,284.0,25009430528,1793826000.0
-STLD,"Steel Dynamics, Inc.",Basic Materials,Steel,10.607672,2.0,14.0,272.675,273.5,32285503488,1792440000.0
-STT,State Street Corporation,Financial Services,Asset Management,11.09862,2.0,15.0,192.63333,192.5,46900813824,1800019800.0
-STX,Seagate Technology Holdings PLC,Technology,Computer Hardware,7.7866974,1.42308,24.0,1044.8334,1045.0,116799545344,1793131200.0
-STZ,"Constellation Brands, Inc.",Consumer Defensive,Beverages - Brewers,12.049046,2.0,23.0,152.91304,150.0,24651739136,1791316800.0
-SW,Smurfit WestRock plc,Consumer Cyclical,Packaging & Containers,13.782674,1.3125,15.0,53.84667,55.0,23519789056,1793190600.0
-SWK,"Stanley Black & Decker, Inc.",Industrials,Tools & Accessories,18.420588,2.46667,11.0,112.0,108.0,17827934208,1793799000.0
-SWKS,"Skyworks Solutions, Inc.",Technology,Semiconductors,11.114408,3.04,18.0,78.44444,78.0,19732742144,1793739600.0
-SYF,Synchrony Financial,Financial Services,Credit Services,7.0295978,1.95652,23.0,87.0,88.0,23976579072,1792499400.0
-SYK,Stryker Corporation,Healthcare,Medical Devices,20.073223,1.8,27.0,340.48407,334.0,124626812928,1793304000.0
 SYY,Sysco Corporation,Consumer Defensive,Food Distribution,14.560483,2.28571,12.0,91.25,91.0,38596489216,1793712600.0
 T,AT&T Inc.,Communication Services,Telecom Services,8.324987,2.08333,23.0,27.58696,27.0,145575198720,1792585800.0
 TDG,Transdigm Group Incorporated,Industrials,Aerospace & Defense,25.439257,2.08696,20.0,1414.3,1405.0,69232353280,1794317400.0
@@ -523,3 +498,28 @@ SBUX,Starbucks Corporation,Consumer Cyclical,Restaurants,28.573807,2.33333,30.0,
 SCHW,Charles Schwab Corporation (The,Financial Services,Capital Markets,11.915701,,22.0,116.86364,118.5,160484196352,1792067400.0
 SE,Sea Limited,Consumer Cyclical,Internet Retail,15.754946,1.33333,27.0,134.49927,136.0,46156836864,1794317400.0
 SHOP,Shopify Inc.,Technology,Software - Application,59.794384,1.69091,49.0,177.28612,180.0,189234511872,1793712600.0
+SHW,Sherwin-Williams Company (The),Basic Materials,Specialty Chemicals,26.482723,2.06897,24.0,374.25,374.0,84529250304,1793104200.0
+SJM,The J.M. Smucker Company,Consumer Defensive,Packaged Foods,12.067873,2.10526,16.0,141.8125,145.0,14174368768,1795527000.0
+SKYD,Skydance Corporation,Communication Services,Entertainment,560.35767,3.16667,18.0,9.05833,9.0,37932552192,1794258000.0
+SLB,SLB Limited,Energy,Oil & Gas Equipment & Services,16.786001,1.53333,29.0,62.2069,63.0,76266446848,1792758600.0
+SMCI,"Super Micro Computer, Inc.",Technology,Computer Hardware,3.8682172,2.94444,15.0,43.6,45.0,17710143488,1793739600.0
+SNA,Snap-On Incorporated,Industrials,Tools & Accessories,17.719986,,9.0,404.1111,405.0,19013873664,1792672200.0
+SNDK,Sandisk Corporation,Technology,Computer Hardware,3.0617468,1.48,24.0,2047.375,2050.0,125927505920,1793304000.0
+SNOW,Snowflake Inc.,Technology,Software - Application,94.962425,1.39216,47.0,434.08533,447.0,102664798208,1796245200.0
+SNPS,"Synopsys, Inc.",Technology,Software - Infrastructure,24.413397,1.28,25.0,589.546,600.0,87233003520,1796763600.0
+SO,Southern Company (The),Utilities,Utilities - Regulated Electric,18.969303,2.63636,19.0,95.84211,95.0,108963184640,1793885400.0
+SOLV,Solventum Corporation,Healthcare,Medical Instruments & Supplies,11.807857,2.2,13.0,98.38462,100.0,15139760128,1793912400.0
+SPCX,Space Exploration Technologies ,Industrials,Aerospace & Defense,50.726936,1.7,37.0,256.41406,245.0,1889261846528,1792526400.0
+SPG,"Simon Property Group, Inc.",Real Estate,REIT - Retail,34.361355,2.47619,19.0,234.8158,229.0,88187109376,1793912400.0
+SPGI,S&P Global Inc.,Financial Services,Financial Data & Stock Exchanges,23.473299,1.34783,20.0,526.7,525.0,137293742080,1793104200.0
+SRE,DBA Sempra,Utilities,Utilities - Diversified,14.397683,1.52381,19.0,97.17579,98.0,52028674048,1793885400.0
+STE,STERIS plc (Ireland),Healthcare,Medical Devices,21.221966,1.625,7.0,281.14285,285.0,25667330048,1793826000.0
+STLD,"Steel Dynamics, Inc.",Basic Materials,Steel,10.631943,2.0,14.0,274.10358,273.5,32628957184,1792440000.0
+STT,State Street Corporation,Financial Services,Asset Management,11.167512,,15.0,192.63333,192.5,47191937024,1800019800.0
+STX,Seagate Technology Holdings PLC,Technology,Computer Hardware,8.0850525,1.42308,24.0,1044.8334,1045.0,121274826752,1793131200.0
+STZ,"Constellation Brands, Inc.",Consumer Defensive,Beverages - Brewers,12.043669,2.0,23.0,152.91304,150.0,24640739328,1791316800.0
+SW,Smurfit WestRock plc,Consumer Cyclical,Packaging & Containers,13.147192,1.3125,15.0,53.84667,55.0,22213715968,1793190600.0
+SWK,"Stanley Black & Decker, Inc.",Industrials,Tools & Accessories,17.338793,2.46667,11.0,112.0,108.0,16842820608,1793799000.0
+SWKS,"Skyworks Solutions, Inc.",Technology,Semiconductors,11.924871,3.04,18.0,79.11111,78.0,21122826240,1793739600.0
+SYF,Synchrony Financial,Financial Services,Credit Services,6.8922296,1.95652,23.0,87.0,88.0,22499002368,1792499400.0
+SYK,Stryker Corporation,Healthcare,Medical Devices,19.010199,1.8,27.0,339.37296,336.0,117877170176,1793304000.0
