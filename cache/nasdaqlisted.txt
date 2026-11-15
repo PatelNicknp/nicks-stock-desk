@@ -481,7 +481,7 @@ ATRO|Astronics Corporation - Common Stock|Q|N|N|100|N|N
 ATTO|Attovia Therapeutics, Inc. - Common Stock|G|N|N|100|N|N
 ATTT|Atlas Trinity Tech Limited - Ordinary Shares|S|N|N|100|N|N
 ATXG|Addentax Group Corp. - Common Stock|S|N|N|100|N|N
-ATYR|aTyr Pharma, Inc. - Common Stock|S|N|D|100|N|N
+ATYR|aTyr Pharma, Inc. - Common Stock|S|N|N|100|N|N
 AUBN|Auburn National Bancorporation, Inc. - Common Stock|G|N|N|100|N|N
 AUC|ATIF Holdings Limited - Ordinary Shares|S|N|N|100|N|N
 AUDC|AudioCodes Ltd. - Ordinary Shares|Q|N|N|100|N|N
@@ -705,7 +705,7 @@ BLIV|BeLive Holdings - ordinary shares|S|N|N|100|N|N
 BLKB|Blackbaud, Inc. - Common Stock|Q|N|N|100|N|N
 BLLN|BillionToOne, Inc. - Class A common stock|Q|N|N|100|N|N
 BLMN|Bloomin' Brands, Inc. - Common Stock|Q|N|N|100|N|N
-BLNE|Beeline Holdings, Inc. - Common Stock|S|N|N|100|N|N
+BLNE|Beeline Holdings, Inc. - Common Stock|S|N|D|100|N|N
 BLNK|Blink Charging Co. - Common Stock|S|N|D|100|N|N
 BLRK|Bluerock Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 BLRKU|Bluerock Acquisition Corp. - Units|G|N|N|100|N|N
@@ -2302,7 +2302,7 @@ HISF|First Trust High Income Strategic Focus ETF|G|N|N|100|Y|N
 HIT|Health In Tech, Inc. - Class A Common Stock|S|N|D|100|N|N
 HITI|High Tide Inc. - Common Shares|S|N|N|100|N|N
 HIVE|HIVE Digital Technologies Ltd - Common Shares|S|N|N|100|N|N
-HKPD|Cellyan Biotechnology Co., Ltd  - Class A Ordinary Shares|S|N|D|100|N|N
+HKPD|Cellyan Biotechnology Co., Ltd  - Class A Ordinary Shares|S|N|N|100|N|N
 HLAL|Wahed FTSE USA Shariah ETF|G|N|N|100|Y|N
 HLIT|Harmonic Inc. - Common Stock|Q|N|N|100|N|N
 HLMN|Hillman Solutions Corp. - Common Stock|G|N|N|100|N|N
@@ -2961,9 +2961,9 @@ LOVE|The Lovesac Company - Common Stock|G|N|N|100|N|N
 LOVI|Live Oak Acquisition Corp. VI - Class A Ordinary Shares|G|N|N|100|N|N
 LOVIU|Live Oak Acquisition Corp. VI - Units|G|N|N|100|N|N
 LOVIW|Live Oak Acquisition Corp. VI - Warrants|G|N|N|100|N|N
-LPAA|Launch One Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
-LPAAU|Launch One Acquisition Corp. - Unit|G|N|N|100|N|N
-LPAAW|Launch One Acquisition Corp. - Warrant|G|N|N|100|N|N
+LPAA|Launch One Acquisition Corp. - Class A Ordinary Shares|G|N|D|100|N|N
+LPAAU|Launch One Acquisition Corp. - Unit|G|N|D|100|N|N
+LPAAW|Launch One Acquisition Corp. - Warrant|G|N|D|100|N|N
 LPBB|Launch Two Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 LPBBU|Launch Two Acquisition Corp. - Unit|G|N|N|100|N|N
 LPBBW|Launch Two Acquisition Corp. - Warrant|G|N|N|100|N|N
@@ -4065,7 +4065,7 @@ QBTZ|Defiance Daily Target 2x Short QBTS ETF|G|N|N|100|Y|N
 QBUF|Innovator Nasdaq-100 10 Buffer ETF Quarterly|G|N|N|100|Y|N
 QBY|GraniteShares YieldBoost QBTS ETF|G|N|N|100|Y|N
 QCLN|First Trust NASDAQ Clean Edge Green Energy Index Fund|G|N|N|100|Y|N
-QCLS|Q/C Technologies, Inc. - Common Stock|S|N|N|100|N|N
+QCLS|Q/C Technologies, Inc. - Common Stock|S|N|D|100|N|N
 QCMD|Direxion Daily QCOM Bear 1X ETF|G|N|N|100|Y|N
 QCML|GraniteShares 2x Long QCOM Daily ETF|G|N|N|100|Y|N
 QCMU|Direxion Daily QCOM Bull 2X ETF|G|N|N|100|Y|N
@@ -5603,4 +5603,4 @@ ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
 ZYN|PTL LTD - Class A Ordinary Shares|S|N|N|100|N|N
-File Creation Time: 1113202618:01|||||||
+File Creation Time: 1113202621:31|||||||
