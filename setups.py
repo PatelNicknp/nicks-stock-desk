@@ -854,12 +854,14 @@ CANSLIM_DEFAULTS = {
     "c_sales_min": 25.0,        # C: same quarter sales vs a year ago, percent (or speeding up)
     "a_eps_min": 25.0,          # A: latest year EPS vs the year before, percent
     "a_roe_min": 17.0,          # A: return on equity, percent, only when on file
+    "a_roe_gate": False,        # A: ROE is shown only; True makes a_roe_min a pass/fail rule (Nick: loosen it)
     "n_near_high_pct": 15.0,    # N: within this many percent of the 52-week closing high
     "ready_near_high_pct": 5.0, # READY: within this many percent of that high
     "s_adv_min": float(NSE_ADV_MIN),  # S: 20-day average volume floor, shares
     "s_breakout_vol_mult": VOL_MULT,  # S: BROKEN OUT needs volume at least this times the 50-day average
     "s_accum_sessions": 50,     # S: up-volume vs down-volume window, sessions
-    "s_accum_min_ratio": 1.0,   # S: up-day volume / down-day volume must be at least this
+    "s_accum_min_ratio": 1.0,   # S: up-day volume / down-day volume, the line for the label
+    "s_accum_gate": False,      # S: accumulation is shown only; True makes s_accum_min_ratio a pass/fail rule
     "l_rs_min": 80.0,           # L: RS Rating floor (1 to 99)
     "rs_score_w6": 0.6,         # rank: rs_score = w6*RS6m + w3*RS3m
     "rs_score_w3": 0.4,
@@ -877,6 +879,10 @@ def canslim_settings(cfg=None):
     out = dict(CANSLIM_DEFAULTS)
     raw = (cfg or {}).get("canslim") if isinstance(cfg, dict) else None
     for k, v in (raw or {}).items():
+        if k in ("a_roe_gate", "s_accum_gate"):
+            if isinstance(v, bool):
+                out[k] = v
+            continue
         if k in out:
             x = _num(v)
             if x is not None:
@@ -1093,11 +1099,11 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
         if a_pct is None or a_pct < p["a_eps_min"]:
             continue
         roe = _roe_check(annual, ticker)
-        if roe is not None and roe < p["a_roe_min"]:
+        if p["a_roe_gate"] and roe is not None and roe < p["a_roe_min"]:
             continue
         # S: accumulation only when enough sessions have a volume.
         acc, acc_up, acc_down = _accumulation(c, vol_s, win)
-        if acc is not None and acc < p["s_accum_min_ratio"]:
+        if p["s_accum_gate"] and acc is not None and acc < p["s_accum_min_ratio"]:
             continue
         # I: holders flat or buying. Missing 13F data does not fail.
         i_trend, i_text = _holder_trend(holders, ticker)
@@ -1147,14 +1153,21 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
             else:
                 c_txt += " (quarter before %+.1f%%, %s)." % (s_prior, "speeding up" if s_accel else "not speeding up")
         a_txt = "%.1f%% versus the prior year (%.2f vs %.2f)." % (a_pct, a_now, a_old)
-        a_txt += " ROE not verified." if roe is None else " ROE %.1f%%." % roe
+        if roe is None:
+            a_txt += " ROE not verified."
+        else:
+            a_txt += " ROE %.1f%% (%s %s%%%s)." % (
+                roe, "at or above" if roe >= p["a_roe_min"] else "below", _round(p["a_roe_min"], 1),
+                "" if p["a_roe_gate"] else ", shown for information, not a pass rule")
         n_txt = "%.1f%% from the 52-week closing high. Product or news catalyst is not verified." % pct_from_high
         s_txt = "20-day average volume %s shares." % _round(adv, 0)
         if acc is None:
             s_txt += " Accumulation (up-day vs down-day volume) not verified."
         else:
-            s_txt += " Up-day volume %s down-day volume over %d sessions, accumulation." % (
-                "with no down-day volume" if not np.isfinite(acc) else "%.2fx" % acc, win)
+            s_txt += " Up-day volume %s down-day volume over %d sessions, %s%s." % (
+                "with no down-day volume" if not np.isfinite(acc) else "%.2fx" % acc, win,
+                "accumulation" if acc >= p["s_accum_min_ratio"] else "distribution",
+                "" if p["s_accum_gate"] else " (shown for information, not a pass rule)")
         s_txt += " Float tightness is not verified."
         l_txt = "RS Rating %.0f of 99 versus every stock on the desk." % rs_val
         if rs_score is None:

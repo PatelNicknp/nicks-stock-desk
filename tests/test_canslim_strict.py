@@ -149,17 +149,25 @@ def test_c_sales_checked_only_when_on_file():
 
 
 def test_a_annual_eps_required_and_roe_only_when_on_file():
-    out, _ = _run({
+    stocks = {
         "LOWA": _named("LOWA", _stock(a_eps=(2.0, 2.4))),               # +20%
         "NOA": (_climb(), _flat_vol(), _good_fund("NOA")[0], []),
         "HIROE": _named("HIROE", _stock(ni=20.0, eq=100.0)),            # 20%
         "LOWROE": _named("LOWROE", _stock(ni=10.0, eq=100.0)),          # 10%
         "NOROE": _named("NOROE", _stock()),
         "NEGEQ": _named("NEGEQ", _stock(ni=10.0, eq=-50.0)),            # ROE has no meaning
-    })
-    assert _tickers(out) == {"HIROE", "NOROE", "NEGEQ"}
+    }
+    # Default (Nick: loosen it): ROE is shown, not a pass rule. A annual EPS stays required.
+    out, _ = _run(stocks)
+    assert _tickers(out) == {"HIROE", "LOWROE", "NOROE", "NEGEQ"}
     by = out.set_index("ticker")
-    assert "ROE 20.0%" in by.loc["HIROE", "a_status"]
+    assert "ROE 10.0% (below 17.0%, shown for information, not a pass rule)" in by.loc["LOWROE", "a_status"]
+    assert "ROE 20.0% (at or above 17.0%" in by.loc["HIROE", "a_status"]
+    # canslim.a_roe_gate on: ROE 17%+ is a pass rule again; missing ROE still does not fail.
+    gated, _ = _run(stocks, cfg={"canslim": {"a_roe_gate": True}})
+    assert _tickers(gated) == {"HIROE", "NOROE", "NEGEQ"}
+    by = gated.set_index("ticker")
+    assert "ROE 20.0%" in by.loc["HIROE", "a_status"] and "not a pass rule" not in by.loc["HIROE", "a_status"]
     assert "ROE not verified" in by.loc["NOROE", "a_status"]
     assert "ROE not verified" in by.loc["NEGEQ", "note"]
     assert setups._roe_check(pd.DataFrame(_good_fund("Z", ni=17.0, eq=100.0)[1]), "Z") == 17.0
@@ -179,17 +187,24 @@ def test_s_volume_floor_breakout_and_accumulation():
     big = _flat_vol()
     big[-1] = 1_600_000  # 1.6x the 50-day average on a new high
     up_v = np.where(np.arange(N) % 2 == 1, 600_000.0, 1_500_000.0)  # heavy volume on the down days
-    out, _ = _run({
+    stocks = {
         "BRK": _named("BRK", _stock(volume=big)),
         "THIN": _named("THIN", _stock(volume=_flat_vol(150_000))),
         "DIST": _named("DIST", _stock(close=_zigzag(), volume=up_v)),
         # Same prices as DIST, heavy volume on the up days instead: only accumulation differs.
         "ACC": _named("ACC", _stock(close=_zigzag(), volume=np.where(np.arange(N) % 2 == 1, 1_500_000.0, 600_000.0))),
-    })
-    assert _tickers(out) == {"BRK", "ACC"}
+    }
+    # Default (Nick: loosen it): accumulation is shown, not a pass rule. The volume floor stays.
+    out, _ = _run(stocks)
+    assert _tickers(out) == {"BRK", "ACC", "DIST"}
     by = out.set_index("ticker")
     assert by.loc["BRK", "status"] == "BROKEN OUT today"
-    assert "accumulation" in by.loc["ACC", "s_status"]
+    assert "accumulation (shown for information, not a pass rule)" in by.loc["ACC", "s_status"]
+    assert "0.40x down-day volume over 50 sessions, distribution" in by.loc["DIST", "s_status"]
+    # canslim.s_accum_gate on: up-day volume must be at least down-day volume again.
+    gated, _ = _run(stocks, cfg={"canslim": {"s_accum_gate": True}})
+    assert _tickers(gated) == {"BRK", "ACC"}
+    assert "not a pass rule" not in gated.set_index("ticker").loc["ACC", "s_status"]
     ratio, up, down = setups._accumulation(pd.Series(_zigzag()), pd.Series(np.where(np.arange(N) % 2 == 1, 1_500_000.0, 600_000.0)), 50)
     assert round(ratio, 6) == 2.5 and up == 25 * 1_500_000 and down == 25 * 600_000
 
@@ -304,6 +319,9 @@ def test_config_block_and_switches():
     for k, v in setups.CANSLIM_DEFAULTS.items():
         assert float(block[k]) == float(v), k
     assert block["l_rs_min"] == 80 and block["a_roe_min"] == 17 and block["s_accum_sessions"] == 50
+    assert block["a_roe_gate"] is False and block["s_accum_gate"] is False  # Nick: loosen it
+    assert setups.canslim_settings({"canslim": {"a_roe_gate": "yes"}})["a_roe_gate"] is False  # only a real true turns it on
+    assert setups.canslim_settings({"canslim": {"a_roe_gate": True, "s_accum_gate": True}})["s_accum_gate"] is True
     assert "not verified" in block["_note"]
     # A config line moves the screen: RS 75 passes at l_rs_min 70, not at the default 80.
     stocks = {"GOOD": _named("GOOD", _stock())}
