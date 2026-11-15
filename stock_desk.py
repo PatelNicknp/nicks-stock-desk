@@ -30,6 +30,7 @@ import trading_floor_paper
 import relative_strength
 import ms_screens
 import eps_inputs
+import inst_history
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -2384,6 +2385,31 @@ def ownership_percent(inst_shares, sec_shares, nasdaq_so_m, fallback_pct):
     return own, bool(capped)
 
 
+def load_inst_13f_history(cfg, data_dir, mode, tickers):
+    """13F fund-holder history for CANSLIM I (data/inst_13f_history.csv, inst_history.py).
+
+    With features.inst_13f_history on, a full run checks the SEC 13F data-set page at
+    most once a day and, only when the SEC has published a new quarterly ZIP, downloads
+    it (plus the one before it) and adds that quarter. Hourly and offline runs only read
+    the saved file. Any failure keeps the saved history. Returns None when the file is
+    missing, so CANSLIM I falls back to not verified / the Nasdaq check.
+    """
+    features = (cfg or {}).get("features") or {}
+    if features.get("inst_13f_history", True) and mode == "full" and (
+            STAMPS.get("inst_13f_history") != today_et() or "--force-slow" in sys.argv):
+        msg = inst_history.update_history(cfg, root(), requests, tickers, log=print)
+        STAMPS["inst_13f_history"] = today_et()
+        log("Institutional 13F history (SEC Form 13F data sets)", "FAILED" if "failed" in msg else "OK", "", msg)
+    path = os.path.join(data_dir, inst_history.HISTORY_FILE)
+    if not os.path.exists(path):
+        return None
+    try:
+        return inst_history.load_history(data_dir)
+    except Exception as exc:
+        print("13F history unreadable: %s" % str(exc)[:120])
+        return None
+
+
 def apply_ownership(holders, annual, quarters):
     """Replace Nasdaq's ownership percent with holdings / SEC shares."""
     if holders is None or len(holders) == 0:
@@ -4385,7 +4411,9 @@ def main(argv=None):
     if len(close) and len(universe):
         # Open is already in the saved daily bars (same Yahoo download). No new request.
         opn = wide_from_long(long, "open") if long is not None and len(long) and "open" in long.columns else None
-        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores, cfg=cfg, opn=opn, rs_map=rs_lookup)
+        inst_hist = load_inst_13f_history(cfg, data, mode, list(universe["ticker"]))
+        setup_frames = setups.build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=scores, cfg=cfg, opn=opn, rs_map=rs_lookup,
+                                           inst_hist=inst_hist)
     else:
         setup_frames = {k: pd.DataFrame() for k in (
             "scanner_vcp", "scanner_canslim", "scanner_box", "scanner_breakdown", "scanner_flag", "scanner_leaders",
