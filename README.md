@@ -103,7 +103,7 @@ Strict screen (`features.canslim_strict`, on by default; Nick, Nov 2026). A stoc
 - N: the close is within 15% of the 52-week closing high.
 - S: the 20-day average volume is at least 200,000 shares. Accumulation: over the last 50 sessions, total volume on up-close days divided by total volume on down-close days (unchanged days count for neither) is shown as accumulation (1.0 or more) or distribution, for information only (Nick: loosen it); `canslim.s_accum_gate: true` makes it a pass/fail rule again. Fewer than 50 sessions with volume means accumulation not verified. BROKEN OUT today still needs a new closing high on volume at least 1.5 times the 50-day average.
 - L: RS Rating 80 or higher (the desk's one 1 to 99 RS Rating; 55 before).
-- I: the cached Nasdaq 13F summary shows institutions bought at least as many shares as they sold (flat or rising). No 13F row is not a fail. The holder count is only saved as one snapshot, so its own trend is not on file; the share flow is the trend used.
+- I (`features.canslim_i_13f_trend`, on by default): the number of distinct 13F filers holding the stock is flat or rising from the second-newest to the newest complete quarter in `data/inst_13f_history.csv` (free SEC Form 13F data sets, see `docs/INST_13F_HISTORY.md`). A drop of `canslim.i_flat_tolerance_pct` (2%) or less counts as flat. A move of more than `canslim.i_max_jump_pct` (50%) either way is not verified, because it almost always means the CUSIP changed (a retired CUSIP that the free mapper no longer knows). Fewer than two back-to-back complete quarters on file says not verified and is not a fail. Turn the switch off for the old check (the Nasdaq 13F summary shows institutions bought at least as many shares as they sold).
 - Trend check (light, not the full Minervini template): close above the 50-day and 200-day simple averages, and the 50-day above the 200-day.
 - M never blocks or demotes a stock (Nick). Market direction keeps the three labels (confirmation, mixed, correction) from price versus the 21, 50, and 200 day EMAs for SPY, and QQQ when its prices are cached. When SPY or QQQ closes under its 200-day EMA the CANSLIM page shows a market-in-correction banner (`features.canslim_market_banner`). READY is still allowed.
 - Status: BROKEN OUT today (new closing high on 1.5x volume), READY (within 5% of the 52-week closing high), otherwise WATCHING. There is no soft tier; `qualify` is `strict` on every row.
@@ -231,6 +231,7 @@ Hourly runs (`--hourly`) refresh prices and rebuild the tables from the cache. T
 | `netutil.py` | Rate gate, retry, once-a-day decision |
 | `tables.py` | One table per Looker page |
 | `setups.py` | VCP, CANSLIM, box, flag, and leaders. No network calls |
+| `inst_history.py` | 13F fund-holder history from the SEC Form 13F data sets (CANSLIM I). See `docs/INST_13F_HISTORY.md` |
 | `reference/` | Nick's Pine script and the NSE CANSLIM scan these pages follow |
 | `config.json` | Feature switches, score lines, rate limits, growth names, 19 sector ETFs |
 | `input/holdings.csv` | Shares and average cost. Example rows are marked `example=yes` |

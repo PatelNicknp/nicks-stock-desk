@@ -868,6 +868,8 @@ CANSLIM_DEFAULTS = {
     "rs_score_w3": 0.4,
     "rs_6m_sessions": 126,
     "rs_3m_sessions": 63,
+    "i_flat_tolerance_pct": 2.0,  # I (13F history): a holder-count drop this small (percent) still counts as flat
+    "i_max_jump_pct": 50.0,       # I (13F history): a move bigger than this either way is not verified (likely a CUSIP change)
 }
 CANSLIM_CORRECTION_BANNER = (
     "Market in correction: {who} closed below its 200-day EMA. "
@@ -897,6 +899,39 @@ def canslim_settings(cfg=None):
 def canslim_strict_on(cfg=None):
     feats = (cfg or {}).get("features") if isinstance(cfg, dict) else None
     return bool((feats or {}).get("canslim_strict", True))
+
+
+def canslim_i_13f_on(cfg=None):
+    """features.canslim_i_13f_trend: I uses the SEC 13F fund-holder count trend (default on).
+    Off gives back the Nasdaq bought-vs-sold shares check."""
+    feats = (cfg or {}).get("features") if isinstance(cfg, dict) else None
+    return bool((feats or {}).get("canslim_i_13f_trend", True))
+
+
+def _holder_count_trend_13f(inst_hist, ticker, tolerance_pct, max_jump_pct=50.0):
+    """CANSLIM I from data/inst_13f_history.csv: distinct 13F filers holding the stock in
+    the newest two complete quarters. Flat or rising passes, a drop fails, and fewer
+    than two back-to-back complete quarters is not verified (and does not fail)."""
+    import inst_history
+    trend, info = inst_history.holder_count_trend(inst_hist, ticker, tolerance_pct, max_jump_pct)
+    if not trend and info.get("reason") == "jump":
+        return NOT_VERIFIED, (
+            "Fund-holder count trend is not verified: 13F holders went from %s in %s to %s in %s (%+.1f%%), a move over "
+            "%s%% that usually means the stock's CUSIP changed, not a real shift. Missing 13F data does not fail the stock." % (
+                "{:,}".format(info["holders_old"]), info["period_old"], "{:,}".format(info["holders_new"]),
+                info["period_new"], info["change_pct"], _round(max_jump_pct, 0)))
+    if not trend:
+        return NOT_VERIFIED, ("Fund-holder count trend is not verified: fewer than two complete 13F quarters "
+                              "on file for this stock. Missing 13F data does not fail the stock.")
+    text = "13F fund holders %s in %s versus %s in %s (%+.1f%%), so the count is %s" % (
+        "{:,}".format(info["holders_new"]), info["period_new"], "{:,}".format(info["holders_old"]), info["period_old"],
+        info["change_pct"], {"up": "rising", "flat": "flat", "down": "falling"}[trend])
+    if trend == "flat" and info["holders_new"] < info["holders_old"]:
+        text += " (a drop of %s%% or less counts as flat)" % _round(tolerance_pct, 1)
+    sh0, sh1 = _num(info.get("shares_old")), _num(info.get("shares_new"))
+    if sh0 and sh1 is not None:
+        text += ". Shares they hold %+.1f%%" % ((sh1 - sh0) / sh0 * 100.0)
+    return trend, text + ". Source: SEC Form 13F data sets."
 
 
 def canslim_market_correction(market):
@@ -1030,14 +1065,16 @@ def _sma_last(c, n):
     return float(c.iloc[-n:].mean())
 
 
-def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None, cfg=None, strict=None):
+def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=None, cfg=None, strict=None, inst_hist=None):
     """CANSLIM scanner. L is the desk's 1 to 99 RS Rating from rs_map ({TICKER: rs}).
 
     With features.canslim_strict on (the default, or strict=True) every listed stock
     passes all of: C (quarterly EPS +25%, sales +25% or speeding up when on file),
     A (annual EPS +25%, ROE 17%+ when on file), N (within 15% of the 52-week closing
     high), S (20-day volume floor, up/down volume accumulation when on file), L (RS
-    Rating 80+), I (13F holders flat or buying when on file), and a light trend check
+    Rating 80+), I (13F fund-holder count flat or rising over the newest two complete
+    quarters, from inst_hist, when on file; features.canslim_i_13f_trend off or no
+    inst_hist uses the Nasdaq bought-vs-sold check), and a light trend check
     (close over SMA50 and SMA200, SMA50 over SMA200). M never blocks: a SPY or QQQ
     close under its EMA200 only sets a banner. Rows rank by rs_score inside each status.
     A stock with no RS Rating (under a year of prices) cannot pass L, so it is not listed.
@@ -1062,6 +1099,7 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
     near_line = -abs(p["n_near_high_pct"])
     ready_line = -abs(p["ready_near_high_pct"])
     win = p["s_accum_sessions"]
+    use_13f = canslim_i_13f_on(cfg) and inst_hist is not None
 
     for ticker in list(universe["ticker"]):
         rs_val = _num(rs_map.get(str(ticker).strip().upper()))
@@ -1109,8 +1147,12 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
         acc, acc_up, acc_down = _accumulation(c, vol_s, win)
         if p["s_accum_gate"] and acc is not None and acc < p["s_accum_min_ratio"]:
             continue
-        # I: holders flat or buying. Missing 13F data does not fail.
-        i_trend, i_text = _holder_trend(holders, ticker)
+        # I: fund-holder count flat or rising (13F history), or Nasdaq holders flat or
+        # buying when that switch is off. Missing 13F data does not fail.
+        if use_13f:
+            i_trend, i_text = _holder_count_trend_13f(inst_hist, ticker, p["i_flat_tolerance_pct"], p["i_max_jump_pct"])
+        else:
+            i_trend, i_text = _holder_trend(holders, ticker)
         if i_trend == "down":
             continue
 
@@ -3563,10 +3605,11 @@ def _buy_market_row(market_ok, qqq_flag):
     }])
 
 
-def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None, cfg=None, opn=None, rs_map=None):
+def build_setups(close, high, low, vol, universe, quarters, annual, holders, features, scores=None, cfg=None, opn=None, rs_map=None, inst_hist=None):
     """Return the scanner frames. Each is empty when that switch is off.
 
     rs_map: {TICKER: RS Rating 1 to 99} from relative_strength.py. CANSLIM's L and the scorecard L use it.
+    inst_hist: data/inst_13f_history.csv (per ticker, per quarter 13F holder counts). CANSLIM's I uses it.
     """
     features = features or {}
     want_v = features.get("scanner_vcp", True)
@@ -3582,7 +3625,7 @@ def build_setups(close, high, low, vol, universe, quarters, annual, holders, fea
     want_sc = features.get("scorecard_canslim", True)
     vcp = scan_vcp(close, high, low, vol, universe, cfg) if (want_v or want_l) else pd.DataFrame()
     canslim, _market = scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_map=rs_map, cfg=cfg,
-                                     strict=features.get("canslim_strict", True)) if (want_c or want_l) else (pd.DataFrame(), {})
+                                     strict=features.get("canslim_strict", True), inst_hist=inst_hist) if (want_c or want_l) else (pd.DataFrame(), {})
     box = scan_box(close, high, low, vol, universe) if want_b else pd.DataFrame()
     breakdown = scan_breakdown(close, high, low, vol, universe) if want_bd else pd.DataFrame()
     flag = scan_flag(close, high, low, vol, universe) if want_f else pd.DataFrame()
