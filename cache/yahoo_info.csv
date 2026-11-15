@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-SYY,Sysco Corporation,Consumer Defensive,Food Distribution,14.560483,2.28571,12.0,91.25,91.0,38596489216,1793712600.0
-T,AT&T Inc.,Communication Services,Telecom Services,8.324987,2.08333,23.0,27.58696,27.0,145575198720,1792585800.0
-TDG,Transdigm Group Incorporated,Industrials,Aerospace & Defense,25.439257,2.08696,20.0,1414.3,1405.0,69232353280,1794317400.0
-TDY,Teledyne Technologies Incorpora,Technology,Scientific & Technical Instruments,23.273289,1.75,12.0,770.0833,777.5,29906847744,1792585800.0
-TECH,Bio-Techne Corp,Healthcare,Biotechnology,31.531626,3.15385,10.0,70.5,73.0,11446209536,1786537800.0
-TEL,TE Connectivity plc,Technology,Electronic Components,14.42216,1.68421,19.0,258.3684,255.0,63034494976,1793190600.0
-TER,"Teradyne, Inc.",Technology,Semiconductor Equipment & Materials,20.012226,1.58824,15.0,424.66666,430.0,37464473600,1793131200.0
-TFC,Truist Financial Corporation,Financial Services,Banks - Regional,10.398815,2.63636,19.0,53.29737,54.0,60943134720,1800451800.0
-TGT,Target Corporation,Consumer Defensive,Discount Stores,17.37895,2.47368,34.0,164.73529,164.0,75546394624,1795008600.0
-TJX,"TJX Companies, Inc. (The)",Consumer Cyclical,Apparel Retail,23.925446,1.54545,19.0,171.15788,175.0,152272453632,1795008600.0
-TKO,"TKO Group Holdings, Inc.",Communication Services,Entertainment,46.217667,1.40909,19.0,232.36842,230.0,37023838208,1793826000.0
-TMO,Thermo Fisher Scientific Inc,Healthcare,Diagnostics & Research,25.658718,1.44444,25.0,756.52,750.0,264133361664,1792585800.0
-TMUS,"T-Mobile US, Inc.",Communication Services,Telecom Services,11.80441,1.60714,25.0,225.64,235.0,178254381056,1793217600.0
-TPL,Texas Pacific Land Corporation,Energy,Oil & Gas E&P,3.794721,,2.0,443.0,443.0,19138404352,1793826000.0
-TPR,"Tapestry, Inc.",Consumer Cyclical,Luxury Goods,14.841756,1.80952,19.0,163.78947,160.0,26743928832,1801747800.0
-TRGP,"Targa Resources, Inc.",Energy,Oil & Gas Midstream,22.108011,1.36364,21.0,330.57144,335.0,58356543488,1793885400.0
-TRI,Thomson Reuters Corp,Industrials,Specialty Business Services,23.36247,1.78947,13.0,128.42308,130.0,47660969984,1793712600.0
-TRMB,Trimble Inc.,Technology,Scientific & Technical Instruments,13.672263,1.30769,11.0,74.18182,73.0,12635874304,1793799000.0
-TROW,"T. Rowe Price Group, Inc.",Financial Services,Asset Management,11.050447,3.35714,13.0,105.38462,107.0,23911702528,1793277000.0
-TRV,"The Travelers Companies, Inc.",Financial Services,Insurance - Property & Casualty,12.670556,2.96552,24.0,376.54166,379.5,80769531904,1792153800.0
-TSCO,Tractor Supply Company,Consumer Cyclical,Specialty Retail,18.166563,2.1,27.0,37.48148,38.0,19425769472,1792672200.0
-TSLA,"Tesla, Inc.",Consumer Cyclical,Auto Manufacturers,174.85019,2.27273,40.0,413.10126,436.0,1492324319232,1792612800.0
-TSN,"Tyson Foods, Inc.",Consumer Defensive,Farm Products,15.584301,2.53846,12.0,63.0,62.5,21153824768,1794835800.0
-TT,Trane Technologies plc,Industrials,Building Products & Equipment,23.758032,1.80769,23.0,519.5574,535.0,92264390656,1793277000.0
-TTWO,"Take-Two Interactive Software, ",Communication Services,Electronic Gaming & Multimedia,20.64823,1.2069,29.0,283.95898,285.0,39394910208,1794258000.0
 TWLO,Twilio Inc.,Technology,Software - Infrastructure,30.034311,1.6129,29.0,269.98862,274.0,31871342592,1793304000.0
 TXN,Texas Instruments Incorporated,Technology,Semiconductors,25.354143,2.02857,29.0,336.86206,340.0,268048285696,1792612800.0
 TXT,Textron Inc.,Industrials,Aerospace & Defense,11.834673,2.1875,15.0,101.26667,100.0,14461677568,1793277000.0
@@ -523,3 +498,28 @@ SWK,"Stanley Black & Decker, Inc.",Industrials,Tools & Accessories,17.338793,2.4
 SWKS,"Skyworks Solutions, Inc.",Technology,Semiconductors,11.924871,3.04,18.0,79.11111,78.0,21122826240,1793739600.0
 SYF,Synchrony Financial,Financial Services,Credit Services,6.8922296,1.95652,23.0,87.0,88.0,22499002368,1792499400.0
 SYK,Stryker Corporation,Healthcare,Medical Devices,19.010199,1.8,27.0,339.37296,336.0,117877170176,1793304000.0
+SYY,Sysco Corporation,Consumer Defensive,Food Distribution,14.318133,2.28571,12.0,91.25,91.0,37954072576,1793712600.0
+T,AT&T Inc.,Communication Services,Telecom Services,8.544573,2.08333,23.0,27.58696,27.0,149414985728,1792585800.0
+TDG,Transdigm Group Incorporated,Industrials,Aerospace & Defense,21.819098,2.08696,20.0,1441.2,1410.0,66451116032,1794317400.0
+TDY,Teledyne Technologies Incorpora,Technology,Scientific & Technical Instruments,23.208391,1.75,12.0,770.0833,777.5,29635020800,1792585800.0
+TECH,Bio-Techne Corp,Healthcare,Biotechnology,31.483397,3.15385,10.0,70.5,73.0,11436205056,
+TEL,TE Connectivity plc,Technology,Electronic Components,14.338499,1.68421,19.0,258.3684,255.0,62023618560,1793190600.0
+TER,"Teradyne, Inc.",Technology,Semiconductor Equipment & Materials,20.730034,1.55556,16.0,415.875,425.0,38960930816,1793131200.0
+TFC,Truist Financial Corporation,Financial Services,Banks - Regional,10.218856,2.63636,19.0,53.29737,54.0,59888467968,1800451800.0
+TGT,Target Corporation,Consumer Defensive,Discount Stores,16.848545,2.47368,34.0,165.94118,164.0,73345351680,1795008600.0
+TJX,"TJX Companies, Inc. (The)",Consumer Cyclical,Apparel Retail,23.44748,1.65217,20.0,167.25,171.5,148439121920,1795008600.0
+TKO,"TKO Group Holdings, Inc.",Communication Services,Entertainment,46.008133,1.40909,19.0,232.36842,230.0,36855988224,1793826000.0
+TMO,Thermo Fisher Scientific Inc,Healthcare,Diagnostics & Research,25.203045,1.44444,25.0,756.52,750.0,259442606080,1792585800.0
+TMUS,"T-Mobile US, Inc.",Communication Services,Telecom Services,11.9215555,1.60714,25.0,225.44,235.0,180023377920,1793217600.0
+TPL,Texas Pacific Land Corporation,Energy,Oil & Gas E&P,3.9922044,3.0,2.0,444.5,444.5,20134400000,1793826000.0
+TPR,"Tapestry, Inc.",Consumer Cyclical,Luxury Goods,14.394708,1.77273,20.0,163.55,159.5,26020749312,1801747800.0
+TRGP,"Targa Resources, Inc.",Energy,Oil & Gas Midstream,24.089386,1.27273,21.0,332.61905,335.0,63793344512,1793885400.0
+TRI,Thomson Reuters Corp,Industrials,Specialty Business Services,23.2233,1.78947,13.0,128.42308,130.0,47377055744,1793712600.0
+TRMB,Trimble Inc.,Technology,Scientific & Technical Instruments,13.801247,1.30769,11.0,74.18182,73.0,12755081216,1793799000.0
+TROW,"T. Rowe Price Group, Inc.",Financial Services,Asset Management,10.738917,3.35714,13.0,105.38462,107.0,23237595136,1793277000.0
+TRV,"The Travelers Companies, Inc.",Financial Services,Insurance - Property & Casualty,12.961132,,24.0,376.54166,379.5,82640519168,1792153800.0
+TSCO,Tractor Supply Company,Consumer Cyclical,Specialty Retail,17.676756,2.16667,27.0,37.48148,38.0,18902011904,1792672200.0
+TSLA,"Tesla, Inc.",Consumer Cyclical,Auto Manufacturers,180.72267,2.29545,40.0,412.47626,436.0,1542445203456,1792612800.0
+TSN,"Tyson Foods, Inc.",Consumer Defensive,Farm Products,15.323574,2.53846,12.0,63.0,62.5,20692965376,1794835800.0
+TT,Trane Technologies plc,Industrials,Building Products & Equipment,23.560188,1.80769,23.0,516.5139,525.0,91496062976,1793277000.0
+TTWO,"Take-Two Interactive Software, ",Communication Services,Electronic Gaming & Multimedia,22.32702,1.2069,29.0,283.92828,289.0,42650976256,1794258000.0
