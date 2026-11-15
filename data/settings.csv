@@ -18,6 +18,10 @@ feature.scanner_dividend,True
 feature.scanner_wheel,True
 feature.scanner_vcp,True
 feature.scanner_canslim,True
+feature.canslim_strict,True
+feature.canslim_i_13f_trend,True
+feature.inst_13f_history,True
+feature.canslim_market_banner,True
 feature.scanner_box,True
 feature.scanner_breakdown,True
 feature.scanner_volume,True

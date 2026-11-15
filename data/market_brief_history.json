@@ -249,11 +249,12 @@
       "regime": "chop",
       "causes": [
         "ai_mood",
-        "inflation"
+        "rates"
       ],
       "sources": [
+        "BBC",
+        "Bank of England",
         "CNBC",
-        "MarketWatch",
         "Yahoo Finance"
       ],
       "spy_day_pct": -0.36,

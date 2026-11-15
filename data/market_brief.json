@@ -3,18 +3,18 @@
   "feature": "market_news",
   "session": "2026-11-13",
   "slot": "evening_close",
-  "updated_pt": "2026-11-13 16:11 PT",
+  "updated_pt": "2026-11-15 15:10 PT",
   "price_as_of": "2026-11-13",
-  "why_moved": "The market fell: S&P -0.4%, Nasdaq -1.2%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-2.0%) and Consumer Discretionary (-0.4%); leading sectors Consumer Staples (1.4%) and Communication Services (1.1%) held up. The move was fairly broad: 1332 stocks rose and 1130 fell.",
-  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1332 stocks up, 1130 down).",
+  "why_moved": "The market fell: S&P -0.4%, Nasdaq -1.2%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-2.0%) and Consumer Discretionary (-0.4%); leading sectors Consumer Staples (1.4%) and Communication Services (1.1%) held up. The move was fairly broad: 1352 stocks rose and 1108 fell.",
+  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1352 stocks up, 1108 down).",
   "story": {
     "direction": "down",
     "date_label": "November 13, 2026",
     "summary": "U.S. closing summary",
     "clear_cause": true,
     "cause": "ai_mood",
-    "lead": "Chip and tech shares led stocks lower.",
-    "support": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang.",
+    "lead": "The AI trade led stocks lower.",
+    "support": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts.",
     "support_ref": 1,
     "bullets": [
       {
@@ -24,7 +24,7 @@
       },
       {
         "lead": "More stocks rose than fell.",
-        "rest": "1332 stocks rose and 1130 fell.",
+        "rest": "1352 stocks rose and 1108 fell.",
         "ref": null
       },
       {
@@ -79,94 +79,94 @@
     "news": [
       {
         "n": 1,
-        "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
-        "source": "MarketWatch",
+        "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
+        "source": "CNBC",
         "via": "",
-        "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T21:10:00+00:00",
-        "date_label": "Nov 13, 1:10 PM PT",
-        "age_label": "3h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+        "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
+        "published": "2026-11-14",
+        "published_at": "2026-11-14T15:50:43+00:00",
+        "date_label": "Nov 14, 7:50 AM PT",
+        "age_label": "31h ago",
+        "region": "Global",
+        "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move."
       },
       {
         "n": 2,
-        "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+        "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
         "source": "CNBC",
         "via": "",
-        "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
+        "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
         "published": "2026-11-13",
-        "published_at": "2026-11-13T21:18:30+00:00",
-        "date_label": "Nov 13, 1:18 PM PT",
-        "age_label": "3h ago",
-        "region": "US",
+        "published_at": "2026-11-13T14:22:07+00:00",
+        "date_label": "Nov 13, 6:22 AM PT",
+        "age_label": "2d ago",
+        "region": "Global",
         "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 3,
-        "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
-        "source": "Yahoo Finance",
+        "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
+        "source": "Bank of England",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
+        "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
         "published": "2026-11-13",
-        "published_at": "2026-11-13T21:49:35+00:00",
-        "date_label": "Nov 13, 1:49 PM PT",
-        "age_label": "2h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+        "published_at": "2026-11-13T09:00:00+00:00",
+        "date_label": "Nov 13, 1:00 AM PT",
+        "age_label": "2d ago",
+        "region": "UK",
+        "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 4,
-        "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
-        "source": "Yahoo Finance",
+        "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
+        "source": "BBC",
         "via": "",
-        "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+        "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
         "published": "2026-11-13",
-        "published_at": "2026-11-13T21:49:53+00:00",
-        "date_label": "Nov 13, 1:49 PM PT",
-        "age_label": "2h ago",
-        "region": "US",
+        "published_at": "2026-11-13T23:00:31+00:00",
+        "date_label": "Nov 13, 3:00 PM PT",
+        "age_label": "2d ago",
+        "region": "Global",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 5,
-        "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
+        "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T22:20:02+00:00",
-        "date_label": "Nov 13, 2:20 PM PT",
-        "age_label": "2h ago",
-        "region": "Global",
+        "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
+        "published": "2026-11-14",
+        "published_at": "2026-11-14T19:24:00+00:00",
+        "date_label": "Nov 14, 11:24 AM PT",
+        "age_label": "27h ago",
+        "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 6,
-        "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+        "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T22:13:55+00:00",
-        "date_label": "Nov 13, 2:13 PM PT",
-        "age_label": "2h ago",
-        "region": "Global",
+        "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
+        "published": "2026-11-14",
+        "published_at": "2026-11-14T19:30:08+00:00",
+        "date_label": "Nov 14, 11:30 AM PT",
+        "age_label": "27h ago",
+        "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
         "n": 7,
-        "title": "Stock Market Today, Nov. 13: CoreWeave Falls Over 6% on AI-Cloud Selling and Reported $4 Billion Loan Talks",
+        "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-coreweave-falls-over-6-on-ai-cloud-selling-and-reported-usd4-billion-loan-talks/?.tsrc=rss",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T23:04:29+00:00",
-        "date_label": "Nov 13, 3:04 PM PT",
-        "age_label": "1h ago",
-        "region": "Global",
-        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
+        "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
+        "published": "2026-11-14",
+        "published_at": "2026-11-14T19:25:33+00:00",
+        "date_label": "Nov 14, 11:25 AM PT",
+        "age_label": "27h ago",
+        "region": "US",
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
@@ -175,225 +175,174 @@
     "label": "Mixed",
     "vix": 19.3,
     "put_call_zone": "Greed",
-    "put_call": 0.72,
-    "advancers": 1332,
-    "decliners": 1130,
-    "why": "VIX 19.3, put/call Greed, 1332 up / 1130 down"
+    "put_call": 0.63,
+    "advancers": 1352,
+    "decliners": 1108,
+    "why": "VIX 19.3, put/call Greed, 1352 up / 1108 down"
   },
   "headlines": [
     {
-      "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
-      "source": "MarketWatch",
-      "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T21:10:00+00:00",
+      "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
+      "source": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
+      "published": "2026-11-14",
+      "published_at": "2026-11-14T15:50:43+00:00",
       "trusted": true,
       "causes": [
+        "oil",
+        "election",
         "ai_mood"
       ],
       "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 1:10 PM PT",
-      "age_label": "3h ago",
-      "wrap": 15.0,
-      "rank": 17.0
+      "region": "Global",
+      "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
+      "published_pt": "Nov 14, 7:50 AM PT",
+      "age_label": "31h ago",
+      "wrap": 10.0,
+      "rank": 14.0
     },
     {
-      "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+      "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
       "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
+      "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
       "published": "2026-11-13",
-      "published_at": "2026-11-13T21:18:30+00:00",
+      "published_at": "2026-11-13T14:22:07+00:00",
       "trusted": true,
       "causes": [
         "rates",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 1:18 PM PT",
-      "age_label": "3h ago",
-      "wrap": 13.0,
-      "rank": 15.5
-    },
-    {
-      "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T21:49:35+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 1:49 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 14.0
-    },
-    {
-      "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T21:49:53+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood",
         "inflation"
       ],
       "via": "",
+      "region": "Global",
+      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 6:22 AM PT",
+      "age_label": "2d ago",
+      "wrap": 0.0,
+      "rank": 4.0
+    },
+    {
+      "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
+      "source": "Bank of England",
+      "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T09:00:00+00:00",
+      "trusted": true,
+      "causes": [
+        "rates"
+      ],
+      "via": "",
+      "region": "UK",
+      "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 1:00 AM PT",
+      "age_label": "2d ago",
+      "wrap": 0.0,
+      "rank": 0.5
+    },
+    {
+      "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
+      "source": "BBC",
+      "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
+      "published": "2026-11-13",
+      "published_at": "2026-11-13T23:00:31+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "Global",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 13, 3:00 PM PT",
+      "age_label": "2d ago",
+      "wrap": 0.0,
+      "rank": 0.5
+    },
+    {
+      "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
+      "published": "2026-11-14",
+      "published_at": "2026-11-14T19:24:00+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
       "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 1:49 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 14.0
+      "published_pt": "Nov 14, 11:24 AM PT",
+      "age_label": "27h ago",
+      "wrap": 0.0,
+      "rank": 0.0
     },
     {
-      "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
+      "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
       "source": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T22:20:02+00:00",
+      "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
+      "published": "2026-11-14",
+      "published_at": "2026-11-14T19:30:08+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
       "via": "",
-      "region": "Global",
+      "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 2:20 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 10.5
+      "published_pt": "Nov 14, 11:30 AM PT",
+      "age_label": "27h ago",
+      "wrap": 0.0,
+      "rank": 2.5
     },
     {
-      "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+      "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
       "source": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T22:13:55+00:00",
+      "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
+      "published": "2026-11-14",
+      "published_at": "2026-11-14T19:25:33+00:00",
       "trusted": true,
       "causes": [
         "ai_mood"
       ],
       "via": "",
-      "region": "Global",
+      "region": "US",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 2:13 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 10.5
-    },
-    {
-      "title": "Stock Market Today, Nov. 13: CoreWeave Falls Over 6% on AI-Cloud Selling and Reported $4 Billion Loan Talks",
-      "source": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-coreweave-falls-over-6-on-ai-cloud-selling-and-reported-usd4-billion-loan-talks/?.tsrc=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T23:04:29+00:00",
-      "trusted": true,
-      "causes": [],
-      "via": "",
-      "region": "Global",
-      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 3:04 PM PT",
-      "age_label": "1h ago",
-      "wrap": 10.0,
-      "rank": 10.0
+      "published_pt": "Nov 14, 11:25 AM PT",
+      "age_label": "27h ago",
+      "wrap": 0.0,
+      "rank": 2.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 12.67,
+      "score": 11.17,
       "headlines": [
         {
-          "title": "AMD and other chip stocks slide as Wall Street rethinks the AI trade without Jensen Huang",
-          "source": "MarketWatch",
-          "url": "https://www.marketwatch.com/story/amd-and-other-chip-stocks-slide-as-wall-street-rethinks-the-ai-trade-without-jensen-huang-2fb74547?mod=mw_rss_topstories",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T21:10:00+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:10 PM PT",
-          "age_label": "3h ago",
-          "wrap": 15.0,
-          "rank": 17.0
-        },
-        {
-          "title": "AI risks are the biggest threat to the financial system, Fed survey finds",
+          "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
           "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T21:18:30+00:00",
+          "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
+          "published": "2026-11-14",
+          "published_at": "2026-11-14T15:50:43+00:00",
           "trusted": true,
           "causes": [
-            "rates",
+            "oil",
+            "election",
             "ai_mood"
           ],
           "via": "",
-          "region": "US",
-          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:18 PM PT",
-          "age_label": "3h ago",
-          "wrap": 13.0,
-          "rank": 15.5
-        },
-        {
-          "title": "Update: Wall Street Notches Weekly Gains Despite Nvidia Sell-Off",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-notches-weekly-gains-214935845.html?.tsrc=rss",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T21:49:35+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:49 PM PT",
-          "age_label": "2h ago",
+          "region": "Global",
+          "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
+          "published_pt": "Nov 14, 7:50 AM PT",
+          "age_label": "31h ago",
           "wrap": 10.0,
           "rank": 14.0
         },
         {
-          "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+          "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
+          "source": "BBC",
+          "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
           "published": "2026-11-13",
-          "published_at": "2026-11-13T21:49:53+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood",
-            "inflation"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:49 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 14.0
-        },
-        {
-          "title": "Stock Market Today, Nov. 13: Nvidia Slides After HSBC Downgrades Stock to Hold on CEO Uncertainty",
-          "source": "Yahoo Finance",
-          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-nvidia-slides-after-hsbc-downgrades-stock-to-hold-on-ceo-uncertainty/?.tsrc=rss",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T22:20:02+00:00",
+          "published_at": "2026-11-13T23:00:31+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
@@ -401,63 +350,117 @@
           "via": "",
           "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 2:20 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 10.5
+          "published_pt": "Nov 13, 3:00 PM PT",
+          "age_label": "2d ago",
+          "wrap": 0.0,
+          "rank": 0.5
         },
         {
-          "title": "Stock Market Today, Nov. 13: AMD Sinks 8.75% on Sector AI-Chip Sell-Off After Early Gains Reverse",
+          "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
           "source": "Yahoo Finance",
-          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-today-nov-13-amd-sinks-8-75-on-sector-ai-chip-sell-off-after-early-gains-reverse/?.tsrc=rss",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T22:13:55+00:00",
+          "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
+          "published": "2026-11-14",
+          "published_at": "2026-11-14T19:24:00+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "region": "Global",
+          "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 2:13 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 10.5
+          "published_pt": "Nov 14, 11:24 AM PT",
+          "age_label": "27h ago",
+          "wrap": 0.0,
+          "rank": 0.0
+        },
+        {
+          "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
+          "published": "2026-11-14",
+          "published_at": "2026-11-14T19:30:08+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 14, 11:30 AM PT",
+          "age_label": "27h ago",
+          "wrap": 0.0,
+          "rank": 2.5
+        },
+        {
+          "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
+          "source": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
+          "published": "2026-11-14",
+          "published_at": "2026-11-14T19:25:33+00:00",
+          "trusted": true,
+          "causes": [
+            "ai_mood"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+          "published_pt": "Nov 14, 11:25 AM PT",
+          "age_label": "27h ago",
+          "wrap": 0.0,
+          "rank": 2.5
         }
       ]
     },
     {
-      "cause": "inflation",
-      "label": "Inflation",
-      "score": 1.5,
+      "cause": "rates",
+      "label": "Rates / Fed",
+      "score": 3.0,
       "headlines": [
         {
-          "title": "Stock Market Today: Indexes Trim Losses, Manage To Score Weekly Gains Despite Strong Volatility",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+          "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
           "published": "2026-11-13",
-          "published_at": "2026-11-13T21:49:53+00:00",
+          "published_at": "2026-11-13T14:22:07+00:00",
           "trusted": true,
           "causes": [
-            "ai_mood",
+            "rates",
             "inflation"
           ],
           "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:49 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 14.0
+          "region": "Global",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 6:22 AM PT",
+          "age_label": "2d ago",
+          "wrap": 0.0,
+          "rank": 4.0
+        },
+        {
+          "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
+          "source": "Bank of England",
+          "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
+          "published": "2026-11-13",
+          "published_at": "2026-11-13T09:00:00+00:00",
+          "trusted": true,
+          "causes": [
+            "rates"
+          ],
+          "via": "",
+          "region": "UK",
+          "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 13, 1:00 AM PT",
+          "age_label": "2d ago",
+          "wrap": 0.0,
+          "rank": 0.5
         }
       ]
     }
   ],
   "vs_yesterday": {
-    "prior_mood": "Fear",
+    "prior_mood": "Mixed",
     "prior_session": "2026-11-13",
-    "text": "Mood flipped: was Fear, now Mixed.",
-    "flipped": true,
+    "text": "Mood steady versus last brief (Mixed).",
+    "flipped": false,
     "same_fear": false
   },
   "breadth_check": {
@@ -467,7 +470,7 @@
   },
   "regime": {
     "label": "chop",
-    "pct_above_50day": 54.5,
+    "pct_above_50day": 54.6,
     "pct_above_200day": 55.9,
     "text": "Breadth is split — not a clean uptrend or selloff."
   },
@@ -488,12 +491,12 @@
   },
   "prior_brief": {
     "session": "2026-11-13",
-    "slot": "morning_open",
-    "why_moved": "The S&P slipped -0.9% (Nasdaq -1.8%), dragged by Technology (-2.8%), while Consumer Staples (0.7%) and Communication Services (0.4%) held up (866 stocks up, 1599 down); VIX at 20.6.",
-    "mood": "Fear",
+    "slot": "evening_close",
+    "why_moved": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1332 stocks up, 1130 down).",
+    "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
-      "Oil / Energy"
+      "Inflation"
     ]
   },
   "stats": {
@@ -502,11 +505,11 @@
     "qqq_day_pct": -1.2,
     "dia_day_pct": null,
     "vix": 19.3,
-    "advancers": 1332,
-    "decliners": 1130,
-    "breadth_sma50": 54.5,
+    "advancers": 1352,
+    "decliners": 1108,
+    "breadth_sma50": 54.6,
     "breadth_sma200": 55.9,
-    "put_call": 0.72,
+    "put_call": 0.63,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
@@ -518,11 +521,12 @@
       "regime": "chop",
       "causes": [
         "ai_mood",
-        "inflation"
+        "rates"
       ],
       "sources": [
+        "BBC",
+        "Bank of England",
         "CNBC",
-        "MarketWatch",
         "Yahoo Finance"
       ],
       "spy_day_pct": -0.36,
@@ -620,7 +624,7 @@
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-14T00:20:40.979162+00:00",
+    "retrieved_at": "2026-11-15T23:20:32.797412+00:00",
     "summary": "Not enough verified index closes to call a worldwide move.",
     "breadth": "unknown",
     "missing": [
@@ -641,14 +645,14 @@
         "pct": -0.36,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:11:00-08:00",
-        "status": "closed",
+        "quote_at": "2026-11-15T15:10:00-08:00",
+        "status": "prior_local_close",
         "source": "Desk price file",
         "source_url": "",
         "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: S&P 500, Dow, Nasdaq End Lower Amid Nvidia Turmoil, But Record Best Week Since August —  SPCX, NVDA, ARM, AZN In Focus. Not proof this caused the percent.",
+        "cause": "Possible context from Yahoo Finance: This Dividend King Yields 5 Times the S&P 500. Is It a Buy Now?. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-end-lower-amid-nvidia-turmoil-but-record-best-week-since-august-spcx-nvda-arm-azn-in-focus/cNbRj3uR9Q2?.tsrc=rss"
+        "cause_url": "https://www.fool.com/investing/2026/11/15/this-dividend-king-yields-5-times-the-s-and-p-500-is-it-a-buy-now/?.tsrc=rss"
       },
       {
         "id": "nifty",
@@ -813,14 +817,14 @@
         "pct": -0.36,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:11:00-08:00",
-        "status": "closed",
+        "quote_at": "2026-11-15T15:10:00-08:00",
+        "status": "prior_local_close",
         "source": "Desk price file",
         "source_url": "",
         "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: S&P 500, Dow, Nasdaq End Lower Amid Nvidia Turmoil, But Record Best Week Since August —  SPCX, NVDA, ARM, AZN In Focus. Not proof this caused the percent.",
+        "cause": "Possible context from Yahoo Finance: This Dividend King Yields 5 Times the S&P 500. Is It a Buy Now?. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-dow-nasdaq-end-lower-amid-nvidia-turmoil-but-record-best-week-since-august-spcx-nvda-arm-azn-in-focus/cNbRj3uR9Q2?.tsrc=rss"
+        "cause_url": "https://www.fool.com/investing/2026/11/15/this-dividend-king-yields-5-times-the-s-and-p-500-is-it-a-buy-now/?.tsrc=rss"
       },
       {
         "id": "qqq",
@@ -830,8 +834,8 @@
         "pct": -1.2,
         "verified": true,
         "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T16:11:00-08:00",
-        "status": "closed",
+        "quote_at": "2026-11-15T15:10:00-08:00",
+        "status": "prior_local_close",
         "source": "Desk price file",
         "source_url": "",
         "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
