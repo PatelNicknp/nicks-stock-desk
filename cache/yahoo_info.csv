@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-TWLO,Twilio Inc.,Technology,Software - Infrastructure,30.034311,1.6129,29.0,269.98862,274.0,31871342592,1793304000.0
-TXN,Texas Instruments Incorporated,Technology,Semiconductors,25.354143,2.02857,29.0,336.86206,340.0,268048285696,1792612800.0
-TXT,Textron Inc.,Industrials,Aerospace & Defense,11.834673,2.1875,15.0,101.26667,100.0,14461677568,1793277000.0
-TYL,"Tyler Technologies, Inc.",Technology,Software - Application,27.20236,1.6087,22.0,446.13635,440.0,16821857280,1793217600.0
-UAL,"United Airlines Holdings, Inc.",Industrials,Airlines,10.144495,1.32,23.0,149.69565,145.0,38769643520,1792526400.0
-UBER,"Uber Technologies, Inc.",Technology,Software - Application,16.220741,1.56863,47.0,99.15617,99.4,145158537216,1793799000.0
-UDR,"UDR, Inc.",Real Estate,REIT - Residential,65.875,2.36364,21.0,39.69048,39.0,13390655488,1793653200.0
-UHS,"Universal Health Services, Inc.",Healthcare,Medical Care Facilities,8.6160555,2.4,17.0,193.82353,194.0,11683869696,1793131200.0
-ULTA,"Ulta Beauty, Inc.",Consumer Cyclical,Specialty Retail,20.856758,1.82143,25.0,635.84,635.0,28622706688,1796331600.0
-UNH,UnitedHealth Group Incorporated,Healthcare,Healthcare Plans,17.04192,1.61538,25.0,476.64,490.0,355577593856,1791894600.0
 UNP,Union Pacific Corporation,Industrials,Railroads,20.57446,1.72,24.0,329.95834,335.0,175935455232,1792672200.0
 UPS,"United Parcel Service, Inc.",Industrials,Integrated Freight & Logistics,13.73006,2.17241,26.0,115.42308,117.5,94645075968,1793104200.0
 URI,"United Rentals, Inc.",Industrials,Rental & Leasing Services,18.574488,1.77273,21.0,1295.4286,1325.0,70657351680,1792612800.0
@@ -523,3 +513,13 @@ TSLA,"Tesla, Inc.",Consumer Cyclical,Auto Manufacturers,180.72267,2.29545,40.0,4
 TSN,"Tyson Foods, Inc.",Consumer Defensive,Farm Products,15.323574,2.53846,12.0,63.0,62.5,20692965376,1794835800.0
 TT,Trane Technologies plc,Industrials,Building Products & Equipment,23.560188,1.80769,23.0,516.5139,525.0,91496062976,1793277000.0
 TTWO,"Take-Two Interactive Software, ",Communication Services,Electronic Gaming & Multimedia,22.32702,1.2069,29.0,283.92828,289.0,42650976256,1794258000.0
+TWLO,Twilio Inc.,Technology,Software - Infrastructure,30.823723,1.6129,29.0,268.36792,270.0,32681375744,1793304000.0
+TXN,Texas Instruments Incorporated,Technology,Semiconductors,26.099201,2.02857,29.0,338.7931,340.0,277420670976,1792612800.0
+TXT,Textron Inc.,Industrials,Aerospace & Defense,11.605692,2.1875,15.0,101.4,100.0,14170308608,1793277000.0
+TYL,"Tyler Technologies, Inc.",Technology,Software - Application,27.264727,1.6087,22.0,446.13635,440.0,16860423168,1793217600.0
+UAL,"United Airlines Holdings, Inc.",Industrials,Airlines,9.295432,1.32,23.0,150.56522,145.0,35514204160,1792526400.0
+UBER,"Uber Technologies, Inc.",Technology,Software - Application,15.809568,1.59184,45.0,98.232,99.4,142299889664,1793799000.0
+UDR,"UDR, Inc.",Real Estate,REIT - Residential,65.07143,2.36364,21.0,39.64286,39.0,13227310080,1793653200.0
+UHS,"Universal Health Services, Inc.",Healthcare,Medical Care Facilities,8.434604,2.4,17.0,196.70589,197.0,11188546560,1793131200.0
+ULTA,"Ulta Beauty, Inc.",Consumer Cyclical,Specialty Retail,20.573437,1.82143,25.0,642.12,645.0,28248150016,1796331600.0
+UNH,UnitedHealth Group Incorporated,Healthcare,Healthcare Plans,17.464527,1.61538,25.0,476.16,490.0,365093355520,1791894600.0
