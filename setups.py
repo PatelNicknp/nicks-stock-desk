@@ -854,6 +854,7 @@ CANSLIM_DEFAULTS = {
     "c_sales_min": 25.0,        # C: same quarter sales vs a year ago, percent (or speeding up)
     "a_eps_min": 25.0,          # A: latest year EPS vs the year before, percent
     "a_roe_min": 17.0,          # A: return on equity, percent, only when on file
+    "eps_positive_gate": True,  # C/A: latest quarterly EPS and latest annual EPS must both be above 0 (Nick)
     "a_roe_gate": False,        # A: ROE is shown only; True makes a_roe_min a pass/fail rule (Nick: loosen it)
     "n_near_high_pct": 15.0,    # N: within this many percent of the 52-week closing high
     "ready_near_high_pct": 5.0, # READY: within this many percent of that high
@@ -879,7 +880,7 @@ def canslim_settings(cfg=None):
     out = dict(CANSLIM_DEFAULTS)
     raw = (cfg or {}).get("canslim") if isinstance(cfg, dict) else None
     for k, v in (raw or {}).items():
-        if k in ("a_roe_gate", "s_accum_gate"):
+        if k in ("a_roe_gate", "s_accum_gate", "eps_positive_gate"):
             if isinstance(v, bool):
                 out[k] = v
             continue
@@ -1098,6 +1099,9 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
         a_pct, a_now, a_old = _yoy_eps(annual, ticker, False)
         if a_pct is None or a_pct < p["a_eps_min"]:
             continue
+        # Latest earnings must be positive: a shrinking loss is not growth here.
+        if p["eps_positive_gate"] and not (c_now > 0 and a_now > 0):
+            continue
         roe = _roe_check(annual, ticker)
         if p["a_roe_gate"] and roe is not None and roe < p["a_roe_min"]:
             continue
@@ -1153,6 +1157,9 @@ def scan_canslim(close, high, low, vol, universe, quarters, annual, holders, rs_
             else:
                 c_txt += " (quarter before %+.1f%%, %s)." % (s_prior, "speeding up" if s_accel else "not speeding up")
         a_txt = "%.1f%% versus the prior year (%.2f vs %.2f)." % (a_pct, a_now, a_old)
+        if p["eps_positive_gate"]:
+            c_txt += " Latest quarterly EPS is positive."
+            a_txt += " Latest annual EPS is positive."
         if roe is None:
             a_txt += " ROE not verified."
         else:

@@ -347,7 +347,8 @@ def test_page_banner_wiring_and_light_theme_classes():
     assert "strip: canslimBanner" in pages
     assert 'sort2: "rs_score"' in pages
     assert 'T("rs_score", "RS score vs SPY"' in pages
-    assert 'class="banner canslim-banner"' in pages  # the shared .banner style, which follows the light theme
+    assert 'class="banner canslim-banner"' in pages
+    assert "latest quarterly and yearly EPS above zero" in pages  # the shared .banner style, which follows the light theme
     css = open(os.path.join(ROOT, "site", "css", "desk.css")).read()
     assert ".banner{" in css
 
@@ -377,6 +378,28 @@ def test_page_banner_logic_in_node():
     assert "Market in correction" in got[0] and "SPY" in got[0]
     assert "QQQ" in got[1] and "SPY" not in got[1].replace("SPY and", "")
     assert got[2] == "" and got[3] == "" and got[4] == ""
+
+
+def test_latest_eps_must_be_positive():
+    stocks = {
+        "PROFIT": _named("PROFIT", _stock()),
+        "QLOSS": _named("QLOSS", _stock(q_eps=(-1.0, -0.5))),   # +50% by the desk formula, still a loss
+        "ALOSS": _named("ALOSS", _stock(a_eps=(-2.0, -1.0))),   # +50%, still a loss
+        "ZERO": _named("ZERO", _stock(q_eps=(-1.0, 0.0))),      # zero is not above zero
+    }
+    out, _ = _run(stocks)
+    assert _tickers(out) == {"PROFIT"}
+    row = out.iloc[0]
+    assert "Latest quarterly EPS is positive" in row["c_status"] and "Latest annual EPS is positive" in row["a_status"]
+    loose, _ = _run(stocks, cfg={"canslim": {"eps_positive_gate": False}})
+    assert _tickers(loose) == {"PROFIT", "QLOSS", "ALOSS", "ZERO"}
+    assert "is positive" not in loose.set_index("ticker").loc["QLOSS", "c_status"]
+    # No EPS on file still fails C or A (required); nothing is filled in.
+    noq = {"NOQ": (_climb(), _flat_vol(), [], _good_fund("NOQ")[1])}
+    assert len(_run(noq)[0]) == 0
+    cfg = json.load(open(os.path.join(ROOT, "config.json")))
+    assert cfg["canslim"]["eps_positive_gate"] is True
+    assert setups.canslim_settings({"canslim": {"eps_positive_gate": "no"}})["eps_positive_gate"] is True
 
 
 if __name__ == "__main__":
