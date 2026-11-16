@@ -1,23 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-WELL,Welltower Inc.,Real Estate,REIT - Healthcare Facilities,78.64331,1.54545,22.0,261.63635,261.5,181157625856,1793044800.0
-WFC,Wells Fargo & Company,Financial Services,Banks - Diversified,10.7597685,1.81481,24.0,97.375,97.5,258519367680,1799933400.0
-WM,"Waste Management, Inc.",Industrials,Waste Management,26.50864,1.75,25.0,255.6,259.0,94313037824,1793131200.0
-WMB,"Williams Companies, Inc. (The)",Energy,Oil & Gas Midstream,25.463818,1.4,24.0,85.41667,85.0,82844663808,1793653200.0
-WMT,Walmart Inc.,Consumer Defensive,Discount Stores,38.872444,1.51163,40.0,127.975,130.0,995050455040,1795095000.0
-WRB,W.R. Berkley Corporation,Financial Services,Insurance - Property & Casualty,15.670693,3.38889,17.0,69.17647,69.0,28250060800,1792440000.0
-WSM,"Williams-Sonoma, Inc.",Consumer Cyclical,Specialty Retail,25.016705,2.21739,20.0,250.55,257.0,30955319296,1787747400.0
-WST,"West Pharmaceutical Services, I",Healthcare,Medical Instruments & Supplies,39.483444,1.375,15.0,471.0,480.0,28586801152,1793277000.0
-WTW,Willis Towers Watson Public Lim,Financial Services,Insurance Brokers,14.360364,1.7619,19.0,374.6316,370.0,30380177408,1793277000.0
-WY,Weyerhaeuser Company,Real Estate,REIT - Specialty,48.71866,1.5,11.0,26.63636,25.0,15228071936,1793304000.0
-WYNN,"Wynn Resorts, Limited",Consumer Cyclical,Resorts & Casinos,19.728838,1.19048,20.0,116.75,119.0,9000947712,1793912400.0
-XEL,Xcel Energy Inc.,Utilities,Utilities - Regulated Electric,17.631184,1.45,19.0,89.81579,92.0,51702988800,1793277000.0
-XOM,ExxonMobil Holdings Corporation,Energy,Oil & Gas Integrated,13.186648,2.42308,22.0,185.04546,186.0,669418455040,1793363400.0
-XYL,Xylem Inc.,Industrials,Specialty Industrial Machinery,16.973051,2.04762,16.0,125.4375,127.0,22864979968,1793104200.0
-XYZ,"Block, Inc.",Technology,Software - Infrastructure,16.577475,1.59574,42.0,100.33976,101.0,53763162112,1793739600.0
-YUM,"Yum! Brands, Inc.",Consumer Cyclical,Restaurants,24.016157,2.19231,22.0,174.86818,175.5,43353280512,1801661400.0
-ZBH,"Zimmer Biomet Holdings, Inc.",Healthcare,Medical Devices,12.095979,2.51852,21.0,116.2381,117.0,20558649344,1793799000.0
-ZBRA,Zebra Technologies Corporation,Technology,Communication Equipment,14.815557,1.9375,15.0,413.45267,427.0,15516729344,1793712600.0
-ZTS,Zoetis Inc.,Healthcare,Drug Manufacturers - Specialty & Generic,12.867497,2.5,13.0,89.69231,85.0,33482481664,1793885400.0
 A,"Agilent Technologies, Inc.",Healthcare,Diagnostics & Research,26.472366,1.77273,20.0,182.05,185.0,50149507072,1795467600.0
 AAPL,Apple Inc.,Technology,Consumer Electronics,33.028427,2.22222,40.0,340.7655,350.0,5064611069952,1793653200.0
 ABBV,AbbVie Inc.,Healthcare,Drug Manufacturers - General,18.143679,1.68966,26.0,310.65384,317.0,519484768256,1793363400.0
@@ -523,3 +504,22 @@ WAT,Waters Corporation,Healthcare,Diagnostics & Research,27.433912,1.66667,23.0,
 WDAY,"Workday, Inc.",Technology,Software - Application,14.653824,2.30952,37.0,209.25323,210.0,46768459776,1795554000.0
 WDC,Western Digital Corporation,Technology,Computer Hardware,6.95288,1.5,24.0,613.375,622.5,105158631424,1792699200.0
 WEC,"WEC Energy Group, Inc.",Utilities,Utilities - Regulated Electric,19.468777,2.4,18.0,119.30556,119.5,38643437568,1793277000.0
+WELL,Welltower Inc.,Real Estate,REIT - Healthcare Facilities,77.91401,1.54545,22.0,265.45456,265.5,179477643264,1793044800.0
+WFC,Wells Fargo & Company,Financial Services,Banks - Diversified,10.608447,1.81481,24.0,97.375,97.5,254676975616,1799933400.0
+WM,"Waste Management, Inc.",Industrials,Waste Management,27.32356,1.75,25.0,255.6,259.0,97154138112,1793131200.0
+WMB,"Williams Companies, Inc. (The)",Energy,Oil & Gas Midstream,26.176207,1.4,24.0,85.41667,85.0,84526194688,1793653200.0
+WMT,Walmart Inc.,Consumer Defensive,Discount Stores,39.797436,1.51163,40.0,131.45,132.0,1018772389888,1795095000.0
+WRB,W.R. Berkley Corporation,Financial Services,Insurance - Property & Casualty,16.181784,3.38889,17.0,69.17647,69.0,29171417088,1792440000.0
+WSM,"Williams-Sonoma, Inc.",Consumer Cyclical,Specialty Retail,23.91634,2.21739,20.0,253.95,261.5,29683425280,1795095000.0
+WST,"West Pharmaceutical Services, I",Healthcare,Medical Instruments & Supplies,40.198315,1.375,15.0,471.0,480.0,29104381952,1793277000.0
+WTW,Willis Towers Watson Public Lim,Financial Services,Insurance Brokers,14.738939,1.7619,19.0,376.6842,371.0,31181074432,1793277000.0
+WY,Weyerhaeuser Company,Real Estate,REIT - Specialty,48.051678,1.5,11.0,26.63636,25.0,14896713728,1793304000.0
+WYNN,"Wynn Resorts, Limited",Consumer Cyclical,Resorts & Casinos,19.164207,1.19048,20.0,116.15,119.0,8431793152,1793912400.0
+XEL,Xcel Energy Inc.,Utilities,Utilities - Regulated Electric,17.775646,1.45,19.0,89.81579,92.0,52126621696,1793277000.0
+XOM,ExxonMobil Holdings Corporation,Energy,Oil & Gas Integrated,13.198995,2.42308,22.0,184.18182,184.5,680699822080,1793363400.0
+XYL,Xylem Inc.,Industrials,Specialty Industrial Machinery,16.397114,2.04762,16.0,125.4375,127.0,22000066560,1793104200.0
+XYZ,"Block, Inc.",Technology,Software - Infrastructure,15.432236,1.58333,43.0,101.35512,102.0,50151141376,1793739600.0
+YUM,"Yum! Brands, Inc.",Consumer Cyclical,Restaurants,24.187536,2.19231,22.0,175.32272,175.5,43516919808,1801661400.0
+ZBH,"Zimmer Biomet Holdings, Inc.",Healthcare,Medical Devices,11.292031,2.48148,21.0,116.90476,117.0,19192238080,1793799000.0
+ZBRA,Zebra Technologies Corporation,Technology,Communication Equipment,14.373008,1.88235,16.0,411.48688,420.0,15074107392,1793712600.0
+ZTS,Zoetis Inc.,Healthcare,Drug Manufacturers - Specialty & Generic,13.231172,2.5,13.0,89.69231,85.0,34289020928,1793885400.0
