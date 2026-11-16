@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-UNP,Union Pacific Corporation,Industrials,Railroads,20.57446,1.72,24.0,329.95834,335.0,175935455232,1792672200.0
-UPS,"United Parcel Service, Inc.",Industrials,Integrated Freight & Logistics,13.73006,2.17241,26.0,115.42308,117.5,94645075968,1793104200.0
-URI,"United Rentals, Inc.",Industrials,Rental & Leasing Services,18.574488,1.77273,21.0,1295.4286,1325.0,70657351680,1792612800.0
-USB,U.S. Bancorp,Financial Services,Banks - Regional,10.47941,1.79167,22.0,68.79545,68.5,95697395712,1800365400.0
-V,Visa Inc.,Financial Services,Credit Services,24.783457,1.5,37.0,446.3346,450.0,792689639424,1793131200.0
-VEEV,Veeva Systems Inc.,Healthcare,Health Information Services,29.975363,1.93103,27.0,321.03705,325.0,49798303744,1787774400.0
-VICI,VICI Properties Inc.,Real Estate,REIT - Diversified,8.496634,1.88,24.0,29.61458,29.5,27785895936,1793217600.0
-VLO,Valero Energy Corporation,Energy,Oil & Gas Refining & Marketing,6.66161,2.5,19.0,427.0,440.0,99383246848,1792672200.0
-VLTO,Veralto Corp,Industrials,Pollution & Treatment Controls,24.267836,1.82353,16.0,124.625,127.0,28780697600,1793304000.0
-VMC,Vulcan Materials Company (Holdi,Basic Materials,Building Materials,28.817669,1.875,23.0,312.65216,320.0,37318705152,1793277000.0
-VMRK,Vivmark Residential,Real Estate,REIT - Residential,45.162296,2.13636,20.0,71.67,71.5,51390742528,1793826000.0
-VRSK,"Verisk Analytics, Inc.",Industrials,Consulting Services,23.28654,2.05263,17.0,235.05882,230.0,26014562304,1793885400.0
-VRSN,"VeriSign, Inc.",Technology,Software - Infrastructure,28.054825,2.0,5.0,339.6,345.0,27588130816,1792699200.0
-VRT,"Vertiv Holdings, LLC",Industrials,Electrical Equipment & Parts,20.235554,1.33333,29.0,337.53723,336.0,76690554880,1793190600.0
-VRTX,Vertex Pharmaceuticals Incorpor,Healthcare,Biotechnology,27.735521,1.625,28.0,592.3571,600.0,140063080448,1793653200.0
-VST,Vistra Corp.,Utilities,Utilities - Independent Power Producers,14.075347,1.34783,21.0,202.66667,198.0,45120901120,1793971800.0
-VTR,"Ventas, Inc.",Real Estate,REIT - Healthcare Facilities,128.94965,1.6087,22.0,99.0,98.5,47392849920,1793131200.0
-VTRS,Viatris Inc.,Healthcare,Drug Manufacturers - Specialty & Generic,7.432491,2.0,10.0,21.0,21.5,23439267840,1793885400.0
-VYLR,Vylor Inc.,Financial Services,Shell Companies,27.954689,1.6875,14.0,82.64286,84.5,48679743488,1794430800.0
-VZ,Verizon Communications Inc.,Communication Services,Telecom Services,8.697403,2.125,22.0,50.65,50.0,191272796160,1793017800.0
-WAB,Westinghouse Air Brake Technolo,Industrials,Railroads,23.675343,,12.0,332.83334,337.0,49979940864,1792585800.0
-WAT,Waters Corporation,Healthcare,Diagnostics & Research,28.787699,1.66667,23.0,503.28912,504.0,46716342272,1793712600.0
-WDAY,"Workday, Inc.",Technology,Software - Application,14.504311,2.30952,37.0,209.25323,210.0,46291279872,1795554000.0
-WDC,Western Digital Corporation,Technology,Computer Hardware,7.2264485,1.5,24.0,613.375,622.5,109296214016,1792699200.0
-WEC,"WEC Energy Group, Inc.",Utilities,Utilities - Regulated Electric,19.47065,2.4,18.0,118.5,117.0,38607249408,1793277000.0
 WELL,Welltower Inc.,Real Estate,REIT - Healthcare Facilities,78.64331,1.54545,22.0,261.63635,261.5,181157625856,1793044800.0
 WFC,Wells Fargo & Company,Financial Services,Banks - Diversified,10.7597685,1.81481,24.0,97.375,97.5,258519367680,1799933400.0
 WM,"Waste Management, Inc.",Industrials,Waste Management,26.50864,1.75,25.0,255.6,259.0,94313037824,1793131200.0
@@ -523,3 +498,28 @@ UDR,"UDR, Inc.",Real Estate,REIT - Residential,65.07143,2.36364,21.0,39.64286,39
 UHS,"Universal Health Services, Inc.",Healthcare,Medical Care Facilities,8.434604,2.4,17.0,196.70589,197.0,11188546560,1793131200.0
 ULTA,"Ulta Beauty, Inc.",Consumer Cyclical,Specialty Retail,20.573437,1.82143,25.0,642.12,645.0,28248150016,1796331600.0
 UNH,UnitedHealth Group Incorporated,Healthcare,Healthcare Plans,17.464527,1.61538,25.0,476.16,490.0,365093355520,1791894600.0
+UNP,Union Pacific Corporation,Industrials,Railroads,21.099674,1.8,24.0,329.95834,335.0,180479787008,1792672200.0
+UPS,"United Parcel Service, Inc.",Industrials,Integrated Freight & Logistics,13.8122015,2.17241,26.0,115.46154,117.5,95211307008,1793104200.0
+URI,"United Rentals, Inc.",Industrials,Rental & Leasing Services,17.817944,1.77273,21.0,1298.0476,1325.0,67779465216,1792612800.0
+USB,U.S. Bancorp,Financial Services,Banks - Regional,10.3113365,1.79167,22.0,68.79545,68.5,94162558976,1800365400.0
+V,Visa Inc.,Financial Services,Credit Services,24.880384,1.5,37.0,449.06433,455.0,795689091072,1793131200.0
+VEEV,Veeva Systems Inc.,Healthcare,Health Information Services,29.16416,1.93103,27.0,326.4074,325.0,48456081408,1796331600.0
+VICI,VICI Properties Inc.,Real Estate,REIT - Diversified,8.367003,1.88,24.0,29.61458,29.5,27361976320,1793217600.0
+VLO,Valero Energy Corporation,Energy,Oil & Gas Refining & Marketing,7.218061,2.5,19.0,421.3158,436.0,103111942144,1792672200.0
+VLTO,Veralto Corp,Industrials,Pollution & Treatment Controls,24.665567,1.82353,16.0,124.625,127.0,29252392960,1793304000.0
+VMC,Vulcan Materials Company (Holdi,Basic Materials,Building Materials,27.478722,1.875,23.0,313.6087,320.0,35584778240,1793277000.0
+VMRK,Vivmark Residential,Real Estate,REIT - Residential,43.242485,2.18182,20.0,71.72,72.5,50168205312,1793826000.0
+VRSK,"Verisk Analytics, Inc.",Industrials,Consulting Services,24.43478,2.05263,17.0,235.94118,235.0,27294216192,1793885400.0
+VRSN,"VeriSign, Inc.",Technology,Software - Infrastructure,28.134184,2.0,5.0,339.6,345.0,27666169856,1792699200.0
+VRT,"Vertiv Holdings, LLC",Industrials,Electrical Equipment & Parts,19.021627,1.41935,30.0,334.286,333.5,72649351168,1793190600.0
+VRTX,Vertex Pharmaceuticals Incorpor,Healthcare,Biotechnology,27.001339,1.625,28.0,595.3571,609.5,136350023680,1793653200.0
+VST,Vistra Corp.,Utilities,Utilities - Independent Power Producers,13.904543,1.375,22.0,200.05455,196.0,44175613952,1793971800.0
+VTR,"Ventas, Inc.",Real Estate,REIT - Healthcare Facilities,127.88489,1.6087,22.0,99.59091,99.5,47001522176,1793131200.0
+VTRS,Viatris Inc.,Healthcare,Drug Manufacturers - Specialty & Generic,7.5623055,2.0,10.0,21.3,21.5,23777472512,1793885400.0
+VYLR,Vylor Inc.,Financial Services,Shell Companies,27.435158,1.6875,14.0,83.5,85.0,47912361984,1794430800.0
+VZ,Verizon Communications Inc.,Communication Services,Telecom Services,8.73323,2.125,22.0,50.65,50.0,192060686336,1793017800.0
+WAB,Westinghouse Air Brake Technolo,Industrials,Railroads,23.15733,1.41667,12.0,334.41666,337.0,48954667008,1792585800.0
+WAT,Waters Corporation,Healthcare,Diagnostics & Research,27.433912,1.66667,23.0,503.28912,504.0,89112330240,1793712600.0
+WDAY,"Workday, Inc.",Technology,Software - Application,14.653824,2.30952,37.0,209.25323,210.0,46768459776,1795554000.0
+WDC,Western Digital Corporation,Technology,Computer Hardware,6.95288,1.5,24.0,613.375,622.5,105158631424,1792699200.0
+WEC,"WEC Energy Group, Inc.",Utilities,Utilities - Regulated Electric,19.468777,2.4,18.0,119.30556,119.5,38643437568,1793277000.0
