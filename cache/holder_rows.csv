@@ -1,20 +1,4 @@
 ticker,owner,shares,share_change,as_of
-YUM,"BlackRock, Inc.",26190487.0,-245742.0,6/30/2026
-YUM,Jpmorgan Chase & Co,20017649.0,646740.0,6/30/2026
-YUM,Vanguard Capital Management LLC,18000462.0,-2464.0,6/30/2026
-YUM,Capital International Investors,16961198.0,135269.0,6/30/2026
-ZBH,Dodge & Cox,24124735.0,582035.0,6/30/2026
-ZBH,"BlackRock, Inc.",15614847.0,274041.0,6/30/2026
-ZBH,Harris Associates L P,12738025.0,-221914.0,6/30/2026
-ZBH,Vanguard Capital Management LLC,12634937.0,-158475.0,6/30/2026
-ZBRA,"BlackRock, Inc.",3311526.0,-891446.0,6/30/2026
-ZBRA,Vanguard Capital Management LLC,3114262.0,-86743.0,6/30/2026
-ZBRA,Vanguard Portfolio Management LLC,2667369.0,-135546.0,6/30/2026
-ZBRA,Boston Partners,2617838.0,1147064.0,6/30/2026
-ZTS,"BlackRock, Inc.",39430181.0,3845869.0,6/30/2026
-ZTS,Vanguard Capital Management LLC,26027984.0,-44862.0,6/30/2026
-ZTS,Vanguard Portfolio Management LLC,23860445.0,-106955.0,6/30/2026
-ZTS,State Street Corp,19667723.0,343322.0,6/30/2026
 A,"BlackRock, Inc.",25599001.0,-303661.0,6/30/2026
 A,Vanguard Capital Management LLC,18449861.0,68831.0,6/30/2026
 A,Vanguard Portfolio Management LLC,14442441.0,89759.0,6/30/2026
@@ -1527,3 +1511,19 @@ XYZ,"BlackRock, Inc.",43109403.0,1536372.0,9/30/2026
 XYZ,Price T Rowe Associates Inc /Md/,35553383.0,-4180947.0,9/30/2026
 XYZ,Vanguard Capital Management LLC,35405553.0,458269.0,9/30/2026
 XYZ,Capital World Investors,26201531.0,4797483.0,9/30/2026
+YUM,"BlackRock, Inc.",25893845.0,-296642.0,9/30/2026
+YUM,Capital International Investors,18411516.0,1450318.0,9/30/2026
+YUM,Vanguard Capital Management LLC,17855277.0,-145185.0,9/30/2026
+YUM,Jpmorgan Chase & Co,17071747.0,-2945902.0,9/30/2026
+ZBH,Dodge & Cox,22732137.0,-1392598.0,9/30/2026
+ZBH,"BlackRock, Inc.",15612396.0,-2451.0,9/30/2026
+ZBH,Vanguard Capital Management LLC,12479866.0,-155071.0,9/30/2026
+ZBH,Harris Associates L P,12230088.0,-507937.0,9/30/2026
+ZBRA,"BlackRock, Inc.",3153621.0,-157905.0,9/30/2026
+ZBRA,Vanguard Capital Management LLC,3096080.0,-18182.0,9/30/2026
+ZBRA,Boston Partners,2561066.0,-56772.0,9/30/2026
+ZBRA,Vanguard Portfolio Management LLC,2448512.0,-218857.0,9/30/2026
+ZTS,"BlackRock, Inc.",38528306.0,-901875.0,9/30/2026
+ZTS,Vanguard Capital Management LLC,25706871.0,-321113.0,9/30/2026
+ZTS,Vanguard Portfolio Management LLC,23505064.0,-355381.0,9/30/2026
+ZTS,State Street Corp,19705376.0,37653.0,9/30/2026
