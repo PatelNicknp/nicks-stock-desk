@@ -612,7 +612,6 @@ BEAGR|Bold Eagle Acquisition Corp. - Right|G|N|N|100|N|N
 BEAGU|Bold Eagle Acquisition Corp. - Units|G|N|N|100|N|N
 BEAM|Beam Therapeutics Inc. - Common Stock|Q|N|N|100|N|N
 BEAT|Heartbeam, Inc. - Common Stock|S|N|D|100|N|N
-BEATW|Heartbeam, Inc. - Warrant|S|N|N|100|N|N
 BEDY|BNY Mellon Enhanced Dividend and Income ETF|G|N|N|100|Y|N
 BEEM|Beam Global - Common Stock|S|N|N|100|N|N
 BEEP|Mobile Infrastructure Corporation - Common Stock|G|N|N|100|N|N
@@ -793,7 +792,9 @@ BRLSW|Borealis Foods Inc. - Warrant|S|N|H|100|N|N
 BRLT|Brilliant Earth Group, Inc. - Class A Common Stock|G|N|N|100|N|N
 BRNX|BrenX Ltd. - Ordinary Shares|S|N|N|100|N|N
 BRNY|Burney U.S. Factor Rotation ETF|G|N|N|100|Y|N
+BRRK|Bluerock Acquisition Corp. II - Class A Ordinary Shares|G|N|N|100|N|N
 BRRKU|Bluerock Acquisition Corp. II - Units|G|N|N|100|N|N
+BRRKW|Bluerock Acquisition Corp. II - Warrants|G|N|N|100|N|N
 BRRR|Coinshares Bitcoin ETF|G|N|N|100|Y|N
 BRTM|B&R Technology Merger Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 BRTMU|B&R Technology Merger Corp. - Units|G|N|N|100|N|N
@@ -852,7 +853,6 @@ BSVN|Bank7 Corp. - Common stock|Q|N|N|100|N|N
 BSVO|EA Bridgeway Omni Small-Cap Value ETF|G|N|N|100|Y|N
 BSY|Bentley Systems, Incorporated - Class B Common Stock|Q|N|N|100|N|N
 BTBD|BT Brands, Inc. - Common Stock|S|N|N|100|N|N
-BTBDW|BT Brands, Inc. - Warrant|S|N|N|100|N|N
 BTBT|Bit Digital, Inc. - Ordinary Share|S|N|N|100|N|N
 BTCS|BTCS Inc. - Common Stock|S|N|N|100|N|N
 BTCT|BTC Digital Ltd. - Ordinary Shares|S|N|N|100|N|N
@@ -1885,7 +1885,7 @@ FNWD|Finward Bancorp - common stock|S|N|N|100|N|N
 FNX|First Trust Mid Cap Core AlphaDEX Fund|G|N|N|100|Y|N
 FNY|First Trust Mid Cap Growth AlphaDEX Fund|G|N|N|100|Y|N
 FOCL|EDAP TMS S.A. - American Depositary Shares, each representing One Ordinary Share|G|N|N|100|N|N
-FOFO|Hang Feng Technology Innovation Co., Ltd. - Ordinary Shares|S|N|N|100|N|N
+FOFO|Hang Feng Technology Innovation Co., Ltd. - Class A Ordinary Shares|S|N|N|100|N|N
 FORM|FormFactor, Inc. - Common Stock|Q|N|N|100|N|N
 FORR|Forrester Research, Inc. - Common Stock|Q|N|N|100|N|N
 FORTY|Formula Systems (1985) Ltd. - American Depositary Shares|Q|N|N|100|N|N
@@ -2266,6 +2266,7 @@ HCM|HUTCHMED (China) Limited - American Depositary Shares|Q|N|N|100|N|N
 HCMA|HCM III Acquisition Corp. - Class A Ordinary Share|G|N|N|100|N|N
 HCMAU|HCM III Acquisition Corp. - Units|G|N|N|100|N|N
 HCMAW|HCM III Acquisition Corp. - Warrants|G|N|N|100|N|N
+HCOP|Hartford Hybrid and Credit Opportunities ETF|G|N|N|100|Y|N
 HCOW|Amplify COWS Covered Call ETF|G|N|N|100|Y|N
 HCSG|Healthcare Services Group, Inc. - Common Stock|Q|N|N|100|N|N
 HCTI|Healthcare Triangle, Inc. - Common Stock|S|N|D|100|N|N
@@ -3536,7 +3537,6 @@ NVYY|GraniteShares YieldBOOST NVDA ETF|G|N|N|100|Y|N
 NWBI|Northwest Bancshares, Inc. - Common Stock|Q|N|N|100|N|N
 NWCL|newcleo plc - Ordinary Shares|Q|N|N|100|N|N
 NWCLW|newcleo plc - Warrants|Q|N|N|100|N|N
-NWE|NorthWestern Energy Group, Inc.  - Common Stock|Q|N|N|100|N|N
 NWFL|Norwood Financial Corp. - Common Stock|G|N|N|100|N|N
 NWGL|CL Workshop Group Limited - American Depositary Shares|S|N|N|100|N|N
 NWL|Newell Brands Inc. - Common Stock|Q|N|N|100|N|N
@@ -3885,7 +3885,6 @@ PLAY|Dave & Buster's Entertainment, Inc. - Common Stock|Q|N|N|100|N|N
 PLBC|Plumas Bancorp - Common Stock|S|N|N|100|N|N
 PLBL|Polibeli Group Ltd - Class A Ordinary Shares|G|N|N|100|N|N
 PLBY|Playboy, Inc. - Common Stock|G|N|N|100|N|N
-PLCE|Children's Place, Inc. (The) - Common Stock|Q|N|N|100|N|N
 PLCI|Pelican Acquisition II Corporation - Ordinary Shares|S|N|N|100|N|N
 PLCIR|Pelican Acquisition II Corporation - Right|S|N|N|100|N|N
 PLCIU|Pelican Acquisition II Corporation - Unit|S|N|N|100|N|N
@@ -4717,7 +4716,6 @@ STKH|Steakholder Foods Ltd. - American Depositary Shares|S|N|N|100|N|N
 STKS|The ONE Group Hospitality, Inc. - Common Stock|S|N|N|100|N|N
 STLD|Steel Dynamics, Inc. - Common Stock|Q|N|N|100|N|N
 STLN|Starling Oncology, Inc. - Common Stock|S|N|N|100|N|N
-STLNW|Starling Oncology, Inc. - Warrant|S|N|N|100|N|N
 STNC|Hennessy Sustainable ETF|G|N|N|100|Y|N
 STNE|StoneCo Ltd. - Class A Common Share|Q|N|N|100|N|N
 STOK|Stoke Therapeutics, Inc. - Common Stock|Q|N|N|100|N|N
@@ -5603,4 +5601,4 @@ ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
 ZYN|PTL LTD - Class A Ordinary Shares|S|N|N|100|N|N
-File Creation Time: 1113202621:31|||||||
+File Creation Time: 1116202618:01|||||||
