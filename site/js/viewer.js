@@ -50,6 +50,19 @@
     const n = Number(s);
     return Number.isFinite(n) ? n : null;
   }
+  // EPS Rating 1 to 99 (ms_screens.eps_ratings via scores.csv eps_rating). Blank, 0, or out of range is no rating.
+  function epsOf(v) {
+    const n = numOf(v);
+    return n != null && n >= 1 && n <= 99 ? Math.round(n) : null;
+  }
+  // The EPS chip next to the RS chip: "EPS 85", green (hot) at greenMin (chart_viewer.eps_chip_green_min, 80) or
+  // higher, plain below, and no chip at all when the stock has no EPS Rating.
+  function epsChip(eps, greenMin) {
+    const n = epsOf(eps);
+    if (n == null) return { show: false, text: "", hot: false, title: "" };
+    const min = Number(greenMin) > 0 ? Number(greenMin) : 80;
+    return { show: true, text: "EPS " + n, hot: n >= min, title: "EPS Rating " + n + " of 99: earnings growth ranked against every stock on the desk" };
+  }
   function isWatching(status) { return /^WATCHING\b/.test(txt(status)); }
   function yes(v) { return txt(v).toLowerCase() === "yes"; }
   // Short version of a long reason: whole sentences while they fit, then a clean word cut.
@@ -180,11 +193,13 @@
       if (!info[t]) {
         const s = scores[t] || {};
         info[t] = { ticker: t, company: txt(s.company) || txt(row && row.company), score: numOf(s.score), price: numOf(s.price),
-          dayPct: numOf(s.day_pct), rs: numOf(s.rs), rsLabel: txt(s.rs_label), strength: null, count: 0, entries: [] };
+          dayPct: numOf(s.day_pct), rs: numOf(s.rs), rsLabel: txt(s.rs_label), eps: epsOf(s.eps_rating), strength: null, count: 0, entries: [] };
       }
       if (!info[t].company && row) info[t].company = txt(row.company);
       if (info[t].rs == null && row) info[t].rs = numOf(row.rs);
       if (!info[t].rsLabel && row) info[t].rsLabel = txt(row.rs_label);
+      // EPS Rating from scores.csv; a scanner row that carries one (Highest EPS and RS, Minervini) fills a gap.
+      if (info[t].eps == null && row) info[t].eps = epsOf(row.eps_rating);
       return info[t];
     };
     const lists = [];
@@ -410,7 +425,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -546,7 +561,10 @@
     // RS Rating badge, first in the chip bar like the India desk: "RS 92", green at relative_strength.leader_min or higher.
     // feature.rs_rank hides it. It is a label, not a button.
     const rsBadge = D.featureOn("feature.rs_rank") ? '<span class="cvchip rschip" id="cvrs" hidden></span>' : "";
-    const chips = rsBadge + (on("ma_chips") ? MAS.map((m) =>
+    // EPS Rating chip right after it: "EPS 85", green at chart_viewer.eps_chip_green_min (80) or higher.
+    // chart_viewer.eps_chip hides it. A label, not a button.
+    const epsBadge = on("eps_chip") ? '<span class="cvchip epschip" id="cveps" hidden></span>' : "";
+    const chips = rsBadge + epsBadge + (on("ma_chips") ? MAS.map((m) =>
       '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i>MA ' + m.n + "</button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
@@ -774,6 +792,15 @@
         if (has) badge.title = it.rsLabel || ("RS Rating " + Math.round(it.rs) + " of 99");
         else badge.removeAttribute("title");
         badge.classList.toggle("hot", has && it.rs >= D.rsLeaderMin());
+      }
+      const epsEl = document.getElementById("cveps");
+      if (epsEl) {
+        const chip = epsChip(it.eps, cfgNum("eps_chip_green_min", 80));
+        epsEl.hidden = !chip.show;
+        epsEl.textContent = chip.text;
+        if (chip.show) epsEl.title = chip.title;
+        else epsEl.removeAttribute("title");
+        epsEl.classList.toggle("hot", chip.hot);
       }
       const blurb = document.getElementById("cvblurb");
       if (blurb) blurb.textContent = D.blurbOf(t) || "";

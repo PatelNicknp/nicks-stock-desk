@@ -3739,6 +3739,20 @@ def load_eps_inputs(universe, cfg, cache, mode, asof=None, skip=None):
     return hist, info
 
 
+def attach_eps_rating(frame, ratings):
+    """Copy the 1 to 99 EPS Rating (ticker, eps_rating) onto a table as eps_rating; blank when missing, never 0."""
+    if frame is None or not isinstance(frame, pd.DataFrame) or len(frame) == 0 or "ticker" not in frame.columns:
+        return frame
+    out = frame.copy()
+    lookup = {}
+    if isinstance(ratings, pd.DataFrame) and len(ratings) and {"ticker", "eps_rating"} <= set(ratings.columns):
+        for t, v in zip(ratings["ticker"].astype(str), pd.to_numeric(ratings["eps_rating"], errors="coerce")):
+            if np.isfinite(v) and 1 <= v <= 99:
+                lookup[t.strip().upper()] = int(round(float(v)))
+    out["eps_rating"] = ["" if lookup.get(k) is None else lookup[k] for k in out["ticker"].astype(str).str.strip().str.upper()]
+    return out
+
+
 def build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof="", eps_history=None, eps_info=None):
     """MarketSmith style screens: Highest EPS and RS, Minervini 1-Month and 5-Month.
 
@@ -3786,6 +3800,8 @@ def build_ms_screens(close, high, low, universe, quarters, annual, setup_frames,
             if eps_info and eps_info.get("on") and eps_info.get("note"):
                 note += " EPS fill: " + eps_info["note"] + "."
         log("EPS Rating", "OK" if eps_lookup else "MISSING", asof, note[:400])
+        # The same ratings ride on scores.csv (eps_rating) for the Chart Viewer's EPS chip.
+        frames["eps_ratings"] = pd.DataFrame({"ticker": list(eps_lookup), "eps_rating": [int(round(float(v))) for v in eps_lookup.values()]})
     except Exception as exc:
         log("EPS Rating", "MISSING", asof, ("The EPS Rating was not built. " + str(exc))[:200])
     if eps_on:
@@ -4139,6 +4155,9 @@ def export_cached_scores(data_dir=None, cache_dir=None, cfg=None):
     # Same RS Rating as the main run, from the same saved closes.
     rs_table = load_rs_table(wide_from_long(prices, "close"), universe, cfg, cache_dir, report.get("price_as_of", ""), log_it=False)
     scores = relative_strength.attach(scores, rs_table)
+    # This export does not rebuild EPS Ratings, so it keeps the ones already on scores.csv.
+    if len(existing) and {"ticker", "eps_rating"} <= set(existing.columns):
+        scores = attach_eps_rating(scores, existing[["ticker", "eps_rating"]])
     write_out(gated(scores, "scores", True, "No scores."), "scores", data_dir)
     candles = candle_file(prices, list(scores["ticker"].astype(str)))
     write_candle_files(candles, os.path.join(data_dir, "ohlc"))
@@ -4477,6 +4496,8 @@ def main(argv=None):
             eps_history, eps_info = None, {"on": True, "note": ("EPS fill failed, kept the plain SEC numbers. " + str(exc))[:160]}
     ms_frames, ms_notes = build_ms_screens(close, high, low, universe, quarters, annual, setup_frames, rs_lookup, cfg, features, asof,
                                            eps_history=eps_history, eps_info=eps_info)
+    # EPS Rating on scores.csv for the Chart Viewer's EPS chip (blank when a stock has none). No new data.
+    scores = attach_eps_rating(scores, ms_frames.get("eps_ratings"))
     floor_on = features.get("trading_floor", True)
     floor = pd.DataFrame()
     if floor_on and len(close):
