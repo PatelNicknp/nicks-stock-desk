@@ -1,35 +1,35 @@
 {
   "schema_version": 2,
   "feature": "market_news",
-  "session": "2026-11-13",
-  "slot": "evening_close",
-  "updated_pt": "2026-11-15 15:10 PT",
-  "price_as_of": "2026-11-13",
-  "why_moved": "The market fell: S&P -0.4%, Nasdaq -1.2%, Dow-heavy groups (Financials/Industrials) about 0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-2.0%) and Consumer Discretionary (-0.4%); leading sectors Consumer Staples (1.4%) and Communication Services (1.1%) held up. The move was fairly broad: 1352 stocks rose and 1108 fell.",
-  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1352 stocks up, 1108 down).",
+  "session": "2026-11-16",
+  "slot": "morning_open",
+  "updated_pt": "2026-11-16 07:34 PT",
+  "price_as_of": "2026-11-16",
+  "why_moved": "The market fell: S&P -1.4%, Nasdaq -2.3%, Dow-heavy groups (Financials/Industrials) about -0.7%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-3.0%) and Communication Services (-1.4%); leading sectors Consumer Staples (1.0%) and Health Care (0.7%) held up. The move was broad: 1668 stocks fell and 807 rose; VIX is firm at 21.4.",
+  "why_moved_short": "Stocks fell, with Nasdaq (-2.3%) leading the S&P (-1.4%) lower, dragged by Technology (-3.0%) and Communication Services (-1.4%), while Consumer Staples (1.0%) and Health Care (0.7%) held up (807 stocks up, 1668 down); VIX at 21.4.",
   "story": {
     "direction": "down",
-    "date_label": "November 13, 2026",
-    "summary": "U.S. closing summary",
-    "clear_cause": true,
-    "cause": "ai_mood",
-    "lead": "The AI trade led stocks lower.",
-    "support": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts.",
-    "support_ref": 1,
+    "date_label": "November 16, 2026",
+    "summary": "U.S. morning summary",
+    "clear_cause": false,
+    "cause": null,
+    "lead": "The Nasdaq led stocks lower.",
+    "support": "No clear cause. The free feeds had no big-picture headline, so this is the desk numbers only.",
+    "support_ref": null,
     "bullets": [
       {
         "lead": "Technology took the biggest hit.",
-        "rest": "Tech fell 2.01%.",
-        "ref": 1
+        "rest": "Tech fell 2.98%.",
+        "ref": null
       },
       {
-        "lead": "More stocks rose than fell.",
-        "rest": "1352 stocks rose and 1108 fell.",
+        "lead": "More stocks fell than rose.",
+        "rest": "1668 stocks fell and 807 rose.",
         "ref": null
       },
       {
         "lead": "Staples held up.",
-        "rest": "Staples rose 1.42%.",
+        "rest": "Staples rose 0.97%.",
         "ref": null
       }
     ],
@@ -37,22 +37,22 @@
     "chips": [
       {
         "name": "Tech",
-        "pct": -2.01,
-        "pct_text": "2.01%",
+        "pct": -2.98,
+        "pct_text": "2.98%",
         "arrow": "down",
         "kind": "move",
-        "bar": 67
+        "bar": 62
       },
       {
         "name": "Chips",
-        "pct": -2.99,
-        "pct_text": "2.99%",
+        "pct": -4.78,
+        "pct_text": "4.78%",
         "arrow": "down",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "4 of 11 sectors down",
+        "name": "7 of 11 sectors down",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -63,422 +63,69 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": -0.36,
-        "pct_text": "0.36%",
+        "pct": -1.39,
+        "pct_text": "1.39%",
         "arrow": "down",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": -1.2,
-        "pct_text": "1.2%",
+        "pct": -2.33,
+        "pct_text": "2.33%",
         "arrow": "down",
         "source": "qqq"
       }
     ],
-    "news": [
-      {
-        "n": 1,
-        "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
-        "source": "CNBC",
-        "via": "",
-        "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
-        "published": "2026-11-14",
-        "published_at": "2026-11-14T15:50:43+00:00",
-        "date_label": "Nov 14, 7:50 AM PT",
-        "age_label": "31h ago",
-        "region": "Global",
-        "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move."
-      },
-      {
-        "n": 2,
-        "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
-        "source": "CNBC",
-        "via": "",
-        "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T14:22:07+00:00",
-        "date_label": "Nov 13, 6:22 AM PT",
-        "age_label": "2d ago",
-        "region": "Global",
-        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
-      },
-      {
-        "n": 3,
-        "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
-        "source": "Bank of England",
-        "via": "",
-        "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T09:00:00+00:00",
-        "date_label": "Nov 13, 1:00 AM PT",
-        "age_label": "2d ago",
-        "region": "UK",
-        "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
-      },
-      {
-        "n": 4,
-        "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
-        "source": "BBC",
-        "via": "",
-        "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
-        "published": "2026-11-13",
-        "published_at": "2026-11-13T23:00:31+00:00",
-        "date_label": "Nov 13, 3:00 PM PT",
-        "age_label": "2d ago",
-        "region": "Global",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      },
-      {
-        "n": 5,
-        "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
-        "published": "2026-11-14",
-        "published_at": "2026-11-14T19:24:00+00:00",
-        "date_label": "Nov 14, 11:24 AM PT",
-        "age_label": "27h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      },
-      {
-        "n": 6,
-        "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
-        "published": "2026-11-14",
-        "published_at": "2026-11-14T19:30:08+00:00",
-        "date_label": "Nov 14, 11:30 AM PT",
-        "age_label": "27h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      },
-      {
-        "n": 7,
-        "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
-        "published": "2026-11-14",
-        "published_at": "2026-11-14T19:25:33+00:00",
-        "date_label": "Nov 14, 11:25 AM PT",
-        "age_label": "27h ago",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      }
-    ],
-    "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
+    "news": [],
+    "note": "No headline was tied to the move. The bold line is the desk numbers only."
   },
   "mood": {
-    "label": "Mixed",
-    "vix": 19.3,
+    "label": "Fear",
+    "vix": 21.36,
     "put_call_zone": "Greed",
     "put_call": 0.63,
-    "advancers": 1352,
-    "decliners": 1108,
-    "why": "VIX 19.3, put/call Greed, 1352 up / 1108 down"
+    "advancers": 807,
+    "decliners": 1668,
+    "why": "VIX 21.4, put/call Greed, 807 up / 1668 down"
   },
-  "headlines": [
-    {
-      "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
-      "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
-      "published": "2026-11-14",
-      "published_at": "2026-11-14T15:50:43+00:00",
-      "trusted": true,
-      "causes": [
-        "oil",
-        "election",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "Global",
-      "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
-      "published_pt": "Nov 14, 7:50 AM PT",
-      "age_label": "31h ago",
-      "wrap": 10.0,
-      "rank": 14.0
-    },
-    {
-      "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
-      "source": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T14:22:07+00:00",
-      "trusted": true,
-      "causes": [
-        "rates",
-        "inflation"
-      ],
-      "via": "",
-      "region": "Global",
-      "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 6:22 AM PT",
-      "age_label": "2d ago",
-      "wrap": 0.0,
-      "rank": 4.0
-    },
-    {
-      "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
-      "source": "Bank of England",
-      "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T09:00:00+00:00",
-      "trusted": true,
-      "causes": [
-        "rates"
-      ],
-      "via": "",
-      "region": "UK",
-      "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 1:00 AM PT",
-      "age_label": "2d ago",
-      "wrap": 0.0,
-      "rank": 0.5
-    },
-    {
-      "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
-      "source": "BBC",
-      "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
-      "published": "2026-11-13",
-      "published_at": "2026-11-13T23:00:31+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "Global",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 13, 3:00 PM PT",
-      "age_label": "2d ago",
-      "wrap": 0.0,
-      "rank": 0.5
-    },
-    {
-      "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
-      "published": "2026-11-14",
-      "published_at": "2026-11-14T19:24:00+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 14, 11:24 AM PT",
-      "age_label": "27h ago",
-      "wrap": 0.0,
-      "rank": 0.0
-    },
-    {
-      "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
-      "published": "2026-11-14",
-      "published_at": "2026-11-14T19:30:08+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 14, 11:30 AM PT",
-      "age_label": "27h ago",
-      "wrap": 0.0,
-      "rank": 2.5
-    },
-    {
-      "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
-      "published": "2026-11-14",
-      "published_at": "2026-11-14T19:25:33+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 14, 11:25 AM PT",
-      "age_label": "27h ago",
-      "wrap": 0.0,
-      "rank": 2.5
-    }
-  ],
+  "headlines": [],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 11.17,
-      "headlines": [
-        {
-          "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/14/nvidia-ai-trade-data-centers-congress.html",
-          "published": "2026-11-14",
-          "published_at": "2026-11-14T15:50:43+00:00",
-          "trusted": true,
-          "causes": [
-            "oil",
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "Global",
-          "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
-          "published_pt": "Nov 14, 7:50 AM PT",
-          "age_label": "31h ago",
-          "wrap": 10.0,
-          "rank": 14.0
-        },
-        {
-          "title": "How the Jensen Huang scandal created a headache for business-friendly Singapore",
-          "source": "BBC",
-          "url": "https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T23:00:31+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "Global",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 3:00 PM PT",
-          "age_label": "2d ago",
-          "wrap": 0.0,
-          "rank": 0.5
-        },
-        {
-          "title": "Core Scientific (CORZ): Can CoreWeave (CRWV) Revenue Growth Offset Expansion Risks?",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/technology/ai/articles/core-scientific-corz-coreweave-crwv-192400622.html?.tsrc=rss",
-          "published": "2026-11-14",
-          "published_at": "2026-11-14T19:24:00+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 14, 11:24 AM PT",
-          "age_label": "27h ago",
-          "wrap": 0.0,
-          "rank": 0.0
-        },
-        {
-          "title": "Micron Technology (MU): Does a Low Earnings Multiple Understate Its AI Opportunity?",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/technology/ai/articles/micron-technology-mu-does-low-193008035.html?.tsrc=rss",
-          "published": "2026-11-14",
-          "published_at": "2026-11-14T19:30:08+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 14, 11:30 AM PT",
-          "age_label": "27h ago",
-          "wrap": 0.0,
-          "rank": 2.5
-        },
-        {
-          "title": "Marvell Technology (MRVL): Can Its $20 Billion Revenue Outlook Justify the Valuation?",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/technology/articles/marvell-technology-mrvl-20-billion-192533605.html?.tsrc=rss",
-          "published": "2026-11-14",
-          "published_at": "2026-11-14T19:25:33+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 14, 11:25 AM PT",
-          "age_label": "27h ago",
-          "wrap": 0.0,
-          "rank": 2.5
-        }
-      ]
+      "score": 4.59,
+      "headlines": []
     },
     {
-      "cause": "rates",
-      "label": "Rates / Fed",
-      "score": 3.0,
-      "headlines": [
-        {
-          "title": "Chicago Fed's Goolsbee says central bank 'has definitely got work to do' on inflation",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/13/chicago-feds-goolsbee-says-central-bank-has-definitely-got-work-to-do-on-inflation.html",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T14:22:07+00:00",
-          "trusted": true,
-          "causes": [
-            "rates",
-            "inflation"
-          ],
-          "via": "",
-          "region": "Global",
-          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 6:22 AM PT",
-          "age_label": "2d ago",
-          "wrap": 0.0,
-          "rank": 4.0
-        },
-        {
-          "title": "The Bank of England, the Monetary Authority of Singapore, and the Bank of Thailand: Project Meridian FX APAC",
-          "source": "Bank of England",
-          "url": "https://www.bankofengland.co.uk/news/2026/november/the-boe-monetary-authority-of-singapore-and-bank-of-thailand-media-release",
-          "published": "2026-11-13",
-          "published_at": "2026-11-13T09:00:00+00:00",
-          "trusted": true,
-          "causes": [
-            "rates"
-          ],
-          "via": "",
-          "region": "UK",
-          "why": "Possible transmission from UK: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 13, 1:00 AM PT",
-          "age_label": "2d ago",
-          "wrap": 0.0,
-          "rank": 0.5
-        }
-      ]
+      "cause": "oil",
+      "label": "Oil / Energy",
+      "score": 3.13,
+      "headlines": []
     }
   ],
   "vs_yesterday": {
     "prior_mood": "Mixed",
     "prior_session": "2026-11-13",
-    "text": "Mood steady versus last brief (Mixed).",
-    "flipped": false,
+    "text": "Mood flipped: was Mixed, now Fear.",
+    "flipped": true,
     "same_fear": false
   },
   "breadth_check": {
-    "aligned": false,
-    "flag": "index_down_stocks_up",
-    "text": "SPY is down, but more stocks rose than fell — a narrow decline."
+    "aligned": true,
+    "flag": "broad_decline",
+    "text": "Index and breadth agree: a broad down day."
   },
   "regime": {
     "label": "chop",
-    "pct_above_50day": 54.6,
-    "pct_above_200day": 55.9,
+    "pct_above_50day": 52.8,
+    "pct_above_200day": 54.1,
     "text": "Breadth is split — not a clean uptrend or selloff."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
-      "Choppy day, small moves are normal; be patient with new buys.",
-      "The index is down, but most stocks held up. The weak print may be narrow.",
+      "Fear is high today. Big swings are more common — go slow with new buys.",
+      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
       "The desk is in chop — not a clean uptrend or selloff. Expect back-and-forth days."
     ],
     "disclaimer": "Research only. Not advice to buy or sell any stock."
@@ -492,45 +139,40 @@
   "prior_brief": {
     "session": "2026-11-13",
     "slot": "evening_close",
-    "why_moved": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1332 stocks up, 1130 down).",
+    "why_moved": "The S&P slipped -0.4% (Nasdaq -1.2%), dragged by Technology (-2.0%), while Consumer Staples (1.4%) and Communication Services (1.1%) held up (1352 stocks up, 1108 down).",
     "mood": "Mixed",
     "causes": [
       "AI / Tech mood",
-      "Inflation"
+      "Rates / Fed"
     ]
   },
   "stats": {
-    "spy_price": 754.37,
-    "spy_day_pct": -0.36,
-    "qqq_day_pct": -1.2,
+    "spy_price": 743.9,
+    "spy_day_pct": -1.39,
+    "qqq_day_pct": -2.33,
     "dia_day_pct": null,
-    "vix": 19.3,
-    "advancers": 1352,
-    "decliners": 1108,
-    "breadth_sma50": 54.6,
-    "breadth_sma200": 55.9,
+    "vix": 21.36,
+    "advancers": 807,
+    "decliners": 1668,
+    "breadth_sma50": 52.8,
+    "breadth_sma200": 54.1,
     "put_call": 0.63,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
-      "date": "2026-11-13",
-      "slot": "evening_close",
-      "mood": "Mixed",
+      "date": "2026-11-16",
+      "slot": "morning_open",
+      "mood": "Fear",
       "regime": "chop",
       "causes": [
         "ai_mood",
-        "rates"
+        "oil"
       ],
-      "sources": [
-        "BBC",
-        "Bank of England",
-        "CNBC",
-        "Yahoo Finance"
-      ],
-      "spy_day_pct": -0.36,
-      "qqq_day_pct": -1.2,
+      "sources": [],
+      "spy_day_pct": -1.39,
+      "qqq_day_pct": -2.33,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
@@ -544,15 +186,15 @@
         },
         "ai_mood": {
           "up": 5,
-          "down": 7,
+          "down": 8,
           "flat": 0,
-          "n": 12
+          "n": 13
         },
         "rates": {
           "up": 1,
-          "down": 1,
+          "down": 2,
           "flat": 0,
-          "n": 2
+          "n": 3
         },
         "inflation": {
           "up": 1,
@@ -600,9 +242,9 @@
         },
         "CNBC": {
           "up": 4,
-          "down": 2,
+          "down": 3,
           "flat": 0,
-          "n": 6
+          "n": 7
         },
         "MarketWatch": {
           "up": 2,
@@ -612,26 +254,35 @@
         },
         "Yahoo Finance": {
           "up": 4,
-          "down": 5,
+          "down": 6,
           "flat": 0,
-          "n": 9
+          "n": 10
+        },
+        "BBC": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
+        },
+        "Bank of England": {
+          "up": 0,
+          "down": 1,
+          "flat": 0,
+          "n": 1
         }
       },
-      "n_labeled": 12,
+      "n_labeled": 13,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-15T23:20:32.797412+00:00",
-    "summary": "Not enough verified index closes to call a worldwide move.",
-    "breadth": "unknown",
+    "retrieved_at": "2026-11-16T15:38:35.339738+00:00",
+    "summary": "Verified indexes on file did not all move the same way.",
+    "breadth": "mixed",
     "missing": [
       "S&P 500",
-      "STOXX Europe 600",
-      "DAX",
-      "FTSE 100",
       "Nikkei 225",
       "Shanghai Composite",
       "Hang Seng"
@@ -642,28 +293,62 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -0.36,
+        "pct": -1.39,
         "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-15T15:10:00-08:00",
-        "status": "prior_local_close",
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T07:34:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: This Dividend King Yields 5 Times the S&P 500. Is It a Buy Now?. Not proof this caused the percent.",
-        "cause_source": "Yahoo Finance",
-        "cause_url": "https://www.fool.com/investing/2026/11/15/this-dividend-king-yields-5-times-the-s-and-p-500-is-it-a-buy-now/?.tsrc=rss"
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "sxxp",
+        "name": "STOXX Europe 600",
+        "region": "Europe",
+        "kind": "index",
+        "pct": -0.15,
+        "verified": true,
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T16:39:24+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ukx",
+        "name": "FTSE 100",
+        "region": "UK",
+        "kind": "index",
+        "pct": 0.04,
+        "verified": true,
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T16:40:55+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
       },
       {
         "id": "nifty",
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": -0.61,
+        "pct": 0.58,
         "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -695,14 +380,14 @@
         "name": "STOXX Europe 600",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T21:58:22+01:00",
-        "status": "prior_local_close",
+        "pct": -0.15,
+        "verified": true,
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T16:39:24+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -712,14 +397,14 @@
         "name": "DAX",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T22:00:19+01:00",
-        "status": "prior_local_close",
+        "pct": -0.63,
+        "verified": true,
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T16:40:48+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -729,14 +414,14 @@
         "name": "FTSE 100",
         "region": "UK",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T22:00:14+01:00",
-        "status": "prior_local_close",
+        "pct": 0.04,
+        "verified": true,
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T16:40:55+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -797,11 +482,11 @@
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": -0.61,
+        "pct": 0.58,
         "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-13T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -814,31 +499,31 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -0.36,
+        "pct": -1.39,
         "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-15T15:10:00-08:00",
-        "status": "prior_local_close",
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T07:34:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: This Dividend King Yields 5 Times the S&P 500. Is It a Buy Now?. Not proof this caused the percent.",
-        "cause_source": "Yahoo Finance",
-        "cause_url": "https://www.fool.com/investing/2026/11/15/this-dividend-king-yields-5-times-the-s-and-p-500-is-it-a-buy-now/?.tsrc=rss"
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
       },
       {
         "id": "qqq",
         "name": "QQQ",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.2,
+        "pct": -2.33,
         "verified": true,
-        "session_date": "2026-11-13",
-        "quote_at": "2026-11-15T15:10:00-08:00",
-        "status": "prior_local_close",
+        "session_date": "2026-11-16",
+        "quote_at": "2026-11-16T07:34:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -846,12 +531,5 @@
     ]
   },
   "watch_next": null,
-  "weekly_recap": {
-    "text": "This week was driven by AI / Tech mood and Oil / Energy. Mood is steady.",
-    "causes": [
-      "ai_mood",
-      "oil"
-    ],
-    "mood": "steady"
-  }
+  "weekly_recap": null
 }
