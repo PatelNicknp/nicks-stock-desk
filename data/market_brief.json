@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
   "feature": "market_news",
-  "session": "2026-11-16",
-  "slot": "evening_close",
-  "updated_pt": "2026-11-16 16:09 PT",
-  "price_as_of": "2026-11-16",
-  "why_moved": "The market fell: S&P -1.9%, Nasdaq -2.7%, Dow-heavy groups (Financials/Industrials) about -1.4%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-3.2%) and Energy (-2.0%); leading sectors Consumer Staples (0.3%) and Utilities (0.2%) held up. The move was broad: 1842 stocks fell and 621 rose; VIX is firm at 22.9.",
-  "why_moved_short": "Stocks fell, with Nasdaq (-2.7%) leading the S&P (-1.9%) lower, dragged by Technology (-3.2%) and Energy (-2.0%) (621 stocks up, 1842 down); VIX at 22.9.",
+  "session": "2026-11-17",
+  "slot": "morning_open",
+  "updated_pt": "2026-11-17 07:36 PT",
+  "price_as_of": "2026-11-17",
+  "why_moved": "The market fell: S&P -0.4%, Nasdaq -0.5%, Dow-heavy groups (Financials/Industrials) about -0.3%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-1.0%) and Financials (-0.7%); leading sectors Materials (0.7%) and Energy (0.6%) held up. The move was broad: 1542 stocks fell and 920 rose; VIX is firm at 22.8.",
+  "why_moved_short": "The S&P slipped -0.4% (Nasdaq -0.5%), dragged by Technology (-1.0%), while Materials (0.7%) and Energy (0.6%) held up (920 stocks up, 1542 down); VIX at 22.8.",
   "story": {
     "direction": "down",
-    "date_label": "November 16, 2026",
-    "summary": "U.S. closing summary",
+    "date_label": "November 17, 2026",
+    "summary": "U.S. morning summary",
     "clear_cause": true,
     "cause": "ai_mood",
     "lead": "Tech led stocks lower.",
@@ -19,17 +19,17 @@
     "bullets": [
       {
         "lead": "Technology took the biggest hit.",
-        "rest": "Tech fell 3.24%.",
+        "rest": "Tech fell 1.0%.",
         "ref": 1
       },
       {
         "lead": "More stocks fell than rose.",
-        "rest": "1842 stocks fell and 621 rose.",
+        "rest": "1542 stocks fell and 920 rose.",
         "ref": null
       },
       {
-        "lead": "Staples held up.",
-        "rest": "Staples rose 0.27%.",
+        "lead": "Materials held up.",
+        "rest": "Materials rose 0.72%.",
         "ref": null
       }
     ],
@@ -37,22 +37,22 @@
     "chips": [
       {
         "name": "Tech",
-        "pct": -3.24,
-        "pct_text": "3.24%",
-        "arrow": "down",
-        "kind": "move",
-        "bar": 63
-      },
-      {
-        "name": "Chips",
-        "pct": -5.11,
-        "pct_text": "5.11%",
+        "pct": -1.0,
+        "pct_text": "1.0%",
         "arrow": "down",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "9 of 11 sectors down",
+        "name": "Financials",
+        "pct": -0.7,
+        "pct_text": "0.7%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 70
+      },
+      {
+        "name": "7 of 11 sectors down",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -63,15 +63,15 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": -1.91,
-        "pct_text": "1.91%",
+        "pct": -0.44,
+        "pct_text": "0.44%",
         "arrow": "down",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": -2.67,
-        "pct_text": "2.67%",
+        "pct": -0.46,
+        "pct_text": "0.46%",
         "arrow": "down",
         "source": "qqq"
       }
@@ -86,38 +86,12 @@
         "published": "2026-11-16",
         "published_at": "2026-11-16T22:25:02+00:00",
         "date_label": "Nov 16, 2:25 PM PT",
-        "age_label": "1h ago",
+        "age_label": "17h ago",
         "region": "US",
         "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 2,
-        "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
-        "published": "2026-11-16",
-        "published_at": "2026-11-16T22:03:47+00:00",
-        "date_label": "Nov 16, 2:03 PM PT",
-        "age_label": "2h ago",
-        "region": "US",
-        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
-      },
-      {
-        "n": 3,
-        "title": "Lumentum (LITE) Got a Takeover Offer. What Does It Mean for Holders? (",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/lumentum-lite-got-takeover-offer-220406453.html?.tsrc=rss",
-        "published": "2026-11-16",
-        "published_at": "2026-11-16T22:04:06+00:00",
-        "date_label": "Nov 16, 2:04 PM PT",
-        "age_label": "2h ago",
-        "region": "US",
-        "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
-      },
-      {
-        "n": 4,
         "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
         "source": "CNBC",
         "via": "",
@@ -125,60 +99,34 @@
         "published": "2026-11-16",
         "published_at": "2026-11-16T12:13:23+00:00",
         "date_label": "Nov 16, 4:13 AM PT",
-        "age_label": "12h ago",
+        "age_label": "27h ago",
         "region": "Global",
         "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move."
       },
       {
-        "n": 5,
-        "title": "Ciena (CIEN) Raised Its Forecast After a Record Quarter. What Drove It?",
+        "n": 3,
+        "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/ciena-cien-raised-forecast-record-220327219.html?.tsrc=rss",
+        "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
         "published": "2026-11-16",
-        "published_at": "2026-11-16T22:03:27+00:00",
+        "published_at": "2026-11-16T22:03:47+00:00",
         "date_label": "Nov 16, 2:03 PM PT",
-        "age_label": "2h ago",
-        "region": "US",
+        "age_label": "17h ago",
+        "region": "Global",
         "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move."
-      },
-      {
-        "n": 6,
-        "title": "USDA Projects Lower Beef and Higher Chicken Output for the Year Ahead",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/markets/commodities/articles/usda-projects-lower-beef-higher-235700990.html?.tsrc=rss",
-        "published": "2026-11-16",
-        "published_at": "2026-11-16T23:57:00+00:00",
-        "date_label": "Nov 16, 3:57 PM PT",
-        "age_label": "just now",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
-      },
-      {
-        "n": 7,
-        "title": "Fuel Cell Market Seen at $18 Billion by 2030 as Quarterly Results Diverge",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://finance.yahoo.com/news/fuel-cell-market-seen-18-000800746.html?.tsrc=rss",
-        "published": "2026-11-16",
-        "published_at": "2026-11-17T00:08:00+00:00",
-        "date_label": "Nov 16, 4:08 PM PT",
-        "age_label": "just now",
-        "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
     "label": "Fear",
-    "vix": 22.91,
+    "vix": 22.83,
     "put_call_zone": "Greed",
     "put_call": 0.63,
-    "advancers": 621,
-    "decliners": 1842,
-    "why": "VIX 22.9, put/call Greed, 621 up / 1842 down"
+    "advancers": 920,
+    "decliners": 1542,
+    "why": "VIX 22.8, put/call Greed, 920 up / 1542 down"
   },
   "headlines": [
     {
@@ -196,47 +144,9 @@
       "region": "US",
       "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
       "published_pt": "Nov 16, 2:25 PM PT",
-      "age_label": "1h ago",
-      "wrap": 15.0,
-      "rank": 20.5
-    },
-    {
-      "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
-      "published": "2026-11-16",
-      "published_at": "2026-11-16T22:03:47+00:00",
-      "trusted": true,
-      "causes": [
-        "election",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-      "published_pt": "Nov 16, 2:03 PM PT",
-      "age_label": "2h ago",
+      "age_label": "17h ago",
       "wrap": 10.0,
-      "rank": 15.0
-    },
-    {
-      "title": "Lumentum (LITE) Got a Takeover Offer. What Does It Mean for Holders? (",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/lumentum-lite-got-takeover-offer-220406453.html?.tsrc=rss",
-      "published": "2026-11-16",
-      "published_at": "2026-11-16T22:04:06+00:00",
-      "trusted": true,
-      "causes": [
-        "election",
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-      "published_pt": "Nov 16, 2:04 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 15.0
+      "rank": 15.5
     },
     {
       "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
@@ -254,71 +164,35 @@
       "region": "Global",
       "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
       "published_pt": "Nov 16, 4:13 AM PT",
-      "age_label": "12h ago",
-      "wrap": 10.0,
-      "rank": 14.0
+      "age_label": "27h ago",
+      "wrap": 5.0,
+      "rank": 9.0
     },
     {
-      "title": "Ciena (CIEN) Raised Its Forecast After a Record Quarter. What Drove It?",
+      "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
       "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/ciena-cien-raised-forecast-record-220327219.html?.tsrc=rss",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
       "published": "2026-11-16",
-      "published_at": "2026-11-16T22:03:27+00:00",
+      "published_at": "2026-11-16T22:03:47+00:00",
       "trusted": true,
       "causes": [
         "election",
         "ai_mood"
       ],
       "via": "",
-      "region": "US",
+      "region": "Global",
       "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
       "published_pt": "Nov 16, 2:03 PM PT",
-      "age_label": "2h ago",
-      "wrap": 10.0,
-      "rank": 13.0
-    },
-    {
-      "title": "USDA Projects Lower Beef and Higher Chicken Output for the Year Ahead",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/commodities/articles/usda-projects-lower-beef-higher-235700990.html?.tsrc=rss",
-      "published": "2026-11-16",
-      "published_at": "2026-11-16T23:57:00+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 16, 3:57 PM PT",
-      "age_label": "just now",
-      "wrap": 5.0,
-      "rank": 9.5
-    },
-    {
-      "title": "Fuel Cell Market Seen at $18 Billion by 2030 as Quarterly Results Diverge",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/news/fuel-cell-market-seen-18-000800746.html?.tsrc=rss",
-      "published": "2026-11-16",
-      "published_at": "2026-11-17T00:08:00+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 16, 4:08 PM PT",
-      "age_label": "just now",
-      "wrap": 5.0,
-      "rank": 9.5
+      "age_label": "17h ago",
+      "wrap": 0.0,
+      "rank": 1.0
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 15.78,
+      "score": 5.0,
       "headlines": [
         {
           "title": "Stock Market Today, Nov. 16: Tech Selloff Deepens as AI Leadership Crisis Rattles Nasdaq",
@@ -335,47 +209,9 @@
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
           "published_pt": "Nov 16, 2:25 PM PT",
-          "age_label": "1h ago",
-          "wrap": 15.0,
-          "rank": 20.5
-        },
-        {
-          "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-16T22:03:47+00:00",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 2:03 PM PT",
-          "age_label": "2h ago",
+          "age_label": "17h ago",
           "wrap": 10.0,
-          "rank": 15.0
-        },
-        {
-          "title": "Lumentum (LITE) Got a Takeover Offer. What Does It Mean for Holders? (",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/lumentum-lite-got-takeover-offer-220406453.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-16T22:04:06+00:00",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 2:04 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 15.0
+          "rank": 15.5
         },
         {
           "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
@@ -393,110 +229,36 @@
           "region": "Global",
           "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
           "published_pt": "Nov 16, 4:13 AM PT",
-          "age_label": "12h ago",
-          "wrap": 10.0,
-          "rank": 14.0
+          "age_label": "27h ago",
+          "wrap": 5.0,
+          "rank": 9.0
         },
         {
-          "title": "Ciena (CIEN) Raised Its Forecast After a Record Quarter. What Drove It?",
+          "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/ciena-cien-raised-forecast-record-220327219.html?.tsrc=rss",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
           "published": "2026-11-16",
-          "published_at": "2026-11-16T22:03:27+00:00",
+          "published_at": "2026-11-16T22:03:47+00:00",
           "trusted": true,
           "causes": [
             "election",
             "ai_mood"
           ],
           "via": "",
-          "region": "US",
+          "region": "Global",
           "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
           "published_pt": "Nov 16, 2:03 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 13.0
-        },
-        {
-          "title": "USDA Projects Lower Beef and Higher Chicken Output for the Year Ahead",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/commodities/articles/usda-projects-lower-beef-higher-235700990.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-16T23:57:00+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 3:57 PM PT",
-          "age_label": "just now",
-          "wrap": 5.0,
-          "rank": 9.5
-        },
-        {
-          "title": "Fuel Cell Market Seen at $18 Billion by 2030 as Quarterly Results Diverge",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/news/fuel-cell-market-seen-18-000800746.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-17T00:08:00+00:00",
-          "trusted": true,
-          "causes": [
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 4:08 PM PT",
-          "age_label": "just now",
-          "wrap": 5.0,
-          "rank": 9.5
+          "age_label": "17h ago",
+          "wrap": 0.0,
+          "rank": 1.0
         }
       ]
     },
     {
       "cause": "election",
       "label": "Election",
-      "score": 6.0,
+      "score": 3.0,
       "headlines": [
-        {
-          "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-16T22:03:47+00:00",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 2:03 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 15.0
-        },
-        {
-          "title": "Lumentum (LITE) Got a Takeover Offer. What Does It Mean for Holders? (",
-          "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/lumentum-lite-got-takeover-offer-220406453.html?.tsrc=rss",
-          "published": "2026-11-16",
-          "published_at": "2026-11-16T22:04:06+00:00",
-          "trusted": true,
-          "causes": [
-            "election",
-            "ai_mood"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
-          "published_pt": "Nov 16, 2:04 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 15.0
-        },
         {
           "title": "How Nvidia turmoil and a Democratic Congress could reshape the AI trade, according to ETF experts",
           "source": "CNBC",
@@ -513,28 +275,28 @@
           "region": "Global",
           "why": "Possible transmission: an oil move can change inflation and energy-sector results. This is not proof it caused the day's move.",
           "published_pt": "Nov 16, 4:13 AM PT",
-          "age_label": "12h ago",
-          "wrap": 10.0,
-          "rank": 14.0
+          "age_label": "27h ago",
+          "wrap": 5.0,
+          "rank": 9.0
         },
         {
-          "title": "Ciena (CIEN) Raised Its Forecast After a Record Quarter. What Drove It?",
+          "title": "Tower Semiconductor (TSEM) Expects Profit to Outrun Sales. What’s Behind It?",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/markets/stocks/articles/ciena-cien-raised-forecast-record-220327219.html?.tsrc=rss",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/tower-semiconductor-tsem-expects-profit-220347110.html?.tsrc=rss",
           "published": "2026-11-16",
-          "published_at": "2026-11-16T22:03:27+00:00",
+          "published_at": "2026-11-16T22:03:47+00:00",
           "trusted": true,
           "causes": [
             "election",
             "ai_mood"
           ],
           "via": "",
-          "region": "US",
+          "region": "Global",
           "why": "Possible transmission: an election or a tariff can change the growth outlook. This is not proof it caused the day's move.",
           "published_pt": "Nov 16, 2:03 PM PT",
-          "age_label": "2h ago",
-          "wrap": 10.0,
-          "rank": 13.0
+          "age_label": "17h ago",
+          "wrap": 0.0,
+          "rank": 1.0
         }
       ]
     }
@@ -553,8 +315,8 @@
   },
   "regime": {
     "label": "chop",
-    "pct_above_50day": 50.7,
-    "pct_above_200day": 53.0,
+    "pct_above_50day": 49.2,
+    "pct_above_200day": 52.9,
     "text": "Breadth is split — not a clean uptrend or selloff."
   },
   "tips": {
@@ -574,32 +336,32 @@
   },
   "prior_brief": {
     "session": "2026-11-16",
-    "slot": "morning_open",
-    "why_moved": "Stocks fell, with Nasdaq (-2.3%) leading the S&P (-1.4%) lower, dragged by Technology (-3.0%) and Communication Services (-1.4%), while Consumer Staples (1.0%) and Health Care (0.7%) held up (807 stocks up, 1668 down); VIX at 21.4.",
+    "slot": "evening_close",
+    "why_moved": "Stocks fell, with Nasdaq (-2.7%) leading the S&P (-1.9%) lower, dragged by Technology (-3.2%) and Energy (-2.0%) (621 stocks up, 1842 down); VIX at 22.9.",
     "mood": "Fear",
     "causes": [
       "AI / Tech mood",
-      "Oil / Energy"
+      "Election"
     ]
   },
   "stats": {
-    "spy_price": 739.95,
-    "spy_day_pct": -1.91,
-    "qqq_day_pct": -2.67,
+    "spy_price": 736.72,
+    "spy_day_pct": -0.44,
+    "qqq_day_pct": -0.46,
     "dia_day_pct": null,
-    "vix": 22.91,
-    "advancers": 621,
-    "decliners": 1842,
-    "breadth_sma50": 50.7,
-    "breadth_sma200": 53.0,
+    "vix": 22.83,
+    "advancers": 920,
+    "decliners": 1542,
+    "breadth_sma50": 49.2,
+    "breadth_sma200": 52.9,
     "put_call": 0.63,
     "put_call_zone": "Greed",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
-      "date": "2026-11-16",
-      "slot": "evening_close",
+      "date": "2026-11-17",
+      "slot": "morning_open",
       "mood": "Fear",
       "regime": "chop",
       "causes": [
@@ -610,8 +372,8 @@
         "CNBC",
         "Yahoo Finance"
       ],
-      "spy_day_pct": -1.91,
-      "qqq_day_pct": -2.67,
+      "spy_day_pct": -0.44,
+      "qqq_day_pct": -0.46,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
@@ -619,15 +381,15 @@
       "by_cause": {
         "election": {
           "up": 3,
-          "down": 2,
+          "down": 3,
           "flat": 0,
-          "n": 5
+          "n": 6
         },
         "ai_mood": {
           "up": 5,
-          "down": 9,
+          "down": 10,
           "flat": 0,
-          "n": 14
+          "n": 15
         },
         "rates": {
           "up": 1,
@@ -681,9 +443,9 @@
         },
         "CNBC": {
           "up": 4,
-          "down": 3,
+          "down": 4,
           "flat": 0,
-          "n": 7
+          "n": 8
         },
         "MarketWatch": {
           "up": 2,
@@ -693,9 +455,9 @@
         },
         "Yahoo Finance": {
           "up": 4,
-          "down": 7,
+          "down": 8,
           "flat": 0,
-          "n": 11
+          "n": 12
         },
         "BBC": {
           "up": 0,
@@ -710,21 +472,18 @@
           "n": 1
         }
       },
-      "n_labeled": 14,
+      "n_labeled": 15,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-17T00:14:27.122399+00:00",
-    "summary": "Not enough verified index closes to call a worldwide move.",
-    "breadth": "unknown",
+    "retrieved_at": "2026-11-17T15:41:55.138334+00:00",
+    "summary": "Verified indexes on file did not all move the same way.",
+    "breadth": "mixed",
     "missing": [
       "S&P 500",
-      "STOXX Europe 600",
-      "DAX",
-      "FTSE 100",
       "Nikkei 225",
       "Shanghai Composite",
       "Hang Seng"
@@ -735,28 +494,62 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.91,
+        "pct": -0.44,
         "verified": true,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T16:09:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T07:36:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Fuel Cell Market Seen at $18 Billion by 2030 as Quarterly Results Diverge. Not proof this caused the percent.",
-        "cause_source": "Yahoo Finance",
-        "cause_url": "https://finance.yahoo.com/news/fuel-cell-market-seen-18-000800746.html?.tsrc=rss"
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "sxxp",
+        "name": "STOXX Europe 600",
+        "region": "Europe",
+        "kind": "index",
+        "pct": -0.75,
+        "verified": true,
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T16:43:22+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ukx",
+        "name": "FTSE 100",
+        "region": "UK",
+        "kind": "index",
+        "pct": -1.07,
+        "verified": true,
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T16:44:17+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
       },
       {
         "id": "nifty",
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": 0.58,
+        "pct": 0.38,
         "verified": true,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -788,14 +581,14 @@
         "name": "STOXX Europe 600",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T22:10:27+01:00",
-        "status": "prior_local_close",
+        "pct": -0.75,
+        "verified": true,
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T16:43:22+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -805,14 +598,14 @@
         "name": "DAX",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T22:00:21+01:00",
-        "status": "prior_local_close",
+        "pct": -1.42,
+        "verified": true,
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T16:44:09+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -822,14 +615,14 @@
         "name": "FTSE 100",
         "region": "UK",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T22:00:19+01:00",
-        "status": "prior_local_close",
+        "pct": -1.07,
+        "verified": true,
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T16:44:17+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -890,11 +683,11 @@
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": 0.58,
+        "pct": 0.38,
         "verified": true,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -907,31 +700,31 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.91,
+        "pct": -0.44,
         "verified": true,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T16:09:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T07:36:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Fuel Cell Market Seen at $18 Billion by 2030 as Quarterly Results Diverge. Not proof this caused the percent.",
-        "cause_source": "Yahoo Finance",
-        "cause_url": "https://finance.yahoo.com/news/fuel-cell-market-seen-18-000800746.html?.tsrc=rss"
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
       },
       {
         "id": "qqq",
         "name": "QQQ",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -2.67,
+        "pct": -0.46,
         "verified": true,
-        "session_date": "2026-11-16",
-        "quote_at": "2026-11-16T16:09:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-17",
+        "quote_at": "2026-11-17T07:36:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
