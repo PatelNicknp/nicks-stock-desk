@@ -7,16 +7,6 @@ ABT,Abbott Laboratories,Healthcare,Medical Devices,18.60545,1.53571,26.0,118.907
 ACGL,Arch Capital Group Ltd.,Financial Services,Insurance - Diversified,10.938316,2.3,19.0,113.57895,111.0,35527835648,1793131200.0
 ACN,Accenture plc,Technology,Information Technology Services,16.250528,2.33333,24.0,229.73792,232.5,152711544832,1797514200.0
 ADBE,Adobe Inc.,Technology,Software - Application,8.636839,2.97436,33.0,266.9097,260.0,92123635712,1796850000.0
-AWK,"American Water Works Company, I",Utilities,Utilities - Regulated Water,22.80836,2.61538,11.0,141.90909,142.0,29937375232,1793217600.0
-AXON,"Axon Enterprise, Inc.",Industrials,Aerospace & Defense,32.033527,1.71429,19.0,541.3158,540.0,24636653568,1793912400.0
-AXP,American Express Company,Financial Services,Credit Services,16.000427,2.2069,24.0,364.78708,361.0,216896749568,1792758600.0
-AZO,"AutoZone, Inc.",Consumer Cyclical,Auto Parts,16.747316,1.48148,23.0,3665.6086,3648.0,51782574080,1790080200.0
-BA,Boeing Company (The),Industrials,Aerospace & Defense,80.16276,1.42857,26.0,233.34615,235.0,137394970624,1793104200.0
-BAC,Bank of America Corporation,Financial Services,Banks - Diversified,9.783595,1.48,22.0,62.47727,62.0,349702586368,1800019800.0
-BALL,Ball Corporation,Consumer Cyclical,Packaging & Containers,14.931412,1.71429,13.0,72.61538,74.0,17384871936,1793712600.0
-BAX,Baxter International Inc.,Healthcare,Medical Instruments & Supplies,12.916094,2.86667,12.0,27.25,26.0,13668339712,1793277000.0
-BBY,"Best Buy Co., Inc.",Consumer Cyclical,Specialty Retail,14.421699,2.8,20.0,89.05,90.0,21832652800,1795527000.0
-BDX,"Becton, Dickinson and Company",Healthcare,Medical Instruments & Supplies,14.944782,2.0,14.0,226.14285,227.5,57912160256,1793885400.0
 BE,Bloom Energy Corporation,Industrials,Electrical Equipment & Parts,34.827785,2.17241,26.0,283.84616,295.0,54798508032,1792699200.0
 BEN,"Franklin Templeton, Inc.",Financial Services,Asset Management,10.029489,2.61538,13.0,36.92308,36.0,18598625280,1793971800.0
 BF-B,Brown Forman Inc,Consumer Defensive,Beverages - Wineries & Distilleries,17.982904,3.22222,17.0,28.25882,28.0,14142196736,1796304600.0
@@ -524,3 +514,13 @@ ASML,ASML Holding N.V. - New York Re,Technology,Semiconductor Equipment & Materi
 ATO,Atmos Energy Corporation,Utilities,Utilities - Regulated Gas,17.582384,2.71429,11.0,182.72726,182.0,29050824704,1793826000.0
 AVGO,Broadcom Inc.,Technology,Semiconductors,17.595514,1.27451,47.0,528.17426,530.0,1630671994880,1796850000.0
 AVY,Avery Dennison Corporation,Consumer Cyclical,Packaging & Containers,16.724482,1.54545,10.0,203.3,200.5,13990759424,1793277000.0
+AWK,"American Water Works Company, I",Utilities,Utilities - Regulated Water,22.455475,2.83333,10.0,141.4,142.5,29497354240,1793217600.0
+AXON,"Axon Enterprise, Inc.",Industrials,Aerospace & Defense,31.615292,1.71429,19.0,541.3158,540.0,24314992640,1793912400.0
+AXP,American Express Company,Financial Services,Credit Services,15.619906,2.2069,24.0,364.78708,361.0,211746914304,1792758600.0
+AZO,"AutoZone, Inc.",Consumer Cyclical,Auto Parts,17.068865,1.53571,24.0,3656.625,3626.5,52775276544,1796736600.0
+BA,Boeing Company (The),Industrials,Aerospace & Defense,75.3256,1.40741,26.0,233.34615,235.0,129890467840,1793104200.0
+BAC,Bank of America Corporation,Financial Services,Banks - Diversified,9.544217,1.48,22.0,62.47727,62.0,341146337280,1800019800.0
+BALL,Ball Corporation,Consumer Cyclical,Packaging & Containers,14.506652,1.71429,13.0,72.61538,74.0,16890317824,1793712600.0
+BAX,Baxter International Inc.,Healthcare,Medical Instruments & Supplies,12.593436,2.86667,12.0,27.25,26.0,13326889984,1793277000.0
+BBY,"Best Buy Co., Inc.",Consumer Cyclical,Specialty Retail,13.632944,2.80769,21.0,91.14286,91.0,20637206528,1795527000.0
+BDX,"Becton, Dickinson and Company",Healthcare,Medical Instruments & Supplies,15.142696,2.0,14.0,226.14285,227.5,58677567488,1793885400.0
