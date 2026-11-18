@@ -1,43 +1,41 @@
 source,status,latest,note,checked_pt
-Universe (Wikipedia S&P 500),OK,503,503 names,2026-11-17 15:41 PT
-Universe (Wikipedia S&P 400),OK,400,400 names,2026-11-17 15:41 PT
-Universe (Wikipedia S&P 600),OK,603,603 names,2026-11-17 15:41 PT
-Universe (Wikipedia Nasdaq-100),OK,101,101 names,2026-11-17 15:41 PT
-Listed symbols (Nasdaq Trader),OK,2026-11-17,nasdaq and other exchanges,2026-11-17 15:41 PT
-Liquid names (Nasdaq screener),OK,2026-11-17,7278 rows,2026-11-17 15:41 PT
-Universe size,OK,2500,"2500 names after S&P 400, S&P 600, and liquid additions",2026-11-17 15:41 PT
-Prices (Yahoo Finance),OK,2026-11-17,"incremental 2505, full 17 (new 8, repair 9, refresh 0), waiting for backfill 0, adjustment refetch 26, 3051478 rows, 2 at a time",2026-11-17 15:47 PT
-SEC company tickers,OK,2026-11-17,10400 companies,2026-11-17 15:47 PT
-Fundamentals (SEC EDGAR company facts),CACHED,,all 12 requests failed,2026-11-17 15:50 PT
-Analyst and profile (Yahoo Finance),OK,2026-11-17,"525 names, 8 failed",2026-11-17 15:52 PT
-Earnings dates (Yahoo Finance),OK,2026-11-17,12781 rows,2026-11-17 15:52 PT
-Institutional 13F and insider (Nasdaq),OK,2026-11-17,"524 names, 0 failed",2026-11-17 15:58 PT
-Company profiles (SEC EDGAR submissions),OK,2026-11-17,2576 names,2026-11-17 16:02 PT
-Earnings dates (Nasdaq calendar),OK,2026-11-17,"1621 rows, 44 weekdays",2026-11-17 16:04 PT
-Company websites (Finnhub),OK,,skipped; no FINNHUB_API_KEY,2026-11-17 16:04 PT
-Relative strength,OK,2026-11-17,"2395 of 2500 stocks ranked 1 to 99 against every stock on the desk (MarketSmith style RS Rating) from saved daily closes. A stock with less than a year of prices, and ETFs or funds (0), are left blank. No new download.",2026-11-17 16:07 PT
-News headlines (Yahoo Finance),OK,2026-11-17,"130 headlines, 0 names failed",2026-11-17 16:07 PT
-Option walls (Yahoo option chain),OK,2026-11-17,"7790 rows, 0 names failed",2026-11-17 16:10 PT
-Put/call (CBOE),OK,2026-11-16,1 days refreshed,2026-11-17 16:10 PT
-FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-17 16:10 PT
-Economic calendar (Nasdaq),OK,2026-11-18,3 matched releases,2026-11-17 16:11 PT
-Backtest,OK,2026-11-17,monthly point-in-time test,2026-11-17 16:22 PT
-Price candles,OK,2026-11-17,"2486 tickers, up to 1264 cached sessions. No new download.",2026-11-17 16:23 PT
-Index series,OK,2026-11-17,"SPY, QQQ, VIX copied from the price frame already downloaded. No new request.",2026-11-17 16:23 PT
-Institutional 13F history (SEC Form 13F data sets),OK,,13F history is current (01jun2026-31aug2026_form13f.zip),2026-11-17 16:24 PT
-Episodic pivot,OK,2026-11-17,"EP rows 84. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-17 16:26 PT
-Pattern scanners,OK,2026-11-17,"VCP 134, CANSLIM 26, box 425, breakdown 15, flag 250, Qullamaggie 119, Marios 97, high volume 323, leaders 72, 52-week 2499 names over 1013 sessions. No new downloads.",2026-11-17 16:26 PT
-Gap up,OK,2026-11-17,Gap up rows 217. Cached daily bars only. No new downloads.,2026-11-17 16:26 PT
-Buy setups,OK,2026-11-17,Buy setups 3. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-17 16:26 PT
-EPS history (Nasdaq earnings surprise),OK,2026-11-17,"5 names asked, 3 had quarters, 0 failed. Saved history now 276 names.",2026-11-17 16:26 PT
-EPS Rating,OK,2026-11-17,"2023 of 2500 stocks rated 1 to 99 (EPS fill on). SEC EPS history with fiscal Q4 worked out from the full year, more EPS tags and split fixes; 589 rated with a loss year ranked at the bottom of the yearly part; 14 use Nasdaq or saved Yahoo quarters because the SEC has none recent.",2026-11-17 16:26 PT
-Highest EPS and RS,OK,2026-11-17,"1431 stocks have both ratings, 89 are at EPS 80+ and RS 80+, 12 were dropped as extended, 50 listed.",2026-11-17 16:26 PT
-Minervini 1-Month,OK,2026-11-17,"319 stocks pass all 8 trend template rules (200-day rising over 21 sessions, RS 70+).",2026-11-17 16:26 PT
-Minervini 5-Month,OK,2026-11-17,"288 stocks pass all 8 trend template rules (200-day rising over 105 sessions, RS 70+).",2026-11-17 16:27 PT
-Trading Floor headlines (Google News RSS),OK,2026-11-17,"14 requests for 14 picks without desk headlines, 61 headlines, 0 failed (they say No fresh headlines found).",2026-11-17 16:27 PT
-Trading Floor,OK,2026-11-17,"14 stocks debated: BUY 4, WAIT 9, SKIP 1. Research only, no orders, no alerts.",2026-11-17 16:27 PT
-Trading Floor paper test,OK,2026-11-17,"FAKE MONEY. Equity 9922.58, open 9, waiting 0, closed 1. Fills at the next session's open. No orders, no broker, no new downloads.",2026-11-17 16:27 PT
-Options chains,OK,2026-11-17T15:59:59,"calls 0, puts 1, skipped 17. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 11/17/2026. Education, not financial advice. No broker.",2026-11-17 16:27 PT
-Sector rotation,OK,2026-11-17,"11 sectors, 5 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-17 16:27 PT
-Column check,PARTIAL,,"A column is blank on every row: scores, scanner_vcp, scanner_canslim, scanner_breakdown, scanner_ep, scanner_leaders, scanner_52w, scanner_eps_rs, scanner_minervini_1m, scanner_minervini_5m, buy_setups, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-17 16:27 PT
-Market news brief,OK,2026-11-17,evening_close · mood Fear · 7 headlines,2026-11-17 16:30 PT
+Universe (Wikipedia S&P 500),OK,503,reused cache (refreshes once a day),2026-11-18 07:26 PT
+Universe (Wikipedia S&P 400),OK,400,reused cache (refreshes once a day),2026-11-18 07:26 PT
+Universe (Wikipedia S&P 600),OK,603,reused cache (refreshes once a day),2026-11-18 07:26 PT
+Universe (Wikipedia Nasdaq-100),OK,101,reused cache (refreshes once a day),2026-11-18 07:26 PT
+Listed symbols (Nasdaq Trader),OK,2026-11-17,reused cache,2026-11-18 07:26 PT
+Liquid names (Nasdaq screener),OK,2026-11-17,reused cache,2026-11-18 07:26 PT
+Universe size,OK,2500,"2500 names after S&P 400, S&P 600, and liquid additions",2026-11-18 07:26 PT
+Prices (Yahoo Finance),OK,2026-11-18,"incremental 2512, full 10 (new 1, repair 9, refresh 0), waiting for backfill 0, adjustment refetch 2, 3053989 rows, 2 at a time",2026-11-18 07:29 PT
+SEC company tickers,OK,2026-11-17,reused cache,2026-11-18 07:30 PT
+Fundamentals (SEC EDGAR company facts),OK,2026-11-17,reused cache (slow sources refresh at most once a day),2026-11-18 07:30 PT
+Analyst and profile (Yahoo Finance),OK,2026-11-17,reused cache (slow sources refresh at most once a day),2026-11-18 07:30 PT
+Earnings dates (Yahoo Finance),OK,2026-11-17,reused cache,2026-11-18 07:30 PT
+Institutional 13F and insider (Nasdaq),OK,2026-11-17,reused cache (slow sources refresh at most once a day),2026-11-18 07:30 PT
+Company profiles (SEC EDGAR submissions),OK,2026-11-17,reused cache,2026-11-18 07:30 PT
+Earnings dates (Nasdaq calendar),OK,2026-11-17,reused cache,2026-11-18 07:30 PT
+Company websites (Finnhub),OK,,skipped; no FINNHUB_API_KEY,2026-11-18 07:30 PT
+Relative strength,OK,2026-11-18,"2395 of 2500 stocks ranked 1 to 99 against every stock on the desk (MarketSmith style RS Rating) from saved daily closes. A stock with less than a year of prices, and ETFs or funds (0), are left blank. No new download.",2026-11-18 07:32 PT
+News headlines (Yahoo Finance),OK,2026-11-17,reused cache,2026-11-18 07:32 PT
+Option walls (Yahoo option chain),OK,2026-11-17,reused cache (option chains refresh at most once a day),2026-11-18 07:32 PT
+Put/call (CBOE),OK,2026-11-17,reused cache,2026-11-18 07:32 PT
+FRED,CACHED,,"HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",2026-11-18 07:33 PT
+Economic calendar (Nasdaq),OK,2026-11-17,reused cache,2026-11-18 07:33 PT
+Backtest,OK,,reused the last test (it rebuilds on the after-close run),2026-11-18 07:33 PT
+Price candles,OK,2026-11-18,"2486 tickers, up to 1265 cached sessions. No new download.",2026-11-18 07:33 PT
+Index series,OK,2026-11-18,"SPY, QQQ, VIX copied from the price frame already downloaded. No new request.",2026-11-18 07:33 PT
+Episodic pivot,OK,2026-11-18,"EP rows 83. Cached prices, earnings dates, and profiles only. No new downloads.",2026-11-18 07:36 PT
+Pattern scanners,OK,2026-11-18,"VCP 140, CANSLIM 23, box 438, breakdown 7, flag 280, Qullamaggie 124, Marios 104, high volume 27, leaders 73, 52-week 2499 names over 1014 sessions. No new downloads.",2026-11-18 07:36 PT
+Gap up,OK,2026-11-18,Gap up rows 201. Cached daily bars only. No new downloads.,2026-11-18 07:36 PT
+Buy setups,OK,2026-11-18,Buy setups 4. Research list only. Built from the scanners already on the desk. No new downloads.,2026-11-18 07:36 PT
+EPS Rating,OK,2026-11-18,"2023 of 2500 stocks rated 1 to 99 (EPS fill on). SEC EPS history with fiscal Q4 worked out from the full year, more EPS tags and split fixes; 589 rated with a loss year ranked at the bottom of the yearly part; 14 use Nasdaq or saved Yahoo quarters because the SEC has none recent.",2026-11-18 07:36 PT
+Highest EPS and RS,OK,2026-11-18,"1431 stocks have both ratings, 87 are at EPS 80+ and RS 80+, 9 were dropped as extended, 50 listed.",2026-11-18 07:36 PT
+Minervini 1-Month,OK,2026-11-18,"328 stocks pass all 8 trend template rules (200-day rising over 21 sessions, RS 70+).",2026-11-18 07:36 PT
+Minervini 5-Month,OK,2026-11-18,"294 stocks pass all 8 trend template rules (200-day rising over 105 sessions, RS 70+).",2026-11-18 07:36 PT
+Trading Floor headlines (Google News RSS),OK,2026-11-17,"reused cache, no request this run (the fetch runs once a day on the full run, only for picks without desk headlines)",2026-11-18 07:36 PT
+Trading Floor,OK,2026-11-18,"15 stocks debated: BUY 0, WAIT 12, SKIP 3. Research only, no orders, no alerts.",2026-11-18 07:36 PT
+Trading Floor paper test,OK,,unchanged: it updates only on the full after-close run,2026-11-18 07:36 PT
+Options chains,OK,,"calls 0, puts 0, skipped 11. rate US Treasury yield curve (3-month). Cboe delayed quotes. Treasury as of 11/17/2026. Education, not financial advice. No broker.",2026-11-18 07:36 PT
+Sector rotation,OK,2026-11-18,"11 sectors, 5 weekly Leading. Skipped (no price or not enough history): none. Macro: 10-year up, 10y-2y flat. Dollar, oil, and gold are not on file.",2026-11-18 07:36 PT
+Column check,PARTIAL,,"A column is blank on every row: scores, scanner_vcp, scanner_canslim, scanner_breakdown, scanner_ep, scanner_leaders, scanner_52w, scanner_eps_rs, scanner_minervini_1m, scanner_minervini_5m, buy_setups, earnings_heatmap, historical_pe. Blank is missing, not zero.",2026-11-18 07:36 PT
+Market news brief,OK,2026-11-18,morning_open · mood Mixed · 6 headlines,2026-11-18 07:39 PT
