@@ -331,6 +331,7 @@ APAM|Artisan Partners Asset Management Inc. Class A Common Stock|N|APAM|N|100|N|
 APCB|ActivePassive Core Bond ETF|P|APCB|Y|100|N|APCB
 APD|Air Products and Chemicals, Inc. Common Stock|N|APD|N|40|N|APD
 APDB|Aptus April Deep Buffer ETF|Z|APDB|Y|100|N|APDB
+APFS|Artisan Focus Fund: ETF Class Shares|P|APFS|Y|100|N|APFS
 APG|APi Group Corporation Common Stock|N|APG|N|100|N|APG
 APH|Amphenol Corporation Common Stock|N|APH|N|100|N|APH
 APHG|Leverage Shares 2X Long APH Daily ETF|Z|APHG|Y|100|N|APHG
@@ -343,6 +344,7 @@ APLY|YieldMax AAPL Option Income Strategy ETF|P|APLY|Y|100|N|APLY
 APLZ|Tradr 2X Short APLD Daily ETF|Z|APLZ|Y|100|N|APLZ
 APMI|Corgi AMAT 2x Daily ETF|Z|APMI|Y|100|N|APMI
 APMU|ActivePassive Intermediate Municipal Bond ETF|P|APMU|Y|100|N|APMU
+APNX|Artisan Select Equity Fund: ETF Class Shares|P|APNX|Y|100|N|APNX
 APO|Apollo Global Management, Inc. (New) Common Stock|N|APO|N|100|N|APO
 APOC|Innovator Equity Defined Protection ETF - 6mo Apr/Oct|Z|APOC|Y|100|N|APOC
 APOS|Apollo Global Management, Inc. 7.625% Fixed-Rate Resettable Junior Subordinated Notes due 2053|N|APOS|N|100|N|APOS
@@ -2893,6 +2895,7 @@ GMEU|T-REX 2X Long GME Daily Target ETF|Z|GMEU|Y|100|N|GMEU
 GMEY|YieldMax GME Option Income Strategy ETF|P|GMEY|Y|100|N|GMEY
 GMF|State Street SPDR S&P Emerging Asia Pacific ETF|P|GMF|Y|100|N|GMF
 GMIE|GMO International Equity Fund, ETF Class|P|GMIE|Y|100|N|GMIE
+GMIX|iShares Macro AlphaBeta Active ETF|P|GMIX|Y|100|N|GMIX
 GMMA|GammaRoad Market Navigation ETF|P|GMMA|Y|100|N|GMMA
 GMMF|iShares Government Money Market ETF|N|GMMF|Y|100|N|GMMF
 GMNY|Goldman Sachs Dynamic New York Municipal Income ETF|P|GMNY|Y|100|N|GMNY
@@ -3328,7 +3331,6 @@ IBMW|iShares iBonds Dec 2034 Term Muni Bond ETF|Z|IBMW|Y|100|N|IBMW
 IBMX|iShares iBonds Dec 2035 Term Muni Bond ETF|Z|IBMX|Y|100|N|IBMX
 IBN|ICICI Bank Limited Common Stock|N|IBN|N|100|N|IBN
 IBND|State Street SPDR Bloomberg International Corporate Bond ETF|P|IBND|Y|100|N|IBND
-IBO|Impact BioMedical, Inc. Common Stock|A|IBO|N|100|N|IBO
 IBOC|International Bancshares Corporation Common Stock|F|IBOC|N|100|N|IBOC
 IBP|Installed Building Products, Inc. Common Stock|N|IBP|N|100|N|IBP
 IBRN|iShares Neuroscience and Healthcare ETF|P|IBRN|Y|100|N|IBRN
@@ -6054,6 +6056,7 @@ SHE|State Street SPDR MSCI USA Gender Diversity ETF|P|SHE|Y|100|N|SHE
 SHEH|Shell plc ADRhedged|P|SHEH|Y|100|N|SHEH
 SHEL|Shell PLC American Depositary Shares (each representing two (2) Ordinary Shares) |N|SHEL|N|100|N|SHEL
 SHG|Shinhan Financial Group Co Ltd American Depositary Shares|N|SHG|N|100|N|SHG
+SHLA|Global X Asia Defense Tech ETF|P|SHLA|Y|100|N|SHLA
 SHLD|Global X Defense Tech ETF|P|SHLD|Y|100|N|SHLD
 SHM|State Street SPDR Nuveen ICE Short Term Municipal Bond ETF|P|SHM|Y|100|N|SHM
 SHO|Sunstone Hotel Investors, Inc. Sunstone Hotel Investors, Inc. Common Shares|N|SHO|N|100|N|SHO
@@ -6748,6 +6751,7 @@ TRGP|Targa Resources, Inc. Common Stock|N|TRGP|N|40|N|TRGP
 TRIL|VegaShares Trillions ETF|Z|TRIL|Y|100|N|TRIL
 TRIN|Trinity Capital Inc. Common Stock|N|TRIN|N|100|N|TRIN
 TRIO|MC Trio Equity Buffered ETF|Z|TRIO|Y|100|N|TRIO
+TRLL|Direxion Trillions ETF|P|TRLL|Y|100|N|TRLL
 TRLV|Trulieve Cannabis Corp. Subordinate Voting Shares|N|TRLV|N|100|N|TRLV
 TRN|Trinity Industries, Inc. Common Stock|N|TRN|N|100|N|TRN
 TRND|Pacer Trendpilot Fund of Funds ETF|P|TRND|Y|100|N|TRND
@@ -6852,7 +6856,6 @@ TYL|Tyler Technologies, Inc. Common Stock|N|TYL|N|40|N|TYL
 TYLD|Cambria Tactical Yield ETF|Z|TYLD|Y|100|N|TYLD
 TYLG|Global X Information Technology Covered Call & Growth ETF|P|TYLG|Y|100|N|TYLG
 TYO|Direxion Daily 10-Yr Treasury Bear 3x Shrs|P|TYO|Y|100|N|TYO
-TYYY|xETFs TSLA Daily Income ETF|P|TYYY|Y|100|N|TYYY
 TZA|Direxion Small Cap Bear 3X ETF|P|TZA|Y|100|N|TZA
 U|Unity Software Inc. Common Stock|N|U|N|100|N|U
 UA|Under Armour, Inc. Class C Common Stock|N|UA|N|100|N|UA
@@ -7078,6 +7081,7 @@ VELL|Defiance Daily Target 2X Long VELO ETF|Z|VELL|Y|100|N|VELL
 VEM|Virtus Emerging Markets Dividend ETF|P|VEM|Y|100|N|VEM
 VEMB|Vanguard Emerging Markets Bond Active ETF|Z|VEMB|Y|100|N|VEMB
 VEMY|Virtus Stone Harbor Emerging Markets High Yield Bond ETF|P|VEMY|Y|100|N|VEMY
+VEN|Teucrium Venezuela Future Opportunities ETF|P|VEN|Y|100|N|VEN
 VENU|Venu Holding Corporation Common Stock|A|VENU|N|100|N|VENU
 VET|Vermilion Energy Inc. Common (Canada)|N|VET|N|100|N|VET
 VETZ|Academy Veteran Bond ETF|P|VETZ|Y|100|N|VETZ
@@ -7214,6 +7218,7 @@ VUSG|Vanguard Wellington U.S. Growth Active ETF|Z|VUSG|Y|100|N|VUSG
 VUSI|Voya Ultra Short Income ETF|P|VUSI|Y|100|N|VUSI
 VUSV|Vanguard Wellington U.S. Value Active ETF|Z|VUSV|Y|100|N|VUSV
 VV|Vanguard Morningstar Large-Cap ETF|P|VV|Y|40|N|VV
+VVPL|Vulcan Value Partners ETF|Z|VVPL|Y|100|N|VVPL
 VVR|Invesco Senior Income Trust Common Stock (DE)|N|VVR|N|100|N|VVR
 VVV|Valvoline Inc. Common Stock|N|VVV|N|100|N|VVV
 VVVV|vVARDIS Holding AG Class A Ordinary Shares|N|VVVV|N|100|N|VVVV
@@ -7377,7 +7382,6 @@ WXET|Teucrium 2x Daily Wheat ETF|P|WXET|Y|100|N|WXET
 WY|Weyerhaeuser Company Common Stock|N|WY|N|100|N|WY
 WYFL|Defiance Daily Target 2X Long WYFI ETF|Z|WYFL|Y|100|N|WYFL
 WYY|WidePoint Corporation Common Stock|A|WYY|N|100|N|WYY
-WZRD|Opportunistic Trader ETF|Z|WZRD|Y|100|N|WZRD
 XA|Corgi AI Cybersecurity ETF|Z|XA|Y|100|N|XA
 XAGG|Eaton Vance Income Opportunities ETF|P|XAGG|Y|100|N|XAGG
 XAGI|Corgi AGIX 2x Daily ETF|Z|XAGI|Y|100|N|XAGI
@@ -7582,6 +7586,7 @@ XZO|Exzeo Group, Inc. Common Stock|N|XZO|N|100|N|XZO
 YALA|Yalla Group Limited American Depositary Shares, each representing one Class A Ordinary Share|N|YALA|N|100|N|YALA
 YALL|Truth Social God Bless America ETF|P|YALL|Y|100|N|YALL
 YANG|Direxion Daily FTSE China Bear 3X ETF|P|YANG|Y|100|N|YANG
+YASX|Yorkville America Space Index ETF|P|YASX|Y|100|N|YASX
 YBIT|YieldMax Bitcoin Option Income Strategy ETF|P|YBIT|Y|100|N|YBIT
 YBTC|Roundhill Bitcoin Covered Call Strategy ETF|Z|YBTC|Y|100|N|YBTC
 YCBD|cbdMD, Inc. Common Stock|A|YCBD|N|100|N|YCBD
@@ -7609,6 +7614,7 @@ YMAG|YieldMax Magnificent 7 Fund of Option Income ETFs|P|YMAG|Y|100|N|YMAG
 YMAR|FT Vest International Equity Moderate Buffer ETF - March|Z|YMAR|Y|100|N|YMAR
 YMAX|YieldMax Universe Fund of Option Income ETFs|P|YMAX|Y|100|N|YMAX
 YMM|Full Truck Alliance Co. Ltd. American Depositary Shares (each representing 20 Class A Ordinary Shares)|N|YMM|N|100|N|YMM
+YO|Amplify S&P 500 Buffered Autocallable Yield Opportunity ETF|P|YO|Y|100|N|YO
 YOLO|AdvisorShares Pure Cannabis ETF|P|YOLO|Y|100|N|YOLO
 YOU|Clear Secure, Inc. Class A Common Stock|N|YOU|N|100|N|YOU
 YPF|YPF Sociedad Anonima American Depositary Shares|N|YPF|N|100|N|YPF
@@ -7660,6 +7666,7 @@ ZKH|ZKH Group Limited American Depositary Shares, each representing thirty-five 
 ZMAR|Innovator Equity Defined Protection ETF - 1 Yr March|Z|ZMAR|Y|100|N|ZMAR
 ZMAY|Innovator Equity Defined Protection ETF - 1 Yr May|Z|ZMAY|Y|100|N|ZMAY
 ZNOV|Innovator Equity Defined Protection ETF - 1 Yr November|Z|ZNOV|Y|100|N|ZNOV
+ZOAR|Zoar Limited Ordinary Shares|A|ZOAR|N|100|N|ZOAR
 ZOCT|Innovator Equity Defined Protection ETF - 1 Yr October|Z|ZOCT|Y|100|N|ZOCT
 ZONE|Zone Frontier Inc. Class B Common Stock|A|ZONE|N|100|N|ZONE
 ZROZ|PIMCO 25  Year Zero Coupon U.S. Treasury Index Exchange-Traded Fund|P|ZROZ|Y|100|N|ZROZ
@@ -7679,4 +7686,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1117202618:01||||||
+File Creation Time: 1118202618:01||||||
