@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-EIX,Edison International,Utilities,Utilities - Regulated Electric,9.208446,3.17647,15.0,63.03333,62.0,23056449536,1793304000.0
-EL,"Estee Lauder Companies, Inc. (T",Consumer Defensive,Household & Personal Products,27.670216,2.26667,28.0,115.35,119.0,40700579840,1801661400.0
-ELV,"Elevance Health, Inc.",Healthcare,Healthcare Plans,14.180857,1.77273,21.0,482.38095,492.0,92791685120,1792585800.0
-EME,"EMCOR Group, Inc.",Industrials,Engineering & Construction,16.299105,1.83333,9.0,884.1111,918.0,29191213056,1793277000.0
-EMR,Emerson Electric Company,Industrials,Specialty Industrial Machinery,20.789932,1.9,28.0,182.82108,189.0,91649114112,1793799000.0
-EOG,"EOG Resources, Inc.",Energy,Oil & Gas E&P,9.209003,2.36364,29.0,167.41379,165.0,79727321088,1793912400.0
-EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,51.60957,1.45714,32.0,1234.875,1230.0,105725468672,1793217600.0
-EQT,EQT Corporation,Energy,Oil & Gas E&P,15.2734375,1.5,22.0,66.90909,67.5,32960198656,1793131200.0
-ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.418604,1.0,,,,14232255488,1793304000.0
-ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.323687,2.70588,14.0,72.0,74.0,26570637312,1793826000.0
 ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,43.566334,2.57692,25.0,295.46,295.0,18906537984,1793131200.0
 ETN,"Eaton Corporation, PLC",Industrials,Specialty Industrial Machinery,21.920897,1.53571,27.0,473.93594,485.0,140100861952,1793712600.0
 ETR,Entergy Corporation,Utilities,Utilities - Regulated Electric,21.900764,1.70833,21.0,120.38095,123.5,53511860224,1793626200.0
@@ -524,3 +514,13 @@ ECL,Ecolab Inc.,Basic Materials,Specialty Chemicals,31.406767,1.41667,21.0,342.9
 ED,"Consolidated Edison, Inc.",Utilities,Utilities - Regulated Electric,18.31269,3.21053,17.0,112.32353,110.0,44204302336,1793912400.0
 EFX,"Equifax, Inc.",Industrials,Consulting Services,18.605186,1.75,20.0,205.0,206.5,20654700544,1792499400.0
 EG,"Everest Group, Ltd.",Financial Services,Insurance - Reinsurance,6.941451,2.41176,16.0,437.9375,437.5,15630662656,1793217600.0
+EIX,Edison International,Utilities,Utilities - Regulated Electric,9.698414,3.1875,14.0,63.46429,62.0,24249290752,1793304000.0
+EL,"Estee Lauder Companies, Inc. (T",Consumer Defensive,Household & Personal Products,25.060762,2.23333,28.0,116.49286,120.0,36874371072,1801661400.0
+ELV,"Elevance Health, Inc.",Healthcare,Healthcare Plans,12.882291,1.68182,21.0,482.38095,492.0,84296368128,1792585800.0
+EME,"EMCOR Group, Inc.",Industrials,Engineering & Construction,15.490473,1.84615,10.0,875.6,863.5,27848857600,1793277000.0
+EMR,Emerson Electric Company,Industrials,Specialty Industrial Machinery,19.59485,1.9,28.0,182.99963,189.0,86459367424,1793799000.0
+EOG,"EOG Resources, Inc.",Energy,Oil & Gas E&P,8.787947,2.36364,29.0,168.41379,167.0,77508206592,1793912400.0
+EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,49.193043,1.45714,32.0,1234.875,1230.0,100775059456,1793217600.0
+EQT,EQT Corporation,Energy,Oil & Gas E&P,14.868207,1.5,22.0,66.54545,67.5,30839586816,1793131200.0
+ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.175545,,,,,14062836736,1793304000.0
+ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.336883,2.76471,14.0,72.28571,74.0,26612072448,1793826000.0
