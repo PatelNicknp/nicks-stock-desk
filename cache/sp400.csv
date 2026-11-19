@@ -47,7 +47,6 @@ BHF,Brighthouse Financial,Financials,no,yes,no,no,no,no
 BILL,Bill Holdings,Information Technology,no,yes,no,no,no,no
 BIO,Bio-Rad Laboratories,Health Care,no,yes,no,no,no,no
 BJ,BJ's Wholesale Club,Consumer Staples,no,yes,no,no,no,no
-HZN,Bright Horizon Energy Corporation,Utilities,no,yes,no,no,no,no
 BMRN,BioMarin Pharmaceutical,Health Care,no,yes,no,no,no,no
 BRKR,Bruker,Health Care,no,yes,no,no,no,no
 BROS,Dutch Bros Inc.,Consumer Discretionary,no,yes,no,no,no,no
@@ -76,6 +75,7 @@ CHE,Chemed Corp.,Health Care,no,yes,no,no,no,no
 CHH,Choice Hotels,Consumer Discretionary,no,yes,no,no,no,no
 CHRD,Chord Energy,Energy,no,yes,no,no,no,no
 CHWY,Chewy,Consumer Discretionary,no,yes,no,no,no,no
+CHYM,Chime Financial,Financials,no,yes,no,no,no,no
 CLF,Cleveland-Cliffs,Materials,no,yes,no,no,no,no
 CLH,Clean Harbors,Industrials,no,yes,no,no,no,no
 CMC,Commercial Metals,Materials,no,yes,no,no,no,no
@@ -184,6 +184,7 @@ HRB,H&R Block,Consumer Discretionary,no,yes,no,no,no,no
 HUBS,HubSpot,Information Technology,no,yes,no,no,no,no
 HWC,Hancock Whitney,Financials,no,yes,no,no,no,no
 HXL,Hexcel,Industrials,no,yes,no,no,no,no
+HZN,Bright Horizon Energy Corporation,Utilities,no,yes,no,no,no,no
 IBOC,Intl Bancshares Corp,Financials,no,yes,no,no,no,no
 IDA,Idacorp,Utilities,no,yes,no,no,no,no
 IDCC,InterDigital,Information Technology,no,yes,no,no,no,no
@@ -251,7 +252,6 @@ NOVT,Novanta,Information Technology,no,yes,no,no,no,no
 NTNX,Nutanix,Information Technology,no,yes,no,no,no,no
 NVST,Envista Holdings,Health Care,no,yes,no,no,no,no
 NVT,nVent Electric plc,Industrials,no,yes,no,no,no,no
-NWE,NorthWestern Energy,Utilities,no,yes,no,no,no,no
 NXST,Nexstar Media Group,Communication Services,no,yes,no,no,no,no
 NXT,Nextpower,Industrials,no,yes,no,no,no,no
 NYT,New York Times Company,Communication Services,no,yes,no,no,no,no

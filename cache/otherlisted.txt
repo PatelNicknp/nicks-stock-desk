@@ -1179,6 +1179,7 @@ CFR|Cullen/Frost Bankers, Inc. Common Stock|F|CFR|N|100|N|CFR
 CFR$B|Cullen/Frost Bankers, Inc. Depositary Shares, each representing a 1/40th ownership interest in a share of 4.450% non-cumulative perpetual preferred stock, Series B|F|CFRpB|N|100|N|CFR-B
 CFTR$A|Cantor Fitzgerald Income Trust, Inc. 9.50% Series A Cumulative Redeemable Preferred Stock|N|CFTRpA|N|100|N|CFTR-A
 CGAU|Centerra Gold Inc. Common Shares|N|CGAU|N|100|N|CGAU
+CGBI|Capital Group Multi-Asset Income Builder ETF|P|CGBI|Y|100|N|CGBI
 CGBL|Capital Group Core Balanced ETF|P|CGBL|Y|100|N|CGBL
 CGCB|Capital Group Core Bond ETF|P|CGCB|Y|100|N|CGCB
 CGCP|Capital Group Core Plus Income ETF|P|CGCP|Y|100|N|CGCP
@@ -1195,6 +1196,7 @@ CGHY|Capital Group High Yield Bond ETF|P|CGHY|Y|100|N|CGHY
 CGIB|Capital Group International Bond ETF (USD-Hedged)|P|CGIB|Y|100|N|CGIB
 CGIC|Capital Group International Core Equity ETF|P|CGIC|Y|100|N|CGIC
 CGIE|Capital Group International Equity ETF|P|CGIE|Y|100|N|CGIE
+CGMI|Capital Group Multi-Asset Income ETF|P|CGMI|Y|100|N|CGMI
 CGMM|Capital Group U.S. Small and Mid Cap ETF|P|CGMM|Y|100|N|CGMM
 CGMS|Capital Group U.S. Multi-Sector Income ETF|P|CGMS|Y|100|N|CGMS
 CGMU|Capital Group Municipal Income ETF|P|CGMU|Y|100|N|CGMU
@@ -2552,6 +2554,7 @@ FMAG|Fidelity Magellan ETF|Z|FMAG|Y|100|N|FMAG
 FMAR|FT Vest U.S. Equity Buffer ETF - March|Z|FMAR|Y|100|N|FMAR
 FMAT|Fidelity MSCI Materials Index ETF|P|FMAT|Y|100|N|FMAT
 FMAY|FT Vest U.S. Equity Buffer ETF - May|Z|FMAY|Y|100|N|FMAY
+FMBM|F&M Bank Corp. Common Stock|A|FMBM|N|100|N|FMBM
 FMC|FMC Corporation Common Stock|N|FMC|N|100|N|FMC
 FMCE|FM Compounders Equity ETF|P|FMCE|Y|100|N|FMCE
 FMCX|FM Focus Equity ETF|P|FMCX|Y|100|N|FMCX
@@ -2896,7 +2899,6 @@ GMEY|YieldMax GME Option Income Strategy ETF|P|GMEY|Y|100|N|GMEY
 GMF|State Street SPDR S&P Emerging Asia Pacific ETF|P|GMF|Y|100|N|GMF
 GMIE|GMO International Equity Fund, ETF Class|P|GMIE|Y|100|N|GMIE
 GMIX|iShares Macro AlphaBeta Active ETF|P|GMIX|Y|100|N|GMIX
-GMMA|GammaRoad Market Navigation ETF|P|GMMA|Y|100|N|GMMA
 GMMF|iShares Government Money Market ETF|N|GMMF|Y|100|N|GMMF
 GMNY|Goldman Sachs Dynamic New York Municipal Income ETF|P|GMNY|Y|100|N|GMNY
 GMOC|GMO Ultra-Short Income ETF|P|GMOC|Y|100|N|GMOC
@@ -2958,6 +2960,7 @@ GPTY|YieldMax AI & Tech Portfolio Option Income ETF|P|GPTY|Y|100|N|GPTY
 GPUS|Hyperscale Data, Inc. Common Stock|A|GPUS|N|100|N|GPUS
 GPUS$D|Hyperscale Data, Inc. 13.00% Series D Cumulative Redeemable Perpetual Preferred Stock|A|GPUSpD|N|100|N|GPUS-D
 GPZ|VanEck Alternative Asset Manager ETF|P|GPZ|Y|100|N|GPZ
+GQGG|GQG Global Equity ETF|P|GQGG|Y|100|N|GQGG
 GQGU|GQG US Equity ETF|P|GQGU|Y|100|N|GQGU
 GQI|Natixis Gateway Quality Income ETF|P|GQI|Y|100|N|GQI
 GQRE|Northern Trust Global Quality Real Estate ETF|P|GQRE|Y|100|N|GQRE
@@ -2989,6 +2992,7 @@ GS$C|Goldman Sachs Group, Inc. (The) Depositary Share repstg 1/1000th Preferred 
 GS$D|Goldman Sachs Group, Inc. (The) Dep Shs repstg 1/1000 Pfd Ser D Fltg|N|GSpD|N|100|N|GS-D
 GSBD|Goldman Sachs BDC, Inc. Common Stock|N|GSBD|N|100|N|GSBD
 GSC|Goldman Sachs Small Cap Equity ETF|P|GSC|Y|100|N|GSC
+GSCZ|Goldman Sachs Securitized Income ETF|P|GSCZ|Y|100|N|GSCZ
 GSEE|Goldman Sachs MarketBeta Emerging Markets Equity ETF|Z|GSEE|Y|100|N|GSEE
 GSEP|FT Vest U.S. Equity Moderate Buffer ETF - September|Z|GSEP|Y|100|N|GSEP
 GSEU|Goldman Sachs ActiveBeta Europe Equity ETF|P|GSEU|Y|100|N|GSEU
@@ -3654,6 +3658,7 @@ JADB|Aptus January Deep Buffer ETF|Z|JADB|Y|100|N|JADB
 JADE|JPMorgan Active Developing Markets Equity ETF|P|JADE|Y|100|N|JADE
 JAGU|Jaguar Uranium Corp. Class A Common Shares|A|JAGU|N|100|N|JAGU
 JAJL|Innovator Equity Defined Protection ETF - 6mo Jan/Jul|Z|JAJL|Y|100|N|JAJL
+JALL|JPMorgan All Country Research Enhanced Equity ETF|P|JALL|Y|100|N|JALL
 JAN|Janus Living, Inc. Class A-1 Common Stock|N|JAN|N|100|N|JAN
 JANB|Aptus January Buffer ETF|Z|JANB|Y|100|N|JANB
 JANH|Innovator Premium Income 20 Barrier ETF - January|Z|JANH|Y|100|N|JANH
@@ -4163,7 +4168,6 @@ LVS|Las Vegas Sands Corp. Common Stock|N|LVS|N|100|N|LVS
 LVWR|LiveWire Group, Inc. Common Stock|N|LVWR|N|100|N|LVWR
 LW|Lamb Weston Holdings, Inc. Common Stock |N|LW|N|100|N|LW
 LWLX|Tradr 2X Long LWLG Daily ETF|Z|LWLX|Y|100|N|LWLX
-LXFR|Luxfer Holdings PLC Ordinary Shares|N|LXFR|N|100|N|LXFR
 LXU|LSB Industries, Inc. Common Stock|N|LXU|N|100|N|LXU
 LYB|LyondellBasell Industries NV Ordinary Shares Class A (Netherlands)|N|LYB|N|100|N|LYB
 LYG|Lloyds Banking Group Plc American Depositary Shares|N|LYG|N|100|N|LYG
@@ -6578,6 +6582,7 @@ TFI|State Street SPDR Nuveen ICE Municipal Bond ETF|P|TFI|Y|100|N|TFI
 TFII|TFI International Inc. Common Shares|N|TFII|N|100|N|TFII
 TFIN|Triumph Financial, Inc. Common Stock|N|TFIN|N|100|N|TFIN
 TFIN$|Triumph Financial, Inc. Depositary Shares, Each Representing a 1/40th Interest in a Share of 7.125% Series C Fixed-Rate Non-Cumulative Perpetual Preferred Stock|N|TFINp|N|100|N|TFIN-
+TFIX|T. Rowe Price Capital Appreciation Fixed Income ETF|P|TFIX|Y|100|N|TFIX
 TFJL|Innovator 20  Year Treasury Bond 5 Floor ETF - July|Z|TFJL|Y|100|N|TFJL
 TFLO|iShares Treasury Floating Rate Bond ETF|P|TFLO|Y|100|N|TFLO
 TFLR|T. Rowe Price Floating Rate ETF|P|TFLR|Y|100|N|TFLR
@@ -6875,7 +6880,7 @@ UBIQ|AAM Ubiquitous ETF|P|UBIQ|Y|100|N|UBIQ
 UBOT|Direxion Daily Robotics, Artificial Intelligence & Automation Index Bull 2X ETF|P|UBOT|Y|100|N|UBOT
 UBR|ProShares Ultra MSCI Brazil Capped|P|UBR|Y|100|N|UBR
 UBS|UBS Group AG Registered Ordinary Shares|N|UBS|N|100|N|UBS
-UBT|ProShares Ultra 20+ Year Treasury|P|UBT|Y|100|N|UBT
+UBT|ProShares Ultra 20 Year Treasury|P|UBT|Y|100|N|UBT
 UCB|United Community Banks, Inc. Common Stock|N|UCB|N|100|N|UCB
 UCBG|State Street SPDR UC Investments 90/10 Endowment Strategy Index ETF|P|UCBG|Y|100|N|UCBG
 UCC|ProShares Ultra Consumer Discretionary|P|UCC|Y|100|N|UCC
@@ -7686,4 +7691,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1118202618:01||||||
+File Creation Time: 1119202618:01||||||

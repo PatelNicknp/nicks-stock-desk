@@ -312,7 +312,7 @@ AMRX|Amneal Pharmaceuticals, Inc. - Class A Common Stock|Q|N|N|100|N|N
 AMSC|American Superconductor Corporation - Common Stock|Q|N|N|100|N|N
 AMSF|AMERISAFE, Inc. - Common Stock|Q|N|N|100|N|N
 AMSS|AMASS Brands Inc. - Common Stock|G|N|D|100|N|N
-AMST|Amesite Inc. - Common Stock|S|N|N|100|N|N
+AMST|Amesite Inc. - Common Stock|S|N|D|100|N|N
 AMTX|Aemetis, Inc - Common Stock|G|N|N|100|N|N
 AMUN|abrdn Ultra Short Municipal Income Active ETF|G|N|N|100|Y|N
 AMUU|Direxion Daily AMD Bull 2X ETF|G|N|N|100|Y|N
@@ -338,6 +338,7 @@ ANNA|AleAnna, Inc. - Class A Common Stock|S|N|N|100|N|N
 ANNAW|AleAnna, Inc. - Warrant|S|N|N|100|N|N
 ANNX|Annexon, Inc. - common stock|Q|N|N|100|N|N
 ANPA|Rich Sparkle Holdings Limited - Ordinary Shares|S|N|N|100|N|N
+ANT|Anthropic, PBC - Class A Common Stock|Q|N|N|100|N|N
 ANTA|Antalpha Platform Holding Company - Class A Ordinary Shares|G|N|N|100|N|N
 ANTX|AN2 Therapeutics, Inc. - Common Stock|Q|N|N|100|N|N
 ANV|GraniteShares Autocallable NVDA ETF|G|N|N|100|Y|N
@@ -1620,6 +1621,7 @@ ENTG|Entegris, Inc. - Common Stock|Q|N|N|100|N|N
 ENTX|Entera Bio Ltd. - Ordinary Shares|S|N|N|100|N|N
 ENVB|Enveric Biosciences, Inc.  - Common Stock|S|N|N|100|N|N
 ENVX|Enovix Corporation - Common Stock|Q|N|N|100|N|N
+ENVXW|Enovix Corporation - Warrants|Q|N|N|100|N|N
 ENZL|iShares MSCI New Zealand ETF|G|N|N|100|Y|N
 EOCN|Eocene Ltd. - Ordinary Shares|S|N|N|100|N|N
 EOLS|Evolus, Inc. - Common Stock|G|N|N|100|N|N
@@ -1763,6 +1765,9 @@ FCUV|Focus Universal Inc. - Common Stock|S|N|N|100|N|N
 FCVT|First Trust SSI Strategic Convertible Securities ETF|G|N|N|100|Y|N
 FDBC|Fidelity D & D Bancorp, Inc. - Common Stock|G|N|N|100|N|N
 FDCF|Fidelity Disruptive Communications ETF|G|N|N|100|Y|N
+FDGX|First Digital Acquisition Corp Ltd. - Class A Ordinary Shares|G|N|N|100|N|N
+FDGXU|First Digital Acquisition Corp Ltd. - Units|G|N|N|100|N|N
+FDGXW|First Digital Acquisition Corp Ltd. - Warrants|G|N|N|100|N|N
 FDIG|Fidelity Crypto Industry and Digital Payments ETF|G|N|N|100|Y|N
 FDIQ|Invesco Bloomberg Financial Data Providers ETF|G|N|N|100|Y|N
 FDIV|MarketDesk Focused U.S. Dividend ETF|G|N|N|100|Y|N
@@ -2796,9 +2801,6 @@ KOD|Kodiak Sciences Inc - Common Stock|G|N|N|100|N|N
 KOID|KraneShares Global Humanoid Robotics and Physical AI Index ETF|G|N|N|100|Y|N
 KOPN|Kopin Corporation - Common Stock|S|N|N|100|N|N
 KOSS|Koss Corporation - Common Stock|S|N|N|100|N|N
-KOYN|CSLM Digital Asset Acquisition Corp III - Class A Ordinary Shares|G|N|N|100|N|N
-KOYNU|CSLM Digital Asset Acquisition Corp III - Units|G|N|N|100|N|N
-KOYNW|CSLM Digital Asset Acquisition Corp III - Warrants|G|N|N|100|N|N
 KPLT|Katapult Holdings, Inc. - Common Stock|G|N|N|100|N|N
 KPRX|Kiora Pharmaceuticals, Inc.  - Common Stock|S|N|N|100|N|N
 KQQQ|Kurv Technology Titans Select ETF|G|N|N|100|Y|N
@@ -3093,8 +3095,8 @@ MDAI|Spectral AI, Inc. - Class A Common Stock|S|N|N|100|N|N
 MDAIW|Spectral AI, Inc. - Warrants|S|N|N|100|N|N
 MDB|MongoDB, Inc. - Class A Common Stock|G|N|N|40|N|N
 MDBH|MDB Capital Holdings, LLC - Class A common |S|N|N|100|N|N
-MDCX|Medicus Pharma Ltd. - Common Stock|S|N|D|100|N|N
-MDCXW|Medicus Pharma Ltd. - Warrant|S|N|D|100|N|N
+MDCX|Medicus Pharma Ltd. - Common Stock|S|N|N|100|N|N
+MDCXW|Medicus Pharma Ltd. - Warrant|S|N|N|100|N|N
 MDGL|Madrigal Pharmaceuticals, Inc. - Common Stock|Q|N|N|40|N|N
 MDIA|Mediaco Holding Inc. - Class A Common Stock|S|N|N|100|N|N
 MDIV|Multi-Asset Diversified Income Index Fund|G|N|N|100|Y|N
@@ -3553,8 +3555,8 @@ NWPX|NWPX Infrastructure, Inc. - Common Stock|Q|N|N|100|N|N
 NWS|News Corporation - Class B Common Stock|Q|N|N|100|N|N
 NWSA|News Corporation - Class A Common Stock|Q|N|N|100|N|N
 NWTG|Newton Golf Company, Inc. - Common Stock|S|N|D|100|N|N
-NXAT|Nexus Advanced Technologies Inc. - Ordinary Shares|S|N|N|100|N|N
-NXATW|Nexus Advanced Technologies Inc. - Warrant|S|N|N|100|N|N
+NXAT|Nexus Advanced Technologies Inc. - Ordinary Shares|S|N|D|100|N|N
+NXATW|Nexus Advanced Technologies Inc. - Warrant|S|N|D|100|N|N
 NXDR|Nextdoor Holdings, Inc. - Common Stock|S|N|N|100|N|N
 NXGL|NexGel, Inc - Common Stock|S|N|N|100|N|N
 NXGLW|NexGel, Inc - Warrant|S|N|N|100|N|N
@@ -3615,7 +3617,7 @@ OFS|OFS Capital Corporation - Closed End Fund|Q|N|N|100|N|N
 OFSSH|OFS Capital Corporation - 4.95% Notes due 2028|Q|N|N|100|N|N
 OFSSO|OFS Capital Corporation - 7.50% Notes due 2028|G|N|N|100|N|N
 OGGWZ|Osisko Gold Group Inc. - Warrant|S|N|N|100|N|N
-OGI|Organigram Global Inc. - Common Shares|Q|N|N|100|N|N
+OGI|Organigram Global Inc. - Common Shares|Q|N|D|100|N|N
 OHAC|Oceanhawk Acquisition Corp. - Class A Ordinary Shares|S|N|N|100|N|N
 OHACR|Oceanhawk Acquisition Corp. - Rights|S|N|N|100|N|N
 OHACU|Oceanhawk Acquisition Corp. - Units|S|N|N|100|N|N
@@ -4425,7 +4427,6 @@ SCHL|Scholastic Corporation - Common Stock|Q|N|N|100|N|N
 SCII|SC II Acquisition Corp. - Class A ordinary share|G|N|N|100|N|N
 SCIIR|SC II Acquisition Corp. - Rights|G|N|N|100|N|N
 SCIIU|SC II Acquisition Corp. - Units|G|N|N|100|N|N
-SCKT|Socket Mobile, Inc. - Common Stock|S|N|D|100|N|N
 SCLX|Scilex Holding Company - Common Stock|S|N|N|100|N|N
 SCLXW|Scilex Holding Company - Warrant|S|N|N|100|N|N
 SCNI|Scinai Immunotherapeutics Ltd. - American Depositary Shares|S|N|N|100|N|N
@@ -4707,7 +4708,6 @@ SSNC|SS&C Technologies Holdings, Inc. - Common Stock|Q|N|N|100|N|N
 SSP|E.W. Scripps Company (The) - Class A Common Stock|Q|N|N|100|N|N
 SSRM|SSR Mining Inc. - Common Stock|Q|N|N|100|N|N
 SSS|CYBER HORNET S&P 500 and Solana 75/25 Strategy ETF|G|N|N|100|Y|N
-SSTI|SoundThinking, Inc. - Common Stock|S|N|N|100|N|N
 SSYS|Stratasys, Ltd. - Common Stock|Q|N|N|100|N|N
 STAA|STAAR Surgical Company - Common Stock|G|N|N|100|N|N
 STAK|STAK Inc. - Class A Ordinary Shares|S|N|N|100|N|N
@@ -5595,7 +5595,7 @@ ZS|Zscaler, Inc. - Common Stock|Q|N|N|100|N|N
 ZSQR|Z Squared Inc. - Common Stock|G|N|N|100|N|N
 ZSTK|ZeroStack Corp. - Common Stock|S|N|N|100|N|N
 ZTEN|F/m 10-Year Investment Grade Corporate Bond ETF|G|N|N|100|Y|N
-ZTG|Zenta Group Company Limited - Class A Ordinary Shares|S|N|N|100|N|N
+ZTG|Zenta Group Company Limited - Class A Ordinary Shares|S|N|D|100|N|N
 ZTOP|F/m High Yield 100 ETF|G|N|N|100|Y|N
 ZTRE|F/m 3-Year Investment Grade Corporate Bond ETF|G|N|N|100|Y|N
 ZTWO|F/m 2-Year Investment Grade Corporate Bond ETF|G|N|N|100|Y|N
@@ -5609,4 +5609,4 @@ ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
 ZYN|PTL LTD - Class A Ordinary Shares|S|N|N|100|N|N
-File Creation Time: 1118202618:01|||||||
+File Creation Time: 1119202618:01|||||||
