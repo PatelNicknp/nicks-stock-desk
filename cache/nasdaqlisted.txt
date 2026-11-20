@@ -25,6 +25,7 @@ AAPL|Apple Inc. - Common Stock|Q|N|N|40|N|N
 AAPU|Direxion Daily AAPL Bull 2X ETF|G|N|N|100|Y|N
 AARD|Aardvark Therapeutics, Inc. - Common Stock|Q|N|N|100|N|N
 AAUB|Alpha Architect US Equity 4 ETF|G|N|N|100|Y|N
+AAUD|Alpha Architect US Equity 5 ETF|G|N|N|100|Y|N
 AAUS|Alpha Architect US Equity ETF|G|N|N|100|Y|N
 AAVM|Alpha Architect Global Factor Equity ETF|G|N|N|100|Y|N
 AAXJ|iShares MSCI All Country Asia ex Japan ETF|G|N|N|100|Y|N
@@ -303,7 +304,6 @@ AMLX|Amylyx Pharmaceuticals, Inc. - Common Stock|Q|N|N|100|N|N
 AMOD|Alpha Modus Holdings, Inc. - Class A Common Stock|S|N|N|100|N|N
 AMODW|Alpha Modus Holdings, Inc. - Warrant|S|N|N|100|N|N
 AMPG|Amplitech Group, Inc. - Common Stock|S|N|N|100|N|N
-AMPGZ|Amplitech Group, Inc. - Series B Right|S|N|N|100|N|N
 AMPH|Amphastar Pharmaceuticals, Inc. - Common Stock|Q|N|N|100|N|N
 AMPL|Amplitude, Inc. - Class A Common Stock|S|N|N|100|N|N
 AMRN|Amarin Corporation plc - American Depositary Shares|S|N|N|100|N|N
@@ -1158,7 +1158,7 @@ CNOBP|ConnectOne Bancorp, Inc. - Depositary Shares (each representing a 1/40th i
 CNQQ|Rayliant-ChinaAMC Transformative China Tech ETF|G|N|N|100|Y|N
 CNSP|CNS Pharmaceuticals, Inc. - Common Stock|S|N|N|100|N|N
 CNSY|Cerenome, Inc. - Common Stock|S|N|N|100|N|N
-CNTB|Connect Biopharma Holdings Limited - Ordinary Shares|G|N|N|100|N|N
+CNTB|Connect Biopharma Holdings Limited - Ordinary Shares|G|N|D|100|N|N
 CNTN|Canton Strategic Holdings, Inc. - Common Stock|S|N|N|100|N|N
 CNTX|Context Therapeutics Inc. - Common Stock|S|N|D|100|N|N
 CNTY|Century Casinos, Inc. - Common Stock|S|N|D|100|N|N
@@ -1346,6 +1346,7 @@ CZFS|Citizens Financial Services, Inc. - Common Stock|S|N|N|100|N|N
 CZNC|Citizens & Northern Corp - Common Stock|S|N|N|100|N|N
 CZR|Caesars Entertainment, Inc. - Common Stock|Q|N|N|100|N|N
 CZWI|Citizens Community Bancorp, Inc. - Common Stock|G|N|N|100|N|N
+CZZL|Cizzle Brands Corporation - Common Stock|S|N|N|100|N|N
 DAAQ|Digital Asset Acquisition Corp. - Class A Ordinary shares|G|N|N|100|N|N
 DAAQU|Digital Asset Acquisition Corp. - Units|G|N|N|100|N|N
 DAAQW|Digital Asset Acquisition Corp. - Warrant|G|N|N|100|N|N
@@ -2643,6 +2644,7 @@ IRWD|Ironwood Pharmaceuticals, Inc. - Class A Common Stock|Q|N|N|100|N|N
 ISBA|Isabella Bank Corporation - Common stock|S|N|N|100|N|N
 ISHG|iShares 1-3 Year International Treasury Bond ETF|G|N|N|100|Y|N
 ISHP|First Trust S-Network E-Commerce ETF|G|N|N|100|Y|N
+ISMH|xETFs International Semiconductor ETF|G|N|N|100|Y|N
 ISNR|Snow Rothschild Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 ISNRU|Snow Rothschild Acquisition Corp. - Units|G|N|N|100|N|N
 ISNRW|Snow Rothschild Acquisition Corp. - Warrants|G|N|N|100|N|N
@@ -3116,7 +3118,6 @@ MEMA|Man Active Emerging Markets Alternative ETF|G|N|N|100|Y|N
 MEMS|Matthews Emerging Markets Discovery Active ETF|G|N|N|100|Y|N
 MENS|Jyong Biotech Ltd. - Ordinary shares|G|N|N|100|N|N
 MEOH|Methanex Corporation - Common Stock|Q|N|N|100|N|N
-MERC|Mercer International Inc. - Common Stock|Q|N|D|100|N|N
 MESH|Meshflow Acquisition Corp. - Class A Ordinary Shares|G|N|N|100|N|N
 MESHU|Meshflow Acquisition Corp. - Units|G|N|N|100|N|N
 MESHW|Meshflow Acquisition Corp. - Warrants|G|N|N|100|N|N
@@ -3670,9 +3671,6 @@ OPAL|OPAL Fuels Inc. - Class A Common Stock|S|N|N|100|N|N
 OPBK|OP Bancorp - Common Stock|G|N|N|100|N|N
 OPCH|Option Care Health, Inc. - Common Stock|Q|N|N|100|N|N
 OPEN|Opendoor Technologies Inc  - Common Stock|Q|N|N|100|N|N
-OPENL|Opendoor Technologies Inc  - Series A Warrants, each whole warrant exercisable to purchase one share of Common Stock at an exercise price of $13.00 per warrant|Q|N|N|100|N|N
-OPENW|Opendoor Technologies Inc  - Series K Warrants, each whole warrant exercisable to purchase one share of Common Stock at an exercise price of $9.00 per warrant|Q|N|N|100|N|N
-OPENZ|Opendoor Technologies Inc  - Series Z Warrants, each whole warrant exercisable to purchase one share of Common Stock at an exercise price of $17.00 per warrant|Q|N|N|100|N|N
 OPHI|CollPlant Biotechnologies Ltd. - Ordinary Shares|S|N|N|100|N|N
 OPI|Office Properties Income Trust - Common shares of beneficial interest|S|N|N|100|N|N
 OPK|Opko Health, Inc. - Common Stock|Q|N|N|100|N|N
@@ -3772,7 +3770,7 @@ PANW|Palo Alto Networks, Inc. - Common Stock|Q|N|N|40|N|N
 PARA|Parabolic Technologies, Inc. - Class A Common Stock|S|N|D|100|N|N
 PARAW|Parabolic Technologies, Inc. - Warrant|S|N|N|100|N|N
 PARK|Park Dental Partners, Inc. - Common Stock|S|N|N|100|N|N
-PASG|Passage Bio, Inc. - Common Stock|S|N|N|100|N|N
+PASG|Passage Bio, Inc. - Common Stock|S|N|D|100|N|N
 PASW|Ping An Biomedical Co., Ltd. - Class A Ordinary Shares|S|N|N|100|N|N
 PATK|Patrick Industries, Inc. - Common Stock|Q|N|N|100|N|N
 PATN|Pacer Nasdaq International Patent Leaders ETF|G|N|N|100|Y|N
@@ -5609,4 +5607,4 @@ ZXZZT|NASDAQ TEST STOCK|G|Y|N|100|N|N
 ZYBT|Zhengye Biotechnology Holding Limited - Class A Ordinary Shares|S|N|N|100|N|N
 ZYME|Zymeworks Inc. - Common Stock|Q|N|N|100|N|N
 ZYN|PTL LTD - Class A Ordinary Shares|S|N|N|100|N|N
-File Creation Time: 1119202618:01|||||||
+File Creation Time: 1120202618:01|||||||

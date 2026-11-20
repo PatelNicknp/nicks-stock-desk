@@ -3760,7 +3760,7 @@ JOBC|Corgi JOBY 2x Daily ETF|Z|JOBC|Y|100|N|JOBC
 JOBX|Tradr 2X Long JOBY Daily ETF|Z|JOBX|Y|100|N|JOBX
 JOBY|Joby Aviation, Inc. Common Stock|N|JOBY|N|100|N|JOBY
 JOE|St. Joe Company (The) Common Stock|N|JOE|N|100|N|JOE
-JOET|Virtus Terranova U.S. Quality Momentum ETF|P|JOET|Y|100|N|JOET
+JOET|Virtus NYSE Terranova U.S. Quality Momentum ETF|P|JOET|Y|100|N|JOET
 JOF|Japan Smaller Capitalization Fund Inc Common Stock|N|JOF|N|100|N|JOF
 JOJO|ATAC Credit Rotation ETF|P|JOJO|Y|100|N|JOJO
 JOUL|Corgi High Voltage Grid Equipment ETF|Z|JOUL|Y|100|N|JOUL
@@ -4980,7 +4980,6 @@ ONTX|Corgi ONTO 2x Daily ETF|Z|ONTX|Y|100|N|ONTX
 ONX|Tradr 2X Long ON Daily ETF|Z|ONX|Y|100|N|ONX
 OOMA|Ooma, Inc. Common Stock|N|OOMA|N|100|N|OOMA
 OOSP|Obra Opportunistic Structured Products ETF|P|OOSP|Y|100|N|OOSP
-OPAY|OPay Limited American Depositary Shares, each representing ten Ordinary Shares|N|OPAY|N|100|N|OPAY
 OPER|ETF ClearShares Ultra-Short Maturity ETF|P|OPER|Y|100|N|OPER
 OPEX|Tradr 2X Long OPEN Daily ETF|Z|OPEX|Y|100|N|OPEX
 OPFI|OppFi Inc. Class A Common Stock|N|OPFI|N|100|N|OPFI
@@ -6242,6 +6241,7 @@ SOLM|Amplify Solana 3% Monthly Option Income ETF|Z|SOLM|Y|100|N|SOLM
 SOLV|Solventum Corporation Common Stock|N|SOLV|N|100|N|SOLV
 SOMN|Southern Company (The) 2025 Series A Corporate Units|N|SOMN|N|100|N|SOMN
 SON|Sonoco Products Company Common Stock|N|SON|N|100|N|SON
+SONN|Southern Company (The) 2026 Series A Corporate Units|N|SONN|N|100|N|SONN
 SONY|Sony Group Corporation American Depositary Shares |N|SONY|N|100|N|SONY
 SOR|Source Capital, Inc. Cmn Shs of BI|N|SOR|N|100|N|SOR
 SOS|SOS Limited Class A Ordinary Shares|N|SOS|N|100|N|SOS
@@ -7018,7 +7018,6 @@ UTG|Reaves Utility Income Fund Common Shares of Beneficial Interest|A|UTG|N|100|
 UTI|Universal Technical Institute Inc Common Stock|N|UTI|N|100|N|UTI
 UTL|UNITIL Corporation Common Stock|N|UTL|N|100|N|UTL
 UTSL|Direxion Daily Utilities Bull 3X ETF|P|UTSL|Y|100|N|UTSL
-UTZ|Utz Brands Inc Class A Common Stock |N|UTZ|N|100|N|UTZ
 UUP|Invesco DB USD Index Bullish Fund ETF|P|UUP|Y|100|N|UUP
 UUPP|Principal CLO ETF|Z|UUPP|Y|100|N|UUPP
 UUUC|Corgi UUUU 2x Daily ETF|Z|UUUC|Y|100|N|UUUC
@@ -7613,6 +7612,7 @@ YGLD|Simplify Gold Strategy ETF|P|YGLD|Y|100|N|YGLD
 YINN|Direxion Daily FTSE China Bull 3X ETF|P|YINN|Y|100|N|YINN
 YJUN|FT Vest International Equity Moderate Buffer ETF - June|Z|YJUN|Y|100|N|YJUN
 YLD|Principal Active High Yield ETF|P|YLD|Y|100|N|YLD
+YLDS|Harbor Arena Structured Income ETF|P|YLDS|Y|100|N|YLDS
 YLDW|Westwood Enhanced Income Opportunity ETF|P|YLDW|Y|100|N|YLDW
 YLDY|Horizon High Income ETF|Z|YLDY|Y|100|N|YLDY
 YMAG|YieldMax Magnificent 7 Fund of Option Income ETFs|P|YMAG|Y|100|N|YMAG
@@ -7691,4 +7691,4 @@ ZZZTA|TXSE Test Stk 1 Common Stock|F|ZZZTA|N|10|Y|ZZZTA
 ZZZTE|TXSE Test Stk 2 ETF|F|ZZZTE|Y|100|Y|ZZZTE
 ZZZTT|ETF|F|ZZZTT|Y|100|Y|ZZZTT
 ZZZTX|TXSE Test Stk 5 Common Stock|F|ZZZTX|N|40|Y|ZZZTX
-File Creation Time: 1119202618:01||||||
+File Creation Time: 1120202618:01||||||
