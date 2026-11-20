@@ -1,29 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,43.566334,2.57692,25.0,295.46,295.0,18906537984,1793131200.0
-ETN,"Eaton Corporation, PLC",Industrials,Specialty Industrial Machinery,21.920897,1.53571,27.0,473.93594,485.0,140100861952,1793712600.0
-ETR,Entergy Corporation,Utilities,Utilities - Regulated Electric,21.900764,1.70833,21.0,120.38095,123.5,53511860224,1793626200.0
-EVRG,"Evergy, Inc.",Utilities,Utilities - Regulated Electric,19.336338,1.8125,14.0,91.85714,92.5,20715433984,1793885400.0
-EW,Edwards Lifesciences Corporatio,Healthcare,Medical Devices,31.264587,1.53333,27.0,112.42259,115.0,60840747008,1793826000.0
-EXC,Exelon Corporation,Utilities,Utilities - Regulated Electric,15.041587,2.72727,17.0,47.76471,46.0,47201640448,1793363400.0
-EXE,Expand Energy Corporation,Energy,Oil & Gas E&P,10.927298,1.55172,27.0,122.77778,122.0,20469749760,1793131200.0
-EXPD,Expeditors International of Was,Industrials,Integrated Freight & Logistics,22.308151,3.11111,15.0,193.73334,197.0,25123645440,1793712600.0
-EXPE,"Expedia Group, Inc.",Consumer Cyclical,Travel Services,10.526794,2.21622,34.0,332.79413,327.5,30953820160,1793826000.0
-EXR,Extra Space Storage Inc,Real Estate,REIT - Industrial,32.643055,2.19048,20.0,161.5,159.0,34511773696,1793131200.0
-F,Ford Motor Company,Consumer Cyclical,Auto Manufacturers,6.3753643,2.35,18.0,15.01722,14.0,47519285248,1793217600.0
-FANG,"Diamondback Energy, Inc.",Energy,Oil & Gas E&P,8.397412,1.5625,30.0,237.43333,233.5,50864377856,1793653200.0
-FAST,Fastenal Company,Industrials,Industrial Distribution,39.250183,2.72222,13.0,51.14615,51.0,63732596736,1800365400.0
-FCX,"Freeport-McMoRan, Inc.",Basic Materials,Copper,14.316638,1.78261,22.0,78.22273,83.0,86741884928,1793104200.0
-FDS,FactSet Research Systems Inc.,Financial Services,Financial Data & Stock Exchanges,15.2692795,3.22222,16.0,304.625,304.5,11699368960,1790771400.0
-FDX,FedEx Corporation,Industrials,Integrated Freight & Logistics,15.256926,1.72414,26.0,356.6154,359.5,74779852800,1793217600.0
-FDXF,"FedEx Freight Holding Company, ",Industrials,Integrated Freight & Logistics,25.436893,1.92857,14.0,143.7857,139.5,19587284992,1793304000.0
-FE,FirstEnergy Corp.,Utilities,Utilities - Regulated Electric,15.784864,2.05556,14.0,50.71429,50.0,26918539264,1793131200.0
-FER,Ferrovial N.V.,Industrials,Engineering & Construction,43.5013,2.33333,3.0,72.387634,69.118034,43951468544,1793131200.0
-FERG,Ferguson Enterprises Inc.,Industrials,Industrial Distribution,20.095507,1.79167,22.0,290.54544,295.5,49359093760,1794231000.0
-FFIV,"F5, Inc.",Technology,Software - Infrastructure,15.900397,2.69231,9.0,444.66666,448.0,18045446144,1793131200.0
-FICO,Fair Isaac Corporation,Technology,Software - Application,13.956348,2.47619,19.0,821.3668,800.0,15338250240,1793826000.0
-FIS,Fidelity National Information S,Technology,Information Technology Services,5.1802588,2.63333,22.0,35.54545,33.0,14618736640,1793799000.0
-FISV,"Fiserv, Inc.",,,7.7098393,2.83784,26.0,62.49923,60.5,32720934912,1793712600.0
-FITB,Fifth Third Bancorp,Financial Services,Banks - Regional,10.854265,1.54545,21.0,61.53571,61.0,48706506752,1800365400.0
 FIX,"Comfort Systems USA, Inc.",Industrials,Engineering & Construction,16.798462,1.41667,10.0,1808.5,1872.5,39467245568,1792699200.0
 FLEX,Flex Ltd.,Technology,Electronic Components,10.159586,1.27273,10.0,151.4,155.0,28862279680,1793190600.0
 FOX,Fox Corporation,Communication Services,Entertainment,12.321092,,,,,24763959296,1793626200.0
@@ -524,3 +499,28 @@ EQIX,"Equinix, Inc.",Real Estate,REIT - Specialty,49.193043,1.45714,32.0,1234.87
 EQT,EQT Corporation,Energy,Oil & Gas E&P,14.868207,1.5,22.0,66.54545,67.5,30839586816,1793131200.0
 ERIE,Erie Indemnity Company,Financial Services,Insurance Brokers,20.175545,,,,,14062836736,1793304000.0
 ES,Eversource Energy (D/B/A),Utilities,Utilities - Regulated Electric,14.336883,2.76471,14.0,72.28571,74.0,26612072448,1793826000.0
+ESS,"Essex Property Trust, Inc.",Real Estate,REIT - Residential,42.87468,2.57692,25.0,295.18,295.0,18606379008,1793131200.0
+ETN,"Eaton Corporation, PLC",Industrials,Specialty Industrial Machinery,18.87696,1.60714,27.0,469.0,485.0,120951701504,1793712600.0
+ETR,Entergy Corporation,Utilities,Utilities - Regulated Electric,20.408045,1.70833,21.0,121.09524,124.0,49875595264,1793626200.0
+EVRG,"Evergy, Inc.",Utilities,Utilities - Regulated Electric,18.780338,1.8125,14.0,92.17857,93.5,20150298624,1793885400.0
+EW,Edwards Lifesciences Corporatio,Healthcare,Medical Devices,30.076097,1.53333,27.0,113.83,116.0,58563747840,1793826000.0
+EXC,Exelon Corporation,Utilities,Utilities - Regulated Electric,15.115833,2.72727,17.0,48.0,47.0,47294779392,1793363400.0
+EXE,Expand Energy Corporation,Energy,Oil & Gas E&P,10.492259,1.55172,27.0,120.62963,118.0,18769901568,1793131200.0
+EXPD,Expeditors International of Was,Industrials,Integrated Freight & Logistics,21.104153,3.05556,16.0,202.6875,204.5,24861550592,1793712600.0
+EXPE,"Expedia Group, Inc.",Consumer Cyclical,Travel Services,9.437062,2.22222,33.0,332.0303,330.0,27860219904,1793826000.0
+EXR,Extra Space Storage Inc,Real Estate,REIT - Industrial,31.59475,2.19048,20.0,161.65,159.0,33794054144,1793131200.0
+F,Ford Motor Company,Consumer Cyclical,Auto Manufacturers,5.980906,2.35,18.0,15.01722,14.0,44604239872,1793217600.0
+FANG,"Diamondback Energy, Inc.",Energy,Oil & Gas E&P,8.119962,1.51613,29.0,238.34483,237.0,49063747584,1793653200.0
+FAST,Fastenal Company,Industrials,Industrial Distribution,35.761982,2.77778,13.0,50.76154,51.0,58064928768,1800365400.0
+FCX,"Freeport-McMoRan, Inc.",Basic Materials,Copper,10.898466,1.78261,22.0,78.22273,83.0,65992712192,1793104200.0
+FDS,FactSet Research Systems Inc.,Financial Services,Financial Data & Stock Exchanges,14.34983,3.22222,16.0,306.1875,304.5,10997298176,1790771400.0
+FDX,FedEx Corporation,Industrials,Integrated Freight & Logistics,14.520236,1.72414,26.0,356.80768,359.5,71194263552,1793217600.0
+FDXF,"FedEx Freight Holding Company, ",Industrials,Integrated Freight & Logistics,23.017475,2.0,14.0,145.07143,142.5,17724250112,1793304000.0
+FE,FirstEnergy Corp.,Utilities,Utilities - Regulated Electric,15.961526,2.05556,14.0,51.17857,50.75,27225352192,1793131200.0
+FER,Ferrovial N.V.,Industrials,Engineering & Construction,40.78091,,3.0,71.8792,68.632576,41184006144,1793131200.0
+FERG,Ferguson Enterprises Inc.,Industrials,Industrial Distribution,18.96747,1.79167,22.0,291.45456,298.0,46595727360,1794231000.0
+FFIV,"F5, Inc.",Technology,Software - Infrastructure,15.217106,2.69231,9.0,444.66666,448.0,17308000256,1793131200.0
+FICO,Fair Isaac Corporation,Technology,Software - Application,13.612264,2.47619,19.0,821.3668,800.0,14844992512,1793826000.0
+FIS,Fidelity National Information S,Technology,Information Technology Services,4.7529845,2.63333,23.0,34.69565,33.0,13314595840,1793799000.0
+FISV,"Fiserv, Inc.",,,7.009428,2.78378,27.0,64.7437,63.0,29730826240,1793712600.0
+FITB,Fifth Third Bancorp,Financial Services,Banks - Regional,9.898212,1.54545,21.0,61.53571,61.0,44631064576,1800365400.0
