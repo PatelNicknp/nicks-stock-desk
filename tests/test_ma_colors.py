@@ -108,11 +108,12 @@ def test_desk_row_charts_use_the_colors():
 def test_chart_viewer_uses_the_colors():
     src = _read("site", "js", "viewer.js")
     mas = re.search(r"const MAS = \[(.*?)\];", src, re.S).group(1)
-    assert re.findall(r"n: (\d+)", mas) == ["10", "20", "50", "150", "200"]
+    # 21 is the optional MarketSurge-style EMA (chart_viewer.ma_21, off at the start).
+    assert re.findall(r"n: (\d+)", mas) == ["10", "20", "21", "50", "150", "200"]
     assert "#" not in mas  # no fixed colors left in the list
     assert "D.maColor(n)" in src
-    assert "{ color: maColor(m.n), lineWidth: 1," in src
-    assert "<i style=\"background:' + maColor(m.n) + '\"></i>MA " in src
+    assert "{ color: maColor(m.n), lineWidth: msLook && (m.n === 50 || m.n === 200) ? 2 : 1," in src
+    assert "<i style=\"background:' + maColor(m.n) + '\"></i><span class=\"cvl\">' + (m.ema ? \"EMA \" : \"MA \") + m.n" in src
     assert "m.color" not in src
 
 

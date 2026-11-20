@@ -63,6 +63,132 @@
     const min = Number(greenMin) > 0 ? Number(greenMin) : 80;
     return { show: true, text: "EPS " + n, hot: n >= min, title: "EPS Rating " + n + " of 99: earnings growth ranked against every stock on the desk" };
   }
+  // Composite Rating 1 to 99 (composite.py via scores.csv composite_rating). Blank, 0, or out of range is no rating.
+  function compOf(v) { return epsOf(v); }
+  // The Comp chip right after the EPS chip: "Comp 91", green (hot) at greenMin (chart_viewer.comp_chip_green_min, 80) or
+  // higher, plain below, and no chip when the stock has no Composite Rating.
+  function compChip(comp, greenMin) {
+    const n = compOf(comp);
+    if (n == null) return { show: false, text: "", hot: false, title: "" };
+    const min = Number(greenMin) > 0 ? Number(greenMin) : 80;
+    return { show: true, text: "Comp " + n, hot: n >= min, title: "Composite Rating " + n + " of 99: EPS Rating, RS Rating, closeness to the 52-week high, sales growth, and margins, ranked against every stock on the desk" };
+  }
+  // ---------- Base patterns (data/base_patterns.csv, from base_patterns.py) ----------
+  const PATTERN_NAMES = {
+    cup_handle: "Cup w/ Handle", cup: "Cup", double_bottom: "Double Bottom", flat_base: "Flat Base",
+    ascending_base: "Ascending Base", ipo_base: "IPO Base", consolidation: "Consolidation",
+  };
+  // One color per pattern family. Mid shades so they read on white and on the dark theme.
+  const PATTERN_COLORS = {
+    cup_handle: "#2563eb", cup: "#2563eb", double_bottom: "#9333ea", flat_base: "#0d9488",
+    ascending_base: "#ea580c", ipo_base: "#db2777", consolidation: "#0d9488",
+  };
+  // Rows of base_patterns.csv by ticker, oldest base first. Placeholder (MISSING) rows and unknown patterns are dropped.
+  function patternIndex(rows) {
+    const out = {};
+    (rows || []).forEach((r) => {
+      const t = txt(r.ticker).toUpperCase();
+      const name = txt(r.pattern);
+      if (!t || !PATTERN_NAMES[name] || txt(r.data_status) === "MISSING") return;
+      const pivot = numOf(r.pivot);
+      if (pivot == null || !txt(r.start_date) || !txt(r.end_date)) return;
+      (out[t] = out[t] || []).push({
+        pattern: name, name: PATTERN_NAMES[name], latest: txt(r.latest) === "yes", status: txt(r.status),
+        startDate: txt(r.start_date), endDate: txt(r.end_date), leftHigh: numOf(r.left_high), low: numOf(r.low), lowDate: txt(r.low_date),
+        depth: numOf(r.depth_pct), weeks: numOf(r.length_weeks), pivot: pivot, buyPoint: numOf(r.buy_point), zoneTop: numOf(r.zone_top),
+        pctFromPivot: numOf(r.pct_from_pivot), breakoutDate: txt(r.breakout_date), handleDate: txt(r.handle_date),
+        handleDepth: numOf(r.handle_depth_pct), firstLowDate: txt(r.first_low_date), midPeakDate: txt(r.mid_peak_date),
+      });
+    });
+    Object.keys(out).forEach((t) => out[t].sort((a, b) => (a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0)));
+    return out;
+  }
+  // First bar at or after the date (daily bars: that day; weekly bars: the week holding it). Clamped to the bars.
+  function barIndexOn(dates, date) {
+    if (!dates || !dates.length || !date) return -1;
+    let lo = 0, hi = dates.length - 1;
+    if (date > dates[hi]) return hi;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (dates[mid] < date) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+  }
+  // What to draw for one base on these bars: indexes, prices, and the shape ("cup", "double", or "box").
+  function patternShape(base, bars) {
+    const dates = bars.map((b) => b.date);
+    const last = bars.length - 1;
+    const s = barIndexOn(dates, base.startDate);
+    let e = barIndexOn(dates, base.endDate);
+    if (s < 0 || e < 0) return null;
+    if (e < s) e = s;
+    const low = barIndexOn(dates, base.lowDate);
+    const bo = base.breakoutDate ? barIndexOn(dates, base.breakoutDate) : -1;
+    const out = { s: s, e: e, low: low, bo: bo, last: last, pivot: base.pivot, zoneTop: base.zoneTop, kind: "box", pivotFrom: s,
+      top: base.leftHigh != null ? base.leftHigh : base.pivot, bottom: base.low };
+    const hiAt = (i) => (bars[i] && bars[i].h != null ? bars[i].h : bars[i].c);
+    const loAt = (i) => (bars[i] && bars[i].l != null ? bars[i].l : bars[i].c);
+    if (base.pattern === "cup_handle" || base.pattern === "cup") {
+      out.kind = "cup";
+      out.lowPrice = base.low;
+      const lowIdx = Math.min(Math.max(s, low), e);
+      if (base.pattern === "cup_handle" && base.handleDate) {
+        const h = Math.min(e, Math.max(s, barIndexOn(dates, base.handleDate)));
+        out.rim = h; out.rimPrice = hiAt(h); out.pivotFrom = h;
+        let hl = Infinity, hi = h;
+        for (let i = h; i <= e; i++) { if (loAt(i) < hl) { hl = loAt(i); hi = i; } }
+        out.handleLow = hi; out.handleLowPrice = hl;
+      } else {
+        out.rim = e; out.rimPrice = hiAt(e);
+      }
+      // The outline hugs the underside of the price: down the left side along the running low, and up the right side
+      // along the low seen from the rim back to the bottom, so the bowl follows the real bars.
+      const left = [[s, out.top]];
+      let run = Infinity;
+      for (let i = s; i <= lowIdx; i++) { run = Math.min(run, loAt(i)); left.push([i, run]); }
+      const right = [];
+      run = Infinity;
+      for (let i = Math.min(out.rim, e); i >= lowIdx; i--) { run = Math.min(run, loAt(i)); right.push([i, run]); }
+      right.reverse();
+      right.push([out.rim, out.rimPrice]);
+      out.path = left.concat(right);
+    } else if (base.pattern === "double_bottom") {
+      out.kind = "double";
+      const b1 = Math.min(Math.max(s, barIndexOn(dates, base.firstLowDate)), e);
+      const mid = Math.min(Math.max(s, barIndexOn(dates, base.midPeakDate)), e);
+      out.pts = [[s, hiAt(s)], [b1, loAt(b1)], [mid, base.pivot], [low, loAt(low)], [e, hiAt(e)]];
+      out.pivotFrom = mid;
+    }
+    return out;
+  }
+  function patternCaption(base) {
+    if (!base) return "";
+    const f = (n) => (Math.round(n * 100) / 100).toFixed(2);
+    const bits = [base.name];
+    if (base.depth != null) bits.push(f(base.depth).replace(/\.?0+$/, "") + "% deep");
+    if (base.weeks != null) bits.push(String(Math.round(base.weeks * 10) / 10) + " weeks");
+    if (base.handleDepth != null) bits.push("handle " + String(Math.round(base.handleDepth * 10) / 10) + "% deep");
+    let text = bits.join(", ") + ". Pivot " + f(base.pivot);
+    if (base.buyPoint != null) text += ", buy point " + f(base.buyPoint);
+    if (base.zoneTop != null) text += ", buy zone up to " + f(base.zoneTop);
+    text += ".";
+    if (base.pctFromPivot != null && base.latest) {
+      const p = base.pctFromPivot;
+      text += " Price is " + f(Math.abs(p)) + "% " + (p >= 0 ? "above" : "below") + " the pivot";
+      if (base.status) text += " (" + base.status.toLowerCase() + ")";
+      text += ".";
+    }
+    return text;
+  }
+  // MarketSurge look: 50-day red, 200-day black (light) or near white (dark), 150-day yellow; weekly 10-week red, 40-week black.
+  const MS_MA = {
+    light: { 10: "#16a34a", 20: "#ea580c", 21: "#16a34a", 50: "#dc2626", 150: "#ca8a04", 200: "#111827" },
+    dark: { 10: "#22c55e", 20: "#f97316", 21: "#22c55e", 50: "#ef4444", 150: "#eab308", 200: "#e5e7eb" },
+  };
+  function msMaColor(n, light) { return (light ? MS_MA.light : MS_MA.dark)[n] || null; }
+  // Average periods on a weekly chart in the MarketSurge look: 50-day is 10 weeks, 150-day 30 weeks, 200-day 40 weeks.
+  const MS_WEEKLY = { 50: 10, 150: 30, 200: 40 };
+  function msPeriod(n, weekly) { return weekly && MS_WEEKLY[n] ? MS_WEEKLY[n] : n; }
   function isWatching(status) { return /^WATCHING\b/.test(txt(status)); }
   function yes(v) { return txt(v).toLowerCase() === "yes"; }
   // Short version of a long reason: whole sentences while they fit, then a clean word cut.
@@ -94,7 +220,7 @@
       if (status === "CLOSED" && !opts.includeClosed) return null;
       // WATCHING and its labeled kinds, such as WATCHING (trend not 8/8), follow include_watching.
       if (isWatching(status) && !opts.includeWatching) return null;
-      return { status: status, reason: txt(row.reason) };
+      return { status: status, reason: txt(row.reason), pivot: numOf(row.pivot) };
     }
     if (list.kind === "gap") {
       // Every Gap Up row is a gap that still holds (no close under the gap-day low).
@@ -193,7 +319,7 @@
       if (!info[t]) {
         const s = scores[t] || {};
         info[t] = { ticker: t, company: txt(s.company) || txt(row && row.company), score: numOf(s.score), price: numOf(s.price),
-          dayPct: numOf(s.day_pct), rs: numOf(s.rs), rsLabel: txt(s.rs_label), eps: epsOf(s.eps_rating), strength: null, count: 0, entries: [] };
+          dayPct: numOf(s.day_pct), rs: numOf(s.rs), rsLabel: txt(s.rs_label), eps: epsOf(s.eps_rating), comp: compOf(s.composite_rating), strength: null, count: 0, entries: [] };
       }
       if (!info[t].company && row) info[t].company = txt(row.company);
       if (info[t].rs == null && row) info[t].rs = numOf(row.rs);
@@ -223,7 +349,7 @@
         if (seen[t]) return;
         seen[t] = true;
         const it = touch(t, row);
-        it.entries.push({ list: list.id, label: list.short, status: e.status, reason: e.reason, order: order });
+        it.entries.push({ list: list.id, label: list.short, status: e.status, reason: e.reason, pivot: e.pivot == null ? null : e.pivot, order: order });
         if (list.scanner) it.count += 1;
         const st = numOf(row.strength);
         if (list.kind === "pattern" && st != null && (it.strength == null || st > it.strength)) it.strength = st;
@@ -425,7 +551,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -433,8 +559,30 @@
   const D = window.Desk;
   // Line colors come from the chart_colors block (ma_colors, ma_colors_light in light mode) through D.maColor:
   // MA 10 green, MA 20 orange, MA 50 blue, MA 150 yellow, MA 200 red. The chips use the same colors.
-  const MAS = [{ n: 10 }, { n: 20 }, { n: 50 }, { n: 150 }, { n: 200 }];
-  function maColor(n) { return D.maColor(n); }
+  const MAS = [{ n: 10 }, { n: 20 }, { n: 21, ema: true }, { n: 50 }, { n: 150 }, { n: 200 }];
+  function maColor(n) {
+    const light = !!(D.isLight && D.isLight());
+    // chart_viewer.ms_look: 50-day red, 200-day black, like MarketSurge. Off keeps the chart_colors block colors.
+    if (on("ms_look")) { const c = msMaColor(n, light); if (c) return c; }
+    return D.maColor(n) || msMaColor(n, light) || "#64748b";
+  }
+  function emaSeries(closes, n) {
+    const out = new Array(closes.length).fill(null);
+    if (closes.length < n) return out;
+    const k = 2 / (n + 1);
+    let prev = 0;
+    for (let i = 0; i < n; i++) prev += closes[i];
+    prev /= n;
+    out[n - 1] = prev;
+    for (let i = n; i < closes.length; i++) { prev = closes[i] * k + prev * (1 - k); out[i] = prev; }
+    return out;
+  }
+  function alpha(hex, a) {
+    const m = /^#([0-9a-fA-F]{6})$/.exec(String(hex || ""));
+    if (!m) return hex;
+    const n = parseInt(m[1], 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
   const GOOD = /BROKEN OUT|READY|CONFIRMED|PASSES|BUYING|NEW HIGH|IN TRADE|FORMING|GAP UP|GAP HOLDING|Uptrend/;
   const WARN = /WATCH|NEAR HIGH|QUIET|ON WATCHLIST|DAY 2-5/;
   const BAD = /BROKEN DOWN|SELLING|NEW LOW|FADED/;
@@ -445,7 +593,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { include_closed: true, ma_10: true, ma_20: true, native_fullscreen_ios: true };
+  const OFF_BY_DEFAULT = { include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -484,6 +632,8 @@
   // Up bars are blue, down bars are pink. Dark and light each have their own color in config.
   function barColor(up) {
     const light = !!(D.isLight && D.isLight());
+    // MarketSurge look: blue up, red down (the bar_up and bar_down colors apply when ms_look is off).
+    if (on("ms_look")) return up ? (light ? "#1d4ed8" : "#60a5fa") : (light ? "#dc2626" : "#ef4444");
     if (up) return hexSetting(light ? "bar_up_light" : "bar_up", light ? "#1d4ed8" : "#60a5fa");
     return hexSetting(light ? "bar_down_light" : "bar_down", light ? "#a21caf" : "#d946ef");
   }
@@ -505,6 +655,142 @@
   function storedGroup() {
     try { return localStorage.getItem(GROUP_KEY) || ""; } catch (e) { return ""; }
   }
+  // Base outlines, pivot lines, and the buy zone, drawn as a Lightweight Charts series primitive on the price series.
+  // items: [{ base, shape (patternShape), color, latest }]. Coordinates come from the chart on every paint, so they
+  // follow drags and zooms. No new market data: only the saved bars and base_patterns.csv.
+  function baseOverlay(items, flags, light) {
+    let chart = null, series = null;
+    const ink = light ? "#374151" : "#cbd5e1";
+    const halo = light ? "#ffffff" : "#0b0f17";
+    const zoneFill = light ? "rgba(37,99,235,0.13)" : "rgba(96,165,250,0.16)";
+    const X = (i) => chart.timeScale().logicalToCoordinate(i);
+    const Y = (p) => series.priceToCoordinate(p);
+    function outline(ctx, it, fill) {
+      const sh = it.shape;
+      const xs = X(sh.s), xe = X(sh.e);
+      if (xs == null || xe == null) return false;
+      ctx.beginPath();
+      if (sh.kind === "cup") {
+        const yT = Y(sh.top);
+        if (yT == null) return false;
+        sh.path.forEach((pt, k) => {
+          const x = X(pt[0]), y = Y(pt[1]);
+          if (x == null || y == null) return;
+          if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        if (sh.handleLow != null) {
+          const xh = X(sh.handleLow), yh = Y(sh.handleLowPrice);
+          if (xh != null && yh != null) {
+            ctx.lineTo(xh, yh);
+            const yE = Y(sh.pivot);
+            if (yE != null) ctx.lineTo(xe, yE);
+          }
+        }
+        if (fill) { ctx.lineTo(xe, yT); ctx.closePath(); }
+      } else if (sh.kind === "double") {
+        sh.pts.forEach((pt, k) => {
+          const x = X(pt[0]), y = Y(pt[1]);
+          if (x == null || y == null) return;
+          if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        if (fill) { const yT = Y(sh.top); if (yT != null) ctx.lineTo(xe, yT); ctx.closePath(); }
+      } else {
+        const yT = Y(sh.top), yB = Y(sh.bottom);
+        if (yT == null || yB == null) return false;
+        ctx.rect(xs, yT, Math.max(2, xe - xs), yB - yT);
+      }
+      return true;
+    }
+    const bottom = {
+      zOrder: () => "bottom",
+      renderer: () => ({
+        draw: (target) => target.useMediaCoordinateSpace((scope) => {
+          if (!chart || !series) return;
+          const ctx = scope.context;
+          const W = scope.mediaSize.width;
+          items.forEach((it) => {
+            ctx.save();
+            ctx.globalAlpha = it.latest ? 1 : 0.55;
+            if (outline(ctx, it, true)) { ctx.fillStyle = alpha(it.color, 0.06); ctx.fill(); }
+            if (flags.zone && it.latest && it.base.status !== "COMPLETED" && it.shape.zoneTop != null) {
+              const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop), x1 = X(it.shape.e);
+              if (y1 != null && y2 != null && x1 != null) {
+                ctx.fillStyle = zoneFill;
+                ctx.fillRect(x1, Math.min(y1, y2), Math.max(0, W - x1), Math.abs(y1 - y2));
+              }
+            }
+            ctx.restore();
+          });
+        }),
+      }),
+    };
+    const top = {
+      zOrder: () => "top",
+      renderer: () => ({
+        draw: (target) => target.useMediaCoordinateSpace((scope) => {
+          if (!chart || !series) return;
+          const ctx = scope.context;
+          const W = scope.mediaSize.width;
+          ctx.font = "600 11px Roboto, Arial, sans-serif";
+          ctx.textBaseline = "alphabetic";
+          items.forEach((it) => {
+            const sh = it.shape;
+            ctx.save();
+            ctx.globalAlpha = it.latest ? 1 : 0.55;
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = it.color;
+            ctx.lineWidth = it.latest ? 2 : 1.5;
+            if (outline(ctx, it, false)) ctx.stroke();
+            const yp = Y(sh.pivot);
+            if (flags.pivot && yp != null) {
+              const x0 = X(sh.pivotFrom);
+              const live = it.latest && it.base.status !== "COMPLETED";
+              const xEnd = live ? W : (sh.bo >= 0 ? X(sh.bo) : X(sh.e));
+              if (x0 != null && xEnd != null) {
+                ctx.setLineDash([6, 4]);
+                ctx.strokeStyle = ink;
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(x0, yp); ctx.lineTo(xEnd, yp); ctx.stroke();
+                ctx.setLineDash([]);
+                if (live) {
+                  const tag = "Pivot " + sh.pivot.toFixed(2);
+                  ctx.textAlign = "right";
+                  ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(tag, W - 4, yp + 13);
+                  ctx.fillStyle = ink; ctx.fillText(tag, W - 4, yp + 13);
+                }
+              }
+            }
+            if (flags.label) {
+              const xs = X(sh.s), yT = Y(Math.max(sh.top, sh.pivot));
+              if (xs != null && yT != null) {
+                const parts = [it.base.name];
+                if (it.base.depth != null) parts.push(Math.round(it.base.depth) + "%");
+                if (it.base.weeks != null) parts.push(Math.round(it.base.weeks) + "w");
+                const text = parts.join("  ");
+                ctx.textAlign = "left";
+                const y = Math.max(14, yT - 7);
+                ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(text, xs + 2, y);
+                ctx.fillStyle = it.color; ctx.fillText(text, xs + 2, y);
+              }
+            }
+            ctx.restore();
+          });
+        }),
+      }),
+    };
+    return {
+      attached: (p) => { chart = p.chart; series = p.series; },
+      detached: () => { chart = null; series = null; },
+      paneViews: () => [bottom, top],
+      updateAllViews: () => {},
+      // Keeps the pivot and the top of the buy zone on screen for the newest base.
+      autoscaleInfo: () => {
+        const it = items.find((x) => x.latest && x.base.status !== "COMPLETED");
+        if (!it || it.shape.zoneTop == null) return null;
+        return { priceRange: { minValue: it.shape.pivot, maxValue: it.shape.zoneTop } };
+      },
+    };
+  }
   function render(ctx) {
     const params = new URLSearchParams(location.search);
     // Technical | Fundamental switch: features.split_tech_fund and chart_viewer.group_toggle. Off is the old single viewer.
@@ -522,6 +808,8 @@
       group: group,
       groupOf: groupFor,
     });
+    // Bases from data/base_patterns.csv (features.base_patterns and chart_viewer.patterns). Missing file or no row is just no overlay.
+    const patterns = on("patterns") && D.featureOn("feature.base_patterns") ? patternIndex(ctx.files["base_patterns.csv"]) : {};
     let built = build();
     let list = built.lists.find((l) => l.id === params.get("list")) || built.lists[0];
     let items = list.items.slice();
@@ -540,10 +828,15 @@
       tf: on("weekly_toggle") ? storedStr("desk-cv-tf", ["daily", "weekly"], "daily") : "daily",
       // Candles is the start. Bars are high-low lines with an open tick and a close tick.
       style: on("bars_toggle") ? storedStr("desk-cv-style", ["candles", "bars"], "candles") : "candles",
+      // Base outlines, pivot lines, and the buy zone (chart_viewer.patterns). The Patterns chip saves a pick on this device.
+      pat: on("patterns") && stored("desk-cv-pat", true),
       range: null, // a range chip pick for this visit; null uses range_months / range_months_phone
       rightIsNext: on("flip_toggle") ? stored("desk-cv-right-next", on("swipe_right_is_next")) : on("swipe_right_is_next"),
       open: false,
     };
+
+    // MarketSurge look starts on price bars, like MarketSurge's own charts, until a Candles | Bars pick is saved on this device.
+    if (on("ms_look") && on("bars_toggle") && storedStr("desk-cv-style", ["candles", "bars"], "") === "") state.style = "bars";
 
     const optionsHtml = () => built.lists.filter((l) => l.items.length || l.id === list.id || l.id === "all")
       .map((l) => '<option value="' + D.esc(l.id) + '"' + (l.id === list.id ? " selected" : "") + ">" +
@@ -564,10 +857,14 @@
     // EPS Rating chip right after it: "EPS 85", green at chart_viewer.eps_chip_green_min (80) or higher.
     // chart_viewer.eps_chip hides it. A label, not a button.
     const epsBadge = on("eps_chip") ? '<span class="cvchip epschip" id="cveps" hidden></span>' : "";
-    const chips = rsBadge + epsBadge + (on("ma_chips") ? MAS.map((m) =>
-      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i>MA ' + m.n + "</button>").join("") : "") +
+    // Composite chip right after the EPS chip: "Comp 91", green at chart_viewer.comp_chip_green_min (80) or higher.
+    // chart_viewer.comp_chip hides it. A label, not a button.
+    const compBadge = on("comp_chip") ? '<span class="cvchip compchip" id="cvcomp" hidden></span>' : "";
+    const chips = rsBadge + epsBadge + compBadge + (on("ma_chips") ? MAS.filter((m) => !m.ema || on("ma_" + m.n)).map((m) =>
+      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i><span class="cvl">' + (m.ema ? "EMA " : "MA ") + m.n + "</span></button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
+      (on("patterns") ? '<button type="button" class="cvchip" data-tool="pat" aria-pressed="false" title="Base outline, pivot line, and buy zone">Patterns</button>' : "") +
       (on("reason_box") && on("reason_box_toggle") ? '<button type="button" class="cvchip" data-tool="why" aria-pressed="false">Why</button>' : "") +
       (on("swipe") && on("flip_toggle") ? '<button type="button" class="cvchip" data-tool="flip" title="Swap which way you swipe for the next chart"></button>' : "") +
       (on("drag_mode_toggle") ? '<button type="button" class="cvchip" data-tool="drag" title="Pick what a one-finger drag on the chart does"></button>' : "") +
@@ -599,6 +896,7 @@
         "</div>" +
       "</div>" +
       '<p class="cap cv-rsnote" id="cvrsnote" hidden></p>' +
+      (on("pattern_caption") ? '<p class="cap cv-patnote" id="cvpatnote" hidden></p>' : "") +
       '<p class="cap">Daily bars saved by the desk. Weekly bars and averages are worked out in your browser. Charting by <a href="https://www.tradingview.com/">TradingView</a> Lightweight Charts™.</p>';
 
     const cv = document.getElementById("cv");
@@ -637,6 +935,19 @@
       });
       const vol = document.querySelector('#cvtools [data-tool="vol"]');
       if (vol) { vol.classList.toggle("on", state.vol); vol.setAttribute("aria-pressed", state.vol ? "true" : "false"); }
+      const pat = document.querySelector('#cvtools [data-tool="pat"]');
+      if (pat) { pat.classList.toggle("on", state.pat); pat.setAttribute("aria-pressed", state.pat ? "true" : "false"); }
+      // MarketSurge look on the Weekly view: the 50, 150, and 200-day chips become the 10, 30, and 40-week averages.
+      document.querySelectorAll("#cvtools [data-ma]").forEach((b) => {
+        const n = Number(b.getAttribute("data-ma"));
+        const lab = b.querySelector(".cvl");
+        const dot = b.querySelector("i");
+        if (lab && !(MAS.find((m) => m.n === n) || {}).ema) {
+          const wk = on("ms_look") && state.tf === "weekly" && msPeriod(n, true) !== n;
+          lab.textContent = wk ? "MA " + msPeriod(n, true) + "w" : "MA " + n;
+        }
+        if (dot) dot.style.background = maColor(n);
+      });
       const rsb = document.querySelector('#cvtools [data-tool="rsline"]');
       if (rsb) { rsb.classList.toggle("on", state.rsLine); rsb.setAttribute("aria-pressed", state.rsLine ? "true" : "false"); }
       const w = document.querySelector('#cvtools [data-tool="why"]');
@@ -802,6 +1113,15 @@
         else epsEl.removeAttribute("title");
         epsEl.classList.toggle("hot", chip.hot);
       }
+      const compEl = document.getElementById("cvcomp");
+      if (compEl) {
+        const chip = compChip(it.comp, cfgNum("comp_chip_green_min", 80));
+        compEl.hidden = !chip.show;
+        compEl.textContent = chip.text;
+        if (chip.show) compEl.title = chip.title;
+        else compEl.removeAttribute("title");
+        compEl.classList.toggle("hot", chip.hot);
+      }
       const blurb = document.getElementById("cvblurb");
       if (blurb) blurb.textContent = D.blurbOf(t) || "";
       let close = null, change = null;
@@ -842,7 +1162,7 @@
         autoSize: true,
         layout: { background: { type: "solid", color: "#0B0F17" }, textColor: D.MU, fontFamily: "Roboto, Arial, sans-serif", fontSize: 11,
           attributionLogo: false, panes: { separatorColor: "#1E293B", separatorHoverColor: "rgba(0,0,0,0)", enableResize: false } },
-        grid: { vertLines: { color: "#161E2E" }, horzLines: { color: "#161E2E" } },
+        grid: { vertLines: { color: "#161E2E", visible: !on("ms_look") }, horzLines: { color: "#161E2E" } },
         crosshair: { mode: LC.CrosshairMode.Magnet },
         rightPriceScale: { borderColor: "#1E293B", scaleMargins: { top: 0.08, bottom: 0.06 } },
         timeScale: { borderColor: "#1E293B", rightOffset: 4, minBarSpacing: minSpacing() },
@@ -854,8 +1174,9 @@
       carryRange = null;
       lastSet = null;
       const barsMode = state.style === "bars";
-      const upC = barsMode ? barColor(true) : D.UP;
-      const dnC = barsMode ? barColor(false) : D.DN;
+      const msLook = on("ms_look");
+      const upC = barsMode || msLook ? barColor(true) : D.UP;
+      const dnC = barsMode || msLook ? barColor(false) : D.DN;
       // Bars: a vertical high-low line, a left tick for the open, a right tick for the close.
       const price = chart.addSeries(barsMode ? LC.BarSeries : LC.CandlestickSeries, barsMode ? {
         upColor: upC, downColor: dnC, openVisible: true, thinBars: true,
@@ -866,11 +1187,44 @@
       });
       price.setData(bars.map((b) => ({ time: b.date, open: b.o, high: b.h, low: b.l, close: b.c })));
       const closes = bars.map((b) => b.c);
+      // Base outlines, pivot lines, and the 5% buy zone (chart_viewer.patterns and the Patterns chip).
+      const found = patterns[t] || [];
+      const shown = state.pat ? found.filter((b) => b.latest || on("pattern_history")) : [];
+      const overlayItems = [];
+      shown.forEach((b) => {
+        const shape = patternShape(b, bars);
+        if (shape) overlayItems.push({ base: b, shape: shape, color: PATTERN_COLORS[b.pattern] || "#2563eb", latest: b.latest });
+      });
+      host.setAttribute("data-bases", String(overlayItems.length));
+      if (overlayItems.length) {
+        try {
+          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels") }, D.isLight()));
+        } catch (e) { /* the chart still draws without the overlay */ }
+      }
+      const capEl = document.getElementById("cvpatnote");
+      if (capEl) {
+        const latest = found.find((b) => b.latest);
+        capEl.hidden = !(state.pat && latest);
+        capEl.textContent = latest ? "Base pattern (MarketSmith rules, a close copy of MarketSurge): " + patternCaption(latest) : "";
+      }
+      // The VCP, Box, and Flag scanner pivots as dashed price lines (chart_viewer.scanner_pivots).
+      if (on("scanner_pivots") && (built.info[t] || {}).entries) {
+        const seen = {};
+        built.info[t].entries.forEach((en) => {
+          if (["vcp", "box", "flag"].indexOf(en.list) < 0 || !(en.pivot > 0) || /^CLOSED/.test(en.status) || seen[en.list]) return;
+          seen[en.list] = true;
+          try {
+            price.createPriceLine({ price: en.pivot, color: "#6B7280", lineWidth: 1, lineStyle: LC.LineStyle.Dotted, axisLabelVisible: true, title: en.label + " pivot" });
+          } catch (e) { /* skip a line that cannot be drawn */ }
+        });
+      }
       MAS.forEach((m) => {
-        const s = chart.addSeries(LC.LineSeries, { color: maColor(m.n), lineWidth: 1, priceLineVisible: false, lastValueVisible: false,
+        const s = chart.addSeries(LC.LineSeries, { color: maColor(m.n), lineWidth: msLook && (m.n === 50 || m.n === 200) ? 2 : 1, priceLineVisible: false, lastValueVisible: false,
           crosshairMarkerVisible: false, visible: !!state.ma[m.n] });
         const data = [];
-        D.smaValues(closes, m.n).forEach((v, i) => { if (v != null) data.push({ time: bars[i].date, value: v }); });
+        // MarketSurge look: on Weekly the 50, 150, and 200-day lines are the 10, 30, and 40-week averages.
+        const per = msLook ? msPeriod(m.n, state.tf === "weekly") : m.n;
+        (m.ema ? emaSeries(closes, per) : D.smaValues(closes, per)).forEach((v, i) => { if (v != null) data.push({ time: bars[i].date, value: v }); });
         s.setData(data);
         maSeries[m.n] = s;
       });
@@ -909,7 +1263,20 @@
       if (state.vol) {
         const vol = chart.addSeries(LC.HistogramSeries, { priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false }, 1);
         vol.setData(bars.filter((b) => b.v != null).map((b) => ({ time: b.date, value: b.v,
-          color: b.c >= b.o ? (D.isLight() ? "rgba(21,128,61,.6)" : "rgba(34,197,94,.55)") : (D.isLight() ? "rgba(220,38,38,.6)" : "rgba(239,68,68,.55)") })));
+          color: msLook ? alpha(b.c >= b.o ? barColor(true) : barColor(false), 0.55)
+            : (b.c >= b.o ? (D.isLight() ? "rgba(21,128,61,.6)" : "rgba(34,197,94,.55)") : (D.isLight() ? "rgba(220,38,38,.6)" : "rgba(239,68,68,.55)")) })));
+        // MarketSurge's red line: the 50-day average volume (10 weeks on Weekly). Bars above it beat normal volume.
+        if (on("volume_avg_line")) {
+          const vb = bars.filter((b) => b.v != null);
+          const avg = D.smaValues(vb.map((b) => b.v), state.tf === "weekly" ? 10 : 50);
+          const vdata = [];
+          avg.forEach((v, i) => { if (v != null) vdata.push({ time: vb[i].date, value: v }); });
+          if (vdata.length) {
+            const vl = chart.addSeries(LC.LineSeries, { color: D.isLight() ? "#dc2626" : "#ef4444", lineWidth: 1, priceLineVisible: false,
+              lastValueVisible: false, crosshairMarkerVisible: false }, 1);
+            vl.setData(vdata);
+          }
+        }
         const panes = chart.panes();
         if (panes[0]) panes[0].setStretchFactor(4);
         if (panes[1]) panes[1].setStretchFactor(1);
@@ -1089,6 +1456,12 @@
         carryRange = userRange;
         syncTools();
         show();
+      } else if (tool === "pat") {
+        state.pat = !state.pat;
+        store("desk-cv-pat", state.pat);
+        carryRange = userRange;
+        syncTools();
+        show();
       } else if (tool === "why") {
         state.why = !state.why;
         store("desk-cv-why", state.why);
@@ -1185,6 +1558,7 @@
   window.DESK_EXTRA_PAGES = Object.assign(window.DESK_EXTRA_PAGES || {}, {
     chartviewer: {
       files: ["scores.csv"].concat(LISTS.map((l) => l.file)),
+      optionalFiles: ["base_patterns.csv"],
       render: render,
     },
   });

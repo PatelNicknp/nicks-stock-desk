@@ -3631,6 +3631,9 @@
   const RS_DESC_LINE = "RS is the RS Rating, a 1 to 99 rank of the past year's price move against every stock on the desk (MarketSmith style, the latest quarter counts double). 99 is the strongest. RS 85 means it beat 85% of stocks. Under a year of prices, the cell is blank. The RS filter shows RS 70 or higher.";
   // Chart Viewer RS line (chart_viewer.rs_line), drawn like the India desk but against SPY.
   const RS_BADGE_DESC = "The RS chip at the start of the chip bar is the 1 to 99 RS Rating, green at 70 or higher (relative_strength.leader_min). RS 85 means it beat 85% of stocks over the past year. A stock with less than a year of prices has no chip.";
+  const COMP_BADGE_DESC = "The Comp chip, right after the EPS chip, is the 1 to 99 Composite Rating: the EPS Rating and the RS Rating (30% each), how close the price is to its 52-week high, the latest quarter's sales growth, and the net margin, each ranked against every stock on the desk and blended. IBD's own formula is private, so this is a close copy. It is green at 80 or higher. A stock with no rating has no chip.";
+  const PATTERN_DESC = "The chart draws the base the stock is building, like MarketSurge: Cup w/ Handle, Cup, Double Bottom, Flat Base, Ascending Base, IPO Base, or Consolidation, with its depth and length, a dashed pivot line (the buy price), and a blue buy zone from the pivot up to 5% above it. A line under the chart says the pivot, the buy point (pivot plus 10 cents), and how far the price is from it. The rules are the public MarketSmith ones, and MarketSurge's own are private, so a few stocks will differ. The Patterns chip turns it off on this device.";
+  const MS_LOOK_DESC = "The charts use a MarketSurge look: price bars first, blue up and red down on the price and the volume, a red 50-day volume average line, the 50-day average in red and the 200-day in black (10-week and 40-week on Weekly).";
   const EPS_BADGE_DESC = "The EPS chip, right after the RS chip, is the 1 to 99 EPS Rating, the same one as Highest EPS and RS: recent quarterly EPS growth versus a year ago blended with 3 to 5 year yearly EPS growth, ranked against every stock on the desk. It is green at 80 or higher. A stock with no EPS Rating has no chip.";
   const RS_LINE_DESC = "The RS line in the lower part of the price chart, below the candles and above the volume, is the stock close divided by SPY. A blue dot is a new 52-week high in that line. An amber dot means the line made that high before the price did. The RS line chip turns it off on this device.";
   function addDescriptions(pages) {
@@ -3651,6 +3654,9 @@
           if (RS_DESC_PAGES.indexOf(id) >= 0 && D.featureOn("feature.rs_rank")) text += " " + RS_DESC_LINE;
           if (id === "chartviewer" && D.featureOn("feature.rs_rank")) text += " " + RS_BADGE_DESC;
           if (id === "chartviewer" && D.viewerOn && D.viewerOn("eps_chip")) text += " " + EPS_BADGE_DESC;
+          if (id === "chartviewer" && D.viewerOn && D.viewerOn("comp_chip")) text += " " + COMP_BADGE_DESC;
+          if (id === "chartviewer" && D.viewerOn && D.viewerOn("patterns") && D.featureOn("feature.base_patterns")) text += " " + PATTERN_DESC;
+          if (id === "chartviewer" && D.viewerOn && D.viewerOn("ms_look")) text += " " + MS_LOOK_DESC;
           if (id === "chartviewer" && D.viewerOn && D.viewerOn("rs_line")) text += " " + RS_LINE_DESC;
           ctx.page.insertAdjacentHTML("beforebegin", '<div class="about-wrap" id="about">' + descBox(title, text) + "</div>");
           const wrap = document.getElementById("about");
