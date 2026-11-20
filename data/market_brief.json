@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
   "feature": "market_news",
-  "session": "2026-11-19",
-  "slot": "evening_close",
-  "updated_pt": "2026-11-19 16:19 PT",
-  "price_as_of": "2026-11-19",
-  "why_moved": "The market fell: S&P -2.0%, Nasdaq -2.2%, Dow-heavy groups (Financials/Industrials) about -1.7%. Biggest driver: AI / Tech mood; lagging sectors were Consumer Discretionary (-2.8%) and Communication Services (-2.7%); leading sectors Energy (-0.7%) and Utilities (-1.2%) were the least weak. The move was broad: 2200 stocks fell and 270 rose; VIX is elevated at 28.4.",
-  "why_moved_short": "The S&P slipped -2.0% (Nasdaq -2.2%), dragged by Consumer Discretionary (-2.8%) and Communication Services (-2.7%) (270 stocks up, 2200 down); VIX at 28.4.",
+  "session": "2026-11-20",
+  "slot": "morning_open",
+  "updated_pt": "2026-11-20 07:35 PT",
+  "price_as_of": "2026-11-20",
+  "why_moved": "The market fell: S&P -0.8%, Nasdaq -2.1%, Dow-heavy groups (Financials/Industrials) about -0.2%. Biggest driver: AI / Tech mood; lagging sectors were Technology (-3.4%) and Industrials (-0.7%); leading sectors Consumer Staples (2.1%) and Health Care (1.1%) held up. Breadth was mixed (1227 up, 1231 down); VIX is elevated at 28.2.",
+  "why_moved_short": "The S&P slipped -0.8% (Nasdaq -2.1%), dragged by Technology (-3.4%), while Consumer Staples (2.1%) and Health Care (1.1%) held up (1227 stocks up, 1231 down); VIX at 28.2.",
   "story": {
     "direction": "down",
-    "date_label": "November 19, 2026",
-    "summary": "U.S. closing summary",
+    "date_label": "November 20, 2026",
+    "summary": "U.S. morning summary",
     "clear_cause": true,
     "cause": "ai_mood",
     "lead": "Tech led stocks lower.",
@@ -18,36 +18,41 @@
     "support_ref": 1,
     "bullets": [
       {
-        "lead": "Discretionary took the biggest hit.",
-        "rest": "Discretionary fell 2.79%.",
-        "ref": null
+        "lead": "Technology took the biggest hit.",
+        "rest": "Tech fell 3.37%.",
+        "ref": 1
       },
       {
         "lead": "More stocks fell than rose.",
-        "rest": "2200 stocks fell and 270 rose.",
+        "rest": "1231 stocks fell and 1227 rose.",
+        "ref": null
+      },
+      {
+        "lead": "Staples held up.",
+        "rest": "Staples rose 2.14%.",
         "ref": null
       }
     ],
     "sector_label": "Where the selling hit",
     "chips": [
       {
-        "name": "Discretionary",
-        "pct": -2.79,
-        "pct_text": "2.79%",
+        "name": "Tech",
+        "pct": -3.37,
+        "pct_text": "3.37%",
+        "arrow": "down",
+        "kind": "move",
+        "bar": 60
+      },
+      {
+        "name": "Chips",
+        "pct": -5.66,
+        "pct_text": "5.66%",
         "arrow": "down",
         "kind": "move",
         "bar": 100
       },
       {
-        "name": "Chips",
-        "pct": -2.62,
-        "pct_text": "2.62%",
-        "arrow": "down",
-        "kind": "move",
-        "bar": 94
-      },
-      {
-        "name": "All 11 sectors down",
+        "name": "4 of 11 sectors down",
         "pct": null,
         "pct_text": null,
         "arrow": "flat",
@@ -58,15 +63,15 @@
     "indexes": [
       {
         "name": "S&P 500",
-        "pct": -1.96,
-        "pct_text": "1.96%",
+        "pct": -0.85,
+        "pct_text": "0.85%",
         "arrow": "down",
         "source": "spy"
       },
       {
         "name": "Nasdaq",
-        "pct": -2.19,
-        "pct_text": "2.19%",
+        "pct": -2.15,
+        "pct_text": "2.15%",
         "arrow": "down",
         "source": "qqq"
       }
@@ -81,8 +86,8 @@
         "published": "2026-11-19",
         "published_at": "2026-11-19T22:40:39+00:00",
         "date_label": "Nov 19, 2:40 PM PT",
-        "age_label": "1h ago",
-        "region": "US",
+        "age_label": "16h ago",
+        "region": "Global",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
       {
@@ -94,22 +99,22 @@
         "published": "2026-11-19",
         "published_at": "2026-11-19T22:10:02+00:00",
         "date_label": "Nov 19, 2:10 PM PT",
-        "age_label": "2h ago",
+        "age_label": "17h ago",
         "region": "US",
         "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
       },
       {
         "n": 3,
-        "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
+        "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
+        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-stock-market-today-nov-19-alphabet-shares-fall-as-anthropic-nasdaq-debut-puts-fresh-value-on-google-s-stake/?.tsrc=rss",
         "published": "2026-11-19",
-        "published_at": "2026-11-20T00:17:05+00:00",
-        "date_label": "Nov 19, 4:17 PM PT",
-        "age_label": "just now",
+        "published_at": "2026-11-19T23:05:02+00:00",
+        "date_label": "Nov 19, 3:05 PM PT",
+        "age_label": "16h ago",
         "region": "US",
-        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
+        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
       },
       {
         "n": 4,
@@ -120,7 +125,7 @@
         "published": "2026-11-19",
         "published_at": "2026-11-19T22:23:09+00:00",
         "date_label": "Nov 19, 2:23 PM PT",
-        "age_label": "2h ago",
+        "age_label": "17h ago",
         "region": "US",
         "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       },
@@ -133,47 +138,34 @@
         "published": "2026-11-19",
         "published_at": "2026-11-19T22:33:46+00:00",
         "date_label": "Nov 19, 2:33 PM PT",
-        "age_label": "1h ago",
+        "age_label": "17h ago",
         "region": "US",
         "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
       },
       {
         "n": 6,
-        "title": "Morgan Stanley’s Vintage Values 2027: 5 Stocks Analysts See Climbing Further",
+        "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
         "source": "Yahoo Finance",
         "via": "",
-        "url": "https://finance.yahoo.com/markets/stocks/articles/morgan-stanley-vintage-values-2027-223235273.html?.tsrc=rss",
+        "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
         "published": "2026-11-19",
-        "published_at": "2026-11-19T22:32:35+00:00",
-        "date_label": "Nov 19, 2:32 PM PT",
-        "age_label": "1h ago",
+        "published_at": "2026-11-20T00:17:05+00:00",
+        "date_label": "Nov 19, 4:17 PM PT",
+        "age_label": "15h ago",
         "region": "US",
-        "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move."
-      },
-      {
-        "n": 7,
-        "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
-        "source": "Yahoo Finance",
-        "via": "",
-        "url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-stock-market-today-nov-19-alphabet-shares-fall-as-anthropic-nasdaq-debut-puts-fresh-value-on-google-s-stake/?.tsrc=rss",
-        "published": "2026-11-19",
-        "published_at": "2026-11-19T23:05:02+00:00",
-        "date_label": "Nov 19, 3:05 PM PT",
-        "age_label": "1h ago",
-        "region": "US",
-        "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move."
+        "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move."
       }
     ],
     "note": "The plain line quotes a free headline that lines up with a desk number. It is a report, not proof of a single cause."
   },
   "mood": {
     "label": "Fear",
-    "vix": 28.44,
+    "vix": 28.23,
     "put_call_zone": "Neutral",
     "put_call": 0.72,
-    "advancers": 270,
-    "decliners": 2200,
-    "why": "VIX 28.4, put/call Neutral, 270 up / 2200 down"
+    "advancers": 1227,
+    "decliners": 1231,
+    "why": "VIX 28.2, put/call Neutral, 1227 up / 1231 down"
   },
   "headlines": [
     {
@@ -188,45 +180,9 @@
       "region": "US",
       "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
       "published_pt": "Nov 19, 2:10 PM PT",
-      "age_label": "2h ago",
-      "wrap": 20.0,
-      "rank": 23.5
-    },
-    {
-      "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
-      "published": "2026-11-19",
-      "published_at": "2026-11-20T00:17:05+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 19, 4:17 PM PT",
-      "age_label": "just now",
+      "age_label": "17h ago",
       "wrap": 15.0,
-      "rank": 19.5
-    },
-    {
-      "title": "Anthropic soars in record Wall Street debut",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/technology/ai/articles/anthropic-set-price-ipo-key-030309911.html?.tsrc=rss",
-      "published": "2026-11-19",
-      "published_at": "2026-11-19T22:23:09+00:00",
-      "trusted": true,
-      "causes": [
-        "ai_mood"
-      ],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-      "published_pt": "Nov 19, 2:23 PM PT",
-      "age_label": "2h ago",
-      "wrap": 15.0,
-      "rank": 19.0
+      "rank": 17.0
     },
     {
       "title": "Is Tech in a Bear Market? 20 Tech Stocks Fall Up to 76% From Highs",
@@ -239,44 +195,12 @@
         "ai_mood"
       ],
       "via": "",
-      "region": "US",
+      "region": "Global",
       "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
       "published_pt": "Nov 19, 2:40 PM PT",
-      "age_label": "1h ago",
-      "wrap": 15.0,
-      "rank": 17.5
-    },
-    {
-      "title": "Jefferies Has Wall Street’s Highest Target on Eli Lilly (LLY). Why?",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-wall-street-highest-target-223346007.html?.tsrc=rss",
-      "published": "2026-11-19",
-      "published_at": "2026-11-19T22:33:46+00:00",
-      "trusted": true,
-      "causes": [],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
-      "published_pt": "Nov 19, 2:33 PM PT",
-      "age_label": "1h ago",
+      "age_label": "16h ago",
       "wrap": 10.0,
-      "rank": 13.5
-    },
-    {
-      "title": "Morgan Stanley’s Vintage Values 2027: 5 Stocks Analysts See Climbing Further",
-      "source": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/morgan-stanley-vintage-values-2027-223235273.html?.tsrc=rss",
-      "published": "2026-11-19",
-      "published_at": "2026-11-19T22:32:35+00:00",
-      "trusted": true,
-      "causes": [],
-      "via": "",
-      "region": "US",
-      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
-      "published_pt": "Nov 19, 2:32 PM PT",
-      "age_label": "1h ago",
-      "wrap": 9.0,
-      "rank": 11.0
+      "rank": 10.5
     },
     {
       "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
@@ -294,34 +218,106 @@
       "region": "US",
       "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
       "published_pt": "Nov 19, 3:05 PM PT",
-      "age_label": "1h ago",
+      "age_label": "16h ago",
       "wrap": 5.0,
-      "rank": 12.0
+      "rank": 8.5
+    },
+    {
+      "title": "Anthropic soars in record Wall Street debut",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/technology/ai/articles/anthropic-set-price-ipo-key-030309911.html?.tsrc=rss",
+      "published": "2026-11-19",
+      "published_at": "2026-11-19T22:23:09+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 19, 2:23 PM PT",
+      "age_label": "17h ago",
+      "wrap": 5.0,
+      "rank": 7.0
+    },
+    {
+      "title": "Jefferies Has Wall Street’s Highest Target on Eli Lilly (LLY). Why?",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-wall-street-highest-target-223346007.html?.tsrc=rss",
+      "published": "2026-11-19",
+      "published_at": "2026-11-19T22:33:46+00:00",
+      "trusted": true,
+      "causes": [],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: this is a market-wide development. This is not proof it caused the day's move.",
+      "published_pt": "Nov 19, 2:33 PM PT",
+      "age_label": "17h ago",
+      "wrap": 5.0,
+      "rank": 6.5
+    },
+    {
+      "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
+      "source": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
+      "published": "2026-11-19",
+      "published_at": "2026-11-20T00:17:05+00:00",
+      "trusted": true,
+      "causes": [
+        "ai_mood"
+      ],
+      "via": "",
+      "region": "US",
+      "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
+      "published_pt": "Nov 19, 4:17 PM PT",
+      "age_label": "15h ago",
+      "wrap": 5.0,
+      "rank": 5.5
     }
   ],
   "causes": [
     {
       "cause": "ai_mood",
       "label": "AI / Tech mood",
-      "score": 8.37,
+      "score": 11.51,
       "headlines": [
         {
-          "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
+          "title": "Is Tech in a Bear Market? 20 Tech Stocks Fall Up to 76% From Highs",
           "source": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
+          "url": "https://beincrypto.com/tech-stocks-bear-market-record-highs/?.tsrc=rss",
           "published": "2026-11-19",
-          "published_at": "2026-11-20T00:17:05+00:00",
+          "published_at": "2026-11-19T22:40:39+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
           ],
           "via": "",
-          "region": "US",
+          "region": "Global",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 19, 4:17 PM PT",
-          "age_label": "just now",
-          "wrap": 15.0,
-          "rank": 19.5
+          "published_pt": "Nov 19, 2:40 PM PT",
+          "age_label": "16h ago",
+          "wrap": 10.0,
+          "rank": 10.5
+        },
+        {
+          "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
+          "source": "Yahoo Finance",
+          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-stock-market-today-nov-19-alphabet-shares-fall-as-anthropic-nasdaq-debut-puts-fresh-value-on-google-s-stake/?.tsrc=rss",
+          "published": "2026-11-19",
+          "published_at": "2026-11-19T23:05:02+00:00",
+          "trusted": true,
+          "causes": [
+            "rates",
+            "ai_mood",
+            "earnings_season"
+          ],
+          "via": "",
+          "region": "US",
+          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
+          "published_pt": "Nov 19, 3:05 PM PT",
+          "age_label": "16h ago",
+          "wrap": 5.0,
+          "rank": 8.5
         },
         {
           "title": "Anthropic soars in record Wall Street debut",
@@ -337,16 +333,16 @@
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
           "published_pt": "Nov 19, 2:23 PM PT",
-          "age_label": "2h ago",
-          "wrap": 15.0,
-          "rank": 19.0
+          "age_label": "17h ago",
+          "wrap": 5.0,
+          "rank": 7.0
         },
         {
-          "title": "Is Tech in a Bear Market? 20 Tech Stocks Fall Up to 76% From Highs",
+          "title": "Dow Jones Futures: Ugly Market Reversal To New Lows As Anthropic IPO Debuts, AMD Dives",
           "source": "Yahoo Finance",
-          "url": "https://beincrypto.com/tech-stocks-bear-market-record-highs/?.tsrc=rss",
+          "url": "https://finance.yahoo.com/m/9e02231d-41cd-31ac-b37f-993325b8a4ca/dow-jones-futures%3A-ugly.html?.tsrc=rss",
           "published": "2026-11-19",
-          "published_at": "2026-11-19T22:40:39+00:00",
+          "published_at": "2026-11-20T00:17:05+00:00",
           "trusted": true,
           "causes": [
             "ai_mood"
@@ -354,37 +350,17 @@
           "via": "",
           "region": "US",
           "why": "Possible transmission: a shift in technology spending can move the major indexes. This is not proof it caused the day's move.",
-          "published_pt": "Nov 19, 2:40 PM PT",
-          "age_label": "1h ago",
-          "wrap": 15.0,
-          "rank": 17.5
-        },
-        {
-          "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
-          "source": "Yahoo Finance",
-          "url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-stock-market-today-nov-19-alphabet-shares-fall-as-anthropic-nasdaq-debut-puts-fresh-value-on-google-s-stake/?.tsrc=rss",
-          "published": "2026-11-19",
-          "published_at": "2026-11-19T23:05:02+00:00",
-          "trusted": true,
-          "causes": [
-            "rates",
-            "ai_mood",
-            "earnings_season"
-          ],
-          "via": "",
-          "region": "US",
-          "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
-          "published_pt": "Nov 19, 3:05 PM PT",
-          "age_label": "1h ago",
+          "published_pt": "Nov 19, 4:17 PM PT",
+          "age_label": "15h ago",
           "wrap": 5.0,
-          "rank": 12.0
+          "rank": 5.5
         }
       ]
     },
     {
-      "cause": "rates",
-      "label": "Rates / Fed",
-      "score": 4.66,
+      "cause": "earnings_season",
+      "label": "Earnings season",
+      "score": 1.5,
       "headlines": [
         {
           "title": "Stock Market Today, Nov. 19: Stock Market Today, Nov. 19: Alphabet Shares Fall as Anthropic Nasdaq Debut Puts Fresh Value on Google's Stake",
@@ -402,9 +378,9 @@
           "region": "US",
           "why": "Possible transmission: policy rates can move bond yields and equity valuations. This is not proof it caused the day's move.",
           "published_pt": "Nov 19, 3:05 PM PT",
-          "age_label": "1h ago",
+          "age_label": "16h ago",
           "wrap": 5.0,
-          "rank": 12.0
+          "rank": 8.5
         }
       ]
     }
@@ -418,20 +394,20 @@
   },
   "breadth_check": {
     "aligned": true,
-    "flag": "broad_decline",
-    "text": "Index and breadth agree: a broad down day."
+    "flag": "flat_or_mixed",
+    "text": "Index and breadth are roughly in line."
   },
   "regime": {
     "label": "selloff",
-    "pct_above_50day": 37.6,
-    "pct_above_200day": 46.3,
+    "pct_above_50day": 38.3,
+    "pct_above_200day": 47.1,
     "text": "Under 40% of the desk is above the 50-day — a weak tape."
   },
   "tips": {
     "title": "What it means for me",
     "lines": [
       "Fear is high today. Big swings are more common — go slow with new buys.",
-      "Most stocks fell with the indexes. Keep new buys small until more names join an up day.",
+      "Index and breadth are mixed. Wait for a clearer day before sizing up.",
       "Breadth looks weak on the 50-day check. Treat rallies as research time, not a green light."
     ],
     "disclaimer": "Research only. Not advice to buy or sell any stock."
@@ -444,8 +420,8 @@
   },
   "prior_brief": {
     "session": "2026-11-19",
-    "slot": "morning_open",
-    "why_moved": "The S&P was little changed (0.1%; Nasdaq 0.6%), dragged by Consumer Staples (-1.5%) and Health Care (-1.2%), while Technology (1.2%) held up (761 stocks up, 1717 down); VIX at 23.0.",
+    "slot": "evening_close",
+    "why_moved": "The S&P slipped -2.0% (Nasdaq -2.2%), dragged by Consumer Discretionary (-2.8%) and Communication Services (-2.7%) (270 stocks up, 2200 down); VIX at 28.4.",
     "mood": "Fear",
     "causes": [
       "AI / Tech mood",
@@ -453,34 +429,34 @@
     ]
   },
   "stats": {
-    "spy_price": 715.87,
-    "spy_day_pct": -1.96,
-    "qqq_day_pct": -2.19,
+    "spy_price": 709.78,
+    "spy_day_pct": -0.85,
+    "qqq_day_pct": -2.15,
     "dia_day_pct": null,
-    "vix": 28.44,
-    "advancers": 270,
-    "decliners": 2200,
-    "breadth_sma50": 37.6,
-    "breadth_sma200": 46.3,
+    "vix": 28.23,
+    "advancers": 1227,
+    "decliners": 1231,
+    "breadth_sma50": 38.3,
+    "breadth_sma200": 47.1,
     "put_call": 0.72,
     "put_call_zone": "Neutral",
     "fred_dgs10": 4.96
   },
   "learning": {
     "stub": {
-      "date": "2026-11-19",
-      "slot": "evening_close",
+      "date": "2026-11-20",
+      "slot": "morning_open",
       "mood": "Fear",
       "regime": "selloff",
       "causes": [
         "ai_mood",
-        "rates"
+        "earnings_season"
       ],
       "sources": [
         "Yahoo Finance"
       ],
-      "spy_day_pct": -1.96,
-      "qqq_day_pct": -2.19,
+      "spy_day_pct": -0.85,
+      "qqq_day_pct": -2.15,
       "next_day_spy_pct": null,
       "next_day_direction": null
     },
@@ -494,15 +470,15 @@
         },
         "ai_mood": {
           "up": 5,
-          "down": 13,
+          "down": 14,
           "flat": 2,
-          "n": 20
+          "n": 21
         },
         "rates": {
           "up": 1,
-          "down": 2,
+          "down": 3,
           "flat": 2,
-          "n": 5
+          "n": 6
         },
         "inflation": {
           "up": 1,
@@ -562,9 +538,9 @@
         },
         "Yahoo Finance": {
           "up": 4,
-          "down": 10,
+          "down": 11,
           "flat": 2,
-          "n": 16
+          "n": 17
         },
         "BBC": {
           "up": 0,
@@ -579,21 +555,18 @@
           "n": 1
         }
       },
-      "n_labeled": 20,
+      "n_labeled": 21,
       "note": "Counts of next-day SPY direction after each cause/source appeared. For later reweighting only — not a trading signal."
     }
   },
   "disclaimer": "Research only. Not a recommendation to buy or sell. This desk never places trades. Market-wide news brief only — no single-stock picks.",
   "data_status": "OK",
   "world_moves": {
-    "retrieved_at": "2026-11-20T00:23:35.865670+00:00",
-    "summary": "Not enough verified index closes to call a worldwide move.",
-    "breadth": "unknown",
+    "retrieved_at": "2026-11-20T15:39:16.098342+00:00",
+    "summary": "Verified indexes on file did not all move the same way.",
+    "breadth": "mixed",
     "missing": [
       "S&P 500",
-      "STOXX Europe 600",
-      "DAX",
-      "FTSE 100",
       "Nikkei 225",
       "Shanghai Composite",
       "Hang Seng"
@@ -604,28 +577,62 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.96,
+        "pct": -0.85,
         "verified": true,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T16:19:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T07:35:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Is Tech in a Bear Market? 20 Tech Stocks Fall Up to 76% From Highs. Not proof this caused the percent.",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "Possible context from Yahoo Finance: Stock Market Today, Nov. 19: Dow Plunges 1,100 Points as the S&P 500 Suffers Its 6th Straight Day of Losses. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://beincrypto.com/tech-stocks-bear-market-record-highs/?.tsrc=rss"
+        "cause_url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-dow-plunges-1-100-points-as-the-s-and-p-500-suffers-its-6th-straight-day-of-losses/?.tsrc=rss"
+      },
+      {
+        "id": "sxxp",
+        "name": "STOXX Europe 600",
+        "region": "Europe",
+        "kind": "index",
+        "pct": -0.88,
+        "verified": true,
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T16:33:22+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
+      },
+      {
+        "id": "ukx",
+        "name": "FTSE 100",
+        "region": "UK",
+        "kind": "index",
+        "pct": -0.67,
+        "verified": true,
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T16:41:32+01:00",
+        "status": "intraday",
+        "source": "Boerse Frankfurt",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
+        "cause": "",
+        "cause_source": "",
+        "cause_url": ""
       },
       {
         "id": "nifty",
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": 1.14,
+        "pct": 1.12,
         "verified": true,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -657,14 +664,14 @@
         "name": "STOXX Europe 600",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T22:15:23+01:00",
-        "status": "prior_local_close",
+        "pct": -0.88,
+        "verified": true,
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T16:33:22+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=EU0009658202",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -674,14 +681,14 @@
         "name": "DAX",
         "region": "Europe",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T22:00:19+01:00",
-        "status": "prior_local_close",
+        "pct": -1.51,
+        "verified": true,
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T16:41:29+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=DE0008469008",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -691,14 +698,14 @@
         "name": "FTSE 100",
         "region": "UK",
         "kind": "index",
-        "pct": null,
-        "verified": false,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T22:00:13+01:00",
-        "status": "prior_local_close",
+        "pct": -0.67,
+        "verified": true,
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T16:41:32+01:00",
+        "status": "intraday",
         "source": "Boerse Frankfurt",
-        "source_url": "",
-        "note": "The feed's last price and previous-close field do not support a percent, so none is shown.",
+        "source_url": "https://api.boerse-frankfurt.de/v1/data/price_information?isin=GB0001383545",
+        "note": "Vendor snapshot from the public price feed. Not an official home-exchange close. Percent checked against the two prices in that payload.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
@@ -759,11 +766,11 @@
         "name": "Nifty 50",
         "region": "India",
         "kind": "index",
-        "pct": 1.14,
+        "pct": 1.12,
         "verified": true,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T15:30:00+05:30",
-        "status": "prior_local_close",
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T15:30:00+05:30",
+        "status": "closed",
         "source": "NSE India",
         "source_url": "https://www.nseindia.com/market-data/live-equity-market",
         "note": "One Nifty 50 snapshot from the NSE public indices response. Not a history and not Sensex.",
@@ -776,31 +783,31 @@
         "name": "SPY",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -1.96,
+        "pct": -0.85,
         "verified": true,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T16:19:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T07:35:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request.",
-        "cause": "Possible context from Yahoo Finance: Is Tech in a Bear Market? 20 Tech Stocks Fall Up to 76% From Highs. Not proof this caused the percent.",
+        "note": "SPY is an ETF proxy for S&P 500, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
+        "cause": "Possible context from Yahoo Finance: Stock Market Today, Nov. 19: Dow Plunges 1,100 Points as the S&P 500 Suffers Its 6th Straight Day of Losses. Not proof this caused the percent.",
         "cause_source": "Yahoo Finance",
-        "cause_url": "https://beincrypto.com/tech-stocks-bear-market-record-highs/?.tsrc=rss"
+        "cause_url": "https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-dow-plunges-1-100-points-as-the-s-and-p-500-suffers-its-6th-straight-day-of-losses/?.tsrc=rss"
       },
       {
         "id": "qqq",
         "name": "QQQ",
         "region": "US",
         "kind": "etf_proxy",
-        "pct": -2.19,
+        "pct": -2.15,
         "verified": true,
-        "session_date": "2026-11-19",
-        "quote_at": "2026-11-19T16:19:00-08:00",
-        "status": "closed",
+        "session_date": "2026-11-20",
+        "quote_at": "2026-11-20T07:35:00-08:00",
+        "status": "open_print",
         "source": "Desk price file",
         "source_url": "",
-        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request.",
+        "note": "QQQ is an ETF proxy for Nasdaq-100, not the index. Day change already stored by the desk. No new price request. The desk stamp is before that market's close, so this percent is not a closing return.",
         "cause": "",
         "cause_source": "",
         "cause_url": ""
