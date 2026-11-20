@@ -1,14 +1,4 @@
 ticker,company,sector,industry,forward_pe,analyst_mean,analyst_count,target_mean,target_median,market_cap,earnings_ts
-GS,"Goldman Sachs Group, Inc. (The)",Financial Services,Capital Markets,12.304753,2.46154,21.0,1030.6666,1000.0,263513833472,1800365400.0
-GWW,"W.W. Grainger, Inc.",Industrials,Industrial Distribution,28.871479,2.78947,14.0,1435.1428,1416.5,70343409664,1801575000.0
-HAL,Halliburton Company,Energy,Oil & Gas Equipment & Services,11.155796,1.67857,25.0,43.56,43.0,27096657920,1792499400.0
-HAS,"Hasbro, Inc.",Consumer Cyclical,Leisure,17.412094,1.5,13.0,119.07692,120.0,16990508032,1792499400.0
-HBAN,Huntington Bancshares Incorpora,Financial Services,Banks - Regional,8.991397,1.80952,19.0,18.77895,19.0,31702040576,1792672200.0
-HCA,"HCA Healthcare, Inc.",Healthcare,Medical Care Facilities,16.007986,2.0,22.0,477.27274,488.0,104584118272,1793104200.0
-HD,"Home Depot, Inc. (The)",Consumer Cyclical,Home Improvement Retail,21.88029,1.88889,32.0,378.8125,392.5,347455389696,1794922200.0
-HIG,"The Hartford Insurance Group, I",Financial Services,Insurance - Diversified,10.0525465,2.41667,21.0,145.2381,144.0,36608892928,1793044800.0
-HII,"Huntington Ingalls Industries, ",Industrials,Aerospace & Defense,15.077585,2.08333,12.0,356.08334,352.0,12150070272,1793277000.0
-HLT,Hilton Worldwide Holdings Inc.,Consumer Cyclical,Lodging,35.643726,1.89655,27.0,370.55557,375.0,82934046720,1793104200.0
 HON,Honeywell International Inc.,Industrials,Conglomerates,22.626312,2.0,23.0,253.91304,254.0,70820241408,1792672200.0
 HONA,Honeywell Aerospace Inc.,Industrials,Aerospace & Defense,19.023954,2.52941,15.0,193.26666,190.0,52700200960,1793217600.0
 HOOD,"Robinhood Markets, Inc.",Financial Services,Capital Markets,23.84288,1.65625,30.0,128.87132,130.0,73254961152,1793131200.0
@@ -524,3 +514,13 @@ GOOGL,Alphabet Inc.,Communication Services,Internet Content & Information,17.342
 GPC,Genuine Parts Company,Consumer Cyclical,Auto Parts,14.560095,2.25,10.0,139.0,130.5,16338344960,1792499400.0
 GPN,Global Payments Inc.,Industrials,Specialty Business Services,5.6727595,2.19444,33.0,109.30303,106.0,24301506560,1793885400.0
 GRMN,Garmin Ltd.,Technology,Scientific & Technical Instruments,23.380266,2.55556,8.0,299.0,302.5,51650048000,1793190600.0
+GS,"Goldman Sachs Group, Inc. (The)",Financial Services,Capital Markets,10.649418,2.46154,21.0,1031.5714,1000.0,228062347264,1800365400.0
+GWW,"W.W. Grainger, Inc.",Industrials,Industrial Distribution,26.03643,2.78947,14.0,1458.2142,1466.5,63543181312,1801575000.0
+HAL,Halliburton Company,Energy,Oil & Gas Equipment & Services,10.400662,1.67857,25.0,43.56,43.0,25252167680,1792499400.0
+HAS,"Hasbro, Inc.",Consumer Cyclical,Leisure,16.082695,1.5,13.0,124.46154,126.0,15721954304,1792499400.0
+HBAN,Huntington Bancshares Incorpora,Financial Services,Banks - Regional,8.167607,1.80952,19.0,18.81579,19.0,28779728896,1792672200.0
+HCA,"HCA Healthcare, Inc.",Healthcare,Medical Care Facilities,15.199714,2.0,22.0,485.68182,488.0,99343007744,1793104200.0
+HD,"Home Depot, Inc. (The)",Consumer Cyclical,Home Improvement Retail,21.494715,1.88889,32.0,375.59375,385.0,338256691200,1794922200.0
+HIG,"The Hartford Insurance Group, I",Financial Services,Insurance - Diversified,10.051218,2.5,21.0,145.7619,145.0,36592848896,1793044800.0
+HII,"Huntington Ingalls Industries, ",Industrials,Aerospace & Defense,13.658133,2.08333,12.0,357.66666,352.0,11047094272,1793277000.0
+HLT,Hilton Worldwide Holdings Inc.,Consumer Cyclical,Lodging,34.057632,1.89655,27.0,374.18518,380.0,79267176448,1793104200.0
