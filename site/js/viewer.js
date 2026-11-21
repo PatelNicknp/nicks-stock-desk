@@ -75,12 +75,12 @@
   }
   // ---------- Base patterns (data/base_patterns.csv, from base_patterns.py) ----------
   const PATTERN_NAMES = {
-    cup_handle: "Cup w/ Handle", cup: "Cup", double_bottom: "Double Bottom", flat_base: "Flat Base",
+    cup_handle: "Cup w/ Handle", cup: "Cup", saucer: "Saucer", double_bottom: "Double Bottom", flat_base: "Flat Base",
     ascending_base: "Ascending Base", ipo_base: "IPO Base", consolidation: "Consolidation",
   };
   // One color per pattern family. Mid shades so they read on white and on the dark theme.
   const PATTERN_COLORS = {
-    cup_handle: "#2563eb", cup: "#2563eb", double_bottom: "#9333ea", flat_base: "#0d9488",
+    cup_handle: "#2563eb", cup: "#2563eb", saucer: "#2563eb", double_bottom: "#9333ea", flat_base: "#0d9488",
     ascending_base: "#ea580c", ipo_base: "#db2777", consolidation: "#0d9488",
   };
   // Rows of base_patterns.csv by ticker, oldest base first. Placeholder (MISSING) rows and unknown patterns are dropped.
@@ -93,11 +93,13 @@
       const pivot = numOf(r.pivot);
       if (pivot == null || !txt(r.start_date) || !txt(r.end_date)) return;
       (out[t] = out[t] || []).push({
-        pattern: name, name: PATTERN_NAMES[name], latest: txt(r.latest) === "yes", status: txt(r.status),
+        pattern: name, name: name === "saucer" && txt(r.handle_date) ? "Saucer w/ Handle" : PATTERN_NAMES[name], latest: txt(r.latest) === "yes", status: txt(r.status),
         startDate: txt(r.start_date), endDate: txt(r.end_date), leftHigh: numOf(r.left_high), low: numOf(r.low), lowDate: txt(r.low_date),
         depth: numOf(r.depth_pct), weeks: numOf(r.length_weeks), pivot: pivot, buyPoint: numOf(r.buy_point), zoneTop: numOf(r.zone_top),
         pctFromPivot: numOf(r.pct_from_pivot), breakoutDate: txt(r.breakout_date), handleDate: txt(r.handle_date),
         handleDepth: numOf(r.handle_depth_pct), firstLowDate: txt(r.first_low_date), midPeakDate: txt(r.mid_peak_date),
+        rimDate: txt(r.rim_date), handleLowDate: txt(r.handle_low_date), stage: numOf(r.stage), stageLabel: txt(r.stage_label),
+        deep: yes(r.deep_base), boVolPct: numOf(r.breakout_volume_pct), boVolOk: yes(r.breakout_volume_ok), failedDate: txt(r.failed_date),
       });
     });
     Object.keys(out).forEach((t) => out[t].sort((a, b) => (a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0)));
@@ -114,6 +116,34 @@
     }
     return lo;
   }
+  // Points [x, y] in screen space (y down), left to right: the hull below all of them (largest y), left to right.
+  // Used to draw a cup as a smooth bowl under the lows.
+  function bowlHull(pts) {
+    const p = pts.slice().sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+    const out = [];
+    p.forEach((q) => {
+      while (out.length >= 2) {
+        const o = out[out.length - 2], a = out[out.length - 1];
+        // Cross product in math space (y up = -y): pop while the turn is not convex from below.
+        const cross = (a[0] - o[0]) * (-q[1] + o[1]) - (-a[1] + o[1]) * (q[0] - o[0]);
+        if (cross <= 0) out.pop(); else break;
+      }
+      out.push(q);
+    });
+    return out;
+  }
+  // A base still in play: not finished long ago and not failed.
+  function isLive(status) { return status !== "COMPLETED" && status !== "FAILED"; }
+  // "Cup w/ Handle 23% 9w  Stage 2(b)" for the chart label; " failed" when the breakout failed.
+  function patternLabel(base) {
+    if (!base) return "";
+    let t = base.name;
+    if (base.depth != null) t += " " + Math.round(base.depth) + "%";
+    if (base.weeks != null) t += " " + Math.round(base.weeks) + "w";
+    if (base.stageLabel) t += "  Stage " + base.stageLabel;
+    if (base.status === "FAILED") t += "  failed";
+    return t;
+  }
   // What to draw for one base on these bars: indexes, prices, and the shape ("cup", "double", or "box").
   function patternShape(base, bars) {
     const dates = bars.map((b) => b.date);
@@ -128,19 +158,29 @@
       top: base.leftHigh != null ? base.leftHigh : base.pivot, bottom: base.low };
     const hiAt = (i) => (bars[i] && bars[i].h != null ? bars[i].h : bars[i].c);
     const loAt = (i) => (bars[i] && bars[i].l != null ? bars[i].l : bars[i].c);
-    if (base.pattern === "cup_handle" || base.pattern === "cup") {
+    out.boLow = bo >= 0 ? loAt(bo) : null;
+    if (base.pattern === "cup_handle" || base.pattern === "cup" || base.pattern === "saucer") {
       out.kind = "cup";
       out.lowPrice = base.low;
       const lowIdx = Math.min(Math.max(s, low), e);
-      if (base.pattern === "cup_handle" && base.handleDate) {
+      out.lowIdx = lowIdx;
+      out.lipPrice = hiAt(s);
+      if (base.handleDate) {
         const h = Math.min(e, Math.max(s, barIndexOn(dates, base.handleDate)));
         out.rim = h; out.rimPrice = hiAt(h); out.pivotFrom = h;
         let hl = Infinity, hi = h;
         for (let i = h; i <= e; i++) { if (loAt(i) < hl) { hl = loAt(i); hi = i; } }
+        if (base.handleLowDate) { const k = Math.min(e, Math.max(h, barIndexOn(dates, base.handleLowDate))); hi = k; hl = loAt(k); }
         out.handleLow = hi; out.handleLowPrice = hl;
+      } else if (base.rimDate) {
+        const r = Math.min(e, Math.max(lowIdx, barIndexOn(dates, base.rimDate)));
+        out.rim = r; out.rimPrice = hiAt(r);
       } else {
         out.rim = e; out.rimPrice = hiAt(e);
       }
+      // Lows from the left lip to the right lip, for the bowl drawn under them.
+      out.lows = [];
+      for (let i = s; i <= out.rim; i++) out.lows.push([i, loAt(i)]);
       // The outline hugs the underside of the price: down the left side along the running low, and up the right side
       // along the low seen from the rim back to the bottom, so the bowl follows the real bars.
       const left = [[s, out.top]];
@@ -157,6 +197,7 @@
       const b1 = Math.min(Math.max(s, barIndexOn(dates, base.firstLowDate)), e);
       const mid = Math.min(Math.max(s, barIndexOn(dates, base.midPeakDate)), e);
       out.pts = [[s, hiAt(s)], [b1, loAt(b1)], [mid, base.pivot], [low, loAt(low)], [e, hiAt(e)]];
+      out.b1 = b1; out.mid = mid; out.b2 = low;
       out.pivotFrom = mid;
     }
     return out;
@@ -168,10 +209,18 @@
     if (base.depth != null) bits.push(f(base.depth).replace(/\.?0+$/, "") + "% deep");
     if (base.weeks != null) bits.push(String(Math.round(base.weeks * 10) / 10) + " weeks");
     if (base.handleDepth != null) bits.push("handle " + String(Math.round(base.handleDepth * 10) / 10) + "% deep");
+    if (base.stageLabel) bits.push("Stage " + base.stageLabel);
+    if (base.deep) bits.push("deeper than usual (weak market)");
     let text = bits.join(", ") + ". Pivot " + f(base.pivot);
     if (base.buyPoint != null) text += ", buy point " + f(base.buyPoint);
     if (base.zoneTop != null) text += ", buy zone up to " + f(base.zoneTop);
     text += ".";
+    if (base.breakoutDate) {
+      text += " Breakout " + base.breakoutDate;
+      if (base.boVolPct != null) text += " on volume " + (base.boVolPct >= 0 ? "+" : "") + Math.round(base.boVolPct) + "% vs the 50-day average" + (base.boVolOk ? "" : " (light)");
+      text += ".";
+    }
+    if (base.status === "FAILED" && base.failedDate) text += " Failed " + base.failedDate + ": closed 7 to 8% under the pivot.";
     if (base.pctFromPivot != null && base.latest) {
       const p = base.pctFromPivot;
       text += " Price is " + f(Math.abs(p)) + "% " + (p >= 0 ? "above" : "below") + " the pivot";
@@ -249,7 +298,7 @@
   }
   // "+3.2% from Pivot in 6 days" for a live base: trading days since the breakout, or since the base ended.
   function pivotNote(base, bars) {
-    if (!base || !base.latest || base.status === "COMPLETED" || !(base.pivot > 0) || !bars || !bars.length) return "";
+    if (!base || !base.latest || !isLive(base.status) || !(base.pivot > 0) || !bars || !bars.length) return "";
     const last = bars[bars.length - 1].c;
     const pct = (last / base.pivot - 1) * 100;
     const dates = bars.map((b) => b.date);
@@ -630,7 +679,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, MSS: MSS, swingPoints: swingPoints, epsMarks: epsMarks, epsMarkText: epsMarkText, pivotNote: pivotNote, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, patternLabel: patternLabel, isLive: isLive, bowlHull: bowlHull, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, MSS: MSS, swingPoints: swingPoints, epsMarks: epsMarks, epsMarkText: epsMarkText, pivotNote: pivotNote, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -790,29 +839,73 @@
     }
     // MarketSurge style: a light shaded box over the base, a small label, and a short dashed pivot line with its price.
     // No heavy outline strokes.
-    function msBox(it) {
+    // MarketSurge style: each base in its own shape, thin and light. A cup is a smooth bowl under the lows from the left
+    // lip to the right lip, plus the handle; a double bottom is a W through the two lows and the middle peak; the other
+    // bases are a thin box. Light shading only inside the shape, and none on a long base (ms_shade_max_weeks).
+    function msShape(ctx, it) {
       const sh = it.shape;
       const xs = X(sh.s), xe = X(sh.e);
+      if (xs == null || xe == null) return null;
+      const P = 3; // px under the lows, so the line sits just below the bars
+      if (sh.kind === "cup" && sh.lowIdx != null) {
+        const xb = X(sh.lowIdx), xr = X(sh.rim), yL = Y(sh.lipPrice), yb = Y(sh.lowPrice), yr = Y(sh.rimPrice);
+        if ([xb, xr, yL, yb, yr].some((v) => v == null)) return null;
+        const ybb = yb + P;
+        // The bowl is the hull under every low from lip to lip, with its corners rounded off, so it is smooth and
+        // never cuts through a bar.
+        const raw = [[xs, yL]];
+        (sh.lows || []).forEach((q) => { const x = X(q[0]), y = Y(q[1]); if (x != null && y != null) raw.push([x, y + P]); });
+        raw.push([xr, yr]);
+        const hull = bowlHull(raw);
+        ctx.beginPath();
+        ctx.moveTo(hull[0][0], hull[0][1]);
+        for (let k = 1; k < hull.length - 1; k++) {
+          const mx = (hull[k][0] + hull[k + 1][0]) / 2, my = (hull[k][1] + hull[k + 1][1]) / 2;
+          ctx.quadraticCurveTo(hull[k][0], hull[k][1], mx, my);
+        }
+        ctx.lineTo(hull[hull.length - 1][0], hull[hull.length - 1][1]);
+        const bowl = { x0: xs, x1: xr, top: Math.min(yL, yr), bottom: ybb, closeTo: [xs, yL] };
+        let handle = null;
+        if (sh.handleLow != null) {
+          const xh = X(sh.handleLow), yh = Y(sh.handleLowPrice);
+          if (xh != null && yh != null) handle = [[xh, yh + P], [Math.max(xh, xe), yh + P]];
+        }
+        return { kind: "cup", bowl: bowl, handle: handle, start: [xr, yr], labelX: xs, labelY: ybb };
+      }
+      if (sh.kind === "double" && sh.pts) {
+        const pts = sh.pts.map((pt, k) => [X(pt[0]), Y(pt[1]) == null ? null : Y(pt[1]) + (k === 1 || k === 3 ? P : 0)]);
+        if (pts.some((p) => p[0] == null || p[1] == null)) return null;
+        ctx.beginPath();
+        pts.forEach((p, k) => { if (k === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); });
+        const yT = Y(Math.max(sh.top, sh.pivot));
+        return { kind: "double", pts: pts, top: yT, labelX: xs, labelY: Math.max(pts[1][1], pts[3][1]) };
+      }
       const yT = Y(Math.max(sh.top, sh.pivot)), yB = Y(sh.bottom);
-      if (xs == null || xe == null || yT == null || yB == null) return null;
-      return { xs: xs, xe: Math.max(xs + 2, xe), yT: yT, yB: yB };
+      if (yT == null || yB == null) return null;
+      ctx.beginPath();
+      ctx.rect(Math.round(xs) + 0.5, Math.round(yT) + 0.5, Math.max(2, Math.round(xe - xs)), Math.round(yB - yT));
+      return { kind: "box", labelX: xs, labelY: yB + 1 };
+    }
+    function shadeOk(it) {
+      const w = it.base.weeks;
+      return !(w != null && w > flags.shadeMaxWeeks);
     }
     function msBottom(ctx, W) {
       items.forEach((it) => {
-        const b = msBox(it);
-        if (!b) return;
         ctx.save();
-        ctx.globalAlpha = it.latest ? 1 : 0.6;
-        ctx.fillStyle = alpha(it.color, light ? 0.07 : 0.10);
-        ctx.fillRect(b.xs, b.yT, b.xe - b.xs, b.yB - b.yT);
-        ctx.strokeStyle = alpha(it.color, 0.35);
-        ctx.lineWidth = 1;
-        ctx.strokeRect(Math.round(b.xs) + 0.5, Math.round(b.yT) + 0.5, Math.round(b.xe - b.xs), Math.round(b.yB - b.yT));
-        if (flags.zone && it.latest && it.base.status !== "COMPLETED" && it.shape.zoneTop != null) {
-          const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop);
-          if (y1 != null && y2 != null) {
+        ctx.globalAlpha = it.latest ? 1 : 0.45;
+        const g = msShape(ctx, it);
+        if (g && shadeOk(it)) {
+          ctx.fillStyle = alpha(it.color, light ? 0.07 : 0.10);
+          if (g.kind === "cup") { ctx.lineTo(g.bowl.closeTo[0], g.bowl.closeTo[1]); ctx.closePath(); ctx.fill(); }
+          else if (g.kind === "double") { const last = g.pts[g.pts.length - 1]; ctx.lineTo(last[0], g.top); ctx.lineTo(g.pts[0][0], g.top); ctx.closePath(); ctx.fill(); }
+          else ctx.fill();
+        }
+        if (flags.zone && it.latest && isLive(it.base.status) && it.shape.zoneTop != null) {
+          const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop), x1 = X(it.shape.e);
+          if (y1 != null && y2 != null && x1 != null) {
             ctx.fillStyle = light ? "rgba(31,63,216,0.07)" : "rgba(96,165,250,0.12)";
-            ctx.fillRect(b.xe, Math.min(y1, y2), Math.max(0, W - b.xe), Math.abs(y1 - y2));
+            ctx.fillRect(x1, Math.min(y1, y2), Math.max(0, W - x1), Math.abs(y1 - y2));
           }
         }
         ctx.restore();
@@ -826,22 +919,44 @@
       ctx.textBaseline = "alphabetic";
       items.forEach((it) => {
         const sh = it.shape;
-        const b = msBox(it);
+        const failed = it.base.status === "FAILED";
         ctx.save();
-        ctx.globalAlpha = it.latest ? 1 : 0.6;
-        if (flags.label && b) {
+        ctx.globalAlpha = it.latest ? 1 : 0.45;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.strokeStyle = alpha(failed ? "#6B7280" : it.color, 0.85);
+        ctx.lineWidth = 1.25;
+        const g = msShape(ctx, it);
+        if (g) {
+          ctx.stroke();
+          if (g.handle) {
+            ctx.beginPath(); ctx.moveTo(g.start[0], g.start[1]);
+            g.handle.forEach((p) => ctx.lineTo(p[0], p[1]));
+            ctx.stroke();
+          }
+        }
+        if (flags.label && g) {
           ctx.textAlign = "left";
-          const text = it.base.name;
-          // Under the box's lower left corner, where a base has no bars, so it never sits on a swing price.
-          const y = b.yB + 11;
-          ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(text, b.xs + 1, y);
-          ctx.fillStyle = light ? "#4B5563" : "#cbd5e1"; ctx.fillText(text, b.xs + 1, y);
-          note(b.xs + 1, y, ctx.measureText(text).width);
+          const text = patternLabel(it.base);
+          const y = g.labelY + 12;
+          ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(text, g.labelX + 1, y);
+          ctx.fillStyle = failed ? "#9CA3AF" : (light ? "#4B5563" : "#cbd5e1"); ctx.fillText(text, g.labelX + 1, y);
+          note(g.labelX + 1, y, ctx.measureText(text).width);
+        }
+        // Breakout day on heavy volume (breakout_volume_ok): a small up arrow under that bar (chart_viewer.breakout_arrows).
+        if (flags.arrow && it.base.boVolOk && sh.bo >= 0 && sh.boLow != null) {
+          const xa = X(sh.bo), ya = Y(sh.boLow);
+          if (xa != null && ya != null) {
+            const y0 = ya + 6;
+            ctx.fillStyle = light ? "#1F3FD8" : "#60a5fa";
+            ctx.beginPath(); ctx.moveTo(xa, y0); ctx.lineTo(xa - 4, y0 + 7); ctx.lineTo(xa + 4, y0 + 7); ctx.closePath(); ctx.fill();
+            ctx.fillRect(xa - 1, y0 + 7, 2, 5);
+          }
         }
         const yp = Y(sh.pivot);
         if (flags.pivot && yp != null) {
           const x0 = X(sh.pivotFrom);
-          const live = it.latest && it.base.status !== "COMPLETED";
+          const live = it.latest && isLive(it.base.status);
           let x1 = X(sh.e);
           if (x1 != null) x1 = Math.min(W - 2, x1 + 26);
           if (x0 != null && x1 != null) {
@@ -874,7 +989,7 @@
             ctx.save();
             ctx.globalAlpha = it.latest ? 1 : 0.55;
             if (outline(ctx, it, true)) { ctx.fillStyle = alpha(it.color, 0.06); ctx.fill(); }
-            if (flags.zone && it.latest && it.base.status !== "COMPLETED" && it.shape.zoneTop != null) {
+            if (flags.zone && it.latest && isLive(it.base.status) && it.shape.zoneTop != null) {
               const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop), x1 = X(it.shape.e);
               if (y1 != null && y2 != null && x1 != null) {
                 ctx.fillStyle = zoneFill;
@@ -907,7 +1022,7 @@
             const yp = Y(sh.pivot);
             if (flags.pivot && yp != null) {
               const x0 = X(sh.pivotFrom);
-              const live = it.latest && it.base.status !== "COMPLETED";
+              const live = it.latest && isLive(it.base.status);
               const xEnd = live ? W : (sh.bo >= 0 ? X(sh.bo) : X(sh.e));
               if (x0 != null && xEnd != null) {
                 ctx.setLineDash([6, 4]);
@@ -948,7 +1063,7 @@
       updateAllViews: () => {},
       // Keeps the pivot and the top of the buy zone on screen for the newest base.
       autoscaleInfo: () => {
-        const it = items.find((x) => x.latest && x.base.status !== "COMPLETED");
+        const it = items.find((x) => x.latest && isLive(x.base.status));
         if (!it || it.shape.zoneTop == null) return null;
         return { priceRange: { minValue: it.shape.pivot, maxValue: it.shape.zoneTop } };
       },
@@ -1513,7 +1628,7 @@
       host.setAttribute("data-bases", String(overlayItems.length));
       if (overlayItems.length) {
         try {
-          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels"), ms: ms, boxes: labelBoxes }, D.isLight()));
+          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels"), ms: ms, boxes: labelBoxes, arrow: on("breakout_arrows"), shadeMaxWeeks: cfgNum("ms_shade_max_weeks", 30) }, D.isLight()));
         } catch (e) { /* the chart still draws without the overlay */ }
       }
       // MarketSurge style: swing high/low prices (chart_viewer.swing_labels) and EPS markers (chart_viewer.eps_markers).

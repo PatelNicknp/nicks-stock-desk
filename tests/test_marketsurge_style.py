@@ -12,7 +12,8 @@ import eps_marks  # noqa: E402
 import tables  # noqa: E402
 
 STYLE_KEYS = ["marketsurge_style", "ms_log_scale", "ms_hide_why", "rs_rating_label", "swing_labels", "swing_label_bars", "swing_label_min_move_pct",
-              "eps_markers", "pivot_header", "ms_range_months", "ms_range_months_phone", "ms_right_space_pct"]
+              "eps_markers", "pivot_header", "ms_range_months", "ms_range_months_phone", "ms_right_space_pct",
+              "breakout_arrows", "ms_shade_max_weeks"]
 
 
 def _read(*parts):

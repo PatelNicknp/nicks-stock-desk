@@ -77,7 +77,7 @@ eq(dbl.pts[2], [4, 58], "middle peak at the pivot");
 
 // Caption.
 const cap = V.patternCaption(idx.AAA[1]);
-eq(/^Cup w\/ Handle, 30% deep, 20 weeks, handle 8.5% deep\. Pivot 58\.00, buy point 58\.10, buy zone up to 60\.90\. Price is 2\.10% above the pivot \(buy zone\)\.$/.test(cap), true, "caption: " + cap);
+eq(/^Cup w\/ Handle, 30% deep, 20 weeks, handle 8.5% deep\. Pivot 58\.00, buy point 58\.10, buy zone up to 60\.90\. Breakout 2026-08-17\. Price is 2\.10% above the pivot \(buy zone\)\.$/.test(cap), true, "caption: " + cap);
 eq(V.patternCaption(null), "", "no base no caption");
 
 // MarketSurge colors: 50-day red, 200-day black, 10-week and 40-week on Weekly.
@@ -120,6 +120,20 @@ const deskSrc = require("fs").readFileSync(path.join(__dirname, "..", "site", "j
 const lightMap = deskSrc.slice(deskSrc.indexOf("const LIGHT_MAP"), deskSrc.indexOf("const THEME_KEY")).toLowerCase();
 const colors = [V.MSS.up, V.MSS.down, V.MSS.rs, V.MSS.volAvg, V.MSS.bg].concat(Object.values(V.MSS.ma));
 colors.forEach((c) => { if (c !== "#FFFFFF") eq(lightMap.indexOf('"' + c.toLowerCase() + '"'), -1, "not remapped: " + c); });
+
+// v3 pattern recognition: the cup bowl hugs the lows, labels carry the stage, failed bases are not live.
+eq(V.bowlHull([[0, 10], [1, 50], [2, 30], [3, 60], [4, 20]]), [[0, 10], [1, 50], [3, 60], [4, 20]], "bowl goes under every low, skips the bounce");
+eq(V.bowlHull([[0, 5]]), [[0, 5]], "one point bowl");
+eq([V.isLive("BUY ZONE"), V.isLive("FORMING"), V.isLive("COMPLETED"), V.isLive("FAILED")], [true, true, false, false], "live statuses");
+const sIdx = V.patternIndex([{ ticker: "SSS", pattern: "saucer", latest: "yes", status: "FAILED", start_date: "2026-01-05", end_date: "2026-07-01", left_high: "50", low: "40", low_date: "2026-03-01", depth_pct: "20", length_weeks: "25", pivot: "50", buy_point: "50.1", zone_top: "52.5", pct_from_pivot: "-9", breakout_date: "2026-07-02", handle_date: "2026-06-20", handle_depth_pct: "6", rim_date: "2026-06-20", handle_low_date: "2026-06-25", stage: "2", stage_label: "2(b)", deep_base: "yes", breakout_volume_pct: "55", breakout_volume_ok: "yes", failed_date: "2026-07-20", data_status: "OK" },
+  { ticker: "TTT", pattern: "cup_handle", latest: "yes", status: "BUY ZONE", start_date: "2026-04-01", end_date: "2026-08-14", left_high: "60", low: "46", low_date: "2026-06-01", depth_pct: "23.4", length_weeks: "9.2", pivot: "58", buy_point: "58.1", zone_top: "60.9", pct_from_pivot: "2.1", breakout_date: "2026-08-17", handle_date: "2026-07-20", handle_depth_pct: "8.5", stage: "2", stage_label: "2", breakout_volume_pct: "12", breakout_volume_ok: "no", data_status: "OK" }]);
+const sb = sIdx.SSS[sIdx.SSS.length - 1], tb = sIdx.TTT[sIdx.TTT.length - 1];
+eq([sb.name, sb.stageLabel, sb.deep, sb.boVolOk, sb.failedDate, sb.rimDate, sb.handleLowDate], ["Saucer w/ Handle", "2(b)", true, true, "2026-07-20", "2026-06-20", "2026-06-25"], "saucer row fields");
+eq(V.patternLabel(tb), "Cup w/ Handle 23% 9w  Stage 2", "label with depth, weeks, stage");
+eq(V.patternLabel(sb), "Saucer w/ Handle 20% 25w  Stage 2(b)  failed", "failed label");
+const sCap = V.patternCaption(sb), tCap = V.patternCaption(tb);
+eq([sCap.includes("Stage 2(b)"), sCap.includes("deeper than usual"), sCap.includes("+55%"), sCap.includes("Failed 2026-07-20")], [true, true, true, true], "caption: stage, deep, volume, failed");
+eq(tCap.includes("(light)"), true, "caption flags a light-volume breakout");
 
 if (fails.length) { console.log("marketsurge check FAILED:\n- " + fails.join("\n- ")); process.exit(1); }
 console.log("marketsurge check ok");
