@@ -727,7 +727,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
+  const OFF_BY_DEFAULT = { pattern_fill: true, include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -841,7 +841,8 @@
     // No heavy outline strokes.
     // MarketSurge style: each base in its own shape, thin and light. A cup is a smooth bowl under the lows from the left
     // lip to the right lip, plus the handle; a double bottom is a W through the two lows and the middle peak; the other
-    // bases are a thin box. Light shading only inside the shape, and none on a long base (ms_shade_max_weeks).
+    // bases are a thin top line and bottom line with end ticks. No fill unless pattern_fill is on (then only inside the
+    // shape, and none on a long base, ms_shade_max_weeks).
     function msShape(ctx, it) {
       const sh = it.shape;
       const xs = X(sh.s), xe = X(sh.e);
@@ -880,11 +881,19 @@
         const yT = Y(Math.max(sh.top, sh.pivot));
         return { kind: "double", pts: pts, top: yT, labelX: xs, labelY: Math.max(pts[1][1], pts[3][1]) };
       }
-      const yT = Y(Math.max(sh.top, sh.pivot)), yB = Y(sh.bottom);
-      if (yT == null || yB == null) return null;
+      const yT0 = Y(Math.max(sh.top, sh.pivot)), yB0 = Y(sh.bottom);
+      if (yT0 == null || yB0 == null) return null;
       ctx.beginPath();
-      ctx.rect(Math.round(xs) + 0.5, Math.round(yT) + 0.5, Math.max(2, Math.round(xe - xs)), Math.round(yB - yT));
-      return { kind: "box", labelX: xs, labelY: yB + 1 };
+      if (flags.fill) {
+        ctx.rect(Math.round(xs) + 0.5, Math.round(yT0) + 0.5, Math.max(2, Math.round(xe - xs)), Math.round(yB0 - yT0));
+        return { kind: "box", labelX: xs, labelY: yB0 + 1 };
+      }
+      // No box: a thin resistance line just over the highs and a thin support line just under the lows, each with a
+      // short tick at its ends (a minimal bracket), so no bar is covered.
+      const yT = Math.round(yT0 - P) + 0.5, yB = Math.round(yB0 + P) + 0.5, x0 = Math.round(xs) + 0.5, x1 = Math.round(xe) + 0.5, t = 4;
+      ctx.moveTo(x0, yT + t); ctx.lineTo(x0, yT); ctx.lineTo(x1, yT); ctx.lineTo(x1, yT + t);
+      ctx.moveTo(x0, yB - t); ctx.lineTo(x0, yB); ctx.lineTo(x1, yB); ctx.lineTo(x1, yB - t);
+      return { kind: "lines", labelX: xs, labelY: yB + 1 };
     }
     function shadeOk(it) {
       const w = it.base.weeks;
@@ -895,16 +904,19 @@
         ctx.save();
         ctx.globalAlpha = it.latest ? 1 : 0.45;
         const g = msShape(ctx, it);
-        if (g && shadeOk(it)) {
+        if (g && flags.fill && g.kind !== "lines" && shadeOk(it)) {
           ctx.fillStyle = alpha(it.color, light ? 0.07 : 0.10);
           if (g.kind === "cup") { ctx.lineTo(g.bowl.closeTo[0], g.bowl.closeTo[1]); ctx.closePath(); ctx.fill(); }
           else if (g.kind === "double") { const last = g.pts[g.pts.length - 1]; ctx.lineTo(last[0], g.top); ctx.lineTo(g.pts[0][0], g.top); ctx.closePath(); ctx.fill(); }
           else ctx.fill();
         }
+        // Buy zone: a small faint band, pivot to zone top, only over the last few bars and the right margin, not the base.
         if (flags.zone && it.latest && isLive(it.base.status) && it.shape.zoneTop != null) {
-          const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop), x1 = X(it.shape.e);
+          const sh = it.shape;
+          const from = Math.max(sh.e + 1, sh.last - flags.zoneBars);
+          const y1 = Y(sh.pivot), y2 = Y(sh.zoneTop), x1 = X(Math.min(from, sh.last));
           if (y1 != null && y2 != null && x1 != null) {
-            ctx.fillStyle = light ? "rgba(31,63,216,0.07)" : "rgba(96,165,250,0.12)";
+            ctx.fillStyle = light ? "rgba(31,63,216,0.06)" : "rgba(96,165,250,0.10)";
             ctx.fillRect(x1, Math.min(y1, y2), Math.max(0, W - x1), Math.abs(y1 - y2));
           }
         }
@@ -955,7 +967,8 @@
         }
         const yp = Y(sh.pivot);
         if (flags.pivot && yp != null) {
-          const x0 = X(sh.pivotFrom);
+          // A short dashed pivot line over the right end of the base, not across all of it.
+          const x0 = X(Math.max(sh.pivotFrom, sh.e - flags.pivotBars));
           const live = it.latest && isLive(it.base.status);
           let x1 = X(sh.e);
           if (x1 != null) x1 = Math.min(W - 2, x1 + 26);
@@ -988,7 +1001,7 @@
           items.forEach((it) => {
             ctx.save();
             ctx.globalAlpha = it.latest ? 1 : 0.55;
-            if (outline(ctx, it, true)) { ctx.fillStyle = alpha(it.color, 0.06); ctx.fill(); }
+            if (outline(ctx, it, true) && flags.fill) { ctx.fillStyle = alpha(it.color, 0.06); ctx.fill(); }
             if (flags.zone && it.latest && isLive(it.base.status) && it.shape.zoneTop != null) {
               const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop), x1 = X(it.shape.e);
               if (y1 != null && y2 != null && x1 != null) {
@@ -1628,7 +1641,8 @@
       host.setAttribute("data-bases", String(overlayItems.length));
       if (overlayItems.length) {
         try {
-          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels"), ms: ms, boxes: labelBoxes, arrow: on("breakout_arrows"), shadeMaxWeeks: cfgNum("ms_shade_max_weeks", 30) }, D.isLight()));
+          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels"), ms: ms, boxes: labelBoxes, arrow: on("breakout_arrows"), shadeMaxWeeks: cfgNum("ms_shade_max_weeks", 30),
+            fill: on("pattern_fill"), zoneBars: cfgNum("ms_zone_bars", 12), pivotBars: cfgNum("ms_pivot_line_bars", 10) }, D.isLight()));
         } catch (e) { /* the chart still draws without the overlay */ }
       }
       // MarketSurge style: swing high/low prices (chart_viewer.swing_labels) and EPS markers (chart_viewer.eps_markers).

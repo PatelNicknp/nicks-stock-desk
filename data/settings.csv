@@ -400,6 +400,9 @@ chart_viewer.ms_log_scale,True
 chart_viewer.ms_hide_why,True
 chart_viewer.breakout_arrows,True
 chart_viewer.ms_shade_max_weeks,30
+chart_viewer.pattern_fill,False
+chart_viewer.ms_zone_bars,12
+chart_viewer.ms_pivot_line_bars,10
 chart_viewer.rs_rating_label,True
 chart_viewer.swing_labels,True
 chart_viewer.swing_label_bars,10

@@ -13,7 +13,7 @@ import tables  # noqa: E402
 
 STYLE_KEYS = ["marketsurge_style", "ms_log_scale", "ms_hide_why", "rs_rating_label", "swing_labels", "swing_label_bars", "swing_label_min_move_pct",
               "eps_markers", "pivot_header", "ms_range_months", "ms_range_months_phone", "ms_right_space_pct",
-              "breakout_arrows", "ms_shade_max_weeks"]
+              "breakout_arrows", "ms_shade_max_weeks", "pattern_fill", "ms_zone_bars", "ms_pivot_line_bars"]
 
 
 def _read(*parts):
@@ -34,6 +34,11 @@ def test_each_style_piece_has_a_switch_and_is_documented():
     for k in ("marketsurge_style", "ms_log_scale", "rs_rating_label", "swing_labels", "eps_markers", "pivot_header"):
         assert cv[k] is True, k
     assert cv["ms_range_months"] == 12 and cv["ms_range_months_phone"] == 6
+    # MarketSurge draws bases as thin lines: no fill unless pattern_fill is turned on, a small buy zone, a short pivot line.
+    assert cv["pattern_fill"] is False and cv["ms_zone_bars"] == 12 and cv["ms_pivot_line_bars"] == 10
+    src = _read("site", "js", "viewer.js")
+    assert "pattern_fill: true" in src[src.index("const OFF_BY_DEFAULT"):src.index("function on(key)")]
+    assert 'fill: on("pattern_fill")' in src and "flags.zoneBars" in src and "flags.pivotBars" in src
     assert cfg["features"]["eps_marks"] is True
     for k in ("quarters", "fresh_days", "default_lag_days", "match_days"):
         assert k in cfg["eps_marks"] and k in cfg["eps_marks"]["_note"], k
