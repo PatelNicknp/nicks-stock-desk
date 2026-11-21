@@ -108,13 +108,15 @@ def test_desk_row_charts_use_the_colors():
 def test_chart_viewer_uses_the_colors():
     src = _read("site", "js", "viewer.js")
     mas = re.search(r"const MAS = \[(.*?)\];", src, re.S).group(1)
-    # 21 is the optional MarketSurge-style EMA (chart_viewer.ma_21, off at the start).
-    assert re.findall(r"n: (\d+)", mas) == ["10", "20", "21", "50", "150", "200"]
+    # MA 9 and MA 21 (simple averages) replace MA 10, MA 20, and the old EMA 21.
+    assert re.findall(r"n: (\d+)", mas) == ["9", "21", "50", "150", "200"]
+    assert "ema" not in mas.lower() and "emaSeries" not in src and "EMA " not in src
     assert "#" not in mas  # no fixed colors left in the list
     assert "D.maColor(n)" in src
     # MarketSurge style (chart_viewer.marketsurge_style) draws every line thin; the earlier look keeps 50 and 200 at 2 px.
     assert "{ color: maColor(m.n), lineWidth: !ms && msLook && (m.n === 50 || m.n === 200) ? 2 : 1," in src
-    assert "<i style=\"background:' + maColor(m.n) + '\"></i><span class=\"cvl\">' + (m.ema ? \"EMA \" : \"MA \") + m.n" in src
+    assert "<i style=\"background:' + maColor(m.n) + '\"></i><span class=\"cvl\">' + \"MA \" + m.n" in src
+    assert "const MA_COLOR_OF = { 9: 10 };" in src and "(n === 21 ? D.maColor(20) : null)" in src
     assert "m.color" not in src
 
 

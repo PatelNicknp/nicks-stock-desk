@@ -48,7 +48,8 @@ def test_switch_and_config_block():
     assert cv["native_fullscreen_ios"] is False
     assert cv["include_trends"] is True
     assert "include_trends" in cv["_note"] and "Uptrend" in cv["_note"]
-    assert (cv["ma_10"], cv["ma_20"], cv["ma_50"], cv["ma_150"], cv["ma_200"]) == (False, False, True, True, True)
+    assert (cv["ma_9"], cv["ma_21"], cv["ma_50"], cv["ma_150"], cv["ma_200"]) == (False, False, True, True, True)
+    assert "ma_10" not in cv and "ma_20" not in cv
     assert cv["volume"] is True and cv["reason_box"] is True and cv["reason_box_toggle"] is True
     for key in ("list_picker", "fullscreen", "native_fullscreen_ios", "swipe", "flip_toggle", "arrows", "keyboard", "counter", "preload_next",
                 "ma_chips", "volume_toggle", "company_line", "day_change", "scanner_links", "drag_mode_toggle", "range_chips", "fit_wide_ranges"):

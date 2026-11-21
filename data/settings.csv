@@ -383,8 +383,7 @@ chart_viewer.keyboard,True
 chart_viewer.counter,True
 chart_viewer.preload_next,True
 chart_viewer.ma_chips,True
-chart_viewer.ma_10,False
-chart_viewer.ma_20,False
+chart_viewer.ma_9,False
 chart_viewer.ma_50,True
 chart_viewer.ma_150,True
 chart_viewer.ma_200,True

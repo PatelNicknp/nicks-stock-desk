@@ -704,9 +704,12 @@
   // ---------- Page ----------
   const D = window.Desk;
   // Line colors come from the chart_colors block (ma_colors, ma_colors_light in light mode) through D.maColor:
-  // MA 10 green, MA 20 orange, MA 50 blue, MA 150 yellow, MA 200 red. The chips use the same colors.
-  const MAS = [{ n: 10 }, { n: 20 }, { n: 21, ema: true }, { n: 50 }, { n: 150 }, { n: 200 }];
-  function maColor(n) {
+  // MA 9 green, MA 21 orange (green in the MarketSurge style), MA 50 blue, MA 150 yellow, MA 200 red. The chips use the
+  // same colors. All are simple averages; MA 9 and MA 21 take the colors MA 10 and MA 20 had (MA_COLOR_OF).
+  const MAS = [{ n: 9 }, { n: 21 }, { n: 50 }, { n: 150 }, { n: 200 }];
+  const MA_COLOR_OF = { 9: 10 };
+  function maColor(p) {
+    const n = MA_COLOR_OF[p] || p;
     const light = !!(D.isLight && D.isLight());
     // chart_viewer.ms_look: 50-day red, 200-day black, like MarketSurge. Off keeps the chart_colors block colors.
     if (on("ms_look")) {
@@ -714,21 +717,10 @@
       if (light && msStyle() && MSS.ma[n]) return MSS.ma[n];
       const c = msMaColor(n, light); if (c) return c;
     }
-    return D.maColor(n) || msMaColor(n, light) || "#64748b";
+    return D.maColor(n) || (n === 21 ? D.maColor(20) : null) || msMaColor(n, light) || "#64748b";
   }
   // The MarketSurge-style chart (chart_viewer.marketsurge_style, on by default). Off brings back the PR 74 look.
   function msStyle() { return on("ms_look") && on("marketsurge_style"); }
-  function emaSeries(closes, n) {
-    const out = new Array(closes.length).fill(null);
-    if (closes.length < n) return out;
-    const k = 2 / (n + 1);
-    let prev = 0;
-    for (let i = 0; i < n; i++) prev += closes[i];
-    prev /= n;
-    out[n - 1] = prev;
-    for (let i = n; i < closes.length; i++) { prev = closes[i] * k + prev * (1 - k); out[i] = prev; }
-    return out;
-  }
   function alpha(hex, a) {
     const m = /^#([0-9a-fA-F]{6})$/.exec(String(hex || ""));
     if (!m) return hex;
@@ -745,7 +737,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { pattern_fill: true, include_box: true, include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
+  const OFF_BY_DEFAULT = { pattern_fill: true, include_box: true, include_closed: true, ma_9: true, ma_21: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -1274,8 +1266,8 @@
     // Composite chip right after the EPS chip: "Comp 91", green at chart_viewer.comp_chip_green_min (80) or higher.
     // chart_viewer.comp_chip hides it. A label, not a button.
     const compBadge = on("comp_chip") ? '<span class="cvchip compchip" id="cvcomp" hidden></span>' : "";
-    const chips = rsBadge + epsBadge + compBadge + (on("ma_chips") ? MAS.filter((m) => !m.ema || on("ma_" + m.n) || msStyle()).map((m) =>
-      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i><span class="cvl">' + (m.ema ? "EMA " : "MA ") + m.n + "</span></button>").join("") : "") +
+    const chips = rsBadge + epsBadge + compBadge + (on("ma_chips") ? MAS.map((m) =>
+      '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i><span class="cvl">' + "MA " + m.n + "</span></button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
       (on("patterns") ? '<button type="button" class="cvchip" data-tool="pat" aria-pressed="false" title="Base outline, pivot line, and buy zone">Patterns</button>' : "") +
@@ -1374,7 +1366,7 @@
         const n = Number(b.getAttribute("data-ma"));
         const lab = b.querySelector(".cvl");
         const dot = b.querySelector("i");
-        if (lab && !(MAS.find((m) => m.n === n) || {}).ema) {
+        if (lab) {
           const wk = on("ms_look") && state.tf === "weekly" && msPeriod(n, true) !== n;
           lab.textContent = wk ? "MA " + msPeriod(n, true) + "w" : "MA " + n;
         }
@@ -1723,7 +1715,7 @@
         const data = [];
         // MarketSurge look: on Weekly the 50, 150, and 200-day lines are the 10, 30, and 40-week averages.
         const per = msLook ? msPeriod(m.n, state.tf === "weekly") : m.n;
-        (m.ema ? emaSeries(closes, per) : D.smaValues(closes, per)).forEach((v, i) => { if (v != null) data.push({ time: bars[i].date, value: v }); });
+        D.smaValues(closes, per).forEach((v, i) => { if (v != null) data.push({ time: bars[i].date, value: v }); });
         s.setData(data);
         maSeries[m.n] = s;
       });
