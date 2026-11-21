@@ -151,5 +151,18 @@ eq(aSh.lowPts[0][1], 94, "spike wick clipped to the base low from the file");
 eq(aSh.highPts[aSh.highPts.length - 1][0], 38, "upper line ends at the base high");
 eq(V.patternShape(Object.assign({}, aBase, { pullbackLowDates: [] }), aBars).kind, "box", "no pullback dates: plain lines");
 
+// v6: the Box breakout screen is out of the Chart Viewer by default; VCP and Flag pivots stay.
+const boxFiles = { "scores.csv": [{ ticker: "AAA", company: "A" }, { ticker: "BOXY", company: "B" }],
+  "scanner_vcp.csv": [{ ticker: "AAA", status: "READY", pivot: "10", reason: "r", strength: "90" }],
+  "scanner_box.csv": [{ ticker: "AAA", status: "READY", pivot: "11", reason: "r", strength: "80" }, { ticker: "BOXY", status: "READY", pivot: "5", reason: "r", strength: "80" }],
+  "scanner_flag.csv": [{ ticker: "AAA", status: "READY", pivot: "12", reason: "r", strength: "70" }] };
+const noBox = V.buildLists(boxFiles, { featureOn: () => true, includeWatching: true, includeBox: false });
+eq(noBox.lists.some((l) => l.id === "box"), false, "no Box list with include_box off");
+eq(noBox.info.AAA.entries.map((e) => e.list).sort(), ["flag", "vcp"], "no Box entry, VCP and Flag kept");
+eq(noBox.lists[0].items.includes("BOXY"), false, "a Box-only stock is not in All scanner stocks");
+const withBox = V.buildLists(boxFiles, { featureOn: () => true, includeWatching: true, includeBox: true });
+eq(withBox.lists.some((l) => l.id === "box"), true, "include_box on brings the list back");
+eq([V.scannerPivotLists(false), V.scannerPivotLists(true)], [["vcp", "flag"], ["vcp", "box", "flag"]], "pivot lines: no Box unless switched on");
+
 if (fails.length) { console.log("marketsurge check FAILED:\n- " + fails.join("\n- ")); process.exit(1); }
 console.log("marketsurge check ok");

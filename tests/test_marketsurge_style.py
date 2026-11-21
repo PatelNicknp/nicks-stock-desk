@@ -13,7 +13,8 @@ import tables  # noqa: E402
 
 STYLE_KEYS = ["marketsurge_style", "ms_log_scale", "ms_hide_why", "rs_rating_label", "swing_labels", "swing_label_bars", "swing_label_min_move_pct",
               "eps_markers", "pivot_header", "ms_range_months", "ms_range_months_phone", "ms_right_space_pct",
-              "breakout_arrows", "ms_shade_max_weeks", "pattern_fill", "ms_zone_bars", "ms_pivot_line_bars"]
+              "breakout_arrows", "ms_shade_max_weeks", "pattern_fill", "ms_zone_bars", "ms_pivot_line_bars",
+              "include_box", "scanner_pivot_bars"]
 
 
 def _read(*parts):
@@ -35,6 +36,8 @@ def test_each_style_piece_has_a_switch_and_is_documented():
         assert cv[k] is True, k
     assert cv["ms_range_months"] == 12 and cv["ms_range_months_phone"] == 6
     # MarketSurge draws bases as thin lines: no fill unless pattern_fill is turned on, a small buy zone, a short pivot line.
+    assert cv["include_box"] is False and cv["scanner_pivot_bars"] == 15
+    assert "include_box: true" in _read("site", "js", "viewer.js").split("const OFF_BY_DEFAULT")[1].split("\n")[0]
     assert cv["pattern_fill"] is False and cv["ms_zone_bars"] == 12 and cv["ms_pivot_line_bars"] == 10
     src = _read("site", "js", "viewer.js")
     assert "pattern_fill: true" in src[src.index("const OFF_BY_DEFAULT"):src.index("function on(key)")]

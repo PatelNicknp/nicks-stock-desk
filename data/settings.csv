@@ -365,6 +365,7 @@ chart_viewer.include_closed,False
 chart_viewer.include_buy_setups,True
 chart_viewer.include_watchlist,True
 chart_viewer.include_gap_up,True
+chart_viewer.include_box,False
 chart_viewer.include_trends,True
 chart_viewer.scanner_links,True
 chart_viewer.fullscreen,True
@@ -421,6 +422,7 @@ chart_viewer.pivot_lines,True
 chart_viewer.buy_zone,True
 chart_viewer.pattern_caption,True
 chart_viewer.scanner_pivots,True
+chart_viewer.scanner_pivot_bars,15
 chart_viewer.reason_box,True
 chart_viewer.reason_box_toggle,True
 chart_viewer.reason_max_chars,110

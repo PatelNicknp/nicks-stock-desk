@@ -109,6 +109,7 @@ async function main() {
     eq(/^All technical stocks \(\d+\)$/.test(opts[0].t), true, "All technical stocks is first: " + opts[0].t);
     counts.technical = Number(/\((\d+)\)/.exec(opts[0].t)[1]);
     eq(opts.slice(1).every((o) => TECH_LISTS.concat(["buysetups", "watchlist"]).includes(o.v)), true, "technical picker shows only technical lists");
+    eq(opts.some((o) => o.v === "box"), false, "no Box list in the Chart Viewer (chart_viewer.include_box off)");
     eq(opts.some((o) => FUND_LISTS.includes(o.v)), false, "no fundamental list on the technical side");
     eq(new URL(page.url()).searchParams.get("group"), "technical", "address carries the side");
     let labels = await whyLabels(page, 12);

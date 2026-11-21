@@ -135,6 +135,8 @@
     return out;
   }
   // A base still in play: not finished long ago and not failed.
+  // Scanner lists whose pivot shows on the chart: VCP and Flag; Box only when chart_viewer.include_box is on.
+  function scannerPivotLists(includeBox) { return includeBox ? ["vcp", "box", "flag"] : ["vcp", "flag"]; }
   function isLive(status) { return status !== "COMPLETED" && status !== "FAILED"; }
   // "Cup w/ Handle 23% 9w  Stage 2(b)" for the chart label; " failed" when the breakout failed.
   function patternLabel(base) {
@@ -480,6 +482,8 @@
       if (list.kind === "buy" && opts.includeBuySetups === false) return;
       if (list.kind === "watch" && opts.includeWatchlist === false) return;
       if (list.kind === "gap" && opts.includeGapUp === false) return;
+      // The Box breakout screen is out of the Chart Viewer (chart_viewer.include_box, off); its scanner page stays.
+      if (list.id === "box" && opts.includeBox === false) return;
       if (list.kind === "trend" && opts.includeTrends === false) return;
       const rows = files[list.file] || [];
       const items = [];
@@ -693,7 +697,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, patternLabel: patternLabel, isLive: isLive, bowlHull: bowlHull, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, MSS: MSS, swingPoints: swingPoints, epsMarks: epsMarks, epsMarkText: epsMarkText, pivotNote: pivotNote, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, patternLabel: patternLabel, isLive: isLive, scannerPivotLists: scannerPivotLists, bowlHull: bowlHull, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, MSS: MSS, swingPoints: swingPoints, epsMarks: epsMarks, epsMarkText: epsMarkText, pivotNote: pivotNote, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -741,7 +745,7 @@
     return D.MU;
   }
   // Defaults match config.json, so a settings file from before this page still behaves the same.
-  const OFF_BY_DEFAULT = { pattern_fill: true, include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
+  const OFF_BY_DEFAULT = { pattern_fill: true, include_box: true, include_closed: true, ma_10: true, ma_20: true, ma_21: true, native_fullscreen_ios: true };
   function on(key) {
     if (!D.featureOn("feature.chart_viewer")) return false;
     const v = D.settingVal("chart_viewer." + key);
@@ -1212,6 +1216,7 @@
       includeBuySetups: on("include_buy_setups"),
       includeWatchlist: on("include_watchlist"),
       includeGapUp: on("include_gap_up"),
+      includeBox: on("include_box"),
       includeTrends: on("include_trends"),
       group: group,
       groupOf: groupFor,
@@ -1694,14 +1699,21 @@
         capEl.hidden = !(state.pat && latest);
         capEl.textContent = latest ? "Base pattern (MarketSmith rules, a close copy of MarketSurge): " + patternCaption(latest) : "";
       }
-      // The VCP, Box, and Flag scanner pivots as dashed price lines (chart_viewer.scanner_pivots).
+      // The VCP and Flag scanner pivots (chart_viewer.scanner_pivots) as short dotted lines over only the last
+      // scanner_pivot_bars bars, with the price on the axis. Box is drawn only with chart_viewer.include_box on (off).
       if (on("scanner_pivots") && (built.info[t] || {}).entries) {
         const seen = {};
+        const kinds = scannerPivotLists(on("include_box"));
+        const span = Math.max(2, Math.round(cfgNum("scanner_pivot_bars", 15)));
         built.info[t].entries.forEach((en) => {
-          if (["vcp", "box", "flag"].indexOf(en.list) < 0 || !(en.pivot > 0) || /^CLOSED/.test(en.status) || seen[en.list]) return;
+          if (kinds.indexOf(en.list) < 0 || !(en.pivot > 0) || /^CLOSED/.test(en.status) || seen[en.list]) return;
           seen[en.list] = true;
           try {
-            price.createPriceLine({ price: en.pivot, color: "#6B7280", lineWidth: 1, lineStyle: LC.LineStyle.Dotted, axisLabelVisible: true, title: en.label + " pivot" });
+            const pl = chart.addSeries(LC.LineSeries, { color: "#6B7280", lineWidth: 1, lineStyle: LC.LineStyle.Dotted, priceLineVisible: false,
+              lastValueVisible: true, crosshairMarkerVisible: false, title: en.label + " pivot", autoscaleInfoProvider: () => null });
+            const pts = [];
+            for (let k = Math.max(0, bars.length - span); k < bars.length; k++) pts.push({ time: bars[k].date, value: en.pivot });
+            pl.setData(pts);
           } catch (e) { /* skip a line that cannot be drawn */ }
         });
       }
