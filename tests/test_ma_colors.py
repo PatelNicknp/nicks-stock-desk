@@ -112,7 +112,8 @@ def test_chart_viewer_uses_the_colors():
     assert re.findall(r"n: (\d+)", mas) == ["10", "20", "21", "50", "150", "200"]
     assert "#" not in mas  # no fixed colors left in the list
     assert "D.maColor(n)" in src
-    assert "{ color: maColor(m.n), lineWidth: msLook && (m.n === 50 || m.n === 200) ? 2 : 1," in src
+    # MarketSurge style (chart_viewer.marketsurge_style) draws every line thin; the earlier look keeps 50 and 200 at 2 px.
+    assert "{ color: maColor(m.n), lineWidth: !ms && msLook && (m.n === 50 || m.n === 200) ? 2 : 1," in src
     assert "<i style=\"background:' + maColor(m.n) + '\"></i><span class=\"cvl\">' + (m.ema ? \"EMA \" : \"MA \") + m.n" in src
     assert "m.color" not in src
 

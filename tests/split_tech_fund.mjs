@@ -62,6 +62,8 @@ const groupOn = (page) => page.$eval("#cvgroup button.on", (b) => b.textContent)
 async function whyLabels(page, steps) {
   const seen = new Set();
   for (let i = 0; i < steps; i++) {
+    // The MarketSurge-style chart starts with the Why box hidden (chart_viewer.ms_hide_why); the Why chip shows it.
+    if (await page.$eval("#cvwhy", (w) => w.hidden)) await page.click('#cvtools [data-tool="why"]');
     const open = await page.$eval("#cvwhy", (w) => w.classList.contains("open"));
     if (!open) await page.click("#cvwhy");
     (await page.$$eval("#cvwhy .cv-why-l", (ls) => ls.map((l) => l.textContent))).forEach((l) => seen.add(l));

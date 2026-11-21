@@ -3,6 +3,8 @@
  * to the network); scores.csv gets a made-up composite_rating for one stock and settings.csv is edited per case.
  * Checks the Comp chip after RS and EPS, price bars first, blue up / red down, 50-day red and 200-day black, the red
  * volume average line, the base overlay and its caption, the Patterns chip, Weekly 10 and 40-week lines, and every switch off.
+ * The shipped config adds the MarketSurge-style chart (chart_viewer.marketsurge_style): white, log price scale, thin lines,
+ * swing prices, EPS markers, the pivot note in the header, and the Why box hidden; the earlier look is checked with it off.
  * Usage: node tests/marketsurge_view.mjs   (needs playwright; PLAYWRIGHT_ROOT can point at it)
  * Prints "marketsurge view ok" and exits 0 when every check passes.
  */
@@ -125,6 +127,14 @@ const info = (page) => page.evaluate(() => {
     bases: document.getElementById("cvchart").getAttribute("data-bases"),
     note: document.getElementById("cvpatnote") ? { hidden: document.getElementById("cvpatnote").hidden, text: document.getElementById("cvpatnote").textContent } : null,
     bg: getComputedStyle(document.documentElement).getPropertyValue("--bg"),
+    ms: document.getElementById("cv").classList.contains("ms"),
+    priceMode: ch.priceScale("right", 0).options().mode, volMode: ch.panes()[1] ? ch.priceScale("right", 1).options().mode : null,
+    chartBg: ch.options().layout.background.color, vGrid: ch.options().grid.vertLines.visible,
+    lineWidths: lines.map((s) => s.options().lineWidth),
+    swings: Number(document.getElementById("cvchart").getAttribute("data-swings") || -1),
+    epsMarks: Number(document.getElementById("cvchart").getAttribute("data-eps-marks") || -1),
+    px: document.getElementById("cvpx").textContent,
+    whyHidden: document.getElementById("cvwhy") ? document.getElementById("cvwhy").hidden : null,
   };
 });
 
@@ -134,13 +144,21 @@ try {
   // 1. Everything on (the shipped config).
   {
     const { ctx, page, errors, outside } = await open(browser, {}, { scores: addComp });
+    await page.waitForTimeout(1500); // the EPS markers file arrives after the first chart
     const a = await info(page);
     check(a.type === "Bar", "first view is price bars (" + a.type + ")");
-    check(a.priceOpts.upColor === "#1d4ed8" && a.priceOpts.downColor === "#dc2626", "blue up, red down on white (" + a.priceOpts.upColor + " " + a.priceOpts.downColor + ")");
+    check(a.priceOpts.upColor === "#1F3FD8" && a.priceOpts.downColor === "#E0256F", "MarketSurge blue up, magenta down (" + a.priceOpts.upColor + " " + a.priceOpts.downColor + ")");
+    check(a.ms === true && a.chartBg === "#FFFFFF" && a.vGrid === true, "white chart with a dotted grid both ways");
+    check(a.priceMode === 1 && a.volMode === 0, "log price scale, plain volume scale: " + a.priceMode + " " + a.volMode);
+    check(a.lineWidths.every((w) => w === 1), "thin lines: " + a.lineWidths);
+    check(a.lineColors.includes("#A8201A") && a.lineColors.includes("#101010") && a.lineColors.includes("#2E9E44") && a.lineColors.includes("#1B2F8F"), "21 green, 50 maroon, 200 black, RS dark blue: " + a.lineColors);
+    check(a.swings > 0, "swing prices drawn: " + a.swings);
+    check(a.epsMarks >= 0, "EPS markers counted: " + a.epsMarks);
+    check(/from Pivot/.test(a.px), "header says how far from the pivot: " + a.px);
+    check(a.whyHidden === true, "Why box starts hidden");
     check(a.comp === "Comp 91" && a.compHot === true && a.compHidden === false, "Comp chip 91 is green: " + a.comp);
     const order = a.chips.filter((c) => /^(RS|EPS|Comp) \d+/.test(c)).map((c) => c.split(" ")[0]);
     check(order.indexOf("Comp") === order.length - 1 && (order.indexOf("EPS") < 0 || order.indexOf("EPS") < order.indexOf("Comp")), "Comp sits after RS and EPS: " + order);
-    check(a.lineColors.includes("#dc2626") && a.lineColors.includes("#111827"), "50-day red and 200-day black: " + a.lineColors);
     check(a.p1.length === 2 && a.p1[1] === "Line", "volume pane has the bars and the red average line: " + a.p1);
     check(Number(a.bases) >= 1, "base overlay drawn: " + a.bases);
     check(a.note && a.note.hidden === false && /Pivot \d/.test(a.note.text) && /buy zone/.test(a.note.text), "caption under the chart: " + (a.note && a.note.text));
@@ -159,9 +177,19 @@ try {
     // Candles keep the blue and red.
     await page.click('#cvtools [data-style="candles"]'); await page.waitForTimeout(900);
     const c = await info(page);
-    check(c.type === "Candlestick" && c.priceOpts.upColor === "#1d4ed8" && c.priceOpts.downColor === "#dc2626", "candles are blue and red too");
+    check(c.type === "Candlestick" && c.priceOpts.upColor === "#1F3FD8" && c.priceOpts.downColor === "#E0256F", "candles are blue and magenta too");
     check(errors.length === 0, "no page errors: " + errors.join(" | "));
     check(outside.n === 0, "no network outside the checkout: " + outside.n);
+    await ctx.close();
+  }
+  // 1b. marketsurge_style off: the earlier MarketSurge look (PR 74 first version) comes back.
+  {
+    const { ctx, page, errors } = await open(browser, { "chart_viewer.marketsurge_style": "False" }, { scores: addComp });
+    const a = await info(page);
+    check(a.type === "Bar" && a.priceOpts.upColor === "#1d4ed8" && a.priceOpts.downColor === "#dc2626", "earlier look: blue up, red down");
+    check(a.lineColors.includes("#dc2626") && a.lineColors.includes("#111827"), "earlier look: 50-day red and 200-day black: " + a.lineColors);
+    check(a.ms === false && a.priceMode === 0 && a.swings === -1 && !/from Pivot/.test(a.px), "earlier look: no log scale, swing prices, or pivot note");
+    check(errors.length === 0, "style off: no page errors " + errors.join(" | "));
     await ctx.close();
   }
   // 2. Each switch off on its own.
@@ -170,6 +198,10 @@ try {
     ["chart_viewer.patterns", (a) => Number(a.bases || 0) === 0 && (a.note === null || a.note.hidden) && !a.chips.includes("Patterns"), "patterns off"],
     ["chart_viewer.volume_avg_line", (a) => a.p1.length === 1, "volume average line off"],
     ["chart_viewer.ms_look", (a) => a.type === "Candlestick" && a.priceOpts.upColor !== "#1d4ed8" && !a.lineColors.includes("#111827"), "MarketSurge look off"],
+    ["chart_viewer.swing_labels", (a) => a.swings === 0, "swing prices off"],
+    ["chart_viewer.ms_log_scale", (a) => a.priceMode === 0, "log scale off"],
+    ["chart_viewer.pivot_header", (a) => !/from Pivot/.test(a.px), "pivot note off"],
+    ["chart_viewer.eps_markers", (a) => a.epsMarks === 0, "EPS markers off"],
     ["chart_viewer.pattern_caption", (a) => a.note === null && Number(a.bases) >= 1, "caption off"],
     ["feature.base_patterns", (a) => Number(a.bases || 0) === 0, "base patterns feature off"],
   ];

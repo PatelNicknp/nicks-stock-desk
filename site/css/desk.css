@@ -460,6 +460,13 @@ body.cv-lock{overflow:hidden;overscroll-behavior:none}
 .cvchip.compchip.hot{color:var(--up);border-color:var(--up)}
 .cv-patnote{margin-top:4px}
 .cvchip[hidden]{display:none}
+/* chart_viewer.marketsurge_style: small clean rating chips, a plain white chart, MarketSurge header line */
+.cv.ms .cvchip.rschip,.cv.ms .cvchip.epschip,.cv.ms .cvchip.compchip{height:22px;padding:0 7px;border-radius:4px;font-size:11px;font-weight:600;background:transparent}
+.cv.ms .cvchip.rschip.hot,.cv.ms .cvchip.epschip.hot,.cv.ms .cvchip.compchip.hot{background:rgba(22,163,74,.08)}
+.cv.ms .cv-px{font-size:14px}
+.cv.ms .cv-px .up,.cv.ms .cv-px .dn{font-weight:600;margin-left:4px}
+.cv.ms .cvpiv{display:inline-block;margin-left:10px;font-size:12px;font-weight:600;color:var(--tx2)}
+html[data-theme=light] .cv.ms .cv-chart{background:#fff}
 .cv-body{position:relative;flex:1;min-height:0;touch-action:pan-y}
 .cv.full .cv-body{touch-action:none}
 .cv-top{touch-action:pan-y}

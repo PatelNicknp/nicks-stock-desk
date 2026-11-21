@@ -74,6 +74,7 @@ feature.scanner_ep,True
 feature.scanner_gap_up,True
 feature.composite_rating,True
 feature.base_patterns,True
+feature.eps_marks,True
 feature.chart_viewer,True
 feature.light_mode,True
 feature.split_tech_fund,True
@@ -394,6 +395,18 @@ chart_viewer.eps_chip_green_min,80
 chart_viewer.comp_chip,True
 chart_viewer.comp_chip_green_min,80
 chart_viewer.ms_look,True
+chart_viewer.marketsurge_style,True
+chart_viewer.ms_log_scale,True
+chart_viewer.ms_hide_why,True
+chart_viewer.rs_rating_label,True
+chart_viewer.swing_labels,True
+chart_viewer.swing_label_bars,10
+chart_viewer.swing_label_min_move_pct,8
+chart_viewer.eps_markers,True
+chart_viewer.pivot_header,True
+chart_viewer.ms_range_months,12
+chart_viewer.ms_range_months_phone,6
+chart_viewer.ms_right_space_pct,6
 chart_viewer.ma_21,False
 chart_viewer.volume_avg_line,True
 chart_viewer.patterns,True
@@ -549,6 +562,10 @@ base_patterns.ipo_max_depth,40
 base_patterns.ipo_max_history_days,260
 base_patterns.consolidation_max_depth,35
 base_patterns.consolidation_near_pct,10
+eps_marks.quarters,12
+eps_marks.fresh_days,120
+eps_marks.default_lag_days,40
+eps_marks.match_days,50
 marketsmith_screens.min_eps_rating,80
 marketsmith_screens.min_rs,80
 marketsmith_screens.max_rows,50

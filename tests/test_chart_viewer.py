@@ -110,8 +110,8 @@ def test_no_new_market_requests():
     js = _read("site", "js", "viewer.js")
     assert "fetch(" not in js and "XMLHttpRequest" not in js
     assert "yahoo" not in js.lower()
-    # Stock bars, plus the SPY closes the desk already saves for the RS line.
-    assert sorted(re.findall(r'loadCsv\("([^"+]+)', js)) == ["index_ohlc/SPY.csv", "ohlc/", "ohlc/"]
+    # Stock bars, plus the SPY closes the desk already saves for the RS line, plus the saved EPS markers (eps_marks.csv).
+    assert sorted(re.findall(r'loadCsv\("([^"+]+)', js)) == ["eps_marks.csv", "index_ohlc/SPY.csv", "ohlc/", "ohlc/"]
     assert "fetch(" not in _read("site", "js", "rs_line.js") and "loadCsv" not in _read("site", "js", "rs_line.js")
 
 

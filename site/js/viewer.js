@@ -180,6 +180,85 @@
     }
     return text;
   }
+  // ---------- MarketSurge style (chart_viewer.marketsurge_style) ----------
+  // Colors picked to sit outside desk.js LIGHT_MAP, so light mode keeps them as written.
+  const MSS = {
+    bg: "#FFFFFF", text: "#333333", grid: "#E9ECF1", border: "#C9CED6",
+    up: "#1F3FD8", down: "#E0256F", volUp: "#3A57E0", volDown: "#E6407F", volAvg: "#D7262E",
+    rs: "#1B2F8F", label: "#3D3D3D", eps: "#2E7D32", epsDown: "#C62828",
+    ma: { 10: "#2E9E44", 20: "#E07B1A", 21: "#2E9E44", 50: "#A8201A", 150: "#C9A86A", 200: "#101010" },
+  };
+  // Swing highs and lows worth a price label: the highest high (lowest low) within k bars on each side,
+  // and at least minMove percent away from the last labelled swing of the other kind. Oldest first.
+  function swingPoints(bars, k, minMove) {
+    const out = [];
+    const n = bars.length;
+    k = k > 0 ? k : 10;
+    minMove = minMove >= 0 ? minMove : 6;
+    const H = (i) => (bars[i].h != null ? bars[i].h : bars[i].c);
+    const L = (i) => (bars[i].l != null ? bars[i].l : bars[i].c);
+    for (let i = 0; i < n; i++) {
+      let isHi = true, isLo = true;
+      for (let j = Math.max(0, i - k); j <= Math.min(n - 1, i + k); j++) {
+        if (j === i) continue;
+        if (H(j) > H(i) || (H(j) === H(i) && j < i)) isHi = false;
+        if (L(j) < L(i) || (L(j) === L(i) && j < i)) isLo = false;
+        if (!isHi && !isLo) break;
+      }
+      if (isHi) out.push({ i: i, price: H(i), kind: "high" });
+      if (isLo) out.push({ i: i, price: L(i), kind: "low" });
+    }
+    // Keep alternating swings that moved enough; a repeat of the same kind keeps the more extreme one.
+    const kept = [];
+    out.forEach((p) => {
+      const last = kept[kept.length - 1];
+      if (last && last.kind === p.kind) {
+        if ((p.kind === "high" && p.price > last.price) || (p.kind === "low" && p.price < last.price)) kept[kept.length - 1] = p;
+        return;
+      }
+      if (last && Math.abs(p.price / last.price - 1) * 100 < minMove) return;
+      kept.push(p);
+    });
+    return kept;
+  }
+  // EPS change versus the same quarter a year before, for one ticker: [{ date, eps, pct }] oldest first.
+  // Rows from data/eps_marks.csv (date, eps, yoy_pct, worked out by eps_marks.py) are used as they are.
+  // Rows from earnings_history.csv (earnings_date, eps_actual) work too: only reported quarters count,
+  // and a year-ago loss gives no percent.
+  function epsMarks(rows) {
+    rows = rows || [];
+    if (rows.length && rows[0].date !== undefined && rows[0].yoy_pct !== undefined) {
+      return rows.filter((r) => txt(r.date) && txt(r.data_status) !== "MISSING")
+        .map((r) => { const p = numOf(r.yoy_pct); return { date: txt(r.date), eps: numOf(r.eps), pct: p == null ? null : Math.round(p) }; })
+        .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    }
+    const rep = rows.map((r) => ({ date: txt(r.earnings_date), eps: numOf(r.eps_actual) }))
+      .filter((r) => r.date && r.eps != null)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const out = [];
+    rep.forEach((r, i) => {
+      const prior = i >= 4 ? rep[i - 4].eps : null;
+      const pct = prior != null && prior > 0 ? Math.round((r.eps / prior - 1) * 100) : null;
+      out.push({ date: r.date, eps: r.eps, pct: pct });
+    });
+    return out;
+  }
+  function epsMarkText(m) {
+    if (m.pct == null) return "EPS";
+    return "EPS " + (m.pct >= 0 ? "+" : "") + m.pct + "%";
+  }
+  // "+3.2% from Pivot in 6 days" for a live base: trading days since the breakout, or since the base ended.
+  function pivotNote(base, bars) {
+    if (!base || !base.latest || base.status === "COMPLETED" || !(base.pivot > 0) || !bars || !bars.length) return "";
+    const last = bars[bars.length - 1].c;
+    const pct = (last / base.pivot - 1) * 100;
+    const dates = bars.map((b) => b.date);
+    const from = barIndexOn(dates, base.breakoutDate || base.endDate);
+    const days = from >= 0 ? Math.max(0, bars.length - 1 - from) : null;
+    let text = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "% from Pivot";
+    if (days != null && base.breakoutDate) text += " in " + days + " day" + (days === 1 ? "" : "s");
+    return text;
+  }
   // MarketSurge look: 50-day red, 200-day black (light) or near white (dark), 150-day yellow; weekly 10-week red, 40-week black.
   const MS_MA = {
     light: { 10: "#16a34a", 20: "#ea580c", 21: "#16a34a", 50: "#dc2626", 150: "#ca8a04", 200: "#111827" },
@@ -551,7 +630,7 @@
   // grey X over the top left of the chart. There the fixed full-page overlay is used instead,
   // unless chart_viewer.native_fullscreen_ios is on.
   function useNativeFullscreen(appleTouch, nativeIos) { return !appleTouch || !!nativeIos; }
-  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
+  const api = { LISTS: LISTS, GROUPS: GROUPS, DEFAULT_GROUPS: DEFAULT_GROUPS, groupOf: groupOf, pickGroup: pickGroup, isAppleTouch: isAppleTouch, useNativeFullscreen: useNativeFullscreen, entryFor: entryFor, isWatching: isWatching, epsOf: epsOf, epsChip: epsChip, compOf: compOf, compChip: compChip, patternIndex: patternIndex, barIndexOn: barIndexOn, patternShape: patternShape, patternCaption: patternCaption, PATTERN_NAMES: PATTERN_NAMES, PATTERN_COLORS: PATTERN_COLORS, msMaColor: msMaColor, MSS: MSS, swingPoints: swingPoints, epsMarks: epsMarks, epsMarkText: epsMarkText, pivotNote: pivotNote, msPeriod: msPeriod, buildLists: buildLists, shorten: shorten, swipeDirection: swipeDirection, swipeZone: swipeZone, viewAfterResize: viewAfterResize, rangeFrom: rangeFrom, RANGES: RANGES, keepRecent: keepRecent, padBars: padBars, fitRange: fitRange, weekMonday: weekMonday, aggregateWeekly: aggregateWeekly, edgePad: edgePad, denseRange: denseRange, RIGHT_MARGIN_PX: RIGHT_MARGIN_PX, rankOf: rankOf };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window === "undefined") return;
 
@@ -563,9 +642,15 @@
   function maColor(n) {
     const light = !!(D.isLight && D.isLight());
     // chart_viewer.ms_look: 50-day red, 200-day black, like MarketSurge. Off keeps the chart_colors block colors.
-    if (on("ms_look")) { const c = msMaColor(n, light); if (c) return c; }
+    if (on("ms_look")) {
+      // chart_viewer.marketsurge_style (light mode): thin MarketSurge lines, 21-day green, 50-day maroon, 150 tan, 200 black.
+      if (light && msStyle() && MSS.ma[n]) return MSS.ma[n];
+      const c = msMaColor(n, light); if (c) return c;
+    }
     return D.maColor(n) || msMaColor(n, light) || "#64748b";
   }
+  // The MarketSurge-style chart (chart_viewer.marketsurge_style, on by default). Off brings back the PR 74 look.
+  function msStyle() { return on("ms_look") && on("marketsurge_style"); }
   function emaSeries(closes, n) {
     const out = new Array(closes.length).fill(null);
     if (closes.length < n) return out;
@@ -633,6 +718,7 @@
   function barColor(up) {
     const light = !!(D.isLight && D.isLight());
     // MarketSurge look: blue up, red down (the bar_up and bar_down colors apply when ms_look is off).
+    if (on("ms_look") && light && msStyle()) return up ? MSS.up : MSS.down;
     if (on("ms_look")) return up ? (light ? "#1d4ed8" : "#60a5fa") : (light ? "#dc2626" : "#ef4444");
     if (up) return hexSetting(light ? "bar_up_light" : "bar_up", light ? "#1d4ed8" : "#60a5fa");
     return hexSetting(light ? "bar_down_light" : "bar_down", light ? "#a21caf" : "#d946ef");
@@ -642,7 +728,8 @@
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem("desk-cv-ma") || "null"); } catch (e) { saved = null; }
     MAS.forEach((m) => {
-      const def = on("ma_" + m.n);
+      // MarketSurge style starts with the 21, 50, 150 (10-week), and 200-day lines, like a MarketSurge daily chart.
+      const def = msStyle() && [21, 50, 150, 200].indexOf(m.n) >= 0 ? true : on("ma_" + m.n);
       out[m.n] = saved && typeof saved[m.n] === "boolean" ? saved[m.n] : def;
     });
     return out;
@@ -701,6 +788,80 @@
       }
       return true;
     }
+    // MarketSurge style: a light shaded box over the base, a small label, and a short dashed pivot line with its price.
+    // No heavy outline strokes.
+    function msBox(it) {
+      const sh = it.shape;
+      const xs = X(sh.s), xe = X(sh.e);
+      const yT = Y(Math.max(sh.top, sh.pivot)), yB = Y(sh.bottom);
+      if (xs == null || xe == null || yT == null || yB == null) return null;
+      return { xs: xs, xe: Math.max(xs + 2, xe), yT: yT, yB: yB };
+    }
+    function msBottom(ctx, W) {
+      items.forEach((it) => {
+        const b = msBox(it);
+        if (!b) return;
+        ctx.save();
+        ctx.globalAlpha = it.latest ? 1 : 0.6;
+        ctx.fillStyle = alpha(it.color, light ? 0.07 : 0.10);
+        ctx.fillRect(b.xs, b.yT, b.xe - b.xs, b.yB - b.yT);
+        ctx.strokeStyle = alpha(it.color, 0.35);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(Math.round(b.xs) + 0.5, Math.round(b.yT) + 0.5, Math.round(b.xe - b.xs), Math.round(b.yB - b.yT));
+        if (flags.zone && it.latest && it.base.status !== "COMPLETED" && it.shape.zoneTop != null) {
+          const y1 = Y(it.shape.pivot), y2 = Y(it.shape.zoneTop);
+          if (y1 != null && y2 != null) {
+            ctx.fillStyle = light ? "rgba(31,63,216,0.07)" : "rgba(96,165,250,0.12)";
+            ctx.fillRect(b.xe, Math.min(y1, y2), Math.max(0, W - b.xe), Math.abs(y1 - y2));
+          }
+        }
+        ctx.restore();
+      });
+    }
+    function msTop(ctx, W) {
+      const boxes = flags.boxes;
+      if (boxes) boxes.length = 0;
+      const note = (x, y, w) => { if (boxes) boxes.push({ x0: x - 2, x1: x + w + 2, y0: y - 10, y1: y + 2 }); };
+      ctx.font = "10px Roboto, Arial, sans-serif";
+      ctx.textBaseline = "alphabetic";
+      items.forEach((it) => {
+        const sh = it.shape;
+        const b = msBox(it);
+        ctx.save();
+        ctx.globalAlpha = it.latest ? 1 : 0.6;
+        if (flags.label && b) {
+          ctx.textAlign = "left";
+          const text = it.base.name;
+          // Under the box's lower left corner, where a base has no bars, so it never sits on a swing price.
+          const y = b.yB + 11;
+          ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(text, b.xs + 1, y);
+          ctx.fillStyle = light ? "#4B5563" : "#cbd5e1"; ctx.fillText(text, b.xs + 1, y);
+          note(b.xs + 1, y, ctx.measureText(text).width);
+        }
+        const yp = Y(sh.pivot);
+        if (flags.pivot && yp != null) {
+          const x0 = X(sh.pivotFrom);
+          const live = it.latest && it.base.status !== "COMPLETED";
+          let x1 = X(sh.e);
+          if (x1 != null) x1 = Math.min(W - 2, x1 + 26);
+          if (x0 != null && x1 != null) {
+            ctx.setLineDash([4, 3]);
+            ctx.strokeStyle = light ? "#1F2937" : "#e5e7eb";
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(x0, Math.round(yp) + 0.5); ctx.lineTo(x1, Math.round(yp) + 0.5); ctx.stroke();
+            ctx.setLineDash([]);
+            if (live || it.latest) {
+              const tag = sh.pivot.toFixed(2);
+              ctx.textAlign = "left";
+              ctx.lineWidth = 3; ctx.strokeStyle = halo; ctx.strokeText(tag, x1 + 3, yp + 3);
+              ctx.fillStyle = light ? "#111827" : "#e5e7eb"; ctx.fillText(tag, x1 + 3, yp + 3);
+              note(x1 + 3, yp + 3, ctx.measureText(tag).width);
+            }
+          }
+        }
+        ctx.restore();
+      });
+    }
     const bottom = {
       zOrder: () => "bottom",
       renderer: () => ({
@@ -708,6 +869,7 @@
           if (!chart || !series) return;
           const ctx = scope.context;
           const W = scope.mediaSize.width;
+          if (flags.ms) { msBottom(ctx, W); return; }
           items.forEach((it) => {
             ctx.save();
             ctx.globalAlpha = it.latest ? 1 : 0.55;
@@ -731,6 +893,7 @@
           if (!chart || !series) return;
           const ctx = scope.context;
           const W = scope.mediaSize.width;
+          if (flags.ms) { msTop(ctx, W); return; }
           ctx.font = "600 11px Roboto, Arial, sans-serif";
           ctx.textBaseline = "alphabetic";
           items.forEach((it) => {
@@ -791,6 +954,101 @@
       },
     };
   }
+  // MarketSurge style extras on the price series: small prices at swing highs and lows, and EPS markers
+  // (a small triangle and "EPS +36%") along the bottom of the price pane on report days.
+  // swings: swingPoints() output; eps: [{ i, text, up }] with bar indexes. All from saved files.
+  function msMarksOverlay(bars, swings, eps, light, boxes) {
+    let chart = null, series = null;
+    const X = (i) => chart.timeScale().logicalToCoordinate(i);
+    const Y = (p) => series.priceToCoordinate(p);
+    const halo = light ? "#ffffff" : "#0b0f17";
+    const view = {
+      zOrder: () => "top",
+      renderer: () => ({
+        draw: (target) => target.useMediaCoordinateSpace((scope) => {
+          if (!chart || !series) return;
+          const ctx = scope.context;
+          const W = scope.mediaSize.width, Hh = scope.mediaSize.height;
+          ctx.save();
+          ctx.font = "10px Roboto, Arial, sans-serif";
+          ctx.textAlign = "center";
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = halo;
+          swings.forEach((p) => {
+            const x = X(p.i), y = Y(p.price);
+            if (x == null || y == null || x < 14 || x > W - 14) return;
+            const yy = p.kind === "high" ? y - 5 : y + 12;
+            if (yy < 10 || yy > Hh - 4) return;
+            const t = p.price >= 1000 ? p.price.toFixed(0) : p.price.toFixed(2);
+            const w = ctx.measureText(t).width;
+            // Skip a swing price that would sit on a base name or a pivot price.
+            if ((boxes || []).some((r) => x + w / 2 > r.x0 && x - w / 2 < r.x1 && yy > r.y0 && yy - 9 < r.y1)) return;
+            ctx.strokeText(t, x, yy);
+            ctx.fillStyle = light ? "#3D3D3D" : "#cbd5e1";
+            ctx.fillText(t, x, yy);
+          });
+          eps.forEach((m) => {
+            const x = X(m.i);
+            if (x == null || x < 4 || x > W - 4) return;
+            const y = Hh - 5;
+            ctx.fillStyle = m.up == null ? (light ? "#6B7280" : "#94a3b8") : (m.up ? (light ? "#2E7D32" : "#4ade80") : (light ? "#C62828" : "#f87171"));
+            ctx.beginPath();
+            if (m.up === false) { ctx.moveTo(x - 4, y - 7); ctx.lineTo(x + 4, y - 7); ctx.lineTo(x, y); }
+            else { ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y); ctx.lineTo(x, y - 7); }
+            ctx.closePath();
+            ctx.fill();
+            ctx.textAlign = "left";
+            ctx.font = "9px Roboto, Arial, sans-serif";
+            if (x + 6 + ctx.measureText(m.text).width > W - 2) { ctx.textAlign = "right"; ctx.strokeText(m.text, x - 6, y); ctx.fillText(m.text, x - 6, y); ctx.textAlign = "center"; ctx.font = "10px Roboto, Arial, sans-serif"; return; }
+            ctx.strokeText(m.text, x + 6, y);
+            ctx.fillText(m.text, x + 6, y);
+            ctx.font = "10px Roboto, Arial, sans-serif";
+            ctx.textAlign = "center";
+          });
+          ctx.restore();
+        }),
+      }),
+    };
+    return {
+      attached: (p) => { chart = p.chart; series = p.series; },
+      detached: () => { chart = null; series = null; },
+      paneViews: () => [view],
+      updateAllViews: () => {},
+    };
+  }
+  // "RS Rating 92" at the right end of the RS line, in the line's color.
+  function rsLabelOverlay(text, color) {
+    let chart = null, series = null, last = null;
+    const view = {
+      zOrder: () => "top",
+      renderer: () => ({
+        draw: (target) => target.useMediaCoordinateSpace((scope) => {
+          if (!chart || !series || !last) return;
+          const x = chart.timeScale().timeToCoordinate(last.time);
+          const y = series.priceToCoordinate(last.value);
+          if (x == null || y == null) return;
+          const ctx = scope.context;
+          ctx.save();
+          ctx.font = "600 10px Roboto, Arial, sans-serif";
+          ctx.textAlign = "right";
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = D.isLight() ? "#ffffff" : "#0b0f17";
+          const yy = Math.max(10, y - 6);
+          ctx.strokeText(text, x, yy);
+          ctx.fillStyle = color;
+          ctx.fillText(text, x, yy);
+          ctx.restore();
+        }),
+      }),
+    };
+    return {
+      attached: (p) => { chart = p.chart; series = p.series; },
+      detached: () => { chart = null; series = null; },
+      paneViews: () => [view],
+      updateAllViews: () => {},
+      setLast: (pt) => { last = pt; },
+    };
+  }
   function render(ctx) {
     const params = new URLSearchParams(location.search);
     // Technical | Fundamental switch: features.split_tech_fund and chart_viewer.group_toggle. Off is the old single viewer.
@@ -821,7 +1079,8 @@
       vol: on("volume_toggle") ? stored("desk-cv-vol", on("volume")) : on("volume"),
       // RS line: stock close divided by SPY (chart_viewer.rs_line). The RS line chip saves a pick on this device.
       rsLine: on("rs_line") && stored("desk-cv-rs-line", true),
-      why: on("reason_box") && (on("reason_box_toggle") ? stored("desk-cv-why", true) : true),
+      // MarketSurge style keeps the chart clear: the Why box starts hidden (the Why chip brings it back and is saved).
+      why: on("reason_box") && (on("reason_box_toggle") ? stored("desk-cv-why", !(msStyle() && on("ms_hide_why"))) : true),
       // Drag: move chart (true) or Drag: next chart (false). chart_touch_pan is the default; the chip saves a pick.
       pan: on("drag_mode_toggle") ? stored("desk-cv-drag-pan", on("chart_touch_pan")) : on("chart_touch_pan"),
       // Daily is the start. Weekly is built from those daily bars. The pick is saved on this device.
@@ -860,7 +1119,7 @@
     // Composite chip right after the EPS chip: "Comp 91", green at chart_viewer.comp_chip_green_min (80) or higher.
     // chart_viewer.comp_chip hides it. A label, not a button.
     const compBadge = on("comp_chip") ? '<span class="cvchip compchip" id="cvcomp" hidden></span>' : "";
-    const chips = rsBadge + epsBadge + compBadge + (on("ma_chips") ? MAS.filter((m) => !m.ema || on("ma_" + m.n)).map((m) =>
+    const chips = rsBadge + epsBadge + compBadge + (on("ma_chips") ? MAS.filter((m) => !m.ema || on("ma_" + m.n) || msStyle()).map((m) =>
       '<button type="button" class="cvchip" data-ma="' + m.n + '" aria-pressed="false"><i style="background:' + maColor(m.n) + '"></i><span class="cvl">' + (m.ema ? "EMA " : "MA ") + m.n + "</span></button>").join("") : "") +
       (on("volume_toggle") ? '<button type="button" class="cvchip" data-tool="vol" aria-pressed="false">Vol</button>' : "") +
       (on("rs_line") ? '<button type="button" class="cvchip" data-tool="rsline" aria-pressed="false">RS line</button>' : "") +
@@ -878,7 +1137,7 @@
     ctx.page.innerHTML =
       '<div class="ctrls cvctrls">' + switcher + picker + fsBtn + "</div>" +
       '<p class="cap" id="cvsum"></p>' +
-      '<div class="cv" id="cv" tabindex="-1">' +
+      '<div class="cv' + (msStyle() ? " ms" : "") + '" id="cv" tabindex="-1">' +
         '<div class="cv-top">' +
           '<div class="cv-id"><div class="cv-line"><span class="cv-tk" id="cvtk"></span><span class="cv-co" id="cvco"></span></div>' +
           (on("company_line") ? '<div class="cv-blurb" id="cvblurb"></div>' : "") + "</div>" +
@@ -916,6 +1175,24 @@
       if (!on("rs_line")) return Promise.resolve([]);
       if (!spyJob) spyJob = D.loadCsv("index_ohlc/SPY.csv").then((rows) => D.barsFromRows(rows || [])).catch(() => []);
       return spyJob;
+    }
+    // EPS reports from data/eps_marks.csv (chart_viewer.eps_markers). One load, after the first chart shows.
+    let epsIndex = null;
+    let epsJob = null;
+    function loadEps() {
+      if (!msStyle() || !on("eps_markers")) return Promise.resolve(null);
+      if (!epsJob) {
+        epsJob = D.loadCsv("eps_marks.csv").then((rows) => {
+          const by = {};
+          (rows || []).forEach((r) => { const k = txt(r.ticker).toUpperCase(); if (k) (by[k] = by[k] || []).push(r); });
+          const out = {};
+          Object.keys(by).forEach((k) => { out[k] = epsMarks(by[k]); });
+          epsIndex = out;
+          if (D.forgetCsv) D.forgetCsv("eps_marks.csv");
+          return out;
+        }).catch(() => { epsIndex = {}; return epsIndex; });
+      }
+      return epsJob;
     }
     function paintRsNote() {
       const el = document.getElementById("cvrsnote");
@@ -1034,6 +1311,13 @@
       try { plot = chart.timeScale().width(); } catch (e) { plot = host.clientWidth - 60; }
       const pick = RANGES.find((r) => r.id === state.range);
       const phone = plot && plot < 520;
+      // MarketSurge style daily: about a year of bars (ms_range_months, 12; ms_range_months_phone, 6) with a little room on the right.
+      if (msStyle() && state.tf === "daily" && !pick && plot > 0) {
+        const from = rangeFrom(bars.map((b) => b.date), phone ? cfgNum("ms_range_months_phone", 6) : cfgNum("ms_range_months", 12));
+        const visible = n - from;
+        setRange({ from: from - 0.5, to: n - 1 + Math.max(3, Math.round(visible * cfgNum("ms_right_space_pct", 6) / 100)) });
+        return;
+      }
       // dense_default: one candle width on every screen, daily or weekly. Off uses the month spans below.
       if (on("dense_default") && !pick && plot > 0) {
         let marginPx = on("why_box_top_left") ? RIGHT_MARGIN_PX : (state.open ? Math.min(boxPad(), 260) : boxPad());
@@ -1124,11 +1408,11 @@
       }
       const blurb = document.getElementById("cvblurb");
       if (blurb) blurb.textContent = D.blurbOf(t) || "";
-      let close = null, change = null;
+      let close = null, change = null, diff = null;
       if (rows && rows.length) {
         close = rows[rows.length - 1].c;
         const prev = rows.length > 1 ? rows[rows.length - 2].c : null;
-        if (prev) change = (close / prev - 1) * 100;
+        if (prev) { change = (close / prev - 1) * 100; diff = close - prev; }
       } else {
         close = it.price;
         change = it.dayPct;
@@ -1136,6 +1420,19 @@
       const px = document.getElementById("cvpx");
       const ch = change == null || !on("day_change") ? "" :
         ' <span class="' + (change >= 0 ? "up" : "dn") + '">' + (change >= 0 ? "+" : "") + D.fmt(change, 2) + "%</span>";
+      if (msStyle()) {
+        // MarketSurge style header: price, change, % change, and "+X% from Pivot in N days" for a live base.
+        const sign = change != null && change >= 0 ? "+" : "";
+        const chMs = change == null || !on("day_change") ? "" : ' <span class="' + (change >= 0 ? "up" : "dn") + '">' +
+          (diff != null ? sign + D.fmt(diff, 2) + " " : "") + sign + D.fmt(change, 2) + "%</span>";
+        let piv = "";
+        if (on("pivot_header") && rows && rows.length && state.pat) {
+          const base = (patterns[t] || []).find((b) => b.latest);
+          const note = pivotNote(base, rows);
+          if (note) piv = '<span class="cvpiv">' + D.esc(note) + "</span>";
+        }
+        px.innerHTML = close == null ? "" : '<b>' + D.esc(D.fmt(close, 2)) + "</b>" + chMs + piv;
+      } else
       px.innerHTML = close == null ? "" : '<b>' + D.esc(D.fmt(close, 2)) + "</b>" + ch;
       const count = document.getElementById("cvcount");
       if (count) count.textContent = items.length ? (index + 1) + " of " + items.length : "0 of 0";
@@ -1158,7 +1455,9 @@
       }
       msg.hidden = true;
       const LC = LightweightCharts;
-      chart = D.themedChart(LC.createChart(host, D.themed({
+      const ms = msStyle();
+      const msLight = ms && D.isLight();
+      const chartOpts = D.themed({
         autoSize: true,
         layout: { background: { type: "solid", color: "#0B0F17" }, textColor: D.MU, fontFamily: "Roboto, Arial, sans-serif", fontSize: 11,
           attributionLogo: false, panes: { separatorColor: "#1E293B", separatorHoverColor: "rgba(0,0,0,0)", enableResize: false } },
@@ -1169,7 +1468,20 @@
         handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: state.pan, vertTouchDrag: false },
         handleScale: { mouseWheel: true, pinch: state.pan, axisPressedMouseMove: true, axisDoubleClickReset: true },
         kineticScroll: { touch: false, mouse: false },
-      })));
+      });
+      if (msLight) {
+        // MarketSurge style: pure white, a faint dotted grid both ways, plain gray axes.
+        chartOpts.layout.background = { type: "solid", color: MSS.bg };
+        chartOpts.layout.textColor = MSS.text;
+        chartOpts.layout.fontSize = 10;
+        chartOpts.layout.panes.separatorColor = MSS.border;
+        chartOpts.grid = { vertLines: { color: MSS.grid, style: LC.LineStyle.Dotted, visible: true }, horzLines: { color: MSS.grid, style: LC.LineStyle.Dotted } };
+        chartOpts.rightPriceScale.borderColor = MSS.border;
+        chartOpts.timeScale.borderColor = MSS.border;
+        chartOpts.crosshair = { mode: LC.CrosshairMode.Magnet, vertLine: { color: "#9CA3AF", labelBackgroundColor: "#4B5563" }, horzLine: { color: "#9CA3AF", labelBackgroundColor: "#4B5563" } };
+      }
+      // MarketSurge charts are semi-log: equal moves in percent look the same size (chart_viewer.ms_log_scale).
+      chart = D.themedChart(LC.createChart(host, chartOpts));
       userRange = carryRange;
       carryRange = null;
       lastSet = null;
@@ -1186,6 +1498,9 @@
         priceLineVisible: false, lastValueVisible: true,
       });
       price.setData(bars.map((b) => ({ time: b.date, open: b.o, high: b.h, low: b.l, close: b.c })));
+      // MarketSurge charts are semi-log: equal moves in percent look the same size (chart_viewer.ms_log_scale). Price pane only.
+      // Text boxes the base overlay drew this paint, so the swing prices can step around them.
+      const labelBoxes = [];
       const closes = bars.map((b) => b.c);
       // Base outlines, pivot lines, and the 5% buy zone (chart_viewer.patterns and the Patterns chip).
       const found = patterns[t] || [];
@@ -1198,8 +1513,29 @@
       host.setAttribute("data-bases", String(overlayItems.length));
       if (overlayItems.length) {
         try {
-          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels") }, D.isLight()));
+          price.attachPrimitive(baseOverlay(overlayItems, { pivot: on("pivot_lines"), zone: on("buy_zone"), label: on("pattern_labels"), ms: ms, boxes: labelBoxes }, D.isLight()));
         } catch (e) { /* the chart still draws without the overlay */ }
+      }
+      // MarketSurge style: swing high/low prices (chart_viewer.swing_labels) and EPS markers (chart_viewer.eps_markers).
+      if (ms) {
+        const weekly = state.tf === "weekly";
+        const swings = on("swing_labels") ? swingPoints(bars, weekly ? 4 : cfgNum("swing_label_bars", 10), cfgNum("swing_label_min_move_pct", 8)) : [];
+        const dates = bars.map((b) => b.date);
+        const marks = [];
+        if (on("eps_markers") && epsIndex && epsIndex[t]) {
+          epsIndex[t].forEach((m) => {
+            if (m.date < dates[0] || m.date > dates[dates.length - 1]) return;
+            marks.push({ i: barIndexOn(dates, m.date), text: epsMarkText(m), up: m.pct == null ? null : m.pct >= 0 });
+          });
+        }
+        host.setAttribute("data-swings", String(swings.length));
+        host.setAttribute("data-eps-marks", String(marks.length));
+        if (swings.length || marks.length) {
+          try { price.attachPrimitive(msMarksOverlay(bars, swings, marks, D.isLight(), labelBoxes)); } catch (e) { /* chart still draws */ }
+        }
+        if (!state.rsLine || !spy.length) {
+          try { chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.05, bottom: 0.09 } }); } catch (e) { /* default margins */ }
+        }
       }
       const capEl = document.getElementById("cvpatnote");
       if (capEl) {
@@ -1219,7 +1555,7 @@
         });
       }
       MAS.forEach((m) => {
-        const s = chart.addSeries(LC.LineSeries, { color: maColor(m.n), lineWidth: msLook && (m.n === 50 || m.n === 200) ? 2 : 1, priceLineVisible: false, lastValueVisible: false,
+        const s = chart.addSeries(LC.LineSeries, { color: maColor(m.n), lineWidth: !ms && msLook && (m.n === 50 || m.n === 200) ? 2 : 1, priceLineVisible: false, lastValueVisible: false,
           crosshairMarkerVisible: false, visible: !!state.ma[m.n] });
         const data = [];
         // MarketSurge look: on Weekly the 50, 150, and 200-day lines are the 10, 30, and 40-week averages.
@@ -1238,7 +1574,7 @@
         rsCount = line.points.length;
         if (line.points.length) {
           rsSeries = chart.addSeries(LC.LineSeries, {
-            color: "#7C9CFF", lineWidth: 2, priceLineVisible: false, lastValueVisible: false,
+            color: ms ? (msLight ? MSS.rs : "#93C5FD") : "#7C9CFF", lineWidth: ms ? 1 : 2, priceLineVisible: false, lastValueVisible: false,
             crosshairMarkerVisible: false, title: "",
             priceFormat: { type: "price", precision: 3, minMove: 0.001 },
             priceScaleId: "",
@@ -1247,23 +1583,33 @@
           if (line.markers.length && LC.createSeriesMarkers) {
             try {
               LC.createSeriesMarkers(rsSeries, line.markers.map((m) => ({
-                time: m.time, position: "inBar", shape: "circle", size: 2,
-                color: D.themed(m.kind === "before" ? "#F59E0B" : "#7C9CFF"),
+                time: m.time, position: "inBar", shape: "circle", size: ms ? 1 : 2,
+                color: D.themed(m.kind === "before" ? "#F59E0B" : (msLight ? "#1F3FD8" : "#7C9CFF")),
               })));
             } catch (e) { /* the line still shows if a dot cannot be drawn */ }
           }
           try {
             // Candles use the top of the pane. The RS line autoscales in the strip below them.
-            chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: 0.26 } });
-            chart.priceScale("").applyOptions({ visible: false, borderVisible: false, scaleMargins: { top: 0.76, bottom: 0.04 } });
+            chart.priceScale("right").applyOptions({ scaleMargins: ms ? { top: 0.05, bottom: 0.25 } : { top: 0.06, bottom: 0.26 } });
+            chart.priceScale("").applyOptions({ visible: false, borderVisible: false, scaleMargins: ms ? { top: 0.78, bottom: 0.08 } : { top: 0.76, bottom: 0.04 } });
           } catch (e) { /* the line still autoscales */ }
+          // "RS Rating 92" at the right end of the line (chart_viewer.rs_rating_label).
+          const it = built.info[t] || {};
+          if (ms && on("rs_rating_label") && it.rs != null && D.featureOn("feature.rs_rank")) {
+            try {
+              const lab = rsLabelOverlay("RS Rating " + Math.round(it.rs), msLight ? MSS.rs : "#93C5FD");
+              lab.setLast(line.points[line.points.length - 1]);
+              rsSeries.attachPrimitive(lab);
+            } catch (e) { /* the line still shows without its label */ }
+          }
         }
       }
       paintRsNote();
       if (state.vol) {
         const vol = chart.addSeries(LC.HistogramSeries, { priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false }, 1);
+        if (ms) { try { chart.priceScale("right", 1).applyOptions({ mode: LC.PriceScaleMode.Normal, scaleMargins: { top: 0.12, bottom: 0 } }); } catch (e) { /* default margins */ } }
         vol.setData(bars.filter((b) => b.v != null).map((b) => ({ time: b.date, value: b.v,
-          color: msLook ? alpha(b.c >= b.o ? barColor(true) : barColor(false), 0.55)
+          color: msLight ? (b.c >= b.o ? MSS.volUp : MSS.volDown) : msLook ? alpha(b.c >= b.o ? barColor(true) : barColor(false), 0.55)
             : (b.c >= b.o ? (D.isLight() ? "rgba(21,128,61,.6)" : "rgba(34,197,94,.55)") : (D.isLight() ? "rgba(220,38,38,.6)" : "rgba(239,68,68,.55)")) })));
         // MarketSurge's red line: the 50-day average volume (10 weeks on Weekly). Bars above it beat normal volume.
         if (on("volume_avg_line")) {
@@ -1272,7 +1618,7 @@
           const vdata = [];
           avg.forEach((v, i) => { if (v != null) vdata.push({ time: vb[i].date, value: v }); });
           if (vdata.length) {
-            const vl = chart.addSeries(LC.LineSeries, { color: D.isLight() ? "#dc2626" : "#ef4444", lineWidth: 1, priceLineVisible: false,
+            const vl = chart.addSeries(LC.LineSeries, { color: msLight ? MSS.volAvg : D.isLight() ? "#dc2626" : "#ef4444", lineWidth: 1, priceLineVisible: false,
               lastValueVisible: false, crosshairMarkerVisible: false }, 1);
             vl.setData(vdata);
           }
@@ -1280,6 +1626,14 @@
         const panes = chart.panes();
         if (panes[0]) panes[0].setStretchFactor(4);
         if (panes[1]) panes[1].setStretchFactor(1);
+      }
+      // MarketSurge charts are semi-log: equal moves in percent look the same size (chart_viewer.ms_log_scale).
+      // Price pane only; the volume pane keeps a plain scale from zero.
+      if (ms && on("ms_log_scale")) {
+        try {
+          price.priceScale().applyOptions({ mode: LC.PriceScaleMode.Logarithmic });
+          if (chart.panes().length > 1) chart.priceScale("right", 1).applyOptions({ mode: LC.PriceScaleMode.Normal });
+        } catch (e) { /* stays linear */ }
       }
       requestAnimationFrame(() => { if (my === token) refit(); });
     }
@@ -1303,7 +1657,12 @@
       header(t, null);
       remember("ohlc/" + t + ".csv");
       Promise.all([D.ensureTv(), D.loadCsv("ohlc/" + t + ".csv").catch(() => []), loadSpy()])
-        .then((res) => { spy = res[2] || []; draw(t, res[1], my); })
+        .then((res) => {
+          spy = res[2] || [];
+          draw(t, res[1], my);
+          // The EPS markers arrive a moment later the first time; redraw once if nobody has moved the chart yet.
+          if (epsIndex == null) loadEps().then((ix) => { if (ix && my === token && !userRange) draw(t, res[1], my); });
+        })
         .catch(() => {
           if (my !== token) return;
           dropChart();

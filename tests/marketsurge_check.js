@@ -87,5 +87,39 @@ eq(V.msMaColor(200, false), "#e5e7eb", "200 light on dark");
 eq([V.msPeriod(50, true), V.msPeriod(150, true), V.msPeriod(200, true), V.msPeriod(10, true), V.msPeriod(50, false)], [10, 30, 40, 10, 50], "weekly periods");
 Object.keys(V.PATTERN_NAMES).forEach((k) => { eq(typeof V.PATTERN_COLORS[k], "string", "color for " + k); });
 
+// MarketSurge style: swing prices. A clean up-down-up zigzag gives alternating highs and lows that moved enough.
+const zig = [];
+[10, 20, 12, 24, 23.5, 15].forEach((p, k, arr) => {
+  if (k === arr.length - 1) return;
+  const q = arr[k + 1];
+  for (let j = 0; j < 10; j++) { const c = p + (q - p) * j / 10; zig.push({ date: "d" + zig.length, o: c, h: c + 0.1, l: c - 0.1, c: c }); }
+});
+const sw = V.swingPoints(zig, 3, 8);
+eq(sw.map((p) => p.kind), ["low", "high", "low", "high", "low"], "swing kinds alternate");
+eq(sw.map((p) => Math.round(p.price * 10) / 10), [9.9, 20.1, 11.9, 24.1, 15.8], "swing prices; the 23.5 dip is too small for its own label");
+eq(V.swingPoints([], 3, 8), [], "no bars no swings");
+// EPS markers: eps_marks.csv rows as they are; earnings_history rows give the change against four quarters back.
+eq(V.epsMarks([{ ticker: "A", date: "2026-05-01", eps: "1.2", yoy_pct: "36", data_status: "OK" }, { ticker: "A", date: "2026-02-01", eps: "1", yoy_pct: "", data_status: "OK" }]),
+  [{ date: "2026-02-01", eps: 1, pct: null }, { date: "2026-05-01", eps: 1.2, pct: 36 }], "eps_marks rows, oldest first");
+const hist = ["2025-01-30", "2025-04-30", "2025-07-30", "2025-10-30", "2026-01-30"].map((d, k) => ({ earnings_date: d, eps_actual: String([1, 1.1, 1.2, 1.3, 1.5][k]) }));
+hist.push({ earnings_date: "2026-04-30", eps_actual: "" });
+const em = V.epsMarks(hist);
+eq(em.length, 5, "only reported quarters");
+eq(em[4].pct, 50, "1.5 vs 1.0 a year before is +50%");
+eq(em[0].pct, null, "no year-ago quarter, no percent");
+eq(V.epsMarks([{ earnings_date: "2025-01-01", eps_actual: "-1" }, { earnings_date: "2025-04-01", eps_actual: "1" }, { earnings_date: "2025-07-01", eps_actual: "1" }, { earnings_date: "2025-10-01", eps_actual: "1" }, { earnings_date: "2026-01-01", eps_actual: "1" }])[4].pct, null, "a year-ago loss gives no percent");
+eq([V.epsMarkText({ pct: 36 }), V.epsMarkText({ pct: -12 }), V.epsMarkText({ pct: null })], ["EPS +36%", "EPS -12%", "EPS"], "marker text");
+// Pivot note in the header.
+const pbars = ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-17", "2026-08-18"].map((d) => ({ date: d, c: 59.74 }));
+eq(V.pivotNote({ latest: true, status: "BUY ZONE", pivot: 58, breakoutDate: "2026-08-14", endDate: "2026-08-13" }, pbars), "+3.0% from Pivot in 2 days", "pivot note with a breakout");
+eq(V.pivotNote({ latest: true, status: "NEAR PIVOT", pivot: 62, breakoutDate: "", endDate: "2026-08-13" }, pbars), "-3.6% from Pivot", "below the pivot, no breakout yet");
+eq(V.pivotNote({ latest: true, status: "COMPLETED", pivot: 58 }, pbars), "", "no note for a finished base");
+eq(V.pivotNote(null, pbars), "", "no base no note");
+// MarketSurge style colors stay as written in light mode (none of them is in desk.js LIGHT_MAP).
+const deskSrc = require("fs").readFileSync(path.join(__dirname, "..", "site", "js", "desk.js"), "utf8");
+const lightMap = deskSrc.slice(deskSrc.indexOf("const LIGHT_MAP"), deskSrc.indexOf("const THEME_KEY")).toLowerCase();
+const colors = [V.MSS.up, V.MSS.down, V.MSS.rs, V.MSS.volAvg, V.MSS.bg].concat(Object.values(V.MSS.ma));
+colors.forEach((c) => { if (c !== "#FFFFFF") eq(lightMap.indexOf('"' + c.toLowerCase() + '"'), -1, "not remapped: " + c); });
+
 if (fails.length) { console.log("marketsurge check FAILED:\n- " + fails.join("\n- ")); process.exit(1); }
 console.log("marketsurge check ok");

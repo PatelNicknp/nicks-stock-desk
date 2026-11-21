@@ -33,6 +33,7 @@ import eps_inputs
 import inst_history
 import composite
 import base_patterns
+import eps_marks
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -4522,6 +4523,15 @@ def main(argv=None):
             log("Base patterns", "OK", asof, "Bases %d on %d stocks. Cached daily bars only. No new downloads." % (len(bases), bases["ticker"].nunique() if len(bases) else 0))
         except Exception as exc:
             log("Base patterns", "MISSING", asof, ("Base patterns were not built. " + str(exc))[:200])
+    # EPS markers for the MarketSurge-style chart: saved SEC quarterly EPS and saved report days only.
+    epsm = pd.DataFrame()
+    if features.get("eps_marks", True):
+        try:
+            hist_q = earn_pages.get("history") if isinstance(earn_pages, dict) else None
+            epsm = eps_marks.build(read_csv(os.path.join(cache, EPS_HISTORY_FILE)), hist_q, cfg)
+            log("EPS markers", "OK", asof, "EPS markers %d on %d stocks. Saved SEC EPS only. No new downloads." % (len(epsm), epsm["ticker"].nunique() if len(epsm) else 0))
+        except Exception as exc:
+            log("EPS markers", "MISSING", asof, ("EPS markers were not built. " + str(exc))[:200])
     floor_on = features.get("trading_floor", True)
     floor = pd.DataFrame()
     if floor_on and len(close):
@@ -4635,6 +4645,7 @@ def main(argv=None):
         "scanner_ep": gated(setup_frames.get("scanner_ep"), "scanner_ep", features.get("scanner_ep", True), "No episodic pivots in the cached prices. An EP needs a gap of 10% or more on at least 3 times normal volume."),
         "scanner_gap_up": gated(setup_frames.get("scanner_gap_up"), "scanner_gap_up", features.get("scanner_gap_up", True), "No holding gap ups in the last 21 trading days of cached prices."),
         "base_patterns": base_patterns.export_frame(bases, features.get("base_patterns", True)),
+        "eps_marks": eps_marks.export_frame(epsm, features.get("eps_marks", True)),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),
