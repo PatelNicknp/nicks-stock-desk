@@ -61,9 +61,14 @@ FLAGS = {
     "handle_drift_down": True,
     "count_stages": True,
     "mark_failed": True,
+    "robust_bounds": True,   # a one-bar spike wick does not set a base's low or depth
+    "prefer_tight": True,    # of several left-side highs at about the same price, start at the one giving the tightest base
 }
 
 DEFAULTS = {
+    "spike_atr_mult": 1.0,         # a low more than this many ATRs under the 2 bars each side is a spike, clipped there
+    "spike_neighbors": 2,
+    "tight_start_pct": 3.0,        # later highs within this % of the left-side high can start the base instead
     "lookback_bars": 300,          # bases shown end in the last ~14 months
     "count_lookback_bars": 1300,   # bases counted for the stage, about 5 years
     "left_high_days": 100,
@@ -97,7 +102,7 @@ COLS = [
     "depth_pct", "length_weeks", "pivot", "buy_point", "zone_top", "pct_from_pivot", "breakout_date",
     "handle_date", "handle_depth_pct", "first_low_date", "mid_peak_date",
     "rim_date", "handle_low_date", "stage", "stage_label", "deep_base", "prior_uptrend_pct",
-    "breakout_volume_pct", "breakout_volume_ok", "failed_date",
+    "breakout_volume_pct", "breakout_volume_ok", "failed_date", "pullback_low_dates", "pullback_high_dates",
 ]
 
 
@@ -154,6 +159,30 @@ def _zigzag(hi, lo, thr):
     elif d == "up":
         pts.append((hh[0], hh[1], "H"))
     return pts
+
+
+def robust_lows(hi, lo, cl, R):
+    """Lows with one-bar spike wicks clipped: a low more than spike_atr_mult ATRs (14-day) under the lowest low of the
+    spike_neighbors bars on each side is raised to that line (never above the bar's close). A real multi-day drop keeps
+    its lows, because its neighbors are low too."""
+    lo = np.asarray(lo, dtype=float)
+    if not R.get("robust_bounds", True) or len(lo) < 5:
+        return lo.copy()
+    hi = np.asarray(hi, dtype=float)
+    cl = np.asarray(cl, dtype=float)
+    pc = np.concatenate([[cl[0]], cl[:-1]])
+    tr = np.maximum(hi - lo, np.maximum(np.abs(hi - pc), np.abs(lo - pc)))
+    atr = pd.Series(tr).rolling(14, min_periods=1).mean().values
+    k = max(1, int(R["spike_neighbors"]))
+    s = pd.Series(lo)
+    left = s.shift(1).rolling(k, min_periods=1).min()
+    right = s[::-1].shift(1).rolling(k, min_periods=1).min()[::-1]
+    nb = np.fmin(left.values, right.values)
+    line = nb - R["spike_atr_mult"] * atr
+    clip = np.isfinite(line) & (lo < line)
+    out = lo.copy()
+    out[clip] = np.minimum(line[clip], np.maximum(cl[clip], lo[clip]))
+    return np.maximum(out, lo)
 
 
 def _weeks(bars):
@@ -393,7 +422,10 @@ def _ascending(C):
         if (pivot - lowest) / pivot * 100.0 > R["asc_max_depth"]:
             continue
         return {"pattern": "ascending_base", "start": start, "end": e, "pivot": pivot,
-                "low_idx": last3[0][1][0], "depth": (pivot - lowest) / pivot * 100.0, "prior": prior}
+                "low_idx": last3[0][1][0], "pullback_lows": [x[1][0] for x in last3],
+                "pullback_highs": [x[0][0] for x in last3],
+                # Depth is the deepest of the three pullbacks, the real range of the base, not the climb across it.
+                "depth": max(x[2] for x in last3), "prior": prior}
     return None
 
 
@@ -435,6 +467,39 @@ def _stages(bases, hi, lo, R):
         prev = b
 
 
+def _base_depth(C, b):
+    s, e = b["start"], b["end"]
+    top = float(C.hi[s])
+    return (top - float(C.lo[s:e + 1].min())) / top * 100.0 if top > 0 else 999.0
+
+
+def _tighter(C, i, e0, found):
+    """MarketSurge starts a base at the true left-side high, the peak right before the correction. When the stock topped
+    out at about the same price more than once (within tight_start_pct), try each later top as the start and keep the
+    tightest valid base, the one with the smallest depth (ties go to the later, shorter one)."""
+    R, hi = C.R, C.hi
+    floor = hi[i] * (1 - R["tight_start_pct"] / 100.0)
+    best, best_d = found, (_base_depth(C, found) if found else np.inf)
+    run_max = -np.inf
+    cands = []
+    for j in range(e0, i, -1):  # a later top must be the highest from there to the end of the base
+        if hi[j] >= run_max:
+            run_max = hi[j]
+            # A real later top: a swing high (the highest of 2 bars each side) after a dip of min_depth or more.
+            if hi[j] >= floor and e0 - j + 1 >= 10 and hi[j] >= hi[max(i, j - 2):j + 3].max() \
+                    and C.lo[i:j].min() <= hi[j] * (1 - R["min_depth"] / 100.0):
+                cands.append(j)
+    for j in sorted(cands):
+        f = _classify(C, j, e0)
+        if not f:
+            continue
+        f["start"] = j
+        d = _base_depth(C, f)
+        if d <= best_d + 1e-9:
+            best, best_d = f, d
+    return best
+
+
 def detect_bases(dates, high, low, close, cfg=None, volume=None, market=None):
     """Bases found on one stock, oldest first, the last max_per_stock of them. Dicts ready for rows_for."""
     R = rules(cfg)
@@ -445,6 +510,7 @@ def detect_bases(dates, high, low, close, cfg=None, volume=None, market=None):
     if n < 30 or not np.isfinite(hi).all() or not np.isfinite(lo).all():
         return []
     vol = np.asarray(volume, dtype=float) if volume is not None else None
+    lo = robust_lows(hi, lo, cl, R)
     C = _Ctx(hi, lo, cl, vol, _market_drawdown(dates, market), R)
     roll = pd.Series(hi).rolling(int(R["left_high_days"]), min_periods=1).max().values
     first = max(0, n - int(max(R["count_lookback_bars"], R["lookback_bars"])))
@@ -459,6 +525,9 @@ def detect_bases(dates, high, low, close, cfg=None, volume=None, market=None):
         found = _classify(C, i, e0)
         if found:
             found["start"] = i
+        if R["prefer_tight"] and (found is None or found["pattern"] in ("flat_base", "consolidation", "ipo_base", "cup", "saucer", "double_bottom")):
+            found = _tighter(C, i, e0, found)
+        if found:
             out.append(found)
             last_end = found["end"]
     if R["on"]["ascending_base"]:
@@ -476,7 +545,7 @@ def detect_bases(dates, high, low, close, cfg=None, volume=None, market=None):
                 out = keep + [asc]
     out.sort(key=lambda b: b["start"])
     if R["count_stages"]:
-        _stages(out, hi, lo, R)
+        _stages(out, hi, C.lo, R)
     out = [b for b in out if b["end"] >= n - int(R["lookback_bars"])]
     return out[-int(R["max_per_stock"]):]
 
@@ -536,6 +605,7 @@ def rows_for(ticker, dates, high, low, close, cfg=None, volume=None, market=None
     bases = detect_bases(dates, hi, lo, cl, cfg, volume, market)
     if not bases:
         return []
+    lo = robust_lows(hi, lo, cl, R)
     C = _Ctx(hi, lo, cl, np.asarray(volume, dtype=float) if volume is not None else None, None, R)
     rows = []
     for k, b in enumerate(bases):
@@ -546,7 +616,7 @@ def rows_for(ticker, dates, high, low, close, cfg=None, volume=None, market=None
         bo, vpct, fail = _breakout(b, C, nxt)
         status, pct = _status(b, C, latest, bo, fail)
         pivot = round(float(b["pivot"]), 4)
-        lowest = float(lo[s:b["end"] + 1].min())
+        lowest = float(lo[s:b["end"] + 1].min()) if b["pattern"] != "ascending_base" else float(lo[b["low_idx"]])
         depth = b.get("depth")
         if depth is None:
             depth = (left - lowest) / left * 100.0
@@ -568,6 +638,8 @@ def rows_for(ticker, dates, high, low, close, cfg=None, volume=None, market=None
             "breakout_volume_pct": round(vpct, 0) if vpct is not None else "",
             "breakout_volume_ok": ("yes" if vpct >= R["breakout_volume_pct"] else "no") if vpct is not None else "",
             "failed_date": dates[fail] if fail is not None else "",
+            "pullback_low_dates": ";".join(dates[k] for k in b.get("pullback_lows", [])),
+            "pullback_high_dates": ";".join(dates[k] for k in b.get("pullback_highs", [])),
         })
     return rows
 

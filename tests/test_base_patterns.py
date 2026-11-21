@@ -235,6 +235,44 @@ def test_each_pattern_has_its_own_switch():
     assert cfg["features"]["base_patterns"] is True
 
 
+def test_a_one_bar_spike_wick_does_not_set_the_low_or_depth():
+    c = path(UP + [(8, 92), (8, 99), (8, 93), (10, 98.5)])
+    n = len(c)
+    idx = pd.bdate_range(end="2026-11-19", periods=n)
+    dates = [d.strftime("%Y-%m-%d") for d in idx]
+    hi, lo = c * 1.004, c * 0.996
+    k = n - 20
+    lo = lo.copy(); lo[k] = c[k] * 0.80  # one intraday flush 20% under the close
+    r = latest(bp.rows_for("T", dates, hi, lo, c, None))
+    assert r["pattern"] == "flat_base" and r["depth_pct"] <= 10, r
+    raw = bp.rows_for("T", dates, hi, lo, c, {"base_patterns": {"robust_bounds": False}})
+    assert all(x["pattern"] != "flat_base" or x["depth_pct"] > 15 for x in raw)
+    clipped = bp.robust_lows(hi, lo, c, bp.rules())
+    assert clipped[k] > lo[k] and clipped[k] <= c[k]
+    # A real multi-day drop keeps its lows.
+    assert np.allclose(np.delete(clipped, k), np.delete(lo, k))
+
+
+def test_base_starts_at_the_tightest_left_side_high():
+    # Two tops at about the same price: the base starts at the later one, so the deep early dip is not in it.
+    c = path(UP + [(10, 84), (12, 99.5), (8, 93), (8, 99), (8, 94), (10, 98.8)])
+    r = latest(run(c))
+    assert r["pattern"] == "flat_base" and r["depth_pct"] < 8, r
+    assert abs(r["pivot"] - 99.5 * 1.004) < 0.6  # the later top, not the first one at 100
+    # Measured from the first top the region is 16% deep with a V in it: no base at all.
+    assert all(x["pattern"] != "flat_base" for x in run(c, {"base_patterns": {"prefer_tight": False}}))
+
+
+def test_ascending_base_lists_its_pullbacks_and_depth_is_the_deepest_pullback():
+    c = path([(300, 60.0), (60, 100.0), (8, 88), (8, 101), (8, 91), (8, 103), (8, 93), (8, 104)])
+    r = latest(run(c))
+    assert r["pattern"] == "ascending_base"
+    lows = r["pullback_low_dates"].split(";")
+    highs = r["pullback_high_dates"].split(";")
+    assert len(lows) == 3 and len(highs) == 3 and lows == sorted(lows) and highs[0] < lows[0]
+    assert 10 <= r["depth_pct"] <= 20
+
+
 def test_numbers_come_from_config():
     c = path(UP + [(8, 92), (8, 99), (8, 93), (10, 98.5)])
     wide = latest(run(c, {"base_patterns": {"buy_zone_pct": 8, "buy_point_cents": 25}}))

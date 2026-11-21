@@ -100,6 +100,8 @@
         handleDepth: numOf(r.handle_depth_pct), firstLowDate: txt(r.first_low_date), midPeakDate: txt(r.mid_peak_date),
         rimDate: txt(r.rim_date), handleLowDate: txt(r.handle_low_date), stage: numOf(r.stage), stageLabel: txt(r.stage_label),
         deep: yes(r.deep_base), boVolPct: numOf(r.breakout_volume_pct), boVolOk: yes(r.breakout_volume_ok), failedDate: txt(r.failed_date),
+        pullbackLowDates: txt(r.pullback_low_dates) ? txt(r.pullback_low_dates).split(";") : [],
+        pullbackHighDates: txt(r.pullback_high_dates) ? txt(r.pullback_high_dates).split(";") : [],
       });
     });
     Object.keys(out).forEach((t) => out[t].sort((a, b) => (a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0)));
@@ -157,7 +159,9 @@
     const out = { s: s, e: e, low: low, bo: bo, last: last, pivot: base.pivot, zoneTop: base.zoneTop, kind: "box", pivotFrom: s,
       top: base.leftHigh != null ? base.leftHigh : base.pivot, bottom: base.low };
     const hiAt = (i) => (bars[i] && bars[i].h != null ? bars[i].h : bars[i].c);
-    const loAt = (i) => (bars[i] && bars[i].l != null ? bars[i].l : bars[i].c);
+    // The base's low in the file skips one-bar spike wicks (base_patterns.robust_bounds), so no line dips to a spike.
+    const floorLow = base.low != null ? base.low : -Infinity;
+    const loAt = (i) => Math.max(floorLow, bars[i] && bars[i].l != null ? bars[i].l : bars[i].c);
     out.boLow = bo >= 0 ? loAt(bo) : null;
     if (base.pattern === "cup_handle" || base.pattern === "cup" || base.pattern === "saucer") {
       out.kind = "cup";
@@ -192,6 +196,16 @@
       right.reverse();
       right.push([out.rim, out.rimPrice]);
       out.path = left.concat(right);
+    } else if (base.pattern === "ascending_base" && base.pullbackLowDates && base.pullbackLowDates.length >= 2) {
+      // A rising channel: a line over the pullback highs up to the pivot and a line under the three higher lows.
+      out.kind = "asc";
+      const at = (d) => Math.min(e, Math.max(s, barIndexOn(dates, d)));
+      out.lowPts = base.pullbackLowDates.map((d) => { const k = at(d); return [k, loAt(k)]; });
+      out.highPts = (base.pullbackHighDates || []).map((d) => { const k = at(d); return [k, hiAt(k)]; });
+      let pk = s;
+      for (let i = s; i <= e; i++) if (hiAt(i) >= hiAt(pk)) pk = i;
+      if (!out.highPts.length || pk > out.highPts[out.highPts.length - 1][0]) out.highPts.push([pk, hiAt(pk)]);
+      out.pivotFrom = pk;
     } else if (base.pattern === "double_bottom") {
       out.kind = "double";
       const b1 = Math.min(Math.max(s, barIndexOn(dates, base.firstLowDate)), e);
@@ -880,6 +894,14 @@
         pts.forEach((p, k) => { if (k === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); });
         const yT = Y(Math.max(sh.top, sh.pivot));
         return { kind: "double", pts: pts, top: yT, labelX: xs, labelY: Math.max(pts[1][1], pts[3][1]) };
+      }
+      if (sh.kind === "asc" && sh.lowPts && sh.highPts) {
+        const up = sh.highPts.map((p) => [X(p[0]), Y(p[1])]), dn = sh.lowPts.map((p) => [X(p[0]), Y(p[1])]);
+        if (up.concat(dn).some((p) => p[0] == null || p[1] == null)) return null;
+        ctx.beginPath();
+        up.forEach((p, k) => { const y = Math.round(p[1] - P) + 0.5; if (k === 0) ctx.moveTo(p[0], y); else ctx.lineTo(p[0], y); });
+        dn.forEach((p, k) => { const y = Math.round(p[1] + P) + 0.5; if (k === 0) ctx.moveTo(p[0], y); else ctx.lineTo(p[0], y); });
+        return { kind: "lines", labelX: dn[0][0], labelY: Math.max.apply(null, dn.map((p) => p[1])) + P + 1 };
       }
       const yT0 = Y(Math.max(sh.top, sh.pivot)), yB0 = Y(sh.bottom);
       if (yT0 == null || yB0 == null) return null;

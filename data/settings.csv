@@ -542,6 +542,11 @@ base_patterns.handle_above_10wk,True
 base_patterns.handle_drift_down,True
 base_patterns.count_stages,True
 base_patterns.mark_failed,True
+base_patterns.robust_bounds,True
+base_patterns.prefer_tight,True
+base_patterns.spike_atr_mult,1
+base_patterns.spike_neighbors,2
+base_patterns.tight_start_pct,3
 base_patterns.lookback_bars,300
 base_patterns.count_lookback_bars,1300
 base_patterns.left_high_days,100

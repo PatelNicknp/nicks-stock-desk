@@ -135,5 +135,21 @@ const sCap = V.patternCaption(sb), tCap = V.patternCaption(tb);
 eq([sCap.includes("Stage 2(b)"), sCap.includes("deeper than usual"), sCap.includes("+55%"), sCap.includes("Failed 2026-07-20")], [true, true, true, true], "caption: stage, deep, volume, failed");
 eq(tCap.includes("(light)"), true, "caption flags a light-volume breakout");
 
+// v5 tighter bases: an ascending base is a rising channel through its pullbacks; no line dips to a one-bar spike.
+const aBars = [];
+for (let i = 0; i < 40; i++) { const d = new Date(Date.UTC(2026, 7, 3 + i)).toISOString().slice(0, 10); aBars.push({ date: d, h: 100 + i, l: 90 + i, c: 95 + i }); }
+aBars[5].l = 60;  // a spike wick
+const aIdx = V.patternIndex([{ ticker: "ASC", pattern: "ascending_base", latest: "yes", status: "FORMING", start_date: aBars[2].date, end_date: aBars[38].date,
+  left_high: "138", low: "94", low_date: aBars[5].date, depth_pct: "14", length_weeks: "7", pivot: "138", buy_point: "138.1", zone_top: "144.9", pct_from_pivot: "-1",
+  pullback_low_dates: [aBars[5].date, aBars[15].date, aBars[25].date].join(";"), pullback_high_dates: [aBars[2].date, aBars[12].date, aBars[22].date].join(";"), data_status: "OK" }]);
+const aBase = aIdx.ASC[0];
+eq([aBase.pullbackLowDates.length, aBase.pullbackHighDates.length], [3, 3], "pullback dates read");
+const aSh = V.patternShape(aBase, aBars);
+eq(aSh.kind, "asc", "ascending base is a channel");
+eq(aSh.lowPts.map((p) => p[0]), [5, 15, 25], "lower line through the three pullback lows");
+eq(aSh.lowPts[0][1], 94, "spike wick clipped to the base low from the file");
+eq(aSh.highPts[aSh.highPts.length - 1][0], 38, "upper line ends at the base high");
+eq(V.patternShape(Object.assign({}, aBase, { pullbackLowDates: [] }), aBars).kind, "box", "no pullback dates: plain lines");
+
 if (fails.length) { console.log("marketsurge check FAILED:\n- " + fails.join("\n- ")); process.exit(1); }
 console.log("marketsurge check ok");
