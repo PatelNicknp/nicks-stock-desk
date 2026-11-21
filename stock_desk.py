@@ -31,6 +31,9 @@ import relative_strength
 import ms_screens
 import eps_inputs
 import inst_history
+import composite
+import base_patterns
+import eps_marks
 
 ROOT = None  # set in main so tests can point DESK_ROOT at a temp folder
 PT = "America/Los_Angeles"
@@ -4158,6 +4161,12 @@ def export_cached_scores(data_dir=None, cache_dir=None, cfg=None):
     # This export does not rebuild EPS Ratings, so it keeps the ones already on scores.csv.
     if len(existing) and {"ticker", "eps_rating"} <= set(existing.columns):
         scores = attach_eps_rating(scores, existing[["ticker", "eps_rating"]])
+    # Composite Rating from the same saved pieces (RS, EPS Rating, 52-week high gap, saved quarters). No download.
+    if (cfg or {}).get("features", {}).get("composite_rating", True):
+        try:
+            scores = composite.attach(scores, read_csv(os.path.join(cache_dir, "quarters.csv")), cfg)
+        except Exception:
+            scores["composite_rating"] = ""
     write_out(gated(scores, "scores", True, "No scores."), "scores", data_dir)
     candles = candle_file(prices, list(scores["ticker"].astype(str)))
     write_candle_files(candles, os.path.join(data_dir, "ohlc"))
@@ -4498,6 +4507,31 @@ def main(argv=None):
                                            eps_history=eps_history, eps_info=eps_info)
     # EPS Rating on scores.csv for the Chart Viewer's EPS chip (blank when a stock has none). No new data.
     scores = attach_eps_rating(scores, ms_frames.get("eps_ratings"))
+    # Composite Rating (1 to 99) for the Chart Viewer's Comp chip: EPS Rating, RS Rating, 52-week high gap, sales growth, margins.
+    if features.get("composite_rating", True):
+        try:
+            scores = composite.attach(scores, quarters, cfg)
+            comp_n = int((scores["composite_rating"].astype(str) != "").sum())
+            log("Composite Rating", "OK", asof, "Composite Rating on %d stocks. Saved ratings and SEC quarters only. No new downloads." % comp_n)
+        except Exception as exc:
+            log("Composite Rating", "MISSING", asof, ("The Composite Rating was not built. " + str(exc))[:200])
+    # Base patterns (cup with handle, flat base, double bottom, ...) with pivots, from the saved daily bars only.
+    bases = pd.DataFrame()
+    if features.get("base_patterns", True) and len(close) and len(high) and len(low):
+        try:
+            bases = base_patterns.scan(close, high, low, list(universe["ticker"].astype(str)), cfg)
+            log("Base patterns", "OK", asof, "Bases %d on %d stocks. Cached daily bars only. No new downloads." % (len(bases), bases["ticker"].nunique() if len(bases) else 0))
+        except Exception as exc:
+            log("Base patterns", "MISSING", asof, ("Base patterns were not built. " + str(exc))[:200])
+    # EPS markers for the MarketSurge-style chart: saved SEC quarterly EPS and saved report days only.
+    epsm = pd.DataFrame()
+    if features.get("eps_marks", True):
+        try:
+            hist_q = earn_pages.get("history") if isinstance(earn_pages, dict) else None
+            epsm = eps_marks.build(read_csv(os.path.join(cache, EPS_HISTORY_FILE)), hist_q, cfg)
+            log("EPS markers", "OK", asof, "EPS markers %d on %d stocks. Saved SEC EPS only. No new downloads." % (len(epsm), epsm["ticker"].nunique() if len(epsm) else 0))
+        except Exception as exc:
+            log("EPS markers", "MISSING", asof, ("EPS markers were not built. " + str(exc))[:200])
     floor_on = features.get("trading_floor", True)
     floor = pd.DataFrame()
     if floor_on and len(close):
@@ -4610,6 +4644,8 @@ def main(argv=None):
         "scanner_marios": gated(setup_frames.get("scanner_marios"), "scanner_marios", features.get("scanner_marios", True), "No Marios setups in the cached prices."),
         "scanner_ep": gated(setup_frames.get("scanner_ep"), "scanner_ep", features.get("scanner_ep", True), "No episodic pivots in the cached prices. An EP needs a gap of 10% or more on at least 3 times normal volume."),
         "scanner_gap_up": gated(setup_frames.get("scanner_gap_up"), "scanner_gap_up", features.get("scanner_gap_up", True), "No holding gap ups in the last 21 trading days of cached prices."),
+        "base_patterns": base_patterns.export_frame(bases, features.get("base_patterns", True)),
+        "eps_marks": eps_marks.export_frame(epsm, features.get("eps_marks", True)),
         "scanner_leaders": gated(setup_frames["scanner_leaders"], "scanner_leaders", features.get("scanner_leaders", True), "No leaders. A leader is a ready or just-broken VCP, a strict CANSLIM qualify, or both."),
         "scanner_52w": gated(setup_frames.get("scanner_52w"), "scanner_52w", features.get("scanner_52w", True), "No 52-week rows. The scan used cached prices only."),
         "highs_lows_history": gated(setup_frames.get("highs_lows_history"), "highs_lows_history", features.get("scanner_52w", True), "No 52-week history in the cached prices."),

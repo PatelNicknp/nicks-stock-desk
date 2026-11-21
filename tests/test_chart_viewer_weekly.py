@@ -120,7 +120,7 @@ def test_viewer_wires_the_switches():
     assert "padBars(visible, plot, state.open ? Math.min(boxPad(), 260) : boxPad())" in js
     # No new market requests, and the saved file is still what the chart reads.
     assert "fetch(" not in js and "yahoo" not in js.lower()
-    assert sorted(re.findall(r'loadCsv\("([^"+]+)', js)) == ["index_ohlc/SPY.csv", "ohlc/", "ohlc/"]  # + saved SPY for the RS line
+    assert sorted(re.findall(r'loadCsv\("([^"+]+)', js)) == ["eps_marks.csv", "index_ohlc/SPY.csv", "ohlc/", "ohlc/"]  # + saved SPY for the RS line, saved EPS markers
     css = _read("site", "css", "desk.css")
     assert ".cv-why.tl{" in css and ".cvseg{" in css
 

@@ -76,6 +76,12 @@ async function openPage(browser, c, narrowPx, theme) {
     const url = route.request().url();
     if (!url.startsWith(BASE)) { net.outside++; return route.abort(); }
     const rel = decodeURIComponent(new URL(url).pathname).replace(/^\/+/, "");
+    // These checks cover the classic look (green candles first, magenta bars). The MarketSurge look has its own browser check
+    // (tests/marketsurge_view.mjs), so chart_viewer.ms_look is served as off here.
+    if (rel === "data/settings.csv") {
+      const classic = fs.readFileSync(path.join(ROOT, rel), "utf8").split("\n").filter((l) => !l.startsWith("chart_viewer.ms_look,")).concat(["chart_viewer.ms_look,False"]).join("\n");
+      return route.fulfill({ status: 200, contentType: "text/csv", body: classic });
+    }
     const file = path.join(ROOT, rel);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return route.fulfill({ status: 404, body: "" });
     return route.fulfill({ status: 200, contentType: TYPES[path.extname(file)] || "application/octet-stream", body: fs.readFileSync(file) });

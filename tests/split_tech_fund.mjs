@@ -62,6 +62,8 @@ const groupOn = (page) => page.$eval("#cvgroup button.on", (b) => b.textContent)
 async function whyLabels(page, steps) {
   const seen = new Set();
   for (let i = 0; i < steps; i++) {
+    // The MarketSurge-style chart starts with the Why box hidden (chart_viewer.ms_hide_why); the Why chip shows it.
+    if (await page.$eval("#cvwhy", (w) => w.hidden)) await page.click('#cvtools [data-tool="why"]');
     const open = await page.$eval("#cvwhy", (w) => w.classList.contains("open"));
     if (!open) await page.click("#cvwhy");
     (await page.$$eval("#cvwhy .cv-why-l", (ls) => ls.map((l) => l.textContent))).forEach((l) => seen.add(l));
@@ -107,15 +109,16 @@ async function main() {
     eq(/^All technical stocks \(\d+\)$/.test(opts[0].t), true, "All technical stocks is first: " + opts[0].t);
     counts.technical = Number(/\((\d+)\)/.exec(opts[0].t)[1]);
     eq(opts.slice(1).every((o) => TECH_LISTS.concat(["buysetups", "watchlist"]).includes(o.v)), true, "technical picker shows only technical lists");
+    eq(opts.some((o) => o.v === "box"), false, "no Box list in the Chart Viewer (chart_viewer.include_box off)");
     eq(opts.some((o) => FUND_LISTS.includes(o.v)), false, "no fundamental list on the technical side");
     eq(new URL(page.url()).searchParams.get("group"), "technical", "address carries the side");
     let labels = await whyLabels(page, 12);
     eq(labels.filter((l) => !TECH_SHORT.concat(BOTH_SHORT).includes(l)), [], "technical Why box shows only technical reasons");
     eq(await page.evaluate(() => document.querySelector("#cvsum").textContent.startsWith("All technical stocks:")), true, "summary names the side");
     // Other viewer tools still work: MA chip and Daily | Weekly. The 3M, 6M, 1Y, All buttons are hidden.
-    const ma = await page.$eval('#cvtools [data-ma="20"]', (b) => b.getAttribute("aria-pressed"));
-    await page.click('#cvtools [data-ma="20"]');
-    eq(await page.$eval('#cvtools [data-ma="20"]', (b) => b.getAttribute("aria-pressed")), ma === "true" ? "false" : "true", "MA chip still toggles");
+    const ma = await page.$eval('#cvtools [data-ma="21"]', (b) => b.getAttribute("aria-pressed"));
+    await page.click('#cvtools [data-ma="21"]');
+    eq(await page.$eval('#cvtools [data-ma="21"]', (b) => b.getAttribute("aria-pressed")), ma === "true" ? "false" : "true", "MA chip still toggles");
     eq(await page.$$eval("#cvtools [data-range]", (bs) => bs.length), 0, "range chips stay hidden");
     await page.click('#cvtools [data-tf="weekly"]');
     eq(await page.$eval('#cvtools [data-tf="weekly"]', (b) => b.getAttribute("aria-pressed")), "true", "Weekly still toggles");
